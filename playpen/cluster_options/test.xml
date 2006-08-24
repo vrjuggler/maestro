@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cluster_config>
+  <launcher title="App Launcher">
+    <applications>
+      <app label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
+        <choice label="Data Set" tooltip="Data Set" type="one">
+          <arg label="Engine Block" class="" flag="">EngineBlock.demo</arg>
+          <arg label="Human Head" class="Linux" flag="">HumanHead.demo</arg>
+          <group label="Human Head 2">
+            <arg label="X" class="Linux" flag="">/home/aronb/HumanHead2.demo</arg>
+            <arg label="X" class="WinXP" flag="">C:\HumanHead2.demo</arg>
+          </group>
+          <group label="Human Tooth">
+            <arg label="X" class="Linux" flag="">/home/aronb/HumanTooth.demo</arg>
+            <arg label="X" class="WinXP" flag="">C:\HumanTooth.demo</arg>
+          </group>
+        </choice>
+        <choice label="VR Juggler Configuration" parent_path="Configuration Files" tooltip="" type="one">
+          <choice label="Test Choice 1" parent_path="Configuration Files" tooltip="" type="one">
+            <choice label="Test Choice 1" parent_path="Configuration Files" tooltip="" type="one">
+              <choice label="Test Choice 1" parent_path="Configuration Files" tooltip="" type="one">
+                <choice label="Test Choice 1" parent_path="Configuration Files" tooltip="" type="one">
+                  <choice label="Test Choice 1" parent_path="Configuration Files" tooltip="" type="one">
+                  </choice>
+                </choice>
+              </choice>
+            </choice>
+          </choice>
+        </choice>
+          <group label="Simulator Configuration">
+            <group label="Test 1">
+              <group label="Test 1">
+                <group label="Test 1">
+                  <group label="Test 1">
+                    <group label="Test 1">
+                      <group label="Test 1">
+                      </group>
+                    </group>
+                  </group>
+                </group>
+              </group>
+            </group>
+            <arg label="Simulator Configuration" class="Linux" flag="-j">/home/dmns/jconf/sim_joystick.jconf</arg>
+          </group>
+          <group label="Dome Configuration">
+            <arg label="Dome Configuration" class="Linux" flag="">/home/dmns/jconf/cluster_joystick.jconf</arg>
+          </group>
+      </app>
+    </applications>
+    <controls>
+      <action name="Test" command="/usr/X11R6/bin/xset" tooltip="Test"/>
+    </controls>
+  </launcher>
+  <!--
+  <cluster_node name="infiscape1" hostname="infiscape1" sub_class="master"/>
+  <cluster_node name="infiscape2" hostname="infiscape2" sub_class="master"/>
+  -->
+  <cluster_node name="infiscape3" hostname="infiscape3" sub_class="master"/>
+</cluster_config>

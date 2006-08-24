@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cluster_config>
+  <launcher title="App Launcher">
+    <applications>
+      <app label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
+        <command class="Linux">./Denver_VolRen_vrj</command>
+        <cwd class="Linux">/home/dmns/Source/SimpleVolRen</cwd>
+        <arg label="Sim Config File" class="Linux,master" flag="-j">/home/dmns/jconf/sim_joystick.jconf</arg>
+        <choice label="VR Juggler Configuration" parent_path="Configuration Files" tooltip="" type="one">
+          <group label="Simulator Configuration">
+            <arg label="Sim Config File" class="Linux,master" flag="-j">/home/dmns/jconf/sim_joystick.jconf</arg>
+          </group>
+          <group label="Dome Configuration">
+            <arg label="Dome Config File" class="Linux,master" flag="-j">/home/dmns/jconf/cluster_joystick.jconf</arg>
+            <choice label="Tracking" parent_path="" tooltip="" type="one">
+               <arg label="Intersense IS-900" class="Linux,master" flag="-j">/home/dmns/jconf/isense.jconf</arg>
+               <arg label="Ascension MotionStar" class="Linux,master" flag="-j">/home/dmns/jconf/mstar.jconf</arg>
+            </choice>
+          </group>
+        </choice>
+        <choice label="Data Set" tooltip="Data Set" type="one">
+          <arg label="Engine Block" class="" flag="">EngineBlock.demo</arg>
+          <arg label="Human Head" class="Linux" flag="">HumanHead.demo</arg>
+          <group label="Human Head 2">
+            <arg label="X" class="Linux" flag="">/home/aronb/HumanHead2.demo</arg>
+            <arg label="X" class="WinXP" flag="">C:\HumanHead2.demo</arg>
+          </group>
+          <group label="Human Tooth">
+            <arg label="X" class="Linux" flag="">/home/aronb/HumanTooth.demo</arg>
+            <arg label="X" class="WinXP" flag="">C:\HumanTooth.demo</arg>
+          </group>
+        </choice>
+      </app>
+      <app label="Test1" global_options="VR Juggler 2.0" tooltip="Test 1" helpUrl="">
+      </app>
+    </applications>
+    <global_options>
+       <global_option label="Configuration Files">
+         <choice label="VR Juggler Configuration" parent_path="Configuration Files" tooltip="" type="one">
+          <group label="Simulator Configuration">
+            <arg label="Simulator Configuration" class="Linux,master" flag="-j">/home/dmns/jconf/sim_joystick.jconf</arg>
+          </group>
+          <group label="Dome Configuration">
+            <arg label="Dome Configuration" class="Linux,master" flag="-j">/home/dmns/jconf/cluster_joystick.jconf</arg>
+          </group>
+        </choice>
+       </global_option>
+       <global_option label="VR Juggler 2.0">
+          <env_var class="" label="VR Juggler Location" key="VJ_BASE_DIR">/path/to/vrjuggler2.0</env_var>
+          <env_var class="" label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
+          <env_var class="" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
+       </global_option>
+    </global_options>
+    <controls>
+      <action name="Test" command="/usr/X11R6/bin/xset" tooltip="Test"/>
+    </controls>
+  </launcher>
+  <!--
+  <cluster_node name="infiscape1" hostname="infiscape1" sub_class="master"/>
+  <cluster_node name="infiscape2" hostname="infiscape2" sub_class="master"/>
+  -->
+  <cluster_node name="infiscape3" hostname="infiscape3" sub_class="master"/>
+</cluster_config>

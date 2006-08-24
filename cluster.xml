@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cluster_config>
+  <launcher title="App Launcher">
+    <applications>
+      <app name="Cubes">
+        <commands>
+          <command class="Linux.shell" env="linux_base" working_dir="/home/dmns/">runcubes.sh</command>
+          <command class="Linux" env="linux_base">/home/dmns/Source/juggler/build.linux/modules/vrjuggler/test/Draw/OGL/cubes/cubes</command>
+        </commands>
+        <tooltip>Cubes test application</tooltip>
+        <helpURL></helpURL>
+        <options>
+        </options>
+      </app>
+      <app name="Pantheon">
+        <commands>
+          <command class="Linux" env="linux_base" 
+                   working_dir="/home/dmns/Source/OsgShaderPantheon/data/">../src/OsgShaderPantheon</command>
+        </commands>
+        <tooltip>Pantheon exploration</tooltip>
+        <helpURL></helpURL>
+        <options>
+        </options>
+      </app>
+      <app name="Ashes to Ashes">
+        <commands>
+          <command class="Linux" env="linux_base" 
+                   working_dir="/home/dmns/Source/DanceDriving">./Linux_Build/DanceDriving.Linux</command>
+        </commands>
+        <tooltip>Ashes to ashes is a vivid recounting of the tragic events of September 11th.</tooltip>
+        <helpURL></helpURL>
+        <options>
+        </options>
+      </app>
+      <app name="Cell Project" use_global_options="false">
+        <commands>
+          <command class="Linux" env="linux_base" 
+                   working_dir="/home/dmns/Source/VSE">./run_vse.sh</command>
+        </commands>
+        <tooltip>Cell Project</tooltip>
+        <helpURL></helpURL>
+        <options>
+          <option name="Cell Configuration" editable="false" tooltip="Cell Configuration">
+            <choice label="Simulator Configuration">
+              <value class="Linux" flag="">sim.base.jconf sim.wand.mixin.jconf /home/dmns/jconf/sim_joystick.jconf</value>
+            </choice>
+            <choice label="Dome Configuration">
+              <value class="Linux" flag="">/home/dmns/jconf/cluster_dome.jconf /home/dmns/jconf/cluster_joystick.jconf</value>
+            </choice>
+          </option>
+        </options>
+      </app>
+      <app name="Example Volume Renderer" use_global_options="false">
+        <commands>
+          <command class="Linux" env="linux_base" 
+                   working_dir="/home/dmns/Source/SimpleVolRen">./Denver_VolRen_vrj</command>
+        </commands>
+        <tooltip>Example Volume Renderer</tooltip>
+        <helpURL></helpURL>
+        <options>
+          <option name="Volume Renderer Configuration" editable="false" tooltip="Volume Renderer Configuration">
+            <choice label="Simulator Configuration">
+              <value class="Linux" flag="">sim.base.jconf sim.wand.mixin.jconf /home/dmns/jconf/sim_joystick.jconf</value>
+            </choice>
+            <choice label="Dome Configuration">
+              <value class="Linux" flag="">/home/dmns/jconf/cluster_dome.jconf /home/dmns/jconf/cluster_joystick.jconf</value>
+            </choice>
+          </option>
+          <option name="Data Set" editable="false" tooltip="Data Set">
+            <choice label="Engine Block">
+              <value class="Linux" flag="">EngineBlock.demo</value>
+            </choice>
+            <choice label="Human Head">
+              <value class="Linux" flag="">HumanHead.demo</value>
+            </choice>
+            <choice label="Human Head 2">
+              <value class="Linux" flag="">HumanHead2.demo</value>
+            </choice>
+            <choice label="Human Tooth">
+              <value class="Linux" flag="">HumanTooth.demo</value>
+            </choice>
+          </option>
+        </options>
+      </app>
+      <app name="Display Test Pattern" use_global_options="false">
+        <commands>
+          <command class="Linux" env="linux_base" 
+                   working_dir="/home/dmns/pattern">./all-dome-view</command>
+        </commands>
+        <tooltip></tooltip>
+        <helpURL></helpURL>
+        <options>
+          <option name="Display Pattern" editable="true" tooltip="Display Pattern">
+            <choice label="channel_ rgb">
+              <value class="Linux" flag="">channel_ rgb</value>
+            </choice>
+            <choice label="channel_ rgb">
+              <value class="Linux" flag="">channel_ rgb</value>
+            </choice>
+          </option>
+        </options>
+      </app>
+      <app name="Clear Test Pattern" use_global_options="false">
+        <commands>
+          <command class="Linux" env="linux_base" 
+                   working_dir="/home/dmns/pattern">./clear-all-dome</command>
+        </commands>
+        <tooltip></tooltip>
+        <helpURL></helpURL>
+        <options>
+        </options>
+      </app>
+      <app name="GLX Gears" use_global_options="false">
+        <commands>
+          <command class="Linux" env="linux_base">glxgears</command>
+        </commands>
+        <tooltip>GLX Gears</tooltip>
+        <helpURL></helpURL>
+        <options>
+        </options>
+      </app>
+    </applications>
+    <controls>
+    </controls>
+    <global_options>
+      <option name="VR Juggler Configuration" editable="false" tooltip="VR Juggler configuration">
+        <choice label="Simulator Configuration">
+          <value class="Linux" flag="">sim.base.jconf sim.wand.mixin.jconf</value>
+        </choice>
+        <choice label="Dome Configuration">
+          <value class="Linux" flag="">/home/dmns/jconf/cluster_dome.jconf</value>
+        </choice>
+      </option>
+    </global_options>
+    <global_environments>
+      <env label="Linux" name="linux_base">
+        <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH" value="/home/dmns/Source/juggler/build.linux/instlinks/lib:/home/dmns/deps/lib:/home/dmns/deps/lib/opt:/home/dmns/deps/lib" append="false"/>
+        <env_var label="PATH" key="PATH" value="/home/dmns/deps/bin:/usr/kerberos/bin:/usr/local/bin:/usr/bin:/bin:/usr/X11R6/bin:/usr/java/jdk1.5.0_06/bin:/home/dmns/Source/juggler/build.linux/instlinks/bin" append="false"/>
+        <env_var label="VR Juggler Location" key="VJ_BASE_DIR" value="/home/dmns/Source/juggler/build.linux/instlinks" append="false"/>
+        <env_var label="VR Juggler Location" key="DISPLAY" value=":0.0" append="false"/>
+      </env>
+    </global_environments>
+    <controls>
+      <action name="Test" command="/usr/X11R6/bin/xset" tooltip="Test"/>
+    </controls>
+  </launcher>
+  <!--
+  <cluster_node name="infiscape1" hostname="infiscape1" sub_class="master"/>
+  <cluster_node name="infiscape2" hostname="infiscape2" sub_class="master"/>
+  -->
+  <cluster_node name="infiscape3" hostname="timmy" sub_class="master"/>
+</cluster_config>

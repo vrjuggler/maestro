@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/ResourceViewer" >
+        <file>images/resources.png</file>
+    </qresource>
+</RCC>

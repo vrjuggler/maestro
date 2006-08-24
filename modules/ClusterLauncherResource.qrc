@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/ClusterLauncher" >
+        <file>images/launch.png</file>
+        <file>images/launch2.png</file>
+        <file>images/linux2.png</file>
+        <file>images/win_xp.png</file>
+    </qresource>
+</RCC>

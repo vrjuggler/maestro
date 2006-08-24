@@ -1,0 +1,72 @@
+#! /bin/bash
+# infclustercontrol init file for infclustercontrold
+#
+# chkconfig: 345 50 50
+# description: The simFUSION control server provides an XML-RPC interface \
+#              for configuring simFUSION settings.
+# pidfile: /var/run/infcontrolcontrol.pid
+
+. /etc/init.d/functions
+
+RETVAL=0
+
+prog="infclustercontrold"
+
+start() {
+    echo -n $"Starting $prog: "
+
+    # Because the Infiscape Cluster Control Daemon is a python script,
+    # the daemon function does not correctly detect if the server is running.
+    # In order to get around this limitation we assume that if the pid
+    # is found in /proc, the server is already running happy and return success.
+    pid=
+	if [ -f /var/run/$prog.pid ]; then
+		local line p
+		read line < /var/run/$prog.pid
+		for p in $line ; do
+			[ -z "${p//[0-9]/}" -a -d "/proc/$p" ] && pid="$pid $p"
+		done
+	fi
+	
+	[ -n "${pid:-}" ] && success $"prog startup" && echo && return 0
+
+    daemon $prog -log
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$prog
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  status)
+    status $prog
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart}"
+    exit 1
+esac
+
+exit $?

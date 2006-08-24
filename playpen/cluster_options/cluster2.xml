@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cluster_config>
+  <launcher title="App Launcher">
+    <applications>
+      <app label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
+        <command class="Linux" visible="false" selected="true">./Denver_VolRen_vrj</command>
+        <command class="Linux,slave" visible="false" selected="true">./slave_viewer</command>
+        <cwd class="Linux" visible="false" selected="true">/home/dmns/Source/SimpleVolRen</cwd>
+        <choice label="VR Juggler Configuration" parent_path="Configuration Files" tooltip="" type="one">
+          <arg label="Simulator Config" visible="true" class="Linux,master" flag="-j">/home/dmns/jconf/sim.jconf</arg>
+          <group label="CAVE Configuration" selected="true">
+            <arg label="Base Config" visible="true" class="Linux,master" flag="-j">/home/dmns/jconf/cave.base.jconf</arg>
+            <arg label="Display Config" visible="true" class="Linux,master" flag="-j">/home/dmns/jconf/cave.displays.jconf</arg>
+            <choice label="Position" parent_path="" tooltip="" type="one_cb">
+              <arg label="Open" visible="true" selected="true" class="Linux,master" flag="-j">/home/dmns/jconf/open.jconf</arg>
+              <arg label="Closed" visible="true" class="Linux,master" flag="-j">/home/dmns/jconf/closed.jconf</arg>
+            </choice>
+            <choice label="Input Device" type="one_cb">
+              <arg label="Wand" visible="true" selected="true" editable="false" class="Linux" flag="-j">/home/dmns/jconf/cave.wand.jconf</arg>
+              <arg label="Glove" visible="true" class="Linux" flag="-j">/home/dmns/jconf/cave.1glove.jconf</arg>
+              <arg label="Two Gloves" visible="true" class="Linux" flag="-j">/home/dmns/jconf/cave.2gloves.jconf</arg>
+              <arg label="Other" visible="true" editable="true" class="Linux" flag="-j">/home/dmns/jconf/cave.2gloves.jconf</arg>
+            </choice>
+            <choice label="Additional Options">
+              <arg label="Enable Sound" selected="true" visible="true" class="Linux" flag="-s"></arg>
+              <arg label="Remote Hostname" visible="true" editable="true" class="Linux" flag="-a">timmy</arg>
+            </choice>
+          </group>
+        </choice>
+        <choice label="VR Juggler Version" type="one_cb">
+          <group label="VR Juggler 2.0" visible="false" selected="true">
+            <env_var class="" visible="false" selected="true" label="VR Juggler Location" key="VJ_BASE_DIR">/path/to/vrjuggler2.0</env_var>
+            <env_var class="" visible="false" selected="true" label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
+            <env_var class="" visible="false" selected="true" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
+          </group>
+          <group label="VR Juggler 2.2" visible="false" selected="true">
+            <env_var class="" visible="false" selected="true" label="VR Juggler Location" key="VJ_BASE_DIR">/path/to/vrjuggler2.2</env_var>
+            <env_var class="" visible="false" selected="true" label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
+            <env_var class="" visible="false" selected="true" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
+          </group>
+        </choice>
+        <choice label="Debug Output Level" parent_path="" tooltip="" type="one_cb">
+           <env_var class="" visible="false" selected="true" editable="false" label="Critical Messages" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
+           <env_var class="" visible="false" editable="false" label="Warning Messages" key="VPR_DEBUG_NFY_LEVEL">1</env_var>
+           <env_var class="" visible="false" editable="false" label="System Configuration Results" key="VPR_DEBUG_NFY_LEVEL">2</env_var>
+           <env_var class="" visible="false" editable="false" label="System Configuration Details" key="VPR_DEBUG_NFY_LEVEL">3</env_var>
+           <env_var class="" visible="false" editable="false" label="State Changes" key="VPR_DEBUG_NFY_LEVEL">4</env_var>
+           <env_var class="" visible="false" editable="false" label="Verbose" key="VPR_DEBUG_NFY_LEVEL">5</env_var>
+           <env_var class="" visible="false" editable="false" label="Highly Verbose" key="VPR_DEBUG_NFY_LEVEL">6</env_var>
+           <env_var class="" visible="false" editable="false" label="Detailed" key="VPR_DEBUG_NFY_LEVEL">7</env_var>
+           <env_var class="" visible="true" editable="false" label="Hexidecimal" key="VPR_DEBUG_NFY_LEVEL">8</env_var>
+           <env_var class="" visible="true" editable="true" label="Other" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
+        </choice>
+      </app>
+      <app label="Test1" global_options="VR Juggler 2.0" tooltip="Test 1" helpUrl="">
+      </app>
+    </applications>
+    <global_options>
+    </global_options>
+    <controls>
+      <action name="Test" command="/usr/X11R6/bin/xset" tooltip="Test"/>
+    </controls>
+  </launcher>
+  <!--
+  <cluster_node name="infiscape1" hostname="infiscape1" sub_class="master"/>
+  <cluster_node name="infiscape2" hostname="infiscape2" sub_class="master"/>
+  -->
+  <cluster_node name="infiscape3" hostname="infiscape3" sub_class="master"/>
+</cluster_config>
