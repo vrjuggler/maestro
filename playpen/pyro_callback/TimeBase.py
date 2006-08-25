@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'daemon/TEST/TimeBase.ui'
+# Form implementation generated from reading ui file 'playpen/pyro_callback/TimeBase.ui'
 #
 #      by: PyQt4 UI code generator 4.0-snapshot-20060705
 #
