@@ -44,10 +44,13 @@ class EventDispatcher(object):
       try:
          print "Trying to connect to: PYROLOC://%s:7766/cluster_server" % (nodeId)
          proxy = Pyro.core.getProxyForURI("PYROLOC://" + nodeId + ":7766/cluster_server")
+
          # XXX: Very large hack to set the connection timeout.
          proxy.__dict__["adapter"].setTimeout(0.1)
          #proxy.__dict__["_setTimeOut"](1)
          #proxy._setTimeOut(2)
+
+         # Force the proxy to actually connect by calling a method on it.
          print "Connected to [%s] [%s]" % (nodeId, proxy.GUID())
 
          # Register remote proxy to receive signals.

@@ -300,7 +300,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                module_class = mod_info[0]
                new_icon = mod_info[1]
                size = QtCore.QSize()
-               print "ICON:", new_icon.actualSize(size)
                if None == new_icon:
                   new_icon = QtGui.QIcon(":/construction.png")
                print "Opening view: ", module_class.__name__
@@ -392,7 +391,8 @@ def main():
       QtCore.QObject.connect(update_timer, QtCore.SIGNAL("timeout()"), onUpdatePyro)
       update_timer.start(0)
 
-      pixmap = QtGui.QPixmap("/home/aronb/Source/Infiscape/tools/Maestro/images/cpu_array.png")
+      logo_path = os.path.join(os.path.dirname(__file__), 'images', 'cpu_array.png')
+      pixmap = QtGui.QPixmap(logo_path)
       splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
       splash.show()
       splash.showMessage("Establishing connections...")
