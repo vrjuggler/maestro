@@ -113,7 +113,7 @@ class ResourceModel(QtCore.QAbstractTableModel):
       return 4
 
    def headerData(self, section, orientation, role):
-      if orientation == QtCore.Qt.Horizontal:
+      if orientation == QtCore.Qt.Horizontal and QtCore.Qt.DisplayRole == role:
          if section == 0:
             return QtCore.QVariant("Node")
          elif section == 1:
