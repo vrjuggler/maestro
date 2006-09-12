@@ -20,9 +20,7 @@ import types
 import Pyro.core
 
 class EventDispatcher(object):
-   """ Class to capture and handle event processing in the system.
-       TODO:
-         - Add culling of null references
+   """ Handles sending messages to remote nodes.
    """
    def __init__(self, ipAddress, callback=None):
       """ Initialize the event dispatcher. """
@@ -31,15 +29,6 @@ class EventDispatcher(object):
       self.mConnections = {}
       self.mIpAddress = ipAddress
       self.mCallback = callback
-
-   def register(self, nodeId, obj):
-      """ Register object to recieve callback events for the given node.
-      """
-      if self.mConnections.has_key(nodeId):
-         raise AttributeError("EventDispatcher.register: already connected to [%s]" % (nodeId))
-
-      self.mConnections[nodeId] = obj
-      obj._setOneway(['emit'])
 
    def connect(self, nodeId):
       """ Connect to the given nodes event manager.
@@ -60,7 +49,11 @@ class EventDispatcher(object):
          #proxy.__dict__["_setTimeOut"](1)
          #proxy._setTimeOut(2)
          print "Connected to [%s] [%s]" % (nodeId, proxy.GUID())
+
+         # Register remote proxy to receive signals.
          self.register(nodeId, proxy)
+
+         # Register ourselves to receive callback signals.
          proxy._setOneway(['register'])
          proxy.register(self.mIpAddress, self.mCallback)
       except Exception, ex:
@@ -79,7 +72,16 @@ class EventDispatcher(object):
       if self.mConnections.has_key(nodeId):
          print "DEBUG: EventDispatcher.disconnect(%s)" % (nodeId)
          del self.mConnections[nodeId]
-      
+
+   def register(self, nodeId, obj):
+      """ Register object to recieve callback events for the given node.
+      """
+      if self.mConnections.has_key(nodeId):
+         raise AttributeError("EventDispatcher.register: already connected to [%s]" % (nodeId))
+
+      self.mConnections[nodeId] = obj
+      obj._setOneway(['emit'])
+
    def emit(self, nodeId, sigName, argsTuple=()):
       """ Emit the named signal on the given node.
           If there are no registered slots, just do nothing.
