@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ClusterControlBase.ui'
+# Form implementation generated from reading ui file 'MaestroBase.ui'
 #
-#      by: PyQt4 UI code generator 4.0-snapshot-20060705
+#      by: PyQt4 UI code generator 4-snapshot-20060828
 #
 # WARNING! All changes made in this file will be lost!
 
 import sys
 from PyQt4 import QtCore, QtGui
 
-class Ui_ClusterControlBase(object):
-   def setupUi(self, ClusterControlBase):
-      ClusterControlBase.setObjectName("ClusterControlBase")
-      ClusterControlBase.resize(QtCore.QSize(QtCore.QRect(0,0,788,711).size()).expandedTo(ClusterControlBase.minimumSizeHint()))
-      ClusterControlBase.setWindowIcon(QtGui.QIcon(":/images/construction.png"))
-      ClusterControlBase.setAutoFillBackground(True)
-      ClusterControlBase.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+class Ui_MaestroBase(object):
+   def setupUi(self, MaestroBase):
+      MaestroBase.setObjectName("MaestroBase")
+      MaestroBase.resize(QtCore.QSize(QtCore.QRect(0,0,788,711).size()).expandedTo(MaestroBase.minimumSizeHint()))
+      MaestroBase.setWindowIcon(QtGui.QIcon(":/images/construction.png"))
+      MaestroBase.setAutoFillBackground(True)
+      MaestroBase.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
 
-      self.centralwidget = QtGui.QWidget(ClusterControlBase)
+      self.centralwidget = QtGui.QWidget(MaestroBase)
       self.centralwidget.setObjectName("centralwidget")
 
       self.hboxlayout = QtGui.QHBoxLayout(self.centralwidget)
@@ -98,9 +98,9 @@ class Ui_ClusterControlBase(object):
       self.mStack.addWidget(self.mOldPage)
       self.hboxlayout1.addWidget(self.mStack)
       self.hboxlayout.addLayout(self.hboxlayout1)
-      ClusterControlBase.setCentralWidget(self.centralwidget)
+      MaestroBase.setCentralWidget(self.centralwidget)
 
-      self.menubar = QtGui.QMenuBar(ClusterControlBase)
+      self.menubar = QtGui.QMenuBar(MaestroBase)
       self.menubar.setGeometry(QtCore.QRect(0,0,788,29))
       self.menubar.setObjectName("menubar")
 
@@ -109,20 +109,20 @@ class Ui_ClusterControlBase(object):
 
       self.menuHelp = QtGui.QMenu(self.menubar)
       self.menuHelp.setObjectName("menuHelp")
-      ClusterControlBase.setMenuBar(self.menubar)
+      MaestroBase.setMenuBar(self.menubar)
 
-      self.statusbar = QtGui.QStatusBar(ClusterControlBase)
+      self.statusbar = QtGui.QStatusBar(MaestroBase)
       self.statusbar.setGeometry(QtCore.QRect(0,689,788,22))
       self.statusbar.setObjectName("statusbar")
-      ClusterControlBase.setStatusBar(self.statusbar)
+      MaestroBase.setStatusBar(self.statusbar)
 
-      self.toolBar = QtGui.QToolBar(ClusterControlBase)
+      self.toolBar = QtGui.QToolBar(MaestroBase)
       self.toolBar.setMovable(True)
       self.toolBar.setOrientation(QtCore.Qt.Horizontal)
       self.toolBar.setObjectName("toolBar")
-      ClusterControlBase.addToolBar(self.toolBar)
+      MaestroBase.addToolBar(self.toolBar)
 
-      self.mStatusWindow = QtGui.QDockWidget(ClusterControlBase)
+      self.mStatusWindow = QtGui.QDockWidget(MaestroBase)
       self.mStatusWindow.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea)
       self.mStatusWindow.setObjectName("mStatusWindow")
 
@@ -134,27 +134,27 @@ class Ui_ClusterControlBase(object):
       self.vboxlayout3.setSpacing(6)
       self.vboxlayout3.setObjectName("vboxlayout3")
       self.mStatusWindow.setWidget(self.mDockWidgetContents)
-      ClusterControlBase.addDockWidget(QtCore.Qt.DockWidgetArea(8),self.mStatusWindow)
+      MaestroBase.addDockWidget(QtCore.Qt.DockWidgetArea(8),self.mStatusWindow)
 
-      self.actionReload = QtGui.QAction(ClusterControlBase)
+      self.actionReload = QtGui.QAction(MaestroBase)
       self.actionReload.setObjectName("actionReload")
 
-      self.actionNew = QtGui.QAction(ClusterControlBase)
+      self.actionNew = QtGui.QAction(MaestroBase)
       self.actionNew.setObjectName("actionNew")
 
-      self.actionOpen = QtGui.QAction(ClusterControlBase)
+      self.actionOpen = QtGui.QAction(MaestroBase)
       self.actionOpen.setObjectName("actionOpen")
 
-      self.actionSave = QtGui.QAction(ClusterControlBase)
+      self.actionSave = QtGui.QAction(MaestroBase)
       self.actionSave.setObjectName("actionSave")
 
-      self.actionSave_As = QtGui.QAction(ClusterControlBase)
+      self.actionSave_As = QtGui.QAction(MaestroBase)
       self.actionSave_As.setObjectName("actionSave_As")
 
-      self.action_Exit = QtGui.QAction(ClusterControlBase)
+      self.action_Exit = QtGui.QAction(MaestroBase)
       self.action_Exit.setObjectName("action_Exit")
 
-      self.action_About = QtGui.QAction(ClusterControlBase)
+      self.action_About = QtGui.QAction(MaestroBase)
       self.action_About.setObjectName("action_About")
       self.menuFile.addAction(self.actionReload)
       self.menuFile.addAction(self.actionNew)
@@ -171,31 +171,31 @@ class Ui_ClusterControlBase(object):
       self.toolBar.addAction(self.actionOpen)
       self.toolBar.addAction(self.actionSave)
 
-      self.retranslateUi(ClusterControlBase)
-      QtCore.QMetaObject.connectSlotsByName(ClusterControlBase)
+      self.retranslateUi(MaestroBase)
+      QtCore.QMetaObject.connectSlotsByName(MaestroBase)
 
-   def retranslateUi(self, ClusterControlBase):
-      ClusterControlBase.setWindowTitle(QtGui.QApplication.translate("ClusterControlBase", "Infiscape Cluster Control", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOldBtn1.setText(QtGui.QApplication.translate("ClusterControlBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOldBtn3.setText(QtGui.QApplication.translate("ClusterControlBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOldBtn2.setText(QtGui.QApplication.translate("ClusterControlBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-      self.menuFile.setTitle(QtGui.QApplication.translate("ClusterControlBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
-      self.menuHelp.setTitle(QtGui.QApplication.translate("ClusterControlBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
-      self.toolBar.setWindowTitle(QtGui.QApplication.translate("ClusterControlBase", "Toolbar", None, QtGui.QApplication.UnicodeUTF8))
-      self.mStatusWindow.setWindowTitle(QtGui.QApplication.translate("ClusterControlBase", "Status Window", None, QtGui.QApplication.UnicodeUTF8))
-      self.actionReload.setText(QtGui.QApplication.translate("ClusterControlBase", "&Reload", None, QtGui.QApplication.UnicodeUTF8))
-      self.actionNew.setText(QtGui.QApplication.translate("ClusterControlBase", "&New", None, QtGui.QApplication.UnicodeUTF8))
-      self.actionOpen.setText(QtGui.QApplication.translate("ClusterControlBase", "&Open", None, QtGui.QApplication.UnicodeUTF8))
-      self.actionSave.setText(QtGui.QApplication.translate("ClusterControlBase", "&Save", None, QtGui.QApplication.UnicodeUTF8))
-      self.actionSave_As.setText(QtGui.QApplication.translate("ClusterControlBase", "Save &As...", None, QtGui.QApplication.UnicodeUTF8))
-      self.action_Exit.setText(QtGui.QApplication.translate("ClusterControlBase", "&Exit", None, QtGui.QApplication.UnicodeUTF8))
-      self.action_About.setText(QtGui.QApplication.translate("ClusterControlBase", "&About", None, QtGui.QApplication.UnicodeUTF8))
+   def retranslateUi(self, MaestroBase):
+      MaestroBase.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Infiscape Cluster Control", None, QtGui.QApplication.UnicodeUTF8))
+      self.mOldBtn1.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
+      self.mOldBtn3.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
+      self.mOldBtn2.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuFile.setTitle(QtGui.QApplication.translate("MaestroBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+      self.toolBar.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Toolbar", None, QtGui.QApplication.UnicodeUTF8))
+      self.mStatusWindow.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Status Window", None, QtGui.QApplication.UnicodeUTF8))
+      self.actionReload.setText(QtGui.QApplication.translate("MaestroBase", "&Reload", None, QtGui.QApplication.UnicodeUTF8))
+      self.actionNew.setText(QtGui.QApplication.translate("MaestroBase", "&New", None, QtGui.QApplication.UnicodeUTF8))
+      self.actionOpen.setText(QtGui.QApplication.translate("MaestroBase", "&Open", None, QtGui.QApplication.UnicodeUTF8))
+      self.actionSave.setText(QtGui.QApplication.translate("MaestroBase", "&Save", None, QtGui.QApplication.UnicodeUTF8))
+      self.actionSave_As.setText(QtGui.QApplication.translate("MaestroBase", "Save &As...", None, QtGui.QApplication.UnicodeUTF8))
+      self.action_Exit.setText(QtGui.QApplication.translate("MaestroBase", "&Exit", None, QtGui.QApplication.UnicodeUTF8))
+      self.action_About.setText(QtGui.QApplication.translate("MaestroBase", "&About", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
-   ClusterControlBase = QtGui.QMainWindow()
-   ui = Ui_ClusterControlBase()
-   ui.setupUi(ClusterControlBase)
-   ClusterControlBase.show()
+   MaestroBase = QtGui.QMainWindow()
+   ui = Ui_MaestroBase()
+   ui.setupUi(MaestroBase)
+   MaestroBase.show()
    sys.exit(app.exec_())

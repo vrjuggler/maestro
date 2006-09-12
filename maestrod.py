@@ -43,7 +43,7 @@ if os.name == 'nt':
             newPrivileges = [(id, 0)]
         win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
 
-class ClusterServer(Pyro.core.ObjBase):
+class MaestroServer(Pyro.core.ObjBase):
    def __init__(self):
       Pyro.core.ObjBase.__init__(self)
       self.mEventManager = util.EventManager.EventManager()
@@ -82,8 +82,8 @@ class ClusterServer(Pyro.core.ObjBase):
 
 if os.name == 'nt':
    class vrjclusterserver(win32serviceutil.ServiceFramework):
-      _svc_name_ = "InfiscapeClusterControlService"
-      _svc_display_name_ = "Infiscape Cluster Control Server"
+      _svc_name_ = "MaestroService"
+      _svc_display_name_ = "Maestro Server"
 
       def __init__(self, args):
          win32serviceutil.ServiceFramework.__init__(self, args)
@@ -117,7 +117,7 @@ def RunServer():
    Pyro.core.initServer()
    Pyro.core.initClient()
    daemon = Pyro.core.Daemon()
-   cluster_server = ClusterServer()
+   cluster_server = MaestroServer()
    uri = daemon.connect(cluster_server, "cluster_server")
    cluster_server.registerInitialServices()
 
@@ -182,7 +182,7 @@ def daemonize (stdin='/dev/null', stdout='/dev/null', stderr=None, pidfile=None)
    os.dup2(so.fileno(), sys.stdout.fileno())
    os.dup2(se.fileno(), sys.stderr.fileno())
 
-   print "\n\nStarted Infiscape Cluster Control on [%s]\n" % (str(datetime.datetime.today()))
+   print "\n\nStarted Maestro on [%s]\n" % (str(datetime.datetime.today()))
 
    if pidfile:
       pf = file(pidfile, 'w+')
@@ -199,13 +199,13 @@ if __name__ == '__main__':
       win32serviceutil.HandleCommandLine(vrjclusterserver)
    elif platform.system() == 'Linux':
       if '-log' in sys.argv:
-         log = '/var/log/infclustercontrold.log'
+         log = '/var/log/maestrod.log'
          print "Using log file: ", log
       else:
          log = '/dev/null'
 
       # Run as a daemon on Linux
-      daemonize(pidfile='/var/run/infclustercontrold.pid', stdout=log)
+      daemonize(pidfile='/var/run/maestrod.pid', stdout=log)
 
       # Now that we've successfully forked as a daemon, run the server
       RunServer()

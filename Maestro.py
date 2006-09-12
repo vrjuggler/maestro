@@ -22,8 +22,8 @@ import sys, os, os.path, time, traceback
 pj = os.path.join
 
 from PyQt4 import QtGui, QtCore
-import ClusterControlBase
-import ClusterControlResource
+import MaestroBase
+import MaestroResource
 import ClusterModel
 import elementtree.ElementTree as ET
 import util.EventManager
@@ -157,7 +157,7 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       #self.mEditMap[ip_address] = textedit
       self.mEditMap[ip_address] = log_widget
 
-class ClusterControl(QtGui.QMainWindow, ClusterControlBase.Ui_ClusterControlBase):
+class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def __init__(self, parent = None):
       QtGui.QMainWindow.__init__(self, parent)
       self.setupUi(self)
@@ -190,7 +190,7 @@ class ClusterControl(QtGui.QMainWindow, ClusterControlBase.Ui_ClusterControlBase
       print "Removed, ", node
 
    def setupUi(self, widget):
-      ClusterControlBase.Ui_ClusterControlBase.setupUi(self, widget)
+      MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
       self.mToolboxButtonGroup = QtGui.QButtonGroup()
       widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mStatusWindow)
@@ -392,7 +392,7 @@ def main():
       QtCore.QObject.connect(update_timer, QtCore.SIGNAL("timeout()"), onUpdatePyro)
       update_timer.start(0)
 
-      pixmap = QtGui.QPixmap("/home/aronb/Source/Infiscape/tools/ClusterControl/images/cpu_array.png")
+      pixmap = QtGui.QPixmap("/home/aronb/Source/Infiscape/tools/Maestro/images/cpu_array.png")
       splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
       splash.show()
       splash.showMessage("Establishing connections...")
@@ -421,7 +421,7 @@ def main():
 
 
       # Create and display GUI
-      cc = ClusterControl()
+      cc = Maestro()
       cc.init(cluster_model, event_manager, event_dispatcher)
       cc.show()
       splash.finish(cc)

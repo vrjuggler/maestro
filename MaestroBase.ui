@@ -2,8 +2,8 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>ClusterControlBase</class>
- <widget class="QMainWindow" name="ClusterControlBase" >
+ <class>MaestroBase</class>
+ <widget class="QMainWindow" name="MaestroBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -16,7 +16,7 @@
    <string>Infiscape Cluster Control</string>
   </property>
   <property name="windowIcon" >
-   <iconset resource="ClusterControlResource.qrc" >:/images/construction.png</iconset>
+   <iconset resource="MaestroResource.qrc" >:/images/construction.png</iconset>
   </property>
   <property name="autoFillBackground" >
    <bool>true</bool>
@@ -274,7 +274,7 @@
  </widget>
  <pixmapfunction></pixmapfunction>
  <resources>
-  <include location="ClusterControlResource.qrc" />
+  <include location="MaestroResource.qrc" />
  </resources>
  <connections/>
 </ui>
