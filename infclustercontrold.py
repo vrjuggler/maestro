@@ -18,34 +18,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, os, types, platform
-import re
+import sys, os, platform
 import Pyro.core
-import Pyro.naming
 
 import services.LaunchService
 import services.SettingsService
-import util.process
 import util.EventManager
 import util.EventDispatcher
 import datetime
-import signal
 import time
-
-ERROR = 0
-LINUX = 1
-WIN = 2
-WINXP = 3
-MACOS = 4
-MACOSX = 5
-HPUX = 6
-AIX = 7
-SOLARIS = 8
 
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
-
-PORT = 8712
 
 if os.name == 'nt':
     def AdjustPrivilege(priv, enable):
@@ -63,15 +47,18 @@ class ClusterServer(Pyro.core.ObjBase):
    def __init__(self):
       Pyro.core.ObjBase.__init__(self)
       self.mEventManager = util.EventManager.EventManager()
+      self.mEventDispatcher = None
       self.mServices = []
 
    def registerInitialServices(self):
+      # Lazy instantiation because we can not the the correct hostname
+      # from our daemon until we are connected.
       self.mEventDispatcher = util.EventDispatcher.EventDispatcher(self.getDaemon().hostname)
+
       # Register initial services
       settings = services.SettingsService.SettingsService()
       settings.init(self.mEventManager, self.mEventDispatcher)
       self.mServices.append(settings)
-      self.mProcess = None
       
       launch_service = services.LaunchService.LaunchService()
       launch_service.init(self.mEventManager, self.mEventDispatcher)
@@ -82,127 +69,16 @@ class ClusterServer(Pyro.core.ObjBase):
       self.mEventManager.timers().createTimer(launch_service.update, 0)
 
    def register(self, nodeId, obj):
+      """ Forward request to register for callback signals. """
       self.mEventDispatcher.register(nodeId, obj)
 
    def emit(self, nodeId, sigName, argsTuple=()):
+      """ Forward incoming signals to event manager. """
       self.mEventManager.emit(nodeId, sigName, argsTuple)
 
    def update(self):
+      """ Give the event manager time to handle it's timers. """
       self.mEventManager.update()
-
-   def test(self):
-      print "Test"
-
-   def stopCommand(self):
-      if not None == self.mProcess:
-         return self.mProcess.kill()
-         #return self.mProcess.kill(sig=signal.SIGTERM)
-         #return self.mProcess.kill(sig=signal.SIGSTOP)
-
-   def isCommandRunning(self):
-      try:
-         # poll to see if is process still running
-         if sys.platform.startswith("win"):
-            timeout = 0
-         else:
-            timeout = os.WNOHANG
-         self.mProcess.wait(timeout)
-      except process.ProcessError, ex:
-         if ex.errno == process.ProcessProxy.WAIT_TIMEOUT:
-            return True
-         else:
-            raise
-      return False
-
-   def runSingleShotCommand(self, command, cwd, envMap):
-      print "Running single shot command: ", command
-      print "With env:", envMap
-      print "Working Dir: ", cwd
-      temp_process = process.ProcessProxy(cmd=command, cwd=cwd, env=envMap)
-   
-   def runCommand(self, command, cwd, envMap):
-      try:
-         if not None == self.mProcess and self.isCommandRunning():
-            print "Command already running."
-            return False
-         else:
-            print "\nOriginal env:", envMap
-            self.evaluateEnvVars(envMap)
-            command = self.expandEnv(command, envMap)[0]
-            cwd     = self.expandEnv(cwd, envMap)[0]
-            #command = command.replace('\\', '\\\\')
-            print "\nRunning command: ", command
-            print "\nWorking Dir: ", cwd
-            print "\nTranslated env:", envMap
-            
-            self.mBuffer = process.IOBuffer(name='<stdout>')
-            #self.mProcess = process.ProcessProxy(command, stdout=self.mBuffer, stderr=self.mBuffer, env={'DISPLAY':':0.0'})
-            self.mProcess = process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=self.mBuffer)
-            return True
-      except KeyError, ex:
-         #traceback.print_stack()
-         print "runCommand() ", ex
-         return False
-
-   def getOutput(self):
-      if not None == self.mProcess:
-         #return self.mProcess.stdout.readline()
-         return self.mBuffer.readline()
-
-   def expandEnv(self, value, envMap, key = None):
-      """
-      Expands a single entry in out environment map.
-      """
-      sEnvVarRegexBraces = re.compile('\${(\w+)}')
-
-      start_pos = 0
-      replaced = 0
-      match = sEnvVarRegexBraces.search(value, start_pos)
-
-      while match is not None:
-         print "1"
-         env_var = match.group(1)
-         env_var_ex = re.compile(r'\${%s}' % env_var)
-
-         # Try to get env_var value from location map first. If not found
-         # then try to get from os.environ
-         if envMap.has_key(env_var) and not (env_var == key):
-            new_value = env_var_ex.sub(envMap[env_var].replace('\\', '\\\\'), value)
-            print "Replaceing %s -> %s" % (value, new_value)
-            value = new_value
-            replaced = replaced + 1
-         elif os.environ.has_key(env_var):
-            #print "%s = %s" % (env_var, os.environ[env_var])
-            new_value = env_var_ex.sub(os.environ[env_var].replace('\\', '\\\\'), value)
-            print "Replaceing %s -> %s" % (value, new_value)
-            value = new_value
-            replaced = replaced + 1
-         else:
-            # Could not find env_var in either map so skip it for now.
-            start_pos = match.end(1)
-
-         match = sEnvVarRegexBraces.search(value, start_pos)
-
-      return (value, replaced)
-
-   def evaluateEnvVars(self, envMap):
-      try:
-         sEnvVarRegexBraces = re.compile('\${(\w+)}')
-         replaced = 1
-         while replaced > 0:
-            print "replaced:", replaced
-            replaced = 0
-            for k, v in envMap.iteritems():
-               print "Trying to match: ", v
-               match = sEnvVarRegexBraces.search(v)
-               if match is not None:
-                  print "Trying to replace env vars in", v
-                  (v, r) = self.expandEnv(v, envMap, k)
-                  envMap[k] = v
-                  replaced = replaced + r
-      except ex:
-         print ex
-
 
 if os.name == 'nt':
    class vrjclusterserver(win32serviceutil.ServiceFramework):
@@ -211,7 +87,6 @@ if os.name == 'nt':
 
       def __init__(self, args):
          win32serviceutil.ServiceFramework.__init__(self, args)
-         #self.sfcServer = BaseSfcServer(('0.0.0.0', PORT), 0)
 
       def SvcStop(self):
          import servicemanager
