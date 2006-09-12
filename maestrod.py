@@ -23,6 +23,7 @@ import Pyro.core
 
 import services.LaunchService
 import services.SettingsService
+import services.ResourceService
 import util.EventManager
 import util.EventDispatcher
 import datetime
@@ -59,6 +60,10 @@ class MaestroServer(Pyro.core.ObjBase):
       settings = services.SettingsService.SettingsService()
       settings.init(self.mEventManager, self.mEventDispatcher)
       self.mServices.append(settings)
+
+      resource = services.ResourceService.ResourceService()
+      resource.init(self.mEventManager, self.mEventDispatcher)
+      self.mServices.append(resource)
       
       launch_service = services.LaunchService.LaunchService()
       launch_service.init(self.mEventManager, self.mEventDispatcher)
@@ -66,6 +71,7 @@ class MaestroServer(Pyro.core.ObjBase):
 
       # Register callbacks to send info to clients
       #self.mEventManager.timers().createTimer(settings.update, 2.0)
+      #self.mEventManager.timers().createTimer(resource.update, 2.0)
       self.mEventManager.timers().createTimer(launch_service.update, 0)
 
    def register(self, nodeId, obj):

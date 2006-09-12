@@ -60,8 +60,7 @@ class EventDispatcher(object):
          proxy._setOneway(['register'])
          proxy.register(self.mIpAddress, self.mCallback)
       except Exception, ex:
-         print "Error connecting proxy to [%s]" % (nodeId)
-         print ex
+         print "Error connecting proxy to [%s] [%s]" % (nodeId, ex)
          return False
       return True
 
