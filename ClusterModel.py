@@ -69,15 +69,6 @@ class ClusterModel(QtCore.QAbstractListModel):
 
       #Pyro.core.initClient()
 
-      # Output logger to manage all output coming over the network
-      self.mOutputLogger = OutputLogger()
-
-      # Timer to refresh Qt controls that have registered to recieve output.
-      self.outputLoggerTimer = QtCore.QTimer()
-      self.outputLoggerTimer.setInterval(100)
-      self.outputLoggerTimer.start()
-      QtCore.QObject.connect(self.outputLoggerTimer, QtCore.SIGNAL("timeout()"), self.refreshOutputLogger)
-      
       # Timer to refresh pyro connections to nodes.
       self.refreshTimer = QtCore.QTimer()
       self.refreshTimer.setInterval(2000)
@@ -98,6 +89,11 @@ class ClusterModel(QtCore.QAbstractListModel):
    def init(self, eventManager, eventDispatcher):
       self.mEventManager = eventManager
       self.mEventDispatcher = eventDispatcher
+
+      # XXX: Should we manage this signal on a per node basis? We would have
+      #      to make each node generate a signal when it's OS changed and
+      #      listen for it here anyway.
+      # Register to receive signals from all nodes about their current os.
       self.mEventManager.connect("*", "settings.os", self.onReportOs)
 
    def onReportOs(self, nodeId, os):
@@ -111,9 +107,8 @@ class ClusterModel(QtCore.QAbstractListModel):
                   changed = True
 
          if changed:
-            # TODO: Only send changed signal for nodes really changed.
+            # TODO: Only send changed signal when nodes really changed os.
             self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
-            #self.emit(QtCore.SIGNAL("dataChanged(int)"), 0)
       except Exception, ex:
          print "ERROR: ", ex
 
@@ -149,12 +144,6 @@ class ClusterModel(QtCore.QAbstractListModel):
    def addNode(self):
       self.insertRow(self.rowCount())
 
-   def refreshOutputLogger(self):
-      self.mOutputLogger.publishEvents()
-        
-   def getOutputLogger(self):
-      return self.mOutputLogger
-
    def refreshConnections(self):
       """Try to connect to all nodes."""
 
@@ -178,15 +167,6 @@ class ClusterModel(QtCore.QAbstractListModel):
       if new_connections:
          print "We had new connections"
          self.emit(QtCore.SIGNAL("newConnections()"))
-
-   def runRemoteCommand(self, masterCommand, slaveCommand):
-      """Run commands on cluster."""
-      for n in self.mNodes:
-         n.runCommand(masterCommand, self.mOutputLogger)
-
-   def killCommand(self):
-      for n in self.mNodes:
-         n.stopCommand()
 
    def data(self, index, role=QtCore.Qt.DisplayRole):
       """ Returns the data representation of each node in the cluster.
@@ -238,8 +218,6 @@ class ClusterNode:
       self.mName = self.mElement.get("name")
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("sub_class")
-      self.mOutputThread = None
-      self.mRunningCommand = ""
       self.mPlatform = ERROR 
 
    def getName(self):
@@ -266,106 +244,3 @@ class ClusterNode:
       if platform > 0:
          return platform + "," + self.mClass
       return self.mClass
-
-   def isOutputThreadRunning(self):
-      if not None == self.mOutputThread:
-         result = self.mOutputThread.isAlive()
-         if not result:
-            self.mOutputThread = None
-            self.mRunningCommand = ""
-         return result
-      return False
-
-   def runSingleShotCommand(self, command, envMap, cwd, outputLogger):
-      self.mProxy.runSingleShotCommand(command=command, cwd=cwd, envMap=envMap)
-
-   def runCommand(self, command, envMap, cwd, outputLogger):
-      if not None == self.mOutputThread:
-         print "Cluster node [%s] is already running [%s]" % (self.getName(), self.mRunningCommand)
-      if not None == self.mProxy:
-         self.mRunningCommand = command
-         self.mProxy.runCommand(command=command, cwd=cwd, envMap=envMap)
-         ot = OutputThread(copy.copy(self.mProxy), self, outputLogger)
-         ot.start()
-      else:
-         print "Cluster node [%s] is not connected." % (self.getName())
-
-   def stopCommand(self):
-      if not None == self.mProxy:
-         self.mProxy.stopCommand()
-      else:
-         print "Cluster node [%s] is not connected." % (self.getName())
-
-class OutputThread(threading.Thread):
-   def __init__(self, proxy, node, outputLogger):
-      threading.Thread.__init__(self)
-      self.mProxy = proxy
-      self.mNode = node
-      self.mOutputLogger = outputLogger
-
-   def run(self):
-      line = self.mProxy.getOutput()
-      while not "" == line:
-         # Strip the trailing newline char
-         self.mOutputLogger.output(self.mNode, line[:-1])
-         line = self.mProxy.getOutput()
-      print "Done running command."
-
-class OutputLogger(QtCore.QObject):
-   def __init__(self):
-      QtCore.QObject.__init__(self)
-      self.subscribersMatch = {}
-      self.nodeSubscribers = {}
-      self.mQueue = Queue()
-
-   def _mksequence(self, seq):
-      if not (type(seq) in (types.TupleType,types.ListType)):
-         return (seq,)
-      return seq
-
-   def subscribeMatch(self, subjects, callback):
-      if not subjects: return
-      # Subscribe into a dictionary; this way; somebody can subscribe
-      # only once to this subject. Subjects are regex patterns.
-      for subject in self._mksequence(subjects):
-         matcher = re.compile(subject, re.IGNORECASE)
-         self.subscribersMatch.setdefault(matcher, []).append(callback)
-
-   def subscribeForNode(self, node, callback):
-      self.nodeSubscribers.setdefault(node, []).append(callback)
-
-   def unsubscribeForNode(self, node, callback):
-      try:
-         self.nodeSubscribers[node].remove(callback)
-      except ValueError, x:
-         pass
-
-   def unsubscribe(self, subjects, callback):
-      if not subjects: return
-      for subject in self._mksequence(subjects):
-         try:
-            m = re.compile(subject,re.IGNORECASE)
-            self.subscribersMatch[m].remove(callback)
-         except ValueError, x:
-            pass
-
-   def output(self, node, message):
-      self.mQueue.put((node, message))
-      
-   def publishEvents(self):
-      try:
-         # Run a maximum up 100 times.
-         for x in xrange(100):
-            (node, message) = self.mQueue.get(block=False)
-            if not node: return
-            # process the subject patterns
-            for (m,subs) in self.subscribersMatch.items():
-               if m.match(node.getName()):
-                  # send event to all subscribers
-                  for cb in subs:
-                     cb(message)
-            # Call all per node callbacks
-            for cb in self.nodeSubscribers[node]:
-               cb(message)
-      except:
-         pass
