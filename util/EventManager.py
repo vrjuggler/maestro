@@ -38,7 +38,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
 
    def remote_emit(self, nodeId, sigName, argsTuple=()):
       """ Forward incoming signals to event manager. """
-      self.local_emit(nodeId, sigName, argsTuple)
+      util.EventManagerBase.EventManagerBase.emit(self, nodeId, sigName, argsTuple)
 
    def error(self, reason):
       print "error: ", str(reason.value)
