@@ -68,7 +68,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       self.actionDict          = {}   # Storage for user-defined action slots
       self.activeThread        = None
 
-   def configure(self, clusterModel, eventManager, eventDispatcher):
+   def configure(self, clusterModel, eventManager):
       self.mClusterModel = clusterModel
       self.mElement = clusterModel.mElement
       self.mTreeModel = LauncherModel.TreeModel(self.mElement)
@@ -77,7 +77,6 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       self.mTableView.setModel(self.mTableModel)
 
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       self._fillInApps()
 
@@ -201,7 +200,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
          #node.runCommand(command=total_command, cwd=cwd, envMap=env_map, outputLogger=self.mClusterModel.mOutputLogger)
          ip_address = node.getIpAddress()
-         self.mEventDispatcher.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
+         self.mEventManager.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
          
 
    def getName():

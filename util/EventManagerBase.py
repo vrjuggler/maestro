@@ -19,7 +19,7 @@
 import os, sys, os.path, traceback, types, weakref, time
 
 
-class EventManager(object):
+class EventManagerBase(object):
    """ Class to capture and handle event processing in the system.
        TODO:
          - Add culling of null references

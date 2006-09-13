@@ -96,7 +96,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.nodeSettingsChanged)
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.nodeSettingsChanged)
    
-   def configure(self, clusterModel, eventManager, eventDispatcher):
+   def configure(self, clusterModel, eventManager):
       """ Configure the user interface with data in cluster configuration. """
       # Set the new cluster configuration
       if not None == self.mClusterModel:
@@ -104,7 +104,6 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       self.mClusterModel = clusterModel
       self.connect(self.mClusterModel, QtCore.SIGNAL("newConnections()"), self.onNewConnections)
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       #self.mSettingsModel = SettingsModel(self.mClusterModel)
 
@@ -125,7 +124,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       if not None == self.mClusterModel:
          self.mClusterModel.refreshConnections()
 
-      self.mEventDispatcher.emit("*", "settings.get_os", ())
+      self.mEventManager.emit("*", "settings.get_os", ())
 
    def onAdd(self):
       """ Called when user presses the add button. """
@@ -159,7 +158,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
          # Disconnect and try to connect to new hostname later..
          try:
             ip_address = selected_node.getIpAddress()
-            self.mEventDispatcher.disconnect(ip_address)
+            self.mEventManager.disconnectFromNode(ip_address)
          except:
             # Do nothing
             pass

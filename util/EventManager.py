@@ -18,16 +18,16 @@
 
 import types
 import Pyro.core
-import util.EventManager
+import util.EventManagerBase
 
 from twisted.spread import pb
 
-class EventDispatcher(pb.Root, util.EventManager.EventManager):
+class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
    """ Handles sending messages to remote objects.
    """
    def __init__(self, ipAddress):
       """ Initialize the event dispatcher. """
-      util.EventManager.EventManager.__init__(self)
+      util.EventManagerBase.EventManagerBase.__init__(self)
       self.mProxies = {}
       self.mIpAddress = ipAddress
 
@@ -49,11 +49,11 @@ class EventDispatcher(pb.Root, util.EventManager.EventManager):
       """
       # nodeId must be a string.
       if not isinstance(nodeId, types.StringType):
-         raise TypeError("EventDispatcher.connect: nodeId of non-string type passed")
+         raise TypeError("EventManager.connect: nodeId of non-string type passed")
       
       # Make sure we are not already connected to node.
       if self.mProxies.has_key(nodeId):
-         raise AttributeError("EventDispatcher.connect: already connected to [%s]" % (nodeId))
+         raise AttributeError("EventManager.connect: already connected to [%s]" % (nodeId))
 
       from twisted.spread import pb
       from twisted.internet import reactor
@@ -72,17 +72,17 @@ class EventDispatcher(pb.Root, util.EventManager.EventManager):
       """ Disconnect a given nodes remote object.
       """
       if not isinstance(nodeId, types.StringType):
-         raise TypeError("EventDispatcher.connect: nodeId of non-string type passed")
+         raise TypeError("EventManager.connect: nodeId of non-string type passed")
 
       if self.mProxies.has_key(nodeId):
-         print "DEBUG: EventDispatcher.disconnect(%s)" % (nodeId)
+         print "DEBUG: EventManager.disconnect(%s)" % (nodeId)
          del self.mProxies[nodeId]
 
    def registerProxy(self, nodeId, obj):
       """ Register object to recieve callback events for the given node.
       """
       if self.mProxies.has_key(nodeId):
-         raise AttributeError("EventDispatcher.registerProxy: already connected to [%s]" % (nodeId))
+         raise AttributeError("EventManager.registerProxy: already connected to [%s]" % (nodeId))
 
       self.mProxies[nodeId] = obj
 
@@ -94,16 +94,16 @@ class EventDispatcher(pb.Root, util.EventManager.EventManager):
           If there are no registered slots, just do nothing.
       """
       if not isinstance(nodeId, types.StringType):
-         raise TypeError("EventDispatcher.connect: nodeId of non-string type passed")
+         raise TypeError("EventManager.connect: nodeId of non-string type passed")
       if not isinstance(sigName, types.StringType):
-         raise TypeError("EventDispatcher.connect: sigName of non-string type passed")
+         raise TypeError("EventManager.connect: sigName of non-string type passed")
       if not isinstance(argsTuple, types.TupleType):
-         raise TypeError("EventDispatcher.connect: argsTuple not of tuple type passed.")
+         raise TypeError("EventManager.connect: argsTuple not of tuple type passed.")
       
       # Get local IP address to use for nodeId mask on remote nodes.
       ip_address = Pyro.protocol.getIPAddress(self.mIpAddress)
 
-      print "DEBUG: EventDispatcher.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple)
+      print "DEBUG: EventManager.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple)
       # Build up a list of all connections to emit signal on.
       nodes = []
       if nodeId == "*":

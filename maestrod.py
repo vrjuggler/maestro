@@ -25,7 +25,6 @@ import services.LaunchService
 import services.SettingsService
 import services.ResourceService
 import util.EventManager
-import util.EventDispatcher
 import datetime
 import time
 
@@ -46,12 +45,9 @@ if os.name == 'nt':
             newPrivileges = [(id, 0)]
         win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
 
-#class MaestroServer(Pyro.core.ObjBase):
-class MaestroServer(pb.Root):
+class MaestroServer:
    def __init__(self):
-      #Pyro.core.ObjBase.__init__(self)
-      #pb.Root.__init__(self)
-      self.mEventDispatcher = None
+      self.mEventManager = util.EventManager.EventManager("192.168.1.14")
       self.mServices = []
 
    def remote_test(self, val):
@@ -59,39 +55,23 @@ class MaestroServer(pb.Root):
       return "Test complete"
 
    def registerInitialServices(self):
-      # Lazy instantiation because we can not the the correct hostname
-      # from our daemon until we are connected.
-      #self.mEventDispatcher = util.EventDispatcher.EventDispatcher(self.getDaemon().hostname)
-      # XXX: Get hostname somehow.
-      self.mEventDispatcher = util.EventDispatcher.EventDispatcher("192.168.1.14")
-      self.mEventManager = self.mEventDispatcher
-
       # Register initial services
       settings = services.SettingsService.SettingsService()
-      settings.init(self.mEventManager, self.mEventDispatcher)
+      settings.init(self.mEventManager)
       self.mServices.append(settings)
 
       resource = services.ResourceService.ResourceService()
-      resource.init(self.mEventManager, self.mEventDispatcher)
+      resource.init(self.mEventManager)
       self.mServices.append(resource)
       
       launch_service = services.LaunchService.LaunchService()
-      launch_service.init(self.mEventManager, self.mEventDispatcher)
+      launch_service.init(self.mEventManager)
       self.mServices.append(launch_service)
 
       # Register callbacks to send info to clients
       #self.mEventManager.timers().createTimer(settings.update, 2.0)
       #self.mEventManager.timers().createTimer(resource.update, 2.0)
       self.mEventManager.timers().createTimer(launch_service.update, 0)
-
-   def remote_registerRemoteObject(self, nodeId, obj):
-      """ Forward request to register for callback signals. """
-      print "Register remote object: ", obj
-      self.mEventDispatcher.registerRemoteObject(nodeId, obj)
-
-   def remote_emit(self, nodeId, sigName, argsTuple=()):
-      """ Forward incoming signals to event manager. """
-      self.mEventManager.local_emit(nodeId, sigName, argsTuple)
 
    def update(self):
       """ Give the event manager time to handle it's timers. """
@@ -158,7 +138,7 @@ def RunServer():
       cluster_server.registerInitialServices()
       from twisted.internet import reactor
       from twisted.internet import task
-      reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventDispatcher))
+      reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
       looping_call = task.LoopingCall(cluster_server.update)
       looping_call.start(0.1)
       reactor.run()

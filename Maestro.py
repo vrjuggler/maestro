@@ -24,7 +24,6 @@ from PyQt4 import QtGui, QtCore
 
 app = QtGui.QApplication(sys.argv)
 from twisted.internet import qt4reactor
-import MyQtReactor
 qt4reactor.install(app)
 
 
@@ -34,7 +33,6 @@ import MaestroResource
 import ClusterModel
 import elementtree.ElementTree as ET
 import util.EventManager
-import util.EventDispatcher
 import modules
 import LogWidget
 
@@ -170,7 +168,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.setupUi(self)
       self.mClusterModel = None
 
-   def init(self, clusterModel, eventManager, eventDispatcher):
+   def init(self, clusterModel, eventManager):
       # Set the new cluster configuration
       if not None == self.mClusterModel:
          self.disconnect(self.mClusterModel, QtCore.SIGNAL("nodeAdded()"), self.onNodeAdded)
@@ -180,14 +178,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.connect(self.mClusterModel, QtCore.SIGNAL("nodeRemoved()"), self.onNodeRemoved)
       
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       self.mOutputTab.init(self.mClusterModel, self.mEventManager)
       
 
       # Initialize all loaded modules.
       for module in self.mModulePanels:
-         module.configure(self.mClusterModel, self.mEventManager, self.mEventDispatcher)
+         module.configure(self.mClusterModel, self.mEventManager)
 
 
    def onNodeAdded(self, node):
@@ -425,20 +422,19 @@ def main():
       #   - Connect to remote event manager objects.
       #   - Emit events to remote event manager objects.
       ip_address = socket.gethostbyname(daemon.hostname)
-      event_dispatcher = util.EventDispatcher.EventDispatcher(ip_address)
-      event_manager = event_dispatcher
+      event_manager = util.EventManager.EventManager(ip_address)
 
 
       # Try to make inital connections
       # Create cluster configuration
       cluster_model = ClusterModel.ClusterModel(tree);
-      cluster_model.init(event_manager, event_dispatcher)
+      cluster_model.init(event_manager)
       cluster_model.refreshConnections()
 
 
       # Create and display GUI
       cc = Maestro()
-      cc.init(cluster_model, event_manager, event_dispatcher)
+      cc.init(cluster_model, event_manager)
       cc.show()
       splash.finish(cc)
       reactor.run()

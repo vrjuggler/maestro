@@ -20,15 +20,14 @@
 import re
 import sys, os
 import util.process
-import util.EventDispatcher
+import util.EventManager
 
 class LaunchService:
    def __init__(self):
       self.mProcess = None
 
-   def init(self, eventManager, eventDispatcher):
+   def init(self, eventManager):
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       self.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
 
@@ -38,12 +37,12 @@ class LaunchService:
             #if self.mBuffer._closed:
             #   result = self.mBuffer.read()
             #   print result
-            #   #self.mEventDispatcher.emit("*", "launch.output", (result,))
+            #   #self.mEventManager.emit("*", "launch.output", (result,))
             #   self.mProcess = None
             #elif self.mBuffer._haveNumBytes(1024):
             #   result = self.mBuffer.read()
             #   #print result
-            #   self.mEventDispatcher.emit("*", "launch.output", (result,))
+            #   self.mEventManager.emit("*", "launch.output", (result,))
             #result = self.isProcessRunning()
             #print "Testing process running: ", result
             #if not result:
@@ -60,7 +59,7 @@ class LaunchService:
             #      if not result:
             #         self.mProcess = None
             #         return
-            #   self.mEventDispatcher.emit("*", "launch.output", (line,))
+            #   self.mEventManager.emit("*", "launch.output", (line,))
             #   print "line: ", line
 
             line = self.mProcess.stdout.read(4096)
@@ -72,7 +71,7 @@ class LaunchService:
                   self.mProcess = None
                   return
             print "line: ", line
-            self.mEventDispatcher.emit("*", "launch.output", (line,))
+            self.mEventManager.emit("*", "launch.output", (line,))
 
       except Exception, ex:
          print "I/O Error: ", ex

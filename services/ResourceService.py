@@ -25,7 +25,7 @@ import time
 import string
 import socket
 
-import util.EventDispatcher
+import util.EventManager
 
 if os.name == 'nt':
    import wmi
@@ -58,24 +58,23 @@ class ResourceService(Pyro.core.ObjBase):
       else:
          self.mLastCPUTime = [0,0,0,0]
 
-   def init(self, eventManager, eventDispatcher):
+   def init(self, eventManager):
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       self.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)
 
    def onGetUsage(self, nodeId):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()
-      self.mEventDispatcher.emit("*", "settings.cpu_usage", (cpu_usage,))
-      self.mEventDispatcher.emit("*", "settings.mem_usage", (mem_usage,))
+      self.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
+      self.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
          
    def update(self):
       cpu_usage = self._getCpuUsage()
       platform = self._getPlatform()
       mem_usage = self._getMemUsage()
-      self.mEventDispatcher.emit("*", "settings.cpu_usage", (cpu_usage,))
-      self.mEventDispatcher.emit("*", "settings.mem_usage", (mem_usage,))
+      self.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
+      self.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
 
    def _getCpuUsage(self):
       if os.name == 'nt':

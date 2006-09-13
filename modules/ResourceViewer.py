@@ -46,8 +46,8 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
       """ Called when user presses the refresh button. """
       if not None == self.mClusterModel:
          self.mClusterModel.refreshConnections()
-      self.mEventDispatcher.emit("*", "settings.get_usage", ())
-      self.mEventDispatcher.emit("*", "settings.get_mem_usage", ())
+      self.mEventManager.emit("*", "settings.get_usage", ())
+      self.mEventManager.emit("*", "settings.get_mem_usage", ())
       
    def reportCpuUsage(self, ip, val):
       print "RV CPU Usage [%s]: %s" % (ip, val)
@@ -59,14 +59,13 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
       self.mResourceModel.mMemUsageMap[ip] = val
       self.mResourceTable.reset()
 
-   def configure(self, clusterModel, eventManager, eventDispatcher):
+   def configure(self, clusterModel, eventManager):
       """ Configure the user interface with data in cluster configuration. """
       self.mClusterModel = clusterModel
 
       self.mResourceModel = ResourceModel(self.mClusterModel)
       self.mResourceTable.setModel(self.mResourceModel)
 
-      self.mEventDispatcher = eventDispatcher
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
       self.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)

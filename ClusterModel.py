@@ -56,7 +56,7 @@ class ClusterModel(QtCore.QAbstractListModel):
    def __init__(self, xmlTree, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
-      self.mEventDispatcher = None
+      self.mEventManager = None
       # Store cluster XML element
       self.mElement = xmlTree.getroot()
       assert self.mElement.tag == "cluster_config"
@@ -86,9 +86,8 @@ class ClusterModel(QtCore.QAbstractListModel):
       def debugCallback(message):
          sys.stdout.write("DEBUG: " + message)
 
-   def init(self, eventManager, eventDispatcher):
+   def init(self, eventManager):
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       # XXX: Should we manage this signal on a per node basis? We would have
       #      to make each node generate a signal when it's OS changed and
@@ -155,11 +154,11 @@ class ClusterModel(QtCore.QAbstractListModel):
             # Attempt to get the IP address from the hostname.
             ip_address = node.getIpAddress()
             # If node is not connected, attempt to connect.
-            if not self.mEventDispatcher.isConnected(ip_address):
-               if self.mEventDispatcher.connectToNode(ip_address):
+            if not self.mEventManager.isConnected(ip_address):
+               if self.mEventManager.connectToNode(ip_address):
                   new_connections = True
                   # Tell the new node to report it's os.
-                  self.mEventDispatcher.emit(ip_address, "settings.get_os", ())
+                  self.mEventManager.emit(ip_address, "settings.get_os", ())
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 

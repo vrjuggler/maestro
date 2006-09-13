@@ -25,7 +25,7 @@ import time
 import string
 import socket
 
-import util.EventDispatcher
+import util.EventManager
 
 if os.name == 'nt':
    import wmi
@@ -63,20 +63,19 @@ class SettingsService(Pyro.core.ObjBase):
       Pyro.core.ObjBase.__init__(self)
       self.mQueue = Queue()
 
-   def init(self, eventManager, eventDispatcher):
+   def init(self, eventManager):
       self.mEventManager = eventManager
-      self.mEventDispatcher = eventDispatcher
 
       self.mEventManager.connect("*", "settings.get_os", self.onGetOs)
 
    def onGetOs(self, nodeId):
       platform = self._getPlatform()
 
-      self.mEventDispatcher.emit(nodeId, "settings.os", (platform,))
+      self.mEventManager.emit(nodeId, "settings.os", (platform,))
 
    def update(self):
       platform = self._getPlatform()
-      self.mEventDispatcher.emit("*", "settings.os", (platform,))
+      self.mEventManager.emit("*", "settings.os", (platform,))
 
    def _getPlatform(self):
       """Returns tuple with error code and platform code.
