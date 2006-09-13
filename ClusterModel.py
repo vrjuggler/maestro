@@ -156,7 +156,7 @@ class ClusterModel(QtCore.QAbstractListModel):
             ip_address = node.getIpAddress()
             # If node is not connected, attempt to connect.
             if not self.mEventDispatcher.isConnected(ip_address):
-               if self.mEventDispatcher.connect(ip_address):
+               if self.mEventDispatcher.connectToNode(ip_address):
                   new_connections = True
                   # Tell the new node to report it's os.
                   self.mEventDispatcher.emit(ip_address, "settings.get_os", ())

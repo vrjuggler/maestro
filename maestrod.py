@@ -29,6 +29,8 @@ import util.EventDispatcher
 import datetime
 import time
 
+from twisted.spread import pb
+
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
 
@@ -44,17 +46,25 @@ if os.name == 'nt':
             newPrivileges = [(id, 0)]
         win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
 
-class MaestroServer(Pyro.core.ObjBase):
+#class MaestroServer(Pyro.core.ObjBase):
+class MaestroServer(pb.Root):
    def __init__(self):
-      Pyro.core.ObjBase.__init__(self)
-      self.mEventManager = util.EventManager.EventManager()
+      #Pyro.core.ObjBase.__init__(self)
+      #pb.Root.__init__(self)
       self.mEventDispatcher = None
       self.mServices = []
+
+   def remote_test(self, val):
+      print "Testing: ", val
+      return "Test complete"
 
    def registerInitialServices(self):
       # Lazy instantiation because we can not the the correct hostname
       # from our daemon until we are connected.
-      self.mEventDispatcher = util.EventDispatcher.EventDispatcher(self.getDaemon().hostname)
+      #self.mEventDispatcher = util.EventDispatcher.EventDispatcher(self.getDaemon().hostname)
+      # XXX: Get hostname somehow.
+      self.mEventDispatcher = util.EventDispatcher.EventDispatcher("192.168.1.14")
+      self.mEventManager = self.mEventDispatcher
 
       # Register initial services
       settings = services.SettingsService.SettingsService()
@@ -74,13 +84,14 @@ class MaestroServer(Pyro.core.ObjBase):
       #self.mEventManager.timers().createTimer(resource.update, 2.0)
       self.mEventManager.timers().createTimer(launch_service.update, 0)
 
-   def registerRemoteObject(self, nodeId, obj):
+   def remote_registerRemoteObject(self, nodeId, obj):
       """ Forward request to register for callback signals. """
+      print "Register remote object: ", obj
       self.mEventDispatcher.registerRemoteObject(nodeId, obj)
 
-   def emit(self, nodeId, sigName, argsTuple=()):
+   def remote_emit(self, nodeId, sigName, argsTuple=()):
       """ Forward incoming signals to event manager. """
-      self.mEventManager.emit(nodeId, sigName, argsTuple)
+      self.mEventManager.local_emit(nodeId, sigName, argsTuple)
 
    def update(self):
       """ Give the event manager time to handle it's timers. """
@@ -120,27 +131,39 @@ if os.name == 'nt':
 
 
 def RunServer():
-   Pyro.core.initServer()
-   Pyro.core.initClient()
-   daemon = Pyro.core.Daemon()
-   cluster_server = MaestroServer()
-   uri = daemon.connect(cluster_server, "cluster_server")
-   cluster_server.registerInitialServices()
-
-   print "The daemon runs on port:",daemon.port
-   print "The object's uri is:",uri
+#   Pyro.core.initServer()
+#   Pyro.core.initClient()
+#   daemon = Pyro.core.Daemon()
+#   cluster_server = MaestroServer()
+#   uri = daemon.connect(cluster_server, "cluster_server")
+#   cluster_server.registerInitialServices()
+#
+#   print "The daemon runs on port:",daemon.port
+#   print "The object's uri is:",uri
+#
+#   try:
+#      #daemon.requestLoop()
+#      while (True):
+#         #daemon.handleRequests(timeout=0.5)
+#         daemon.handleRequests(timeout=0.01)
+#         cluster_server.update()
+#         #time.sleep(0)
+#   except Exception, ex:
+#      print "ERROR: ", ex
+#      print "Unregistering Pyro objects"
+#      daemon.shutdown(True)
 
    try:
-      #daemon.requestLoop()
-      while (True):
-         #daemon.handleRequests(timeout=0.5)
-         daemon.handleRequests(timeout=0.01)
-         cluster_server.update()
-         #time.sleep(0)
+      cluster_server = MaestroServer()
+      cluster_server.registerInitialServices()
+      from twisted.internet import reactor
+      reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventDispatcher))
+      reactor.run()
    except Exception, ex:
       print "ERROR: ", ex
       print "Unregistering Pyro objects"
-      daemon.shutdown(True)
+      raise
+
 
 def daemonize (stdin='/dev/null', stdout='/dev/null', stderr=None, pidfile=None):
    """This forks the current process into a daemon. The stdin, stdout,

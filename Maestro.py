@@ -20,8 +20,15 @@
 
 import sys, os, os.path, time, traceback
 pj = os.path.join
-
 from PyQt4 import QtGui, QtCore
+
+app = QtGui.QApplication(sys.argv)
+from twisted.internet import qt4reactor
+import MyQtReactor
+qt4reactor.install(app)
+
+
+
 import MaestroBase
 import MaestroResource
 import ClusterModel
@@ -374,7 +381,20 @@ def main():
    Pyro.config.PYRO_TRACELEVEL = 4
    Pyro.config.PYRO_USER_TRACELEVEL = 4
    try:
-      app = QtGui.QApplication(sys.argv)
+
+
+      from twisted.spread import pb
+      from twisted.internet import reactor
+      import twisted.python.util
+
+      factory = pb.PBClientFactory()
+      reactor.connectTCP("localhost", 8789, factory)
+      d = factory.getRootObject()
+      d.addCallback(lambda object: object.callRemote("test", "hello network"))
+      d.addCallback(lambda echo: 'server echoed: '+echo)
+      d.addErrback(lambda reason: 'error: '+str(reason.value))
+      d.addCallback(twisted.python.util.println)
+      #d.addCallback(lambda _: reactor.stop())
 
       # Parse xml config file
       tree = ET.ElementTree(file=sys.argv[1])
@@ -400,17 +420,13 @@ def main():
       QtGui.qApp.processEvents()
 
       # Create the event manager
-      event_manager = util.EventManager.EventManager()
-      # Create callback object so that EventManager does not have to derive from Pyro.ObjBase.
-      callback = Pyro.core.ObjBase()
-      callback.delegateTo(event_manager)
-      daemon.connect(callback)
 
       # Create an event dispatcher that will:
       #   - Connect to remote event manager objects.
       #   - Emit events to remote event manager objects.
       ip_address = socket.gethostbyname(daemon.hostname)
-      event_dispatcher = util.EventDispatcher.EventDispatcher(ip_address, callback.getProxy())
+      event_dispatcher = util.EventDispatcher.EventDispatcher(ip_address)
+      event_manager = event_dispatcher
 
 
       # Try to make inital connections
@@ -425,7 +441,12 @@ def main():
       cc.init(cluster_model, event_manager, event_dispatcher)
       cc.show()
       splash.finish(cc)
-      sys.exit(app.exec_())
+      reactor.run()
+      #result = app.exec_()
+      reactor.stop()
+      reactor.runUntilCurrent()
+      #sys.exit(result)
+      sys.exit()
    except IOError, ex:
       print "Failed to read %s: %s" % (sys.argv[1], ex.strerror)
 

@@ -18,17 +18,32 @@
 
 import types
 import Pyro.core
+import util.EventManager
 
-class EventDispatcher(object):
+from twisted.spread import pb
+
+class EventDispatcher(pb.Root, util.EventManager.EventManager):
    """ Handles sending messages to remote objects.
    """
-   def __init__(self, ipAddress, localCallback=None):
+   def __init__(self, ipAddress):
       """ Initialize the event dispatcher. """
-      self.mRemoteObjects = {}
+      util.EventManager.EventManager.__init__(self)
+      self.mProxies = {}
       self.mIpAddress = ipAddress
-      self.mLocalEventManagerCallback = localCallback
 
-   def connect(self, nodeId):
+   def remote_registerCallback(self, nodeId, obj):
+      """ Forward request to register for callback signals. """
+      print "Register remote object: ", obj
+      self.registerProxy(nodeId, obj)
+
+   def remote_emit(self, nodeId, sigName, argsTuple=()):
+      """ Forward incoming signals to event manager. """
+      self.local_emit(nodeId, sigName, argsTuple)
+
+   def error(self, reason):
+      print "error: ", str(reason.value)
+
+   def connectToNode(self, nodeId):
       """ Connect to the given nodes event manager.
           nodeId - IP/hostname of the node to connect to
       """
@@ -37,50 +52,42 @@ class EventDispatcher(object):
          raise TypeError("EventDispatcher.connect: nodeId of non-string type passed")
       
       # Make sure we are not already connected to node.
-      if self.mRemoteObjects.has_key(nodeId):
+      if self.mProxies.has_key(nodeId):
          raise AttributeError("EventDispatcher.connect: already connected to [%s]" % (nodeId))
 
-      print "Trying to connect to: PYROLOC://%s:7766/cluster_server" % (nodeId)
-      proxy = Pyro.core.getProxyForURI("PYROLOC://" + nodeId + ":7766/cluster_server")
+      from twisted.spread import pb
+      from twisted.internet import reactor
+      from twisted.python import util as tpu
+      factory = pb.PBClientFactory()
+      reactor.connectTCP("localhost", 8789, factory)
+      d = factory.getRootObject()
+      d.addCallback(lambda object: self.completeConnect(nodeId, object))
+      d.addErrback(self.error)
 
-      # XXX: Very large hack to set the connection timeout. There is no direct way
-      #      to actually set the timeout on a connect call. But what we can do is
-      #      create a lazy proxy above, forcefully set the timeout, and force
-      #      the proxy to attempt to connect by calling a method on it.
-      proxy.__dict__["adapter"].setTimeout(0.1)
+   def completeConnect(self, nodeId, object):
+      object.callRemote("registerCallback", self.mIpAddress, self)
+      self.registerProxy(nodeId, object)
 
-      # Force the proxy to actually connect by calling a method on it.
-      print "Connected to [%s] [%s]" % (nodeId, proxy.GUID())
-
-      # Register remote proxy to receive signals.
-      self.registerRemoteObject(nodeId, proxy)
-
-      # Make this call non-blocking.
-      proxy._setOneway(['registerRemoteObject'])
-
-      # Register ourselves to receive callback signals.
-      proxy.registerRemoteObject(self.mIpAddress, self.mLocalEventManagerCallback)
-
-   def disconnect(self, nodeId):
+   def disconnectFromNode(self, nodeId):
       """ Disconnect a given nodes remote object.
       """
       if not isinstance(nodeId, types.StringType):
          raise TypeError("EventDispatcher.connect: nodeId of non-string type passed")
 
-      if self.mRemoteObjects.has_key(nodeId):
+      if self.mProxies.has_key(nodeId):
          print "DEBUG: EventDispatcher.disconnect(%s)" % (nodeId)
-         del self.mRemoteObjects[nodeId]
+         del self.mProxies[nodeId]
 
-   def registerRemoteObject(self, nodeId, obj):
+   def registerProxy(self, nodeId, obj):
       """ Register object to recieve callback events for the given node.
       """
-      if self.mRemoteObjects.has_key(nodeId):
-         raise AttributeError("EventDispatcher.registerRemoteObject: already connected to [%s]" % (nodeId))
+      if self.mProxies.has_key(nodeId):
+         raise AttributeError("EventDispatcher.registerProxy: already connected to [%s]" % (nodeId))
 
-      self.mRemoteObjects[nodeId] = obj
+      self.mProxies[nodeId] = obj
 
       # Make this call non-blocking.
-      obj._setOneway(['emit'])
+      #obj._setOneway(['emit'])
 
    def emit(self, nodeId, sigName, argsTuple=()):
       """ Emit the named signal on the given node.
@@ -100,23 +107,23 @@ class EventDispatcher(object):
       # Build up a list of all connections to emit signal on.
       nodes = []
       if nodeId == "*":
-         nodes = self.mRemoteObjects.items()
-      elif self.mRemoteObjects.has_key(nodeId):
-         nodes = [(nodeId, self.mRemoteObjects[nodeId])]
-      print "   DEBUG: [%s][%s] " % (self.mRemoteObjects.items(), nodes)
+         nodes = self.mProxies.items()
+      elif self.mProxies.has_key(nodeId):
+         nodes = [(nodeId, self.mProxies[nodeId])]
+      print "   DEBUG: [%s][%s] " % (self.mProxies.items(), nodes)
 
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
          try:
-            v.emit(ip_address, sigName, argsTuple)
+            v.callRemote("emit", ip_address, sigName, argsTuple)
          except Pyro.errors.ConnectionClosedError, x:
             # connection dropped, remove the listener if it's still there
             # check for existence because other thread may have killed it already
-            del self.mRemoteObjects[k]
+            del self.mProxies[k]
             print 'Removed dead connection', k
 
    def isConnected(self, nodeId):
-      return self.mRemoteObjects.has_key(nodeId)
+      return self.mProxies.has_key(nodeId)
       
-   def _getRemoteObjects(self):
-      return self.mRemoteObjects
+   def _getProxies(self):
+      return self.mProxies
