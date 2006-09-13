@@ -74,9 +74,9 @@ class MaestroServer(Pyro.core.ObjBase):
       #self.mEventManager.timers().createTimer(resource.update, 2.0)
       self.mEventManager.timers().createTimer(launch_service.update, 0)
 
-   def register(self, nodeId, obj):
+   def registerRemoteObject(self, nodeId, obj):
       """ Forward request to register for callback signals. """
-      self.mEventDispatcher.register(nodeId, obj)
+      self.mEventDispatcher.registerRemoteObject(nodeId, obj)
 
    def emit(self, nodeId, sigName, argsTuple=()):
       """ Forward incoming signals to event manager. """
