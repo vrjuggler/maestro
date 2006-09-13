@@ -157,7 +157,10 @@ def RunServer():
       cluster_server = MaestroServer()
       cluster_server.registerInitialServices()
       from twisted.internet import reactor
+      from twisted.internet import task
       reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventDispatcher))
+      looping_call = task.LoopingCall(cluster_server.update)
+      looping_call.start(0.1)
       reactor.run()
    except Exception, ex:
       print "ERROR: ", ex
