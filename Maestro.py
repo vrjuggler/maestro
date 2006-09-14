@@ -26,8 +26,6 @@ app = QtGui.QApplication(sys.argv)
 from twisted.internet import qt4reactor
 qt4reactor.install(app)
 
-
-
 import MaestroBase
 import MaestroResource
 import ClusterModel
@@ -36,11 +34,8 @@ import util.EventManager
 import modules
 import LogWidget
 
-import Pyro.core
 import socket
 import time
-
-Pyro.config.PYRO_MULTITHREADED  = 0
 
 gui_base_dir = ""
 try:
@@ -170,28 +165,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def init(self, clusterModel, eventManager):
       # Set the new cluster configuration
-      if not None == self.mClusterModel:
-         self.disconnect(self.mClusterModel, QtCore.SIGNAL("nodeAdded()"), self.onNodeAdded)
-         self.disconnect(self.mClusterModel, QtCore.SIGNAL("nodeRemoved()"), self.onNodeRemoved)
       self.mClusterModel = clusterModel
-      self.connect(self.mClusterModel, QtCore.SIGNAL("nodeAdded()"), self.onNodeAdded)
-      self.connect(self.mClusterModel, QtCore.SIGNAL("nodeRemoved()"), self.onNodeRemoved)
-      
       self.mEventManager = eventManager
-
       self.mOutputTab.init(self.mClusterModel, self.mEventManager)
-      
 
       # Initialize all loaded modules.
       for module in self.mModulePanels:
          module.configure(self.mClusterModel, self.mEventManager)
-
-
-   def onNodeAdded(self, node):
-      print "Added: ", node
-
-   def onNodeRemoved(self, node):
-      print "Removed, ", node
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
@@ -366,48 +346,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    #   #self.mTextEdit.setText(str(message))
    #   self.mTextEdit.append("Aron")
 
-daemon = None
-
-def onUpdatePyro():
-   global daemon
-   daemon.handleRequests(timeout=0)
-
 def main():
-   Pyro.config.PYRO_LOGFILE = 'Pyro_sys_log'
-   Pyro.config.PYRO_USER_LOGFILE = 'Pyro_user_log'
-   Pyro.config.PYRO_TRACELEVEL = 4
-   Pyro.config.PYRO_USER_TRACELEVEL = 4
    try:
-
-
-      from twisted.spread import pb
-      from twisted.internet import reactor
-      import twisted.python.util
-
-      factory = pb.PBClientFactory()
-      reactor.connectTCP("localhost", 8789, factory)
-      d = factory.getRootObject()
-      d.addCallback(lambda object: object.callRemote("test", "hello network"))
-      d.addCallback(lambda echo: 'server echoed: '+echo)
-      d.addErrback(lambda reason: 'error: '+str(reason.value))
-      d.addCallback(twisted.python.util.println)
-      #d.addCallback(lambda _: reactor.stop())
-
-      # Parse xml config file
-      tree = ET.ElementTree(file=sys.argv[1])
-
-
-      Pyro.core.initServer()
-      Pyro.core.initClient()
-      global daemon
-      daemon = Pyro.core.Daemon()
-
-
-      # Create timer to call onUpdate once per frame
-      update_timer = QtCore.QTimer()
-      QtCore.QObject.connect(update_timer, QtCore.SIGNAL("timeout()"), onUpdatePyro)
-      update_timer.start(0)
-
       logo_path = os.path.join(os.path.dirname(__file__), 'images', 'cpu_array.png')
       pixmap = QtGui.QPixmap(logo_path)
       splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
@@ -421,9 +361,11 @@ def main():
       # Create an event dispatcher that will:
       #   - Connect to remote event manager objects.
       #   - Emit events to remote event manager objects.
-      ip_address = socket.gethostbyname(daemon.hostname)
+      ip_address = socket.gethostbyname(socket.gethostname())
       event_manager = util.EventManager.EventManager(ip_address)
 
+      # Parse xml config file
+      tree = ET.ElementTree(file=sys.argv[1])
 
       # Try to make inital connections
       # Create cluster configuration
@@ -431,17 +373,14 @@ def main():
       cluster_model.init(event_manager)
       cluster_model.refreshConnections()
 
-
       # Create and display GUI
-      cc = Maestro()
-      cc.init(cluster_model, event_manager)
-      cc.show()
-      splash.finish(cc)
+      m = Maestro()
+      m.init(cluster_model, event_manager)
+      m.show()
+      splash.finish(m)
       reactor.run()
-      #result = app.exec_()
       reactor.stop()
       reactor.runUntilCurrent()
-      #sys.exit(result)
       sys.exit()
    except IOError, ex:
       print "Failed to read %s: %s" % (sys.argv[1], ex.strerror)

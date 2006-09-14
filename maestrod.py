@@ -27,6 +27,7 @@ import services.ResourceService
 import util.EventManager
 import datetime
 import time
+import socket
 
 from twisted.spread import pb
 
@@ -47,7 +48,8 @@ if os.name == 'nt':
 
 class MaestroServer:
    def __init__(self):
-      self.mEventManager = util.EventManager.EventManager("192.168.1.14")
+      ip_address = socket.gethostbyname(socket.gethostname())
+      self.mEventManager = util.EventManager.EventManager(ip_address)
       self.mServices = []
 
    def remote_test(self, val):
@@ -111,28 +113,6 @@ if os.name == 'nt':
 
 
 def RunServer():
-#   Pyro.core.initServer()
-#   Pyro.core.initClient()
-#   daemon = Pyro.core.Daemon()
-#   cluster_server = MaestroServer()
-#   uri = daemon.connect(cluster_server, "cluster_server")
-#   cluster_server.registerInitialServices()
-#
-#   print "The daemon runs on port:",daemon.port
-#   print "The object's uri is:",uri
-#
-#   try:
-#      #daemon.requestLoop()
-#      while (True):
-#         #daemon.handleRequests(timeout=0.5)
-#         daemon.handleRequests(timeout=0.01)
-#         cluster_server.update()
-#         #time.sleep(0)
-#   except Exception, ex:
-#      print "ERROR: ", ex
-#      print "Unregistering Pyro objects"
-#      daemon.shutdown(True)
-
    try:
       cluster_server = MaestroServer()
       cluster_server.registerInitialServices()

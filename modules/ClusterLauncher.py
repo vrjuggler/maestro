@@ -324,7 +324,8 @@ class ChoiceSheet(Sheet):
       self.mLabel.setObjectName("mChoiceLabel")
       self.mLabel.setText(self.mObj.mLabel)
       self.gridlayout.addWidget(self.mLabel,0,0,1,2)
-      
+     
+      # Create a spacer to push us and all of our children to the right to provide some structure.
       spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
       self.gridlayout.addItem(spacerItem,1,0,1,1)
 
@@ -336,9 +337,10 @@ class ChoiceSheet(Sheet):
    def _fillForm(self):
       current_row = 1
       self.mButtonGroup = QtGui.QButtonGroup()
+      # Iterate over all possible choices.
       for c in self.mObj.mChildren:
-
-         # Create the correct type of sheets.
+         # Create the correct type of sheet for our child. Placing a selection
+         # button next to it.
          if self.mObj.mChoiceType == LauncherModel.ONE:
             w = _buildWidget(c, RADIO_BUTTON)
          elif self.mObj.mChoiceType == LauncherModel.ANY:
@@ -346,13 +348,16 @@ class ChoiceSheet(Sheet):
          else:
             w = _buildWidget(c, NO_BUTTON)
          
-         # Get label from sheet to add to group if needed.
+         # Get the selection button that is used for the child/choice.
          lbl = w.mLabel
+
+         # Add child button to button group if we have single selection.
          if self.mObj.mChoiceType == LauncherModel.ONE \
                and lbl is not None \
                and isinstance(lbl, QtGui.QAbstractButton):
             self.mButtonGroup.addButton(lbl)
-         
+
+         # Add child option to ourself.
          self.mOptionSheets.append(w)
          w.setParent(self)
          self.gridlayout.addWidget(w,current_row,1,1,2)
@@ -379,7 +384,6 @@ class ChoiceSheetCB(Sheet):
          mSavedEnableState = val
 
    def setupUi(self):
-
       self.gridlayout = QtGui.QGridLayout(self)
       self.gridlayout.setMargin(1)
       self.gridlayout.setSpacing(1)

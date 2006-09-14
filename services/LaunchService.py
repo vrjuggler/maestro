@@ -93,7 +93,7 @@ class LaunchService:
             print "\nWorking Dir: ", cwd
             print "\nTranslated env:", envMap
             
-            self.mBuffer = util.process.IOBuffer(name='<stdout>')
+            #self.mBuffer = util.process.IOBuffer(name='<stdout>')
             #self.mProcess = util.process.ProcessProxy(command, stdout=self.mBuffer, stderr=self.mBuffer, env={'DISPLAY':':0.0'})
             #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=sys.stdout)
             #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=self.mBuffer)

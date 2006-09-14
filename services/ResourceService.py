@@ -71,7 +71,6 @@ class ResourceService(Pyro.core.ObjBase):
          
    def update(self):
       cpu_usage = self._getCpuUsage()
-      platform = self._getPlatform()
       mem_usage = self._getMemUsage()
       self.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
       self.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
