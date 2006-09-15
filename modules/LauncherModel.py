@@ -18,13 +18,8 @@
 
 
 import elementtree.ElementTree as ET
-from xml.dom.minidom import parseString
-#import time, types, re, sys
+from PyQt4 import QtCore
 
-from PyQt4 import QtCore, QtGui
-#from Queue import Queue
-
-#import copy
 class TreeItem:
    def __init__(self, xmlElt, parent, row):
       self.mParent = parent

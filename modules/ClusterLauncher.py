@@ -23,7 +23,11 @@ import ClusterLauncherResource
 import elementtree.ElementTree as ET
 import ClusterModel
 import LauncherModel
+import Stanza
 import GlobalOptions
+
+import os.path
+pj = os.path.join
 
 def numClassMatches(nodeClassString, subClassString):
    node_classes = nodeClassString.split(",")
@@ -68,20 +72,40 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       self.actionDict          = {}   # Storage for user-defined action slots
       self.activeThread        = None
 
+   def scanForStanzas(self):
+      file_dir = os.path.dirname(os.path.abspath(__file__))
+      stanza_path = pj(file_dir, "..", "stanzas")
+      assert os.path.exists(stanza_path)
+      assert os.path.isdir(stanza_path)
+      files = os.listdir(stanza_path)
+      stanza_files = []
+      for path, dirs, files in os.walk(stanza_path):
+         stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
+
+      self.mStanzas = []
+      print "Stanzas: ", stanza_files
+      for s in stanza_files:
+         stanza_elm = ET.ElementTree(file=s).getroot()
+         stanza = Stanza.Stanza(stanza_elm)
+         print "Adding stanza: ", stanza.getName()
+         self.mStanzas.append(stanza)
+
+
    def init(self, ensemble, eventManager):
       self.mEnsemble = ensemble
       self.mElement = self.mEnsemble.mElement
-      self.mTreeModel = LauncherModel.TreeModel(self.mElement)
-      self.mTableModel = LauncherModel.TableModel()
-      self.mTreeView.setModel(self.mTreeModel)
-      self.mTableView.setModel(self.mTableModel)
+      self.scanForStanzas()
 
       self.mEventManager = eventManager
 
-      #self._fillInApps()
+      self._fillInApps()
 
-      QtCore.QObject.connect(self.mTreeView.selectionModel(),
-         QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
+      #self.mTreeModel = LauncherModel.TreeModel(self.mElement)
+      #self.mTableModel = LauncherModel.TableModel()
+      #self.mTreeView.setModel(self.mTreeModel)
+      #self.mTableView.setModel(self.mTableModel)
+      #QtCore.QObject.connect(self.mTreeView.selectionModel(),
+      #   QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
 
    def setupUi(self, widget):
       ClusterLauncherBase.Ui_ClusterLauncherBase.setupUi(self, widget)
@@ -113,28 +137,23 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       """ Fills in the application panel. """
       self.mAppComboBox.clear()
 
-      apps = self.mTreeModel.mAppLabel.mChildren
+      for s in self.mStanzas:
+         self.mAppComboBox.addItem(s.getName())
    
-      for app in apps:
-         #self.mAppComboBox.insertItem(app.getName())
-         self.mAppComboBox.addItem(app.getName())
-   
-      if len(apps) > 0:
+      if len(self.mStanzas) > 0:
          self.mAppComboBox.setCurrentIndex(0)
          self._setApplication(0)
       else:
          print "ERROR: No applications defined!"
          QApplication.exit(0)
 
-
    def _setApplication(self, index):
       if self.mSelectedApp != None:
          self.mSelectedApp.mSelected = False
          self._resetAppState()
 
-      apps = self.mTreeModel.mAppLabel.mChildren
-      assert index < len(apps)
-      self.mSelectedApp = apps[index]
+      assert index < len(self.mStanzas)
+      self.mSelectedApp = self.mStanzas[index]
       self.mSelectedApp.mSelected = True
       print "Setting application [%s] [%s]" % (index, self.mSelectedApp.getName())
       for c in self.mSelectedApp.mChildren:
@@ -230,7 +249,7 @@ CHECK_BUTTON = 2
 def _buildWidget(obj, buttonType = NO_BUTTON):
    name = obj.getName()
    widget = None
-   if isinstance(obj, LauncherModel.Application):
+   if isinstance(obj, Stanza.Stanza):
       pass
    #   print "Building Application Sheet... ", name
    #   sh = QtGui.QLabel(self)
@@ -239,30 +258,30 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
    elif isinstance(obj, LauncherModel.GlobalOption):
       pass
    #   print "Building Global Option Sheet... ", name
-   elif isinstance(obj, LauncherModel.Group):
+   elif isinstance(obj, Stanza.Group):
       #print "Building Group Sheet... ", name
       widget = GroupSheet(obj, buttonType)
       widget.config()
-   elif isinstance(obj, LauncherModel.Choice):
+   elif isinstance(obj, Stanza.Choice):
       #print "Building Choice Sheet... ", name
       if obj.mChoiceType == LauncherModel.ONE_CB:
          widget = ChoiceSheetCB(obj, buttonType)
       else:
          widget = ChoiceSheet(obj, buttonType)
       widget.config()
-   if isinstance(obj, LauncherModel.Arg):
+   if isinstance(obj, Stanza.Arg):
       #print "Building Arg Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.config(obj.mLabel)
-   elif isinstance(obj, LauncherModel.Command):
+   elif isinstance(obj, Stanza.Command):
       #print "Building Command Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.config("Command")
-   elif isinstance(obj, LauncherModel.Cwd):
+   elif isinstance(obj, Stanza.Cwd):
       #print "Building CWD Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.config("Current Working Directory")
-   elif isinstance(obj, LauncherModel.EnvVar):
+   elif isinstance(obj, Stanza.EnvVar):
       #print "Building EnvVar Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.config(obj.mLabel)
@@ -340,9 +359,9 @@ class ChoiceSheet(Sheet):
       for c in self.mObj.mChildren:
          # Create the correct type of sheet for our child. Placing a selection
          # button next to it.
-         if self.mObj.mChoiceType == LauncherModel.ONE:
+         if self.mObj.mChoiceType == Stanza.ONE:
             w = _buildWidget(c, RADIO_BUTTON)
-         elif self.mObj.mChoiceType == LauncherModel.ANY:
+         elif self.mObj.mChoiceType == Stanza.ANY:
             w = _buildWidget(c, CHECK_BUTTON)
          else:
             w = _buildWidget(c, NO_BUTTON)
