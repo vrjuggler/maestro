@@ -100,7 +100,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
 
       self._fillInApps()
 
-      self.mTreeModel = StanzaModel.TreeModel(self.mStanzas[0])
+      self.mTreeModel = StanzaModel.TreeModel(self.mStanzas)
       self.mTableModel = StanzaModel.TableModel()
       self.mTreeView.setModel(self.mTreeModel)
       self.mTableView.setModel(self.mTableModel)

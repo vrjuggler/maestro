@@ -474,17 +474,17 @@ class TableModel(QtCore.QAbstractTableModel):
       return False
 
 class TreeModel(QtCore.QAbstractItemModel):
-   def __init__(self, stanza, parent=None):
+   def __init__(self, stanzas, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
-      self.mStanza = stanza
+      self.mStanzas = stanzas
       # Create object index to use when finding tree elements.
       self.mObjectDict = {}
 
    def index(self, row, column, parent):
       #print "Parent: %s id: %s row: %s col: %s" % (parent, parent.internalId(), row, column)
       if not parent.isValid():
-         childItem = self.mStanza
+         childItem = self.mStanzas[row]
       else:
          parentItem = self.mObjectDict[parent.internalId()]
          childItem = parentItem.child(row)
@@ -530,7 +530,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
    def data(self, index, role=QtCore.Qt.DisplayRole):
       if not index.isValid():
-         item = self.Categories[index.row()]
+         return QtCore.QVariant("Root")
       else:
          item = self.mObjectDict[index.internalId()]
 
@@ -555,10 +555,11 @@ class TreeModel(QtCore.QAbstractItemModel):
 
    def rowCount(self, parent = QtCore.QModelIndex()):
       if not parent.isValid():
-         return 1
+         return len(self.mStanzas)
       else:
          parent_obj = self.mObjectDict[parent.internalId()]
          return parent_obj.childCount()
+      return 1
 
    def columnCount(self, parent=QtCore.QModelIndex()):
       return 1
