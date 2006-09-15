@@ -177,8 +177,8 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
 
       for node in self.mEnsemble.mNodes:
          print "Node [%s] [%s]" % (node.getName(), node.getClass())
-         option_visitor = LauncherModel.OptionVisitor(node.getClass())
-         LauncherModel.traverse(self.mSelectedApp, option_visitor)
+         option_visitor = Stanza.OptionVisitor(node.getClass())
+         Stanza.traverse(self.mSelectedApp, option_visitor)
          print option_visitor.mArgs
          print option_visitor.mCommands
          print option_visitor.mCwds
@@ -264,7 +264,7 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
       widget.config()
    elif isinstance(obj, Stanza.Choice):
       #print "Building Choice Sheet... ", name
-      if obj.mChoiceType == LauncherModel.ONE_CB:
+      if obj.mChoiceType == Stanza.ONE_CB:
          widget = ChoiceSheetCB(obj, buttonType)
       else:
          widget = ChoiceSheet(obj, buttonType)
@@ -370,7 +370,7 @@ class ChoiceSheet(Sheet):
          lbl = w.mLabel
 
          # Add child button to button group if we have single selection.
-         if self.mObj.mChoiceType == LauncherModel.ONE \
+         if self.mObj.mChoiceType == Stanza.ONE \
                and lbl is not None \
                and isinstance(lbl, QtGui.QAbstractButton):
             self.mButtonGroup.addButton(lbl)
