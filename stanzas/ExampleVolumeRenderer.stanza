@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+Basically there are only a few restrictions.
+
+- The only things that can contain sub elements are stanza, choice, and group.
+- Selected is going to change.
+- Visible should be reversed to hidden.
+-->
 <stanza label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
   <command class="" visible="false" selected="true">./build.linux-i686/Viewer/infi_app</command>
   <env_var class="" visible="false" selected="true" label="Display" key="DISPLAY">:0.0</env_var>
