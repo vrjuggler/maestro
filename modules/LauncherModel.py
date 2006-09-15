@@ -812,6 +812,7 @@ class TreeModel(QtCore.QAbstractItemModel):
    def __init__(self, xmlElement, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
+      """
       # Store cluster XML element
       self.mClusterConfigElement = xmlElement
       assert self.mClusterConfigElement.tag == "cluster_config"
@@ -839,6 +840,7 @@ class TreeModel(QtCore.QAbstractItemModel):
       assert None is not controls_elt
       controls_label = Label(controls_elt, None, 2, "Controls")
       self.mCategories.append(controls_label)
+      """
 
       # Create object index to use when finding tree elements.
       self.mObjectDict = {}

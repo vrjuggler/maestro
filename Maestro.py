@@ -29,7 +29,7 @@ from twisted.internet import reactor
 
 import MaestroBase
 import MaestroResource
-import ClusterModel
+import Ensemble
 import elementtree.ElementTree as ET
 import util.EventManager
 import modules
@@ -49,7 +49,7 @@ print "Base gui dir:", gui_base_dir
 class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
    def __init__(self, parent):
       QtGui.QTabWidget.__init__(self, parent)
-      self.mClusterModel = None
+      self.mEnsemble = None
       self.mTabMap = {}
       self.mEditMap = {}
 
@@ -66,15 +66,15 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
          #disconnect(d->model, SIGNAL(modelReset()), this, SLOT(reset()));
          #disconnect(d->model, SIGNAL(layoutChanged()), this, SLOT(doItemsLayout()));
 
-      self.mClusterModel = clusterModel
+      self.mEnsemble = clusterModel
       self.mEventManager = eventManager
 
-      self.connect(self.mClusterModel, QtCore.SIGNAL("rowsAboutToBeRemoved(int,int)"),
-                   self.rowsAboutToBeRemoved)
-      self.connect(self.mClusterModel, QtCore.SIGNAL("rowsInserted(int,int)"),
-                   self.rowsInserted)
-      self.connect(self.mClusterModel, QtCore.SIGNAL("dataChanged(int)"),
-                   self.dataChanged)
+      #self.connect(self.mClusterModel, QtCore.SIGNAL("rowsAboutToBeRemoved(int,int)"),
+      #             self.rowsAboutToBeRemoved)
+      #self.connect(self.mClusterModel, QtCore.SIGNAL("rowsInserted(int,int)"),
+      #             self.rowsInserted)
+      #self.connect(self.mClusterModel, QtCore.SIGNAL("dataChanged(int)"),
+      #             self.dataChanged)
 
       self.mEventManager.connect("*", "launch.output", self.onOutput)
 
@@ -89,8 +89,8 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       self.mTabMap = {}
       self.mEditMap = {}
          
-      for i in xrange(len(self.mClusterModel.mNodes)):
-         node = self.mClusterModel.mNodes[i]
+      for i in xrange(len(self.mEnsemble.mNodes)):
+         node = self.mEnsemble.mNodes[i]
          self.addOutputTab(node, i)
 
 
@@ -162,17 +162,17 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def __init__(self, parent = None):
       QtGui.QMainWindow.__init__(self, parent)
       self.setupUi(self)
-      self.mClusterModel = None
+      self.mEnsemble = None
 
    def init(self, clusterModel, eventManager):
       # Set the new cluster configuration
-      self.mClusterModel = clusterModel
+      self.mEnsemble = clusterModel
       self.mEventManager = eventManager
-      self.mOutputTab.init(self.mClusterModel, self.mEventManager)
+      self.mOutputTab.init(self.mEnsemble, self.mEventManager)
 
       # Initialize all loaded modules.
       for module in self.mModulePanels:
-         module.configure(self.mClusterModel, self.mEventManager)
+         module.init(self.mEnsemble, self.mEventManager)
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
@@ -370,13 +370,13 @@ def main():
 
       # Try to make inital connections
       # Create cluster configuration
-      cluster_model = ClusterModel.ClusterModel(tree);
-      cluster_model.init(event_manager)
-      cluster_model.refreshConnections()
+      ensemble = Ensemble.Ensemble(tree)
+      ensemble.init(event_manager)
+      ensemble.refreshConnections()
 
       # Create and display GUI
       m = Maestro()
-      m.init(cluster_model, event_manager)
+      m.init(ensemble, event_manager)
       m.show()
       splash.finish(m)
       reactor.run()

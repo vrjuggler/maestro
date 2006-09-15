@@ -68,9 +68,9 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       self.actionDict          = {}   # Storage for user-defined action slots
       self.activeThread        = None
 
-   def configure(self, clusterModel, eventManager):
-      self.mClusterModel = clusterModel
-      self.mElement = clusterModel.mElement
+   def init(self, ensemble, eventManager):
+      self.mEnsemble = ensemble
+      self.mElement = self.mEnsemble.mElement
       self.mTreeModel = LauncherModel.TreeModel(self.mElement)
       self.mTableModel = LauncherModel.TableModel()
       self.mTreeView.setModel(self.mTreeModel)
@@ -78,7 +78,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
 
       self.mEventManager = eventManager
 
-      self._fillInApps()
+      #self._fillInApps()
 
       QtCore.QObject.connect(self.mTreeView.selectionModel(),
          QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
@@ -148,7 +148,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
             sh.show()
 
    def onKillApp(self):
-      self.mClusterModel.killCommand()
+      pass
       #self.launchButton.setEnabled(True)
       #self.killButton.setEnabled(False)
 
@@ -156,7 +156,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       """ Invoked when the built-in Launch button is clicked. """
 
 
-      for node in self.mClusterModel.mNodes:
+      for node in self.mEnsemble.mNodes:
          print "Node [%s] [%s]" % (node.getName(), node.getClass())
          option_visitor = LauncherModel.OptionVisitor(node.getClass())
          LauncherModel.traverse(self.mSelectedApp, option_visitor)
@@ -198,7 +198,6 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
          print "   Final Cmd [%s]" % (total_command)
          print "   Cwd       [%s]" % (cwd)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
-         #node.runCommand(command=total_command, cwd=cwd, envMap=env_map, outputLogger=self.mClusterModel.mOutputLogger)
          ip_address = node.getIpAddress()
          self.mEventManager.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
          

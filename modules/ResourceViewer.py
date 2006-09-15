@@ -27,7 +27,7 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
-      self.mClusterModel = None
+      self.mEnsemble = None
 
    def setupUi(self, widget):
       """
@@ -44,8 +44,8 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
 
    def onRefresh(self):
       """ Called when user presses the refresh button. """
-      if not None == self.mClusterModel:
-         self.mClusterModel.refreshConnections()
+      if self.mEnsemble is not None:
+         self.mEnsemble.refreshConnections()
       self.mEventManager.emit("*", "settings.get_usage", ())
       self.mEventManager.emit("*", "settings.get_mem_usage", ())
       
@@ -59,11 +59,11 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
       self.mResourceModel.mMemUsageMap[ip] = val
       self.mResourceTable.reset()
 
-   def configure(self, clusterModel, eventManager):
+   def init(self, ensemble, eventManager):
       """ Configure the user interface with data in cluster configuration. """
-      self.mClusterModel = clusterModel
+      self.mEnsemble = ensemble
 
-      self.mResourceModel = ResourceModel(self.mClusterModel)
+      self.mResourceModel = ResourceModel(self.mEnsemble)
       self.mResourceTable.setModel(self.mResourceModel)
 
       self.mEventManager = eventManager
@@ -99,14 +99,14 @@ class PixelDelegate(QtGui.QItemDelegate):
     
 
 class ResourceModel(QtCore.QAbstractTableModel):
-   def __init__(self, clusterModel, parent=None):
+   def __init__(self, ensemble, parent=None):
       QtCore.QAbstractTableModel.__init__(self, parent)
-      self.mClusterModel = clusterModel
+      self.mEnsemble = ensemble
       self.mCpuUsageMap = {}
       self.mMemUsageMap = {}
 
    def rowCount(self, parent):
-      return self.mClusterModel.rowCount()
+      return self.mEnsemble.getNumNodes()
 
    def columnCount(self, parent):
       return 4
@@ -129,25 +129,21 @@ class ResourceModel(QtCore.QAbstractTableModel):
       elif role != QtCore.Qt.DisplayRole:
          return QtCore.QVariant()
 
-      cm_index = self.mClusterModel.createIndex(index.row(), index.column())
-
-      node = self.mClusterModel.data(cm_index, QtCore.Qt.UserRole)
+      node = self.mEnsemble.getNode(index.row())
       ip_addr = node.getIpAddress()
       if index.column() == 0:
-         return QtCore.QVariant(self.mClusterModel.data(cm_index))
+         return QtCore.QVariant(str(node.getName()))
       elif index.column() == 1:
          try:
             return QtCore.QVariant(self.mCpuUsageMap[ip_addr])
          except:
             return QtCore.QVariant(0.0)
       elif index.column() == 2:
-         node = self.mClusterModel.data(cm_index, QtCore.Qt.UserRole)
          try:
             return QtCore.QVariant(self.mMemUsageMap[ip_addr][0])
          except:
             return QtCore.QVariant(0.0)
       elif index.column() == 3:
-         node = self.mClusterModel.data(cm_index, QtCore.Qt.UserRole)
          try:
             return QtCore.QVariant(self.mMemUsageMap[ip_addr][1])
          except:
