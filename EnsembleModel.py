@@ -52,39 +52,18 @@ OsNameMap = {ERROR  : 'Error',
              AIX    : 'AIX',
              SOLARIS : 'Solaris'}
 
-class ClusterModel(QtCore.QAbstractListModel):
-   def __init__(self, xmlTree, parent=None):
+class EnsembleModel(QtCore.QAbstractListModel):
+   def __init__(self, ensemble, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
       self.mEventManager = None
-      # Store cluster XML element
-      self.mElement = xmlTree.getroot()
-      assert self.mElement.tag == "cluster_config"
-
-      # Parse all node settings
-      self.mNodes = []
-      for nodeElt in self.mElement.findall("./cluster_node"):
-         self.mNodes.append(ClusterNode(nodeElt))
-         print "Cluster Node: ", ClusterNode(nodeElt).getName()
-
-      #Pyro.core.initClient()
-
-      # Timer to refresh pyro connections to nodes.
-      self.refreshTimer = QtCore.QTimer()
-      self.refreshTimer.setInterval(2000)
-      self.refreshTimer.start()
-      QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"), self.refreshConnections)
+      self.mEnsemble = ensemble
 
       self.mIcons = {}
       self.mIcons[ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
       self.mIcons[WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
       self.mIcons[WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
       self.mIcons[LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
-
-
-      # Simple callback to print all output to stdout
-      def debugCallback(message):
-         sys.stdout.write("DEBUG: " + message)
 
    def init(self, eventManager):
       self.mEventManager = eventManager
@@ -99,7 +78,7 @@ class ClusterModel(QtCore.QAbstractListModel):
       try:
          print "onReportOs [%s] [%s]" % (nodeId, os)
          changed = False
-         for node in self.mNodes:
+         for node in self.mEnsemble.mNodes:
             if node.getIpAddress() == nodeId:
                if os != node.mPlatform:
                   node.mPlatform = os
@@ -116,7 +95,7 @@ class ClusterModel(QtCore.QAbstractListModel):
       for i in xrange(count):
          new_element = ET.SubElement(self.mElement, "cluster_node", name="NewNode", hostname="NewNode")
          new_node = ClusterNode(new_element)
-         self.mNodes.insert(row, new_node);
+         self.mEnsemble.mNodes.insert(row, new_node);
       self.refreshConnections()
       self.endInsertRows()
       self.emit(QtCore.SIGNAL("rowsInserted(int, int)"), row, count)
@@ -126,45 +105,22 @@ class ClusterModel(QtCore.QAbstractListModel):
       self.beginRemoveRows(QtCore.QModelIndex(), row, row + count - 1)
       self.emit(QtCore.SIGNAL("rowsAboutToBeRemoved(int, int)"), row, count)
       for i in xrange(count):
-         node = self.mNodes[row]
+         node = self.mEnsemble.mNodes[row]
 
          # Remove node's element from XML tree.
          self.mElement.remove(node.mElement)
          # Remove node data structure
-         self.mNodes.remove(node)
+         self.mEnsemble.mNodes.remove(node)
       self.endRemoveRows()
       return True
 
    def removeNode(self, node):
       assert not None == node
-      index = self.mNodes.index(node)
+      index = self.mEnsemble.mNodes.index(node)
       self.removeRow(index, QtCore.QModelIndex())
 
    def addNode(self):
       self.insertRow(self.rowCount())
-
-   def refreshConnections(self):
-      """Try to connect to all nodes."""
-
-      new_connections = False
-
-      # Iterate over nodes and try to connect to nodes that are not connected.
-      for node in self.mNodes:
-         try:
-            # Attempt to get the IP address from the hostname.
-            ip_address = node.getIpAddress()
-            # If node is not connected, attempt to connect.
-            if not self.mEventManager.isConnected(ip_address):
-               if self.mEventManager.connectToNode(ip_address):
-                  new_connections = True
-                  # Tell the new node to report it's os.
-                  self.mEventManager.emit(ip_address, "settings.get_os", ())
-         except Exception, ex:
-            print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
-
-      if new_connections:
-         print "We had new connections"
-         self.emit(QtCore.SIGNAL("newConnections()"))
 
    def data(self, index, role=QtCore.Qt.DisplayRole):
       """ Returns the data representation of each node in the cluster.
@@ -173,7 +129,7 @@ class ClusterModel(QtCore.QAbstractListModel):
          return QtCore.QVariant()
 
       # Get the cluster node we want data for.
-      cluster_node = self.mNodes[index.row()]
+      cluster_node = self.mEnsemble.getNode(index.row())
 
       # Return an icon representing the operating system.
       if role == QtCore.Qt.DecorationRole:
@@ -193,7 +149,7 @@ class ClusterModel(QtCore.QAbstractListModel):
       if parent.isValid():
          return 0
       else:
-         return len(self.mNodes)
+         return self.mEnsemble.getNumNodes()
 
    def setData(self, index, value, role):
       """ Doesn't do anything but provide a way to fire a dataChanged event
@@ -202,46 +158,3 @@ class ClusterModel(QtCore.QAbstractListModel):
       self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
       self.emit(QtCore.SIGNAL("dataChanged(int)"), index.row())
       return True
-
-class ClusterNode:
-   """ Represents a node in the active cluster configuration. Most of this
-       information is loaded from the configuration file. But things like
-       the current OS are retrieved from the remote object.
-   """
-   def __init__(self, xmlElt):
-      assert xmlElt.tag == "cluster_node"
-      self.mElement = xmlElt
-      #print "Name:", self.mElement.get("name")
-      #print "HostName:", self.mElement.get("hostname")
-      self.mName = self.mElement.get("name")
-      self.mHostname = self.mElement.get("hostname")
-      self.mClass = self.mElement.get("sub_class")
-      self.mPlatform = ERROR 
-
-   def getName(self):
-      return self.mElement.get("name")
-
-   def setName(self, newName):
-      return self.mElement.set("name", newName)
-
-   def getHostname(self):
-      return self.mElement.get("hostname")
-
-   def setHostname(self, newHostname):
-      self.mPlatform = ERROR
-      return self.mElement.set("hostname", newHostname)
-
-   def getIpAddress(self):
-      try:
-         return socket.gethostbyname(self.getHostname())
-      except:
-         return "0.0.0.0"
-
-   def getPlatformName(self):
-      return OsNameMap[self.mPlatform]
-
-   def getClass(self):
-      platform = self.getPlatformName()
-      if platform > 0:
-         return platform + "," + self.mClass
-      return self.mClass
