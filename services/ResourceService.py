@@ -54,7 +54,8 @@ class ResourceService(Pyro.core.ObjBase):
       self.mQueue = Queue()
 
       if os.name == 'nt':
-         self.mWMIConnection = xmi.WMI()
+         pass
+         #self.mWMIConnection = xmi.WMI()
       else:
          self.mLastCPUTime = [0,0,0,0]
 
