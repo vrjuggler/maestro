@@ -67,6 +67,8 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
    def completeConnect(self, nodeId, object):
       object.callRemote("registerCallback", self.mIpAddress, self)
       self.registerProxy(nodeId, object)
+      # As soon as we connect to a new node, we want to know what OS it is running.
+      self.emit("*", "settings.get_os", ())
 
    def disconnectFromNode(self, nodeId):
       """ Disconnect a given nodes remote object.
