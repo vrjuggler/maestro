@@ -22,7 +22,7 @@ import ClusterLauncherBase
 import ClusterLauncherResource
 import elementtree.ElementTree as ET
 import ClusterModel
-import LauncherModel
+import StanzaModel
 import Stanza
 import GlobalOptions
 
@@ -100,12 +100,12 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
 
       self._fillInApps()
 
-      #self.mTreeModel = LauncherModel.TreeModel(self.mElement)
-      #self.mTableModel = LauncherModel.TableModel()
-      #self.mTreeView.setModel(self.mTreeModel)
-      #self.mTableView.setModel(self.mTableModel)
-      #QtCore.QObject.connect(self.mTreeView.selectionModel(),
-      #   QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
+      self.mTreeModel = StanzaModel.TreeModel(self.mStanzas[0])
+      self.mTableModel = StanzaModel.TableModel()
+      self.mTreeView.setModel(self.mTreeModel)
+      self.mTableView.setModel(self.mTableModel)
+      QtCore.QObject.connect(self.mTreeView.selectionModel(),
+         QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
 
    def setupUi(self, widget):
       ClusterLauncherBase.Ui_ClusterLauncherBase.setupUi(self, widget)
@@ -255,8 +255,8 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
    #   sh = QtGui.QLabel(self)
    #   sh.setText("Hi")
    #   sh.show()
-   elif isinstance(obj, LauncherModel.GlobalOption):
-      pass
+   #elif isinstance(obj, LauncherModel.GlobalOption):
+   #   pass
    #   print "Building Global Option Sheet... ", name
    elif isinstance(obj, Stanza.Group):
       #print "Building Group Sheet... ", name
