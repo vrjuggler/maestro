@@ -232,7 +232,10 @@ class ClusterNode:
       return self.mElement.set("hostname", newHostname)
 
    def getIpAddress(self):
-      return socket.gethostbyname(self.getHostname())
+      try:
+         return socket.gethostbyname(self.getHostname())
+      except:
+         return "0.0.0.0"
 
    def getPlatformName(self):
       return OsNameMap[self.mPlatform]
