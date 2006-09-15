@@ -23,8 +23,9 @@ pj = os.path.join
 from PyQt4 import QtGui, QtCore
 
 app = QtGui.QApplication(sys.argv)
-from twisted.internet import qt4reactor
+from util import qt4reactor
 qt4reactor.install(app)
+from twisted.internet import reactor
 
 import MaestroBase
 import MaestroResource
