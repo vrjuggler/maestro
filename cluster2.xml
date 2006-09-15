@@ -49,8 +49,10 @@
         </choice>
       </app>
       <app label="Test1" global_options="VR Juggler 2.0" tooltip="Test 1" helpUrl="">
-        <command class="" visible="false" selected="true">ls</command>
-        <cwd class="" visible="false" selected="true">/home/aronb</cwd>
+        <command class="Linux" visible="false" selected="true">ls</command>
+        <command class="Windows XP" visible="false" selected="true">dir</command>
+        <cwd class="Linux" visible="false" selected="true">~</cwd>
+        <cwd class="Windows XP" visible="false" selected="true">C:\</cwd>
       </app>
       <app label="Test2" global_options="VR Juggler 2.0" tooltip="Test 1" helpUrl="">
         <command class="" visible="false" selected="true">./test</command>
@@ -67,7 +69,7 @@
   <cluster_node name="infiscape1" hostname="infiscape1" sub_class="master"/>
   <cluster_node name="infiscape2" hostname="infiscape2" sub_class="master"/>
   -->
-  <cluster_node name="timmy" hostname="timmy" sub_class="Linux,master"/>
+  <cluster_node name="smalls" hostname="smalls" sub_class="master"/>
   <!--
   <cluster_node name="morpheus" hostname="morpheus" sub_class="Linux,master"/>
   -->
