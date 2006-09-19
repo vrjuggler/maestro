@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, os, platform
-import Pyro.core
 
 import services.LaunchService
 import services.SettingsService
@@ -124,7 +123,6 @@ def RunServer():
       reactor.run()
    except Exception, ex:
       print "ERROR: ", ex
-      print "Unregistering Pyro objects"
       raise
 
 

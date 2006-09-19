@@ -17,8 +17,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import types
-import Pyro.core
 import util.EventManagerBase
+import socket
 
 from twisted.spread import pb
 
@@ -103,7 +103,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
          raise TypeError("EventManager.connect: argsTuple not of tuple type passed.")
       
       # Get local IP address to use for nodeId mask on remote nodes.
-      ip_address = Pyro.protocol.getIPAddress(self.mIpAddress)
+      ip_address = socket.gethostbyname(socket.gethostname())
 
       print "DEBUG: EventManager.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple)
       # Build up a list of all connections to emit signal on.
@@ -118,9 +118,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       for k, v in nodes:
          try:
             v.callRemote("emit", ip_address, sigName, argsTuple)
-         except Pyro.errors.ConnectionClosedError, x:
-            # connection dropped, remove the listener if it's still there
-            # check for existence because other thread may have killed it already
+         except ex:
             del self.mProxies[k]
             print 'Removed dead connection', k
 

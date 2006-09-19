@@ -19,7 +19,6 @@
 from PyQt4 import QtGui, QtCore
 import ResourceViewerBase
 import ResourceViewerResource
-import Pyro.core
 
 import services.SettingsService
 

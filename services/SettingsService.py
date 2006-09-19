@@ -17,8 +17,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, os, types, platform
-import Pyro.core
-import Pyro.naming
 import popen2
 import re
 import time
@@ -58,9 +56,8 @@ OsNameMap = {ERROR  : 'Error',
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
 
-class SettingsService(Pyro.core.ObjBase):
+class SettingsService:
    def __init__(self):
-      Pyro.core.ObjBase.__init__(self)
       self.mQueue = Queue()
 
    def init(self, eventManager):

@@ -56,8 +56,6 @@ class Ensemble(QtCore.QObject):
          self.mNodes.append(ClusterNode(nodeElt))
          print "Cluster Node: ", ClusterNode(nodeElt).getName()
 
-      #Pyro.core.initClient()
-
       # Timer to refresh pyro connections to nodes.
       self.refreshTimer = QtCore.QTimer()
       self.refreshTimer.setInterval(2000)

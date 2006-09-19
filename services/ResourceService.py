@@ -17,8 +17,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, os, types, platform
-import Pyro.core
-import Pyro.naming
 import popen2
 import re
 import time
@@ -48,9 +46,8 @@ PAT_MEMINFO_INACTIVE = re.compile(r"inactive: *([0-9]+)", re.I)
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
 
-class ResourceService(Pyro.core.ObjBase):
+class ResourceService:
    def __init__(self):
-      Pyro.core.ObjBase.__init__(self)
       self.mQueue = Queue()
 
       if os.name == 'nt':

@@ -19,8 +19,6 @@
 
 import elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
-import Pyro.core
-from Pyro.protocol import getHostname
 import threading
 import time, types, re, sys
 
