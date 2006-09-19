@@ -165,7 +165,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
             self.mAppFrame.layout().insertWidget(self.mAppFrame.layout().count()-1, sh)
             self.mAppSpecificWidgets.append(sh)
       
-      _fixFontSize(self.mAppSpecificWidgets, 14)
+      #_fixFontSize(self.mAppSpecificWidgets, 12)
       for sh in self.mAppSpecificWidgets:
          sh.show()
 
@@ -245,13 +245,16 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       #self.appSpecificLayouts = []
 
 
-def _fixFontSize(sheets, fontsize=14):
+def _fixFontSize(sheets, fontsize=12):
+   print "fontsize: ", fontsize
+   fontsize = max(fontsize, 8)
+   print "fontsize: ", fontsize
    for s in sheets:
+      s.mTitleWidget.font().setPointSize(fontsize)
+      s.mTitleWidget.font().setBold(True)
       if isinstance(s, GroupSheet):
          print "Title: ", s.mTitleWidget.text()
-         s.mTitleWidget.font().setPointSize(fontsize)
-         s.mTitleWidget.font().setBold(True)
-         _fixFontSize(s.mChildSheets, fontsize-4)
+         _fixFontSize(s.mChildSheets, fontsize-2)
    
 
 NO_BUTTON = 0
@@ -273,14 +276,14 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
    elif isinstance(obj, Stanza.Group):
       #print "Building Group Sheet... ", name
       widget = GroupSheet(obj, buttonType)
-      #widget.config()
+      widget.setupUi(buttonType)
    elif isinstance(obj, Stanza.Choice):
       #print "Building Choice Sheet... ", name
       if obj.mChoiceType == Stanza.ONE_CB:
          widget = ChoiceSheetCB(obj, buttonType)
       else:
          widget = ChoiceSheet(obj, buttonType)
-      #widget.config()
+      widget.setupUi(buttonType)
    if isinstance(obj, Stanza.Arg):
       print "Building Arg Sheet... ", name
       widget = ValueSheet(obj, buttonType)
@@ -447,8 +450,6 @@ class GroupSheet(Sheet):
             self.mChildrenHidden = False
             break
 
-      self.setupUi()
-
    def setEnabled(self, val):
       Sheet.setEnabled(self, val)
       for w in self.mChildSheets:
@@ -467,6 +468,8 @@ class GroupSheet(Sheet):
          self.mButtonWidget = self._buildButton(buttonType)
 
          self.gridlayout = QtGui.QGridLayout(self)
+         self.gridlayout.setMargin(1)
+         self.gridlayout.setSpacing(1)
 
          self.mChildrenLayout = QtGui.QVBoxLayout()
          self.mChildrenLayout.setMargin(1)
@@ -477,17 +480,15 @@ class GroupSheet(Sheet):
    
          if self.mButtonWidget is not None:
             print "Label taking up space [%s] [%s]" % (self.mButtonWidget, self.mButtonWidget.text())
-            self.gridlayout.addWidget(self.mButtonWidget,1,0,1,1)
-            self.gridlayout.addWidget(self.mTitleWidget,0,1,1,2)
-            self.gridlayout.addItem(spacerItem,1,1,1,1)
-            self.gridlayout.addLayout(self.mChildrenLayout,1,2,1,1)
-         else:
-            self.gridlayout.addWidget(self.mTitleWidget,0,0,1,2)
-            self.gridlayout.addItem(spacerItem,1,0,1,1)
-            self.gridlayout.addLayout(self.mChildrenLayout,1,1,1,1)
-      
-         self.gridlayout.setMargin(1)
-         self.gridlayout.setSpacing(1)
+            #self.gridlayout.addWidget(self.mButtonWidget,1,0,1,1)
+            self.gridlayout.addWidget(self.mButtonWidget,0,0,1,1)
+         self.gridlayout.addWidget(self.mTitleWidget,0,1,1,2)
+         self.gridlayout.addItem(spacerItem,1,1,1,1)
+         self.gridlayout.addLayout(self.mChildrenLayout,1,2,1,1)
+         #else:
+         #   self.gridlayout.addWidget(self.mTitleWidget,0,0,1,2)
+         #   self.gridlayout.addItem(spacerItem,1,0,1,1)
+         #   self.gridlayout.addLayout(self.mChildrenLayout,1,1,1,1)
 
          self._fillForm()
       self.setTitle(self.mObj.mLabel)
@@ -505,7 +506,7 @@ class GroupSheet(Sheet):
 class ChoiceSheet(GroupSheet):
    def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
       GroupSheet.__init__(self, obj, buttonType, parent)
-      
+
    def _fillForm(self):
       self.mOptionSheets = []
 
@@ -549,17 +550,19 @@ class ValueSheet(Sheet):
       Sheet.__init__(self, obj, parent)
 
    def setupUi(self, buttonType = NO_BUTTON):
-      if NO_BUTTON == buttonType:
-         self.mTitleWidget = QtGui.QLabel(self)
-      else:
-         self.mTitleWidget = self._buildButton(buttonType)
-         self.mButtonWidget = self.mTitleWidget
-
       # Create layout to use for sheet.
       self.mLayout = QtGui.QHBoxLayout(self)
       self.mLayout.setMargin(1)
       self.mLayout.setSpacing(1)
+
+      if NO_BUTTON == buttonType:
+         self.mTitleWidget = QtGui.QLabel(self)
+      else:
+         self.mButtonWidget = self._buildButton(buttonType)
+         self.mTitleWidget = QtGui.QLabel(self)
+         self.mLayout.addWidget(self.mButtonWidget)
       self.mLayout.addWidget(self.mTitleWidget)
+
 
       # Create editor if we want to allow the user to edit the value
       # or we are in advanced mode.
