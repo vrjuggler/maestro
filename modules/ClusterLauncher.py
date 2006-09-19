@@ -83,7 +83,6 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
          stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
 
       self.mStanzas = []
-      print "Stanzas: ", stanza_files
       for s in stanza_files:
          stanza_elm = ET.ElementTree(file=s).getroot()
          stanza = Stanza.Stanza(stanza_elm)
@@ -285,22 +284,22 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
          widget = ChoiceSheet(obj, buttonType)
       widget.setupUi(buttonType)
    if isinstance(obj, Stanza.Arg):
-      print "Building Arg Sheet... ", name
+      #print "Building Arg Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
    elif isinstance(obj, Stanza.Command):
-      print "Building Command Sheet... ", name
+      #print "Building Command Sheet... ", name
       widget = ValueSheet(obj)
       widget.setupUi(buttonType)
       widget.setTitle("Command")
    elif isinstance(obj, Stanza.Cwd):
-      print "Building CWD Sheet... ", name
+      #print "Building CWD Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle("Current Working Directory")
    elif isinstance(obj, Stanza.EnvVar):
-      print "Building EnvVar Sheet... ", name
+      #print "Building EnvVar Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
@@ -327,27 +326,18 @@ class Sheet(QtGui.QWidget):
          button.setChecked(self.mObj.mSelected)
       return button
 
-   # XXX:
-   #def setupUi():
-   #   self.setEnabled(self.mObj.mSelected)
-
-   def setEnabled(self, val):
-      pass
-      #if val:
-      #   self.mLabel.palette().setColor(QtGui.QPalette.Foreground,
-      #      self.mLabel.palette().buttonText().color())
-      #else:
-      #   self.mLabel.palette().setColor(QtGui.QPalette.Foreground,
-      #      self.mLabel.palette().dark().color())
-      #self.mLabel.update()
-
    def setTitle(self, text):
       self.mTitleWidget.setText(text)
 
    def onToggled(self, val):
       print "Setting [%s] selected: %s" % (self.mObj.getName(), val)
       self.mObj.mSelected = val
-      self.setEnabled(val)
+   
+   def setEnabled(self, val):
+      if self.mTitleWidget is not None:
+         self.mTitleWidget.setEnabled(val)
+      if self.mButtonWidget is not None:
+         self.mButtonWidget.setEnabled(val)
 
 class ChoiceSheetCB(Sheet):
    def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
@@ -428,9 +418,9 @@ class ChoiceSheetCB(Sheet):
             mSelectedFrame = None
          else:
             self.mSelectedFrame = _buildWidget(obj)
-            self.mSelectedFrame.setEnabled(self.mSavedEnableState)
+            #self.mSelectedFrame.setEnabled(self.mSavedEnableState)
             self.mSelectedFrame.setParent(self)
-            self.mSelectedFrame.setEnabled(True)
+            #self.mSelectedFrame.setEnabled(True)
             self.gridlayout.addWidget(self.mSelectedFrame,1,1,1,2)
             #self.mSelectedFrame.show()
             self.gridlayout.update()
@@ -450,10 +440,15 @@ class GroupSheet(Sheet):
             self.mChildrenHidden = False
             break
 
-   def setEnabled(self, val):
+   def setEnabled(self, val, including=False):
       Sheet.setEnabled(self, val)
       for w in self.mChildSheets:
          w.setEnabled(val)
+   
+   def onToggled(self, val):
+      Sheet.onToggled(self, val)
+      for s in self.mChildSheets:
+         s.setEnabled(val)
 
    def setupUi(self, buttonType = NO_BUTTON):
       assert not self.mObj.mHidden
@@ -479,16 +474,10 @@ class GroupSheet(Sheet):
          spacerItem = QtGui.QSpacerItem(15,15,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
    
          if self.mButtonWidget is not None:
-            print "Label taking up space [%s] [%s]" % (self.mButtonWidget, self.mButtonWidget.text())
-            #self.gridlayout.addWidget(self.mButtonWidget,1,0,1,1)
             self.gridlayout.addWidget(self.mButtonWidget,0,0,1,1)
          self.gridlayout.addWidget(self.mTitleWidget,0,1,1,2)
          self.gridlayout.addItem(spacerItem,1,1,1,1)
          self.gridlayout.addLayout(self.mChildrenLayout,1,2,1,1)
-         #else:
-         #   self.gridlayout.addWidget(self.mTitleWidget,0,0,1,2)
-         #   self.gridlayout.addItem(spacerItem,1,0,1,1)
-         #   self.gridlayout.addLayout(self.mChildrenLayout,1,1,1,1)
 
          self._fillForm()
       self.setTitle(self.mObj.mLabel)
@@ -575,12 +564,13 @@ class ValueSheet(Sheet):
          self.mLayout.addWidget(self.mValueEditor)
          self.connect(self.mValueEditor, QtCore.SIGNAL("editingFinished()"),self.onEdited)
 
-#   def config(self, text):
-#      Sheet.config(self)
-#      command_text = text + " [" + self.mObj.mClass + "]:"
-#      self.mLabel.setText(command_text)
+   def onToggled(self, val):
+      Sheet.onToggled(self, val)
+      enable = val and self.mObj.mEditable
+      if self.mValueEditor:
+         self.mValueEditor.setEnabled(enable)
 
-   def setEnabled(self, val):
+   def setEnabled(self, val, including=False):
       Sheet.setEnabled(self, val)
       enable = val and self.mObj.mEditable
       if self.mValueEditor:
