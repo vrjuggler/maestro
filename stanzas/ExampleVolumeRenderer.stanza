@@ -3,52 +3,51 @@
 Basically there are only a few restrictions.
 
 - The only things that can contain sub elements are stanza, choice, and group.
-- Selected is going to change.
-- Visible should be reversed to hidden.
+- Selected attribute is only valid if parent is a choice.
 -->
 <stanza label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
-  <command class="" visible="false" selected="true">./build.linux-i686/Viewer/infi_app</command>
-  <env_var class="" visible="false" selected="true" label="Display" key="DISPLAY">:0.0</env_var>
-  <cwd class="" visible="false" selected="true">/home/aronb/Source/Infiscape/common/IOV</cwd>
+  <command class="" hidden="true">./build.linux-i686/Viewer/infi_app</command>
+  <env_var class="" hidden="true" label="Display" key="DISPLAY">:0.0</env_var>
+  <cwd class="" hidden="true">/home/aronb/Source/Infiscape/common/IOV</cwd>
   <choice label="VR Juggler Configuration" parent_path="Configuration Files" tooltip="" type="one">
     <group label="Simulator" selected="true">
-      <arg label="Simulator Config" visible="true" editable="true" class="" flag="-j">sim.base.jconf</arg>
-      <arg label="Simulator Config" visible="true" editable="true" class="" flag="-j">sim.wand.mixin.jconf</arg>
+      <arg label="Simulator Config" editable="true" class="" flag="-j">sim.base.jconf</arg>
+      <arg label="Simulator Config" editable="true" class="" flag="-j">sim.wand.mixin.jconf</arg>
     </group>
   </choice>
-  <arg label="IOV Config" visible="true" editable="true" class="Linux,master" flag="-a">viewer-nav.jconf</arg>
-  <group label="IOV CVS" visible="false" selected="true">
-     <env_var class="" visible="true" selected="true" label="IOV Location" key="IOV_BASE_DIR">/home/aronb/Source/Infiscape/common/IOV/build.linux-i686/instlinks</env_var>
-     <env_var class="" visible="false" selected="true" label="PATH" key="PATH">${IOV_BASE_DIR}/bin:${PATH}</env_var>
-     <env_var class="" visible="false" selected="true" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${IOV_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
+  <arg label="IOV Config" editable="true" class="Linux,master" flag="-a">viewer-nav.jconf</arg>
+  <group label="IOV CVS" hidden="true">
+     <env_var label="IOV Location" key="IOV_BASE_DIR">/home/aronb/Source/Infiscape/common/IOV/build.linux-i686/instlinks</env_var>
+     <env_var label="PATH" key="PATH">${IOV_BASE_DIR}/bin:${PATH}</env_var>
+     <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${IOV_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
   </group>
-  <group label="OpenSG CVS" visible="false" selected="true">
-     <env_var class="" visible="true" selected="true" label="OpenSG Location" key="OSG_BASE_DIR">/home/aronb/Source/OpenSG/install_linux_fc4</env_var>
-     <env_var class="" visible="false" selected="true" label="PATH" key="PATH">${OSG_BASE_DIR}/bin:${PATH}</env_var>
-     <env_var class="" visible="false" selected="true" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${OSG_BASE_DIR}/lib/dbg:${LD_LIBRARY_PATH}</env_var>
+  <group label="OpenSG CVS" hidden="true">
+     <env_var label="OpenSG Location" key="OSG_BASE_DIR">/home/aronb/Source/OpenSG/install_linux_fc4</env_var>
+     <env_var label="PATH" key="PATH">${OSG_BASE_DIR}/bin:${PATH}</env_var>
+     <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${OSG_BASE_DIR}/lib/dbg:${LD_LIBRARY_PATH}</env_var>
   </group>
   <choice label="VR Juggler Version" type="one_cb">
-    <group label="VR Juggler CVS" visible="false" selected="true">
-      <env_var class="" visible="false" selected="true" label="VR Juggler Location" key="VJ_BASE_DIR">/home/aronb/Source/CurrentJuggler/juggler/build_linux_fc4/instlinks</env_var>
-      <env_var class="" visible="false" selected="true" label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
-      <env_var class="" visible="false" selected="true" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
+    <group label="VR Juggler CVS" hidden="true" selected="true">
+      <env_var label="VR Juggler Location" key="VJ_BASE_DIR">/home/aronb/Source/CurrentJuggler/juggler/build_linux_fc4/instlinks</env_var>
+      <env_var label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
+      <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
     </group>
-    <group label="VR Juggler 2.0" visible="false" selected="false">
-      <env_var class="" visible="false" selected="true" label="VR Juggler Location" key="VJ_BASE_DIR">/path/to/vrjuggler2.0</env_var>
-      <env_var class="" visible="false" selected="true" label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
-      <env_var class="" visible="false" selected="true" label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
+    <group label="VR Juggler 2.0" hidden="true">
+      <env_var label="VR Juggler Location" key="VJ_BASE_DIR">/path/to/vrjuggler2.0</env_var>
+      <env_var label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
+      <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
     </group>
   </choice>
   <choice label="Debug Output Level" parent_path="" tooltip="" type="one_cb">
-     <env_var class="" visible="false" selected="true" editable="false" label="Critical Messages" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
-     <env_var class="" visible="false" editable="false" label="Warning Messages" key="VPR_DEBUG_NFY_LEVEL">1</env_var>
-     <env_var class="" visible="false" editable="false" label="System Configuration Results" key="VPR_DEBUG_NFY_LEVEL">2</env_var>
-     <env_var class="" visible="false" editable="false" label="System Configuration Details" key="VPR_DEBUG_NFY_LEVEL">3</env_var>
-     <env_var class="" visible="false" editable="false" label="State Changes" key="VPR_DEBUG_NFY_LEVEL">4</env_var>
-     <env_var class="" visible="false" editable="false" label="Verbose" key="VPR_DEBUG_NFY_LEVEL">5</env_var>
-     <env_var class="" visible="false" editable="false" label="Highly Verbose" key="VPR_DEBUG_NFY_LEVEL">6</env_var>
-     <env_var class="" visible="false" editable="false" label="Detailed" key="VPR_DEBUG_NFY_LEVEL">7</env_var>
-     <env_var class="" visible="true" editable="false" label="Hexidecimal" key="VPR_DEBUG_NFY_LEVEL">8</env_var>
-     <env_var class="" visible="true" editable="true" label="Other" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
+     <env_var selected="true" label="Critical Messages" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
+     <env_var label="Warning Messages" key="VPR_DEBUG_NFY_LEVEL">1</env_var>
+     <env_var label="System Configuration Results" key="VPR_DEBUG_NFY_LEVEL">2</env_var>
+     <env_var label="System Configuration Details" key="VPR_DEBUG_NFY_LEVEL">3</env_var>
+     <env_var label="State Changes" key="VPR_DEBUG_NFY_LEVEL">4</env_var>
+     <env_var label="Verbose" key="VPR_DEBUG_NFY_LEVEL">5</env_var>
+     <env_var label="Highly Verbose" key="VPR_DEBUG_NFY_LEVEL">6</env_var>
+     <env_var label="Detailed" key="VPR_DEBUG_NFY_LEVEL">7</env_var>
+     <env_var label="Hexidecimal" key="VPR_DEBUG_NFY_LEVEL">8</env_var>
+     <env_var editable="true" label="Other" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
   </choice>
 </stanza>

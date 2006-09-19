@@ -159,7 +159,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       for c in self.mSelectedApp.mChildren:
          # All top level objects are selected by default.
          c.mSelected = True
-         if c.mVisible:
+         if not c.mHidden:
             sh = _buildWidget(c)
             sh.setParent(self.mAppFrame);
             self.mAppFrame.layout().insertWidget(self.mAppFrame.layout().count()-1, sh)
@@ -457,7 +457,7 @@ class ChoiceSheetCB(Sheet):
       obj = self.mObj.mChildren[index]
       self.mSelectedObject = obj
       self.mSelectedObject.mSelected = True
-      if obj is not None and obj.mVisible:
+      if obj is not None and not obj.mHidden:
          if isPointless(obj):
             mSelectedFrame = None
          else:
@@ -488,7 +488,7 @@ class GroupSheet(Sheet):
       if self.mLabel is not None:
          self.hboxlayout.addWidget(self.mLabel)
 
-      if self.mObj.mVisible == True:
+      if not self.mObj.mHidden == True:
          # Create group box to contain all sub options.
          self.mGroupBox = QtGui.QGroupBox(self)
          self.hboxlayout.addWidget(self.mGroupBox)
@@ -504,7 +504,7 @@ class GroupSheet(Sheet):
          for c in self.mObj.mChildren:
             # All top level objects are selected by default.
             c.mSelected = True
-            if c.mVisible and not isPointless(c):
+            if not c.mHidden and not isPointless(c):
                sh = _buildWidget(c)
                sh.setParent(self.mGroupBox);
                self.mGroupBox.layout().addWidget(sh)
@@ -529,12 +529,12 @@ class GroupSheet(Sheet):
 
 
 def isPointless(obj):
-   """ If we are not in ADVANCED user mode and an object is visible and
+   """ If we are not in ADVANCED user mode, an object is not hidden, and
        not editable then there is no point displaying it unless it is
        in a choice.
    """
    user_mode = GlobalOptions.instance.mOptions["UserMode"]
-   return (GlobalOptions.ADVANCED != user_mode and obj.mVisible and not obj.mEditable)
+   return (GlobalOptions.ADVANCED != user_mode and not obj.mHidden and not obj.mEditable)
 
 
 class ValueSheet(Sheet):

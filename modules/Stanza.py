@@ -19,23 +19,34 @@
 
 import elementtree.ElementTree as ET
 
+def str2bool(s, default=True):
+   if (str(s) == "true" or str(s) == "True" or str(s) == "1"):
+      return True
+   elif (str(s) == "false" or str(s) == "False" or str(s) == "0"):
+      return False
+   else:
+      return default
+
 class TreeItem:
    def __init__(self, xmlElt, parent, row):
       self.mParent = parent
       self.mRow = row
       self.mChildren = []
-      self.mVisible = True
+      self.mHidden = False
       self.mSelected = False
       self.mEditable = True
 
       # Can the user edit the arg value
       selected = xmlElt.get("selected")
-      if selected == "" or selected == None:
-         self.mSelected = False
-      elif selected == "true" or selected == "1":
-         self.mSelected = True
+      if isinstance(self.mParent, Choice):
+         self.mSelected = str2bool(selected, False)
       else:
-         self.mSelected = False
+         if selected is not None:
+            print "WARNING: [%s][%s] You should not specify a selected attribute unless the "\
+                   "options parent is a choice." % (xmlElt.tag, xmlElt.get("label", xmlElt.text))
+            assert (selected is None)
+         # XXX: Currently self.mSelected is checked in the traversal to determine if we should include the option.
+         self.mSelected = True
 
       elts = xmlElt.getchildren()
       if elts is not None:
@@ -66,11 +77,9 @@ class TreeItem:
 
                # XXX: How should we handle this case? Should we assume that
                #      the option should be selected?
-               if not obj.mVisible and not obj.mSelected:
-                  parent = obj.parent()
-                  if parent is not None and not isinstance(parent, Choice):
-                     print "WARNING: It is impossible to select [%s]. " \
-                            "Are you trying to hide this option?" % (obj.getName())
+               if obj.mHidden and not obj.mSelected:
+                  print "WARNING: It is impossible to select [%s]. " \
+                         "Are you trying to hide this option?" % (obj.getName())
 
    def parent(self):
       return self.mParent
@@ -170,9 +179,7 @@ class GlobalOption(TreeItem):
       TreeItem.__init__(self, xmlElt, parent, row)
       self.mLabel = "Unknown"
 
-      label = xmlElt.get("label")
-      if None is not label:
-         self.mLabel = label
+      self.mLabel = xmlElt.get("label", "Unknown")
 
    def getName(self):
       return self.mLabel
@@ -187,26 +194,13 @@ class Stanza(TreeItem):
 
       assert xmlElt.tag == "stanza"
 
-      self.mLabel = "Unknown"
-      self.mGlobalOptions = []
-      self.mTooltip = "Unknown"
-      self.mHelpUrl = "Unknown"
+      self.mLabel = xmlElt.get("label", "Unknown")
 
-      label = xmlElt.get("label")
-      if None is not label:
-         self.mLabel = label
+      global_options = xmlElt.get("global_options", "")
+      self.mGlobalOptions = [opt.rstrip().lstrip() for opt in global_options.split(',')]
 
-      global_options = xmlElt.get("global_options")
-      if None is not global_options:
-         self.mGlobalOptions = [opt.rstrip().lstrip() for opt in global_options.split(',')]
-
-      tooltip = xmlElt.get("tooltip")
-      if None is not tooltip:
-         self.mTooltip = tooltip
-
-      helpurl = xmlElt.get("helpUrl")
-      if None is not helpurl:
-         self.mHelpUrl = helpurl
+      self.mTooltip = xmlElt.get("tooltip", "Unknown")
+      self.mHelpUrl = xmlElt.get("helpUrl", "Unknown")
 
    def getName(self):
       return self.mLabel
@@ -218,23 +212,14 @@ class Stanza(TreeItem):
 class Group(TreeItem):
    def __init__(self, xmlElt, parent, row):
       TreeItem.__init__(self, xmlElt, parent, row)
-      self.mLabel = "Unknown"
 
       # XXX: Groups are always editable?
       self.mEditable = True
 
-      label = xmlElt.get("label")
-      if None is not label:
-         self.mLabel = label
+      self.mLabel = xmlElt.get("label", "Unknown")
    
-      # Can the user see the arg value
-      visible = xmlElt.get("visible")
-      if visible == "" or visible == None:
-         self.mVisible = True
-      elif visible == "false" or visible == "0":
-         self.mVisible = False
-      else:
-         self.mVisible = True
+      # Is the group hidden?
+      self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
    def getName(self):
       return self.mLabel
@@ -250,28 +235,18 @@ ONE_CB = 2
 class Choice(TreeItem):
    def __init__(self, xmlElt, parent, row):
       TreeItem.__init__(self, xmlElt, parent, row)
-      self.mLabel = "Unknown"
-      self.mParentPath = ""
-      self.mTooltip = "Unknown"
-      self.mChoiceType = ANY
 
-      label = xmlElt.get("label")
-      if None is not label:
-         self.mLabel = label
-      
-      parent_path = xmlElt.get("parent_path")
-      if None is not parent_path:
-         self.mParentPath = parent_path
+      self.mLabel = xmlElt.get("label", "Unknown")
+      self.mParentPath = xmlElt.get("parent_path", "")
+      self.mTooltip = xmlElt.get("tooltip", "Unknown")
 
-      tooltip = xmlElt.get("tooltip")
-      if None is not tooltip:
-         self.mTooltip = tooltip
-
-      type = xmlElt.get("type")
-      if type is not None and type == "one":
+      type = xmlElt.get("type", "any")
+      if type == "one":
          self.mChoiceType = ONE
-      if type is not None and type == "one_cb":
+      elif type == "one_cb":
          self.mChoiceType = ONE_CB
+      else:
+         self.mChoiceType = ANY
 
    def getName(self):
       return self.mLabel
@@ -286,47 +261,18 @@ class Choice(TreeItem):
 class Arg(TreeItem):
    def __init__(self, xmlElt, parent, row):
       TreeItem.__init__(self, xmlElt, parent, row)
-      self.mLabel = ""
-      self.mClass = ""
-      self.mFlag = ""
-      self.mValue = ""
-      self.mEditable = False
-      self.mVisible = False
 
-      label = xmlElt.get("label")
-      if None is not label:
-         self.mLabel = label
+      self.mLabel = xmlElt.get("label", "")
+      self.mClass = xmlElt.get("class", "")
+      self.mFlag = xmlElt.get("flag", "")
       
-      class_value = xmlElt.get("class")
-      if None is not class_value:
-         self.mClass = class_value
-      
-      #class_value = xmlElt.get("class")
-      #if None is not class_value:
-      #   self.mClass = [opt.rstrip().lstrip() for opt in class_value.split(',')]
-
-      flag = xmlElt.get("flag")
-      if None is not flag:
-         self.mFlag = flag
-
       # Can the user edit the arg value
-      editable = xmlElt.get("editable")
-      if editable == "" or editable == None:
-         self.mEditable = False
-      elif editable == "true" or editable == "1":
-         self.mEditable = True
-      else:
-         self.mEditable = False
+      self.mEditable = str2bool(xmlElt.get("editable", "false"), False)
 
       # Can the user see the arg value
-      visible = xmlElt.get("visible")
-      if visible == "" or visible == None:
-         self.mVisible = False
-      elif visible == "true" or visible == "1":
-         self.mVisible = True
-      else:
-         self.mVisible = False
+      self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
+      self.mValue = ""
       value = xmlElt.text
       if None is not value:
          self.mValue = value
@@ -344,33 +290,16 @@ class Arg(TreeItem):
 class Command(TreeItem):
    def __init__(self, xmlElt, parent, row):
       TreeItem.__init__(self, xmlElt, parent, row)
-      self.mClass = ""
-      self.mValue = ""
-      self.mEditable = False
-      self.mVisible = False
 
-      class_value = xmlElt.get("class")
-      if None is not class_value:
-         self.mClass = class_value
+      self.mClass = xmlElt.get("class", "")
 
       # Can the user edit the command value
-      editable = xmlElt.get("editable")
-      if editable == "" or editable == None:
-         self.mEditable = False
-      elif editable == "true" or editable == "1":
-         self.mEditable = True
-      else:
-         self.mEditable = False
+      self.mEditable = str2bool(xmlElt.get("editable", "false"), False)
 
       # Can the user see the command value
-      visible = xmlElt.get("visible")
-      if visible == "" or visible == None:
-         self.mVisible = False
-      elif visible == "true" or visible == "1":
-         self.mVisible = True
-      else:
-         self.mVisible = False
+      self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
+      self.mValue = ""
       value = xmlElt.text
       if None is not value:
          self.mValue = value
@@ -388,32 +317,16 @@ class Command(TreeItem):
 class Cwd(TreeItem):
    def __init__(self, xmlElt, parent, row):
       TreeItem.__init__(self, xmlElt, parent, row)
-      self.mClass = ""
-      self.mValue = ""
-      self.mEditable = False
-      self.mVisible = False
 
-      class_value = xmlElt.get("class")
-      if None is not class_value:
-         self.mClass = class_value
+      self.mClass = xmlElt.get("class", "")
 
       # Can the user edit the cwd value
-      editable = xmlElt.get("editable")
-      if editable == "" or editable == None:
-         self.mEditable = False
-      elif editable == "true" or editable == "1":
-         self.mEditable = True
-      else:
-         self.mEditable = False
+      self.mEditable = str2bool(xmlElt.get("editable", "false"), False)
 
       # Can the user see the cwd value
-      visible = xmlElt.get("visible")
-      if visible == "" or visible == None:
-         self.mVisible = False
-      elif visible == "true" or visible == "1":
-         self.mVisible = True
-      else:
-         self.mVisible = False
+      self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
+
+      self.mValue = ""
       value = xmlElt.text
       if None is not value:
          self.mValue = value
@@ -439,43 +352,18 @@ class Cwd(TreeItem):
 class EnvVar(TreeItem):
    def __init__(self, xmlElt, parent, row):
       TreeItem.__init__(self, xmlElt, parent, row)
-      self.mLabel = ""
-      self.mClass = ""
-      self.mKey   = ""
-      self.mValue = ""
-      self.mEditable = False
-      self.mVisible = False
 
-      class_value = xmlElt.get("class")
-      if None is not class_value:
-         self.mClass = class_value
-
-      label_value = xmlElt.get("label")
-      if None is not label_value:
-         self.mLabel = label_value
-
-      key_value = xmlElt.get("key")
-      if None is not key_value:
-         self.mKey = key_value
+      self.mClass = xmlElt.get("class", "")
+      self.mLabel = xmlElt.get("label", "")
+      self.mKey = xmlElt.get("key", "")
 
       # Can the user edit the options value
-      editable = xmlElt.get("editable")
-      if editable == "" or editable == None:
-         self.mEditable = False
-      elif editable == "true" or editable == "1":
-         self.mEditable = True
-      else:
-         self.mEditable = False
+      self.mEditable = str2bool(xmlElt.get("editable", "false"), False)
 
       # Can the user see the command value
-      visible = xmlElt.get("visible")
-      if visible == "" or visible == None:
-         self.mVisible = False
-      elif visible == "true" or visible == "1":
-         self.mVisible = True
-      else:
-         self.mVisible = False
+      self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
+      self.mValue = ""
       value = xmlElt.text
       if None is not value:
          self.mValue = value
