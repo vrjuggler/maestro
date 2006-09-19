@@ -164,7 +164,10 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
             sh.setParent(self.mAppFrame);
             self.mAppFrame.layout().insertWidget(self.mAppFrame.layout().count()-1, sh)
             self.mAppSpecificWidgets.append(sh)
-            sh.show()
+      
+      _fixFontSize(self.mAppSpecificWidgets, 14)
+      for sh in self.mAppSpecificWidgets:
+         sh.show()
 
    def onKillApp(self):
       pass
@@ -242,6 +245,15 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       #self.appSpecificLayouts = []
 
 
+def _fixFontSize(sheets, fontsize=14):
+   for s in sheets:
+      if isinstance(s, GroupSheet):
+         print "Title: ", s.mTitleWidget.text()
+         s.mTitleWidget.font().setPointSize(fontsize)
+         s.mTitleWidget.font().setBold(True)
+         _fixFontSize(s.mChildSheets, fontsize-4)
+   
+
 NO_BUTTON = 0
 RADIO_BUTTON = 1
 CHECK_BUTTON = 2
@@ -261,31 +273,34 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
    elif isinstance(obj, Stanza.Group):
       #print "Building Group Sheet... ", name
       widget = GroupSheet(obj, buttonType)
-      widget.config()
+      #widget.config()
    elif isinstance(obj, Stanza.Choice):
       #print "Building Choice Sheet... ", name
       if obj.mChoiceType == Stanza.ONE_CB:
          widget = ChoiceSheetCB(obj, buttonType)
       else:
          widget = ChoiceSheet(obj, buttonType)
-      widget.config()
+      #widget.config()
    if isinstance(obj, Stanza.Arg):
-      #print "Building Arg Sheet... ", name
+      print "Building Arg Sheet... ", name
       widget = ValueSheet(obj, buttonType)
-      widget.config(obj.mLabel)
+      widget.setupUi(buttonType)
+      widget.setTitle(obj.mLabel)
    elif isinstance(obj, Stanza.Command):
-      #print "Building Command Sheet... ", name
-      widget = ValueSheet(obj, buttonType)
-      widget.config("Command")
+      print "Building Command Sheet... ", name
+      widget = ValueSheet(obj)
+      widget.setupUi(buttonType)
+      widget.setTitle("Command")
    elif isinstance(obj, Stanza.Cwd):
-      #print "Building CWD Sheet... ", name
+      print "Building CWD Sheet... ", name
       widget = ValueSheet(obj, buttonType)
-      widget.config("Current Working Directory")
+      widget.setupUi(buttonType)
+      widget.setTitle("Current Working Directory")
    elif isinstance(obj, Stanza.EnvVar):
-      #print "Building EnvVar Sheet... ", name
+      print "Building EnvVar Sheet... ", name
       widget = ValueSheet(obj, buttonType)
-      widget.config(obj.mLabel)
-
+      widget.setupUi(buttonType)
+      widget.setTitle(obj.mLabel)
    
    return widget
 
@@ -294,92 +309,42 @@ class Sheet(QtGui.QWidget):
       QtGui.QWidget.__init__(self, parent)
       
       self.mObj = obj
-      
-      if RADIO_BUTTON == buttonType:
-         self.mLabel = QtGui.QRadioButton(self)
-      elif CHECK_BUTTON == buttonType:
-         self.mLabel = QtGui.QCheckBox(self)
-      else:
-         self.mLabel = QtGui.QLabel(self)
+      self.mTitleWidget = None
+      self.mButtonWidget = None
 
-   def config(self):
-      if isinstance(self.mLabel, QtGui.QAbstractButton):
-         self.connect(self.mLabel, QtCore.SIGNAL("toggled(bool)"), self.onToggled)
-         self.mLabel.setChecked(self.mObj.mSelected)
-         self.setEnabled(self.mObj.mSelected)
-         
+   def _buildButton(self, buttonType):
+      button = None
+      if RADIO_BUTTON == buttonType:
+         button =QtGui.QRadioButton(self)
+      elif CHECK_BUTTON == buttonType:
+         button = QtGui.QCheckBox(self)
+
+      if button is not None:
+         self.connect(button, QtCore.SIGNAL("toggled(bool)"), self.onToggled)
+         button.setChecked(self.mObj.mSelected)
+      return button
+
+   # XXX:
+   #def setupUi():
+   #   self.setEnabled(self.mObj.mSelected)
+
    def setEnabled(self, val):
-      if val:
-         self.mLabel.palette().setColor(QtGui.QPalette.Foreground,
-            self.mLabel.palette().buttonText().color())
-      else:
-         self.mLabel.palette().setColor(QtGui.QPalette.Foreground,
-            self.mLabel.palette().dark().color())
-      self.mLabel.update()
+      pass
+      #if val:
+      #   self.mLabel.palette().setColor(QtGui.QPalette.Foreground,
+      #      self.mLabel.palette().buttonText().color())
+      #else:
+      #   self.mLabel.palette().setColor(QtGui.QPalette.Foreground,
+      #      self.mLabel.palette().dark().color())
+      #self.mLabel.update()
+
+   def setTitle(self, text):
+      self.mTitleWidget.setText(text)
 
    def onToggled(self, val):
       print "Setting [%s] selected: %s" % (self.mObj.getName(), val)
       self.mObj.mSelected = val
       self.setEnabled(val)
-
-class ChoiceSheet(Sheet):
-   def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
-      Sheet.__init__(self, obj, buttonType, parent)
-
-      self.mSelectedFrame = None
-
-      # XXX: Might want to put some where else.
-      self.setupUi()
-      self.mOptionSheets = []
-      self._fillForm()
-
-   def setupUi(self):
-      self.gridlayout = QtGui.QGridLayout(self)
-      self.gridlayout.setMargin(1)
-      self.gridlayout.setSpacing(1)
-      self.gridlayout.setObjectName("gridlayout")
-      
-      self.mLabel.setObjectName("mChoiceLabel")
-      self.mLabel.setText(self.mObj.mLabel)
-      self.gridlayout.addWidget(self.mLabel,0,0,1,2)
-     
-      # Create a spacer to push us and all of our children to the right to provide some structure.
-      spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
-      self.gridlayout.addItem(spacerItem,1,0,1,1)
-
-   def setEnabled(self, val):
-      Sheet.setEnabled(self, val)
-      for w in self.mOptionSheets:
-         w.setEnabled(val)
-      
-   def _fillForm(self):
-      current_row = 1
-      self.mButtonGroup = QtGui.QButtonGroup()
-      # Iterate over all possible choices.
-      for c in self.mObj.mChildren:
-         # Create the correct type of sheet for our child. Placing a selection
-         # button next to it.
-         if self.mObj.mChoiceType == Stanza.ONE:
-            w = _buildWidget(c, RADIO_BUTTON)
-         elif self.mObj.mChoiceType == Stanza.ANY:
-            w = _buildWidget(c, CHECK_BUTTON)
-         else:
-            w = _buildWidget(c, NO_BUTTON)
-         
-         # Get the selection button that is used for the child/choice.
-         lbl = w.mLabel
-
-         # Add child button to button group if we have single selection.
-         if self.mObj.mChoiceType == Stanza.ONE \
-               and lbl is not None \
-               and isinstance(lbl, QtGui.QAbstractButton):
-            self.mButtonGroup.addButton(lbl)
-
-         # Add child option to ourself.
-         self.mOptionSheets.append(w)
-         w.setParent(self)
-         self.gridlayout.addWidget(w,current_row,1,1,2)
-         current_row += 1
 
 class ChoiceSheetCB(Sheet):
    def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
@@ -389,11 +354,6 @@ class ChoiceSheetCB(Sheet):
       self.mSelectedFrame = None
       self.mSelectedObject = None
       self.mSavedEnableState = False
-
-      # XXX: Might want to put some where else.
-      self.setupUi()
-      self._fillCombo()
-      self.connect(self.mChoice, QtCore.SIGNAL("activated(int)"), self.choiceSelected)
 
    def setEnabled(self, val):
       Sheet.setEnabled(self, val)
@@ -422,6 +382,9 @@ class ChoiceSheetCB(Sheet):
       
       self.mChoice.setObjectName("mChoice")
       self.gridlayout.addWidget(self.mChoice,0,2,1,1)
+
+      self._fillCombo()
+      self.connect(self.mChoice, QtCore.SIGNAL("activated(int)"), self.choiceSelected)
 
    def _fillCombo(self):
       selected_index = 0
@@ -469,63 +432,107 @@ class ChoiceSheetCB(Sheet):
             #self.mSelectedFrame.show()
             self.gridlayout.update()
 
+
 class GroupSheet(Sheet):
    def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
       Sheet.__init__(self, obj, buttonType, parent)
 
       self.mGroupBox = None
 
-      # XXX: Might want to put some where else.
+      self.mChildrenHidden = True
+      self.mChildSheets = []
+
+      for c in self.mObj.mChildren:
+         if not c.mHidden and not isPointless(c):
+            self.mChildrenHidden = False
+            break
+
       self.setupUi()
-
-   def setupUi(self):
-      self.hboxlayout = QtGui.QHBoxLayout(self)
-      self.hboxlayout.setMargin(1)
-      self.hboxlayout.setSpacing(1)
-      self.hboxlayout.setObjectName("hboxlayout1")
-
-      # If we have a selection button, then use it.
-      if self.mLabel is not None:
-         self.hboxlayout.addWidget(self.mLabel)
-
-      if not self.mObj.mHidden == True:
-         # Create group box to contain all sub options.
-         self.mGroupBox = QtGui.QGroupBox(self)
-         self.hboxlayout.addWidget(self.mGroupBox)
-         self.mGroupBox.setTitle(self.mObj.mLabel)
-
-         # Create layout for group box.
-         self.vboxlayout1 = QtGui.QVBoxLayout(self.mGroupBox)
-         self.vboxlayout1.setMargin(1)
-         self.vboxlayout1.setSpacing(1)
-         self.vboxlayout1.setObjectName("vboxlayout1")
-
-         # Add all sub options to group box.
-         for c in self.mObj.mChildren:
-            # All top level objects are selected by default.
-            c.mSelected = True
-            if not c.mHidden and not isPointless(c):
-               sh = _buildWidget(c)
-               sh.setParent(self.mGroupBox);
-               self.mGroupBox.layout().addWidget(sh)
 
    def setEnabled(self, val):
       Sheet.setEnabled(self, val)
+      for w in self.mChildSheets:
+         w.setEnabled(val)
 
-      if self.mGroupBox is not None:
-         self.mGroupBox.setEnabled(val)
+   def setupUi(self, buttonType = NO_BUTTON):
+      assert not self.mObj.mHidden
 
-         # Force the QBroupBox title to appear disabled.
-         if val:
-            self.mGroupBox.setAttribute(QtCore.Qt.WA_SetPalette, False)
-            # Don't need to set the color back.
-            #self.mGroupBox.palette().setColor(QtGui.QPalette.Foreground, \
-            #   self.mGroupBox.palette().buttonText().color())
+      if self.mChildrenHidden:
+         self.mTitleWidget = QtGui.QLabel(self)
+         self.hboxlayout = QtGui.QHBoxLayout(self)
+         # If we have a selection button, then use it.
+         self.hboxlayout.addWidget(self.mTitle)
+      else:
+         self.mTitleWidget = QtGui.QLabel(self)
+         self.mButtonWidget = self._buildButton(buttonType)
+
+         self.gridlayout = QtGui.QGridLayout(self)
+
+         self.mChildrenLayout = QtGui.QVBoxLayout()
+         self.mChildrenLayout.setMargin(1)
+         self.mChildrenLayout.setSpacing(1)
+
+         # Create a spacer to push us and all of our children to the right to provide some structure.
+         spacerItem = QtGui.QSpacerItem(15,15,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
+   
+         if self.mButtonWidget is not None:
+            print "Label taking up space [%s] [%s]" % (self.mButtonWidget, self.mButtonWidget.text())
+            self.gridlayout.addWidget(self.mButtonWidget,1,0,1,1)
+            self.gridlayout.addWidget(self.mTitleWidget,0,1,1,2)
+            self.gridlayout.addItem(spacerItem,1,1,1,1)
+            self.gridlayout.addLayout(self.mChildrenLayout,1,2,1,1)
          else:
-            self.mGroupBox.setAttribute(QtCore.Qt.WA_SetPalette, True)
-            self.mGroupBox.palette().setColor(QtGui.QPalette.Foreground, \
-               self.mGroupBox.palette().dark().color())
-         self.mGroupBox.update()
+            self.gridlayout.addWidget(self.mTitleWidget,0,0,1,2)
+            self.gridlayout.addItem(spacerItem,1,0,1,1)
+            self.gridlayout.addLayout(self.mChildrenLayout,1,1,1,1)
+      
+         self.gridlayout.setMargin(1)
+         self.gridlayout.setSpacing(1)
+
+         self._fillForm()
+      self.setTitle(self.mObj.mLabel)
+
+   def _fillForm(self):
+      # Add all sub options to group box.
+      for c in self.mObj.mChildren:
+         if not c.mHidden and not isPointless(c):
+            sh = _buildWidget(c)
+            self.mChildSheets.append(sh)
+            sh.setParent(self)
+            self.mChildrenLayout.addWidget(sh)
+            sh.layout().setMargin(1)
+
+class ChoiceSheet(GroupSheet):
+   def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
+      GroupSheet.__init__(self, obj, buttonType, parent)
+      
+   def _fillForm(self):
+      self.mOptionSheets = []
+
+      self.mButtonGroup = QtGui.QButtonGroup()
+      # Iterate over all possible choices.
+      for c in self.mObj.mChildren:
+         # Create the correct type of sheet for our child. Placing a selection
+         # button next to it.
+         if self.mObj.mChoiceType == Stanza.ONE:
+            w = _buildWidget(c, RADIO_BUTTON)
+         elif self.mObj.mChoiceType == Stanza.ANY:
+            w = _buildWidget(c, CHECK_BUTTON)
+         else:
+            w = _buildWidget(c, NO_BUTTON)
+         
+         # Get the selection button that is used for the child/choice.
+         btn = w.mButtonWidget
+
+         # Add child button to button group if we have single selection.
+         if self.mObj.mChoiceType == Stanza.ONE \
+               and btn is not None:
+            self.mButtonGroup.addButton(btn)
+
+         # Add child option to ourself.
+         self.mChildSheets.append(w)
+         w.setParent(self)
+         self.mChildrenLayout.addWidget(w)
 
 
 def isPointless(obj):
@@ -538,14 +545,21 @@ def isPointless(obj):
 
 
 class ValueSheet(Sheet):
-   def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
-      Sheet.__init__(self, obj, buttonType, parent)
+   def __init__(self, obj, parent = None):
+      Sheet.__init__(self, obj, parent)
+
+   def setupUi(self, buttonType = NO_BUTTON):
+      if NO_BUTTON == buttonType:
+         self.mTitleWidget = QtGui.QLabel(self)
+      else:
+         self.mTitleWidget = self._buildButton(buttonType)
+         self.mButtonWidget = self.mTitleWidget
 
       # Create layout to use for sheet.
       self.mLayout = QtGui.QHBoxLayout(self)
       self.mLayout.setMargin(1)
       self.mLayout.setSpacing(1)
-      self.mLayout.addWidget(self.mLabel)
+      self.mLayout.addWidget(self.mTitleWidget)
 
       # Create editor if we want to allow the user to edit the value
       # or we are in advanced mode.
@@ -558,10 +572,10 @@ class ValueSheet(Sheet):
          self.mLayout.addWidget(self.mValueEditor)
          self.connect(self.mValueEditor, QtCore.SIGNAL("editingFinished()"),self.onEdited)
 
-   def config(self, text):
-      Sheet.config(self)
-      command_text = text + " [" + self.mObj.mClass + "]:"
-      self.mLabel.setText(command_text)
+#   def config(self, text):
+#      Sheet.config(self)
+#      command_text = text + " [" + self.mObj.mClass + "]:"
+#      self.mLabel.setText(command_text)
 
    def setEnabled(self, val):
       Sheet.setEnabled(self, val)
@@ -572,8 +586,6 @@ class ValueSheet(Sheet):
    def onEdited(self):
       if self.mValueEditor:
          self.mObj.mValue = str(self.mValueEditor.text())
-
-
 
 
 def getModuleInfo():
