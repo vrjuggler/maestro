@@ -29,6 +29,9 @@ import time
 import socket
 
 from twisted.spread import pb
+from twisted.cred import checkers, portal
+from zope.interface import implements
+#from twisted.conch.checkers import UNIXPasswordDatabase
 
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
@@ -110,6 +113,32 @@ if os.name == 'nt':
                                servicemanager.PYS_SERVICE_STARTED,
                                (self._svc_display_name_, 'error'))
 
+class UserPerspective(pb.Avatar):
+   def __init__(self, eventMgr):
+      self.mEventManager = eventMgr
+
+   def perspective_registerCallback(self, nodeId, obj):
+      self.mEventManager.remote_registerCallback(nodeId, obj)
+
+   def perspective_emit(self, nodeId, sigName, argsTuple=()):
+      self.mEventManager.remote_emit(nodeId, sigName, argsTuple)
+
+class TestRealm(object):
+   implements(portal.IRealm)
+
+   def __init__(self, eventMgr):
+      self.mEventManager = eventMgr
+
+   def requestAvatar(self, avatarId, minf, *interfaces):
+      if not pb.IPerspective in interfaces:
+         raise NotImplementedError, "No supported avatar interface."
+      else:
+         if avatarId == "aronb":
+            #avatar = AdminPerspective(self.mEventManager)
+            avatar = UserPerspective(self.mEventManager)
+         else:
+            avatar = UserPerspective(self.mEventManager)
+         return pb.IPerspective, avatar, lambda: None
 
 def RunServer():
    try:
@@ -117,7 +146,14 @@ def RunServer():
       cluster_server.registerInitialServices()
       from twisted.internet import reactor
       from twisted.internet import task
-      reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
+
+      #reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
+      p = portal.Portal(TestRealm(cluster_server.mEventManager))
+      #p.registerChecker(UNIXPasswordDatabase())
+      p.registerChecker(
+         checkers.InMemoryUsernamePasswordDatabaseDontUse(aronb="aronb"))
+      reactor.listenTCP(8789, pb.PBServerFactory(p))
+
       looping_call = task.LoopingCall(cluster_server.update)
       looping_call.start(0.1)
       reactor.run()

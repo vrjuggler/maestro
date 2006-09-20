@@ -21,6 +21,7 @@ import util.EventManagerBase
 import socket
 
 from twisted.spread import pb
+from twisted.cred import credentials
 
 class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
    """ Handles sending messages to remote objects.
@@ -40,8 +41,9 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       """ Forward incoming signals to event manager. """
       util.EventManagerBase.EventManagerBase.emit(self, nodeId, sigName, argsTuple)
 
-   def error(self, reason):
-      print "error: ", str(reason.value)
+   def _catchFailure(self, failure):
+      print "error: ", str(failure.value)
+      print "error: ", failure.getErrorMessage()
 
    def connectToNode(self, nodeId):
       """ Connect to the given nodes event manager.
@@ -59,10 +61,9 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       from twisted.internet import reactor
       from twisted.python import util as tpu
       factory = pb.PBClientFactory()
-      reactor.connectTCP("localhost", 8789, factory)
-      d = factory.getRootObject()
-      d.addCallback(lambda object: self.completeConnect(nodeId, object))
-      d.addErrback(self.error)
+      reactor.connectTCP(nodeId, 8789, factory)
+      creds = credentials.UsernamePassword('aronb', 'aronb')
+      d = factory.login(creds).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
 
    def completeConnect(self, nodeId, object):
       object.callRemote("registerCallback", self.mIpAddress, self)
