@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stanza label="Calculator" global_options="" tooltip="Run a calculator program." helpUrl="">
+  <command class="Linux">/usr/X11R6/bin/xcalc</command>
+  <command class="Windows XP">C:\WINDOWS\system32\calc.exe</command>
+  <cwd class="Linux">/</cwd>
+  <cwd class="Windows XP">C:\</cwd>
+</stanza>
