@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # Copyright (c) 2002-2005 ActiveState Corp.
-# See LICENSE.txt for license details.
+# See LICENSE-process.txt for license details.
 # Author:
 #   Trent Mick (TrentM@ActiveState.com)
 # Home:
 #   http://trentm.com/projects/process/
+# Version: 0.7.1
 
 r"""
     Python interface for process control.

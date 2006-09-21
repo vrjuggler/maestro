@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Copyright (c) 2002-2005 ActiveState Corp.
-# See LICENSE.txt for license details.
+# See LICENSE-which.txt for license details.
 # Author:
 #   Trent Mick (TrentM@ActiveState.com)
 # Home:
