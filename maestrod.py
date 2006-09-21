@@ -29,9 +29,12 @@ import time
 import socket
 
 from twisted.spread import pb
-from twisted.cred import checkers, portal
+from util import pboverssl
+from twisted.cred import checkers, credentials, portal, error
 from zope.interface import implements
-#from twisted.conch.checkers import UNIXPasswordDatabase
+from twisted.conch.checkers import UNIXPasswordDatabase
+from twisted.internet import ssl
+from twisted.python import failure
 
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
@@ -123,13 +126,15 @@ class UserPerspective(pb.Avatar):
    def perspective_emit(self, nodeId, sigName, argsTuple=()):
       self.mEventManager.remote_emit(nodeId, sigName, argsTuple)
 
+
+
 class TestRealm(object):
    implements(portal.IRealm)
 
    def __init__(self, eventMgr):
       self.mEventManager = eventMgr
 
-   def requestAvatar(self, avatarId, minf, *interfaces):
+   def requestAvatar(self, avatarId, mind, *interfaces):
       if not pb.IPerspective in interfaces:
          raise NotImplementedError, "No supported avatar interface."
       else:
@@ -141,6 +146,7 @@ class TestRealm(object):
          return pb.IPerspective, avatar, lambda: None
 
 def RunServer():
+
    try:
       cluster_server = MaestroServer()
       cluster_server.registerInitialServices()
@@ -149,10 +155,23 @@ def RunServer():
 
       #reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
       p = portal.Portal(TestRealm(cluster_server.mEventManager))
+      pb_portal = pboverssl.PortalRoot(p)
+      #factory = pb.PBServerFactory(p)
+      factory = pboverssl.PBServerFactory(pb_portal)
+
       #p.registerChecker(UNIXPasswordDatabase())
       p.registerChecker(
          checkers.InMemoryUsernamePasswordDatabaseDontUse(aronb="aronb"))
-      reactor.listenTCP(8789, pb.PBServerFactory(p))
+      try:
+         from util.pamchecker import PAMChecker
+         p.registerChecker(PAMChecker())
+      except:
+         pass
+      #reactor.listenTCP(8789, factory)
+      cert_path = os.path.join(os.path.dirname(__file__), 'server.pem')
+      print "Cert: ", cert_path
+      reactor.listenSSL(8789, factory,
+         ssl.DefaultOpenSSLContextFactory(cert_path, cert_path))
 
       looping_call = task.LoopingCall(cluster_server.update)
       looping_call.start(0.1)

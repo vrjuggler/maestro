@@ -22,6 +22,7 @@ import socket
 
 from twisted.spread import pb
 from twisted.cred import credentials
+from util import pboverssl
 
 class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
    """ Handles sending messages to remote objects.
@@ -58,10 +59,11 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
          raise AttributeError("EventManager.connect: already connected to [%s]" % (nodeId))
 
       from twisted.spread import pb
-      from twisted.internet import reactor
-      from twisted.python import util as tpu
-      factory = pb.PBClientFactory()
-      reactor.connectTCP(nodeId, 8789, factory)
+      from twisted.internet import reactor, ssl
+      #factory = pb.PBClientFactory()
+      factory = pboverssl.PBClientFactory()
+      #reactor.connectTCP(nodeId, 8789, factory)
+      reactor.connectSSL(nodeId, 8789, factory, ssl.ClientContextFactory())
       creds = credentials.UsernamePassword('aronb', 'aronb')
       d = factory.login(creds).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
 
@@ -88,9 +90,6 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
          raise AttributeError("EventManager.registerProxy: already connected to [%s]" % (nodeId))
 
       self.mProxies[nodeId] = obj
-
-      # Make this call non-blocking.
-      #obj._setOneway(['emit'])
 
    def emit(self, nodeId, sigName, argsTuple=()):
       """ Emit the named signal on the given node.
