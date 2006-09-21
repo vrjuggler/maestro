@@ -32,7 +32,6 @@ from twisted.spread import pb
 from util import pboverssl
 from twisted.cred import checkers, credentials, portal, error
 from zope.interface import implements
-from twisted.conch.checkers import UNIXPasswordDatabase
 from twisted.internet import ssl
 from twisted.python import failure
 
@@ -110,11 +109,11 @@ if os.name == 'nt':
                                servicemanager.PYS_SERVICE_STARTED,
                                (self._svc_display_name_, 'Started'))
          try:
-            RunServer()
-         except:
+            RunServer(installSH=False)
+         except Exception, ex:
             servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
                                servicemanager.PYS_SERVICE_STARTED,
-                               (self._svc_display_name_, 'error'))
+                               (self._svc_display_name_, 'error' + str(ex)))
 
 class UserPerspective(pb.Avatar):
    def __init__(self, eventMgr):
@@ -145,8 +144,7 @@ class TestRealm(object):
             avatar = UserPerspective(self.mEventManager)
          return pb.IPerspective, avatar, lambda: None
 
-def RunServer():
-
+def RunServer(installSH=True):
    try:
       cluster_server = MaestroServer()
       cluster_server.registerInitialServices()
@@ -159,7 +157,6 @@ def RunServer():
       #factory = pb.PBServerFactory(p)
       factory = pboverssl.PBServerFactory(pb_portal)
 
-      #p.registerChecker(UNIXPasswordDatabase())
       p.registerChecker(
          checkers.InMemoryUsernamePasswordDatabaseDontUse(aronb="aronb"))
       try:
@@ -175,7 +172,7 @@ def RunServer():
 
       looping_call = task.LoopingCall(cluster_server.update)
       looping_call.start(0.1)
-      reactor.run()
+      reactor.run(installSignalHandlers=installSH)
    except Exception, ex:
       print "ERROR: ", ex
       raise

@@ -92,6 +92,9 @@ class LaunchService:
             print "\nRunning command: ", command
             print "\nWorking Dir: ", cwd
             print "\nTranslated env:", envMap
+         
+            if sys.platform.startswith("win"):
+               envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
             
             #self.mBuffer = util.process.IOBuffer(name='<stdout>')
             #self.mProcess = util.process.ProcessProxy(command, stdout=self.mBuffer, stderr=self.mBuffer, env={'DISPLAY':':0.0'})

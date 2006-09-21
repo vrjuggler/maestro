@@ -25,9 +25,6 @@ import socket
 
 import util.EventManager
 
-if os.name == 'nt':
-   import wmi
-
 from Queue import Queue
 from threading import Thread
 
