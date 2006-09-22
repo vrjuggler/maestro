@@ -60,10 +60,18 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
 
       from twisted.spread import pb
       from twisted.internet import reactor, ssl
+      from OpenSSL import SSL
       #factory = pb.PBClientFactory()
       factory = pboverssl.PBClientFactory()
       #reactor.connectTCP(nodeId, 8789, factory)
-      reactor.connectSSL(nodeId, 8789, factory, ssl.ClientContextFactory())
+      ctx_factory = ssl.ClientContextFactory()
+      def verify(*a):
+         print "FAIL: "
+         return False
+      ctx_factory.getContext().set_verify_depth(2)
+      ctx_factory.getContext().set_verify(SSL.VERIFY_PEER, verify)
+
+      reactor.connectSSL(nodeId, 8789, factory, ctx_factory)
       creds = credentials.UsernamePassword('aronb', 'aronb')
       d = factory.login(creds).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
 

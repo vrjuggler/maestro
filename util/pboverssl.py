@@ -1,9 +1,28 @@
+# Maestro is Copyright (C) 2006 by Infiscape
+#
+# Original Author: Aron Bierbaum
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 from twisted.spread import pb
 from twisted.spread.flavors import Referenceable
 from twisted.internet import defer, protocol
 from zope.interface import implements
 from twisted.cred import credentials
 from twisted.spread.interfaces import IJellyable, IUnjellyable
+import sys
 
 class PortalRoot:
     """Root object, used to login to portal."""
@@ -28,23 +47,27 @@ class _PortalWrapper(Referenceable):
    # Have to return two rhings
    def remote_login(self, username, password, mind):
       """Start of username/password login."""
-      self.mUPCred = credentials.UsernamePassword(username, password)        
-      try:
-         import pamchecker
-         conv = pamchecker.makeConv({1:password, 2:username, 3:''})
-         self.mPAMCred = credentials.PluggableAuthenticationModules(username, conv)
-      except Exception, ex:
-         print ex
-         pass
 
       self.username = username
       self.password = password
-      d = self.portal.login(self.mUPCred, mind, pb.IPerspective)
-      d.addCallback(self._loggedIn).addErrback(self.tryNext, mind)
+      self.mUPCred = credentials.UsernamePassword(username, password)
+
+      if 'win32' == sys.platform:
+         import winchecker
+         self.mWindowsCred = winchecker.WindowsUsernamePassword(username, password)
+         d = self.portal.login(self.mWindowsCred, mind, pb.IPerspective)
+      else:
+         import pamchecker
+         conv = pamchecker.makeConv({1:password, 2:username, 3:''})
+         self.mPAMCred = credentials.PluggableAuthenticationModules(username, conv)
+         d = self.portal.login(self.mPAMCred, mind, pb.IPerspective)
+
+      d.addCallback(self._loggedIn)
+#.addErrback(self.tryNext, mind)
       return d
 
    def tryNext(self, oldDeffered, mind):
-      d = self.portal.login(self.mPAMCred, mind, pb.IPerspective)
+      d = self.portal.login(self.mUPCred, mind, pb.IPerspective)
       d.addCallback(self._loggedIn)
       return d
 
