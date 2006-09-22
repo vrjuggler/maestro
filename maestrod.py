@@ -129,7 +129,7 @@ class UserPerspective(pb.Avatar):
       self.mEventManager.remote_registerCallback(nodeId, obj)
 
    def perspective_emit(self, nodeId, sigName, argsTuple=()):
-      self.mEventManager.remote_emit(nodeId, sigName, argsTuple)
+      self.mEventManager.remote_emit(nodeId, sigName, (self,) + argsTuple)
 
 
 

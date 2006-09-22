@@ -1097,7 +1097,7 @@ class ProcessOpen(Process):
     #   - Share some implementation with Process and ProcessProxy.
     #
 
-    def __init__(self, cmd, mode='t', cwd=None, env=None):
+    def __init__(self, cmd, mode='t', cwd=None, env=None, avatarId=None):
         """Create a Process with proxy threads for each std handle.
 
         "cmd" is the command string or argument vector to run.
@@ -1121,6 +1121,7 @@ class ProcessOpen(Process):
         self._cwd = cwd
         self._env = env
         self._mode = mode
+        self._avatarId = avatarId
         if self._mode not in ('t', 'b'):
             raise ProcessError("'mode' must be 't' or 'b'.")
         self._closed = 0

@@ -62,7 +62,7 @@ class SettingsService:
 
       self.mEventManager.connect("*", "settings.get_os", self.onGetOs)
 
-   def onGetOs(self, nodeId):
+   def onGetOs(self, nodeId, avatar):
       platform = self._getPlatform()
 
       self.mEventManager.emit(nodeId, "settings.os", (platform,))

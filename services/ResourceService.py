@@ -58,7 +58,7 @@ class ResourceService:
 
       self.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)
 
-   def onGetUsage(self, nodeId):
+   def onGetUsage(self, nodeId, avatar):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()
       self.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))

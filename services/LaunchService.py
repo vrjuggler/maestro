@@ -76,7 +76,7 @@ class LaunchService:
       except Exception, ex:
          print "I/O Error: ", ex
 
-   def onRunCommand(self, nodeId, command, cwd, envMap):
+   def onRunCommand(self, nodeId, avatar, command, cwd, envMap):
       print "LaunchService.onRunCommand(%s, %s, %s)" % (command, cwd, envMap)
 
       try:
@@ -95,13 +95,15 @@ class LaunchService:
          
             if sys.platform.startswith("win"):
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+
+            avatar_id = avatar.mAvatarId
             
             #self.mBuffer = util.process.IOBuffer(name='<stdout>')
             #self.mProcess = util.process.ProcessProxy(command, stdout=self.mBuffer, stderr=self.mBuffer, env={'DISPLAY':':0.0'})
             #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=sys.stdout)
             #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=self.mBuffer)
             #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=sys.stdout, stderr=self.mBuffer)
-            self.mProcess = util.process.ProcessOpen(cmd=command, cwd=cwd, env=envMap)
+            self.mProcess = util.process.ProcessOpen(cmd=command, cwd=cwd, env=envMap, avatarId=avatar_id)
             return True
       except KeyError, ex:
          #traceback.print_stack()

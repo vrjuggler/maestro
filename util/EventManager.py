@@ -74,7 +74,6 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       reactor.connectSSL(nodeId, 8789, factory, ctx_factory)
 
       creds = {'username':'aronb', 'password':'aronb', 'domain':''}
-      #creds = credentials.UsernamePassword('aronb', 'aronb')
       d = factory.login(creds).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
 
    def completeConnect(self, nodeId, object):
