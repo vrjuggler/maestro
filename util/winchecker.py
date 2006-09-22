@@ -34,13 +34,14 @@ class IWindowsUsernamePassword(credentials.ICredentials):
 class WindowsUsernamePassword:
    interface.implements(IWindowsUsernamePassword)
 
-   def __init__(self, username, password):
-       self.username = username
-       self.password = password
+   def __init__(self, username, password, domain):
+       self.mUsername = username
+       self.mPassword = password
+       self.mDomain = domain
 
    def attemptLogon(self):
       try:
-         handle = win32security.LogonUser(self.username, '', self.password,
+         handle = win32security.LogonUser(self.mUsername, self.mDomain, self.mPassword,
             win32con.LOGON32_LOGON_INTERACTIVE,
             win32con.LOGON32_PROVIDER_DEFAULT)
          print "Windows login succeeded."

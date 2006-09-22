@@ -38,23 +38,22 @@ class PortalRoot:
 class _PortalWrapper(Referenceable):
    """Root Referenceable object, used to login to portal."""
 
-   implements(credentials.IUsernamePassword)
-
    def __init__(self, portal, broker):
       self.portal = portal
       self.broker = broker
 
    # Have to return two rhings
-   def remote_login(self, username, password, mind):
+   def remote_login(self, creds, mind):
       """Start of username/password login."""
 
-      self.username = username
-      self.password = password
+      username = creds['username']
+      password = creds['password']
       self.mUPCred = credentials.UsernamePassword(username, password)
 
       if 'win32' == sys.platform:
+         domain = creds['domain']
          import winchecker
-         self.mWindowsCred = winchecker.WindowsUsernamePassword(username, password)
+         self.mWindowsCred = winchecker.WindowsUsernamePassword(username, password, domain)
          d = self.portal.login(self.mWindowsCred, mind, pb.IPerspective)
       else:
          import pamchecker
@@ -71,11 +70,6 @@ class _PortalWrapper(Referenceable):
       d.addCallback(self._loggedIn)
       return d
 
-   # credentials.IUsernamePassword:
-   def checkPassword(self, password):
-      print "Checking password: ", password
-      return self.password == password
-
    def _loggedIn(self, (interface, perspective, logout)):
       print "Log-in successful."
       if not IJellyable.providedBy(perspective):
@@ -84,10 +78,10 @@ class _PortalWrapper(Referenceable):
       return perspective
 
 class PBClientFactory(pb.PBClientFactory):
-    def _cbSendUsername(self, root, username, password, client):
-        return root.callRemote("login", username, password, client)
+    def _cbSendUsername(self, root, creds, client):
+        return root.callRemote("login", creds, client)
 
-    def login(self, credentials, client=None):
+    def login(self, creds, client=None):
         """Login and get perspective from remote PB server.
 
         Currently only credentials implementing
@@ -96,7 +90,7 @@ class PBClientFactory(pb.PBClientFactory):
         @return: Deferred of RemoteReference to the perspective.
         """
         d = self.getRootObject()
-        d.addCallback(self._cbSendUsername, credentials.username, credentials.password, client)
+        d.addCallback(self._cbSendUsername, creds, client)
         return d
 
 
