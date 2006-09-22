@@ -457,7 +457,7 @@ class GroupSheet(Sheet):
          self.mTitleWidget = QtGui.QLabel(self)
          self.hboxlayout = QtGui.QHBoxLayout(self)
          # If we have a selection button, then use it.
-         self.hboxlayout.addWidget(self.mTitle)
+         self.hboxlayout.addWidget(self.mTitleWidget)
       else:
          self.mTitleWidget = QtGui.QLabel(self)
          self.mButtonWidget = self._buildButton(buttonType)
