@@ -116,8 +116,14 @@ if os.name == 'nt':
                                (self._svc_display_name_, 'error' + str(ex)))
 
 class UserPerspective(pb.Avatar):
-   def __init__(self, eventMgr):
+   def __init__(self, eventMgr, avatarId):
+      """ Constructs a UserPerspective used to access the event manager.
+          @param eventMgr: A reference to the event manager to use.
+          @param avatarId: Handle to the user's authentication.
+          @note avatarId is a username on UNIX and a handle on win32.
+      """
       self.mEventManager = eventMgr
+      self.mAvatarId = avatarId
 
    def perspective_registerCallback(self, nodeId, obj):
       self.mEventManager.remote_registerCallback(nodeId, obj)
@@ -137,11 +143,7 @@ class TestRealm(object):
       if not pb.IPerspective in interfaces:
          raise NotImplementedError, "No supported avatar interface."
       else:
-         if avatarId == "aronb":
-            #avatar = AdminPerspective(self.mEventManager)
-            avatar = UserPerspective(self.mEventManager)
-         else:
-            avatar = UserPerspective(self.mEventManager)
+         avatar = UserPerspective(self.mEventManager, avatarId)
          return pb.IPerspective, avatar, lambda: None
 
 def RunServer(installSH=True):
@@ -164,11 +166,17 @@ def RunServer(installSH=True):
          p.registerChecker(PAMChecker())
       except:
          pass
+      try:
+         from util.winchecker import WindowsChecker
+         p.registerChecker(WindowsChecker())
+      except:
+         pass
       #reactor.listenTCP(8789, factory)
+      pk_path = os.path.join(os.path.dirname(__file__), 'server.pem')
       cert_path = os.path.join(os.path.dirname(__file__), 'server.pem')
       print "Cert: ", cert_path
       reactor.listenSSL(8789, factory,
-         ssl.DefaultOpenSSLContextFactory(cert_path, cert_path))
+         ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
 
       looping_call = task.LoopingCall(cluster_server.update)
       looping_call.start(0.1)
