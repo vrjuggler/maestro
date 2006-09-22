@@ -45,6 +45,8 @@ class WindowsUsernamePassword:
             win32con.LOGON32_LOGON_INTERACTIVE,
             win32con.LOGON32_PROVIDER_DEFAULT)
          print "Windows login succeeded."
+         # XXX: Result may have to be a string.
+         #      http://twistedmatrix.com/projects/core/documentation/howto/cred.html#auto5
          return handle
       except Exception, ex:
          print "Windows login failed."
@@ -56,4 +58,6 @@ class WindowsChecker:
    credentialInterfaces = IWindowsUsernamePassword,
 
    def requestAvatarId(self, credentials):
+      # XXX: Result may have to be a string.
+      #      http://twistedmatrix.com/projects/core/documentation/howto/cred.html#auto5
       return defer.maybeDeferred(credentials.attemptLogon)

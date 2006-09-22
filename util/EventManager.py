@@ -74,7 +74,8 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       reactor.connectSSL(nodeId, 8789, factory, ctx_factory)
 
       creds = {'username':'aronb', 'password':'aronb', 'domain':''}
-      d = factory.login(creds).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
+      ip_address = socket.gethostbyname(socket.gethostname())
+      d = factory.login(creds, ip_address).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
 
    def completeConnect(self, nodeId, object):
       object.callRemote("registerCallback", self.mIpAddress, self)
@@ -99,6 +100,12 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
          raise AttributeError("EventManager.registerProxy: already connected to [%s]" % (nodeId))
 
       self.mProxies[nodeId] = obj
+
+   def unregisterProxy(self, nodeId):
+      """ Register object to recieve callback events for the given node.
+      """
+      if self.mProxies.has_key(nodeId):
+         del self.mProxies[nodeId]
 
    def emit(self, nodeId, sigName, argsTuple=()):
       """ Emit the named signal on the given node.

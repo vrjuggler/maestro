@@ -131,6 +131,9 @@ class UserPerspective(pb.Avatar):
    def perspective_emit(self, nodeId, sigName, argsTuple=()):
       self.mEventManager.remote_emit(nodeId, sigName, (self,) + argsTuple)
 
+   def logout(self, nodeId):
+      print "Logging out client: ", nodeId
+      self.mEventManager.unregisterProxy(nodeId)
 
 
 class TestRealm(object):
@@ -140,11 +143,13 @@ class TestRealm(object):
       self.mEventManager = eventMgr
 
    def requestAvatar(self, avatarId, mind, *interfaces):
+      """ mind is nodeId
+      """
       if not pb.IPerspective in interfaces:
          raise NotImplementedError, "No supported avatar interface."
       else:
          avatar = UserPerspective(self.mEventManager, avatarId)
-         return pb.IPerspective, avatar, lambda: None
+         return pb.IPerspective, avatar, lambda: avatar.logout(mind)
 
 def RunServer(installSH=True):
    try:
