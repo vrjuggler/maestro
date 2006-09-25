@@ -72,9 +72,9 @@ class _PortalWrapper(Referenceable):
 
    def _loggedIn(self, (interface, perspective, logout), creds):
       print "Log-in successful."
+      perspective.setCredentials(creds)
       if not IJellyable.providedBy(perspective):
          perspective = pb.AsReferenceable(perspective, "perspective")
-      perspective.mCredentials = creds
       self.broker.notifyOnDisconnect(logout)
       return perspective
 
