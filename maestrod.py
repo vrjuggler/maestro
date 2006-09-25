@@ -137,6 +137,12 @@ class UserPerspective(pb.Avatar):
    def perspective_emit(self, nodeId, sigName, argsTuple=()):
       self.mEventManager.remote_emit(nodeId, sigName, (self,) + argsTuple)
 
+   def setCredentials(self, creds):
+      self.mCredentials = creds
+
+   def getCredentials(self):
+      return self.mCredentials
+
    def logout(self, nodeId):
       print "Logging out client: ", nodeId
       self.mEventManager.unregisterProxy(nodeId)
