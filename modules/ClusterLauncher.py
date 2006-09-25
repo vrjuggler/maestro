@@ -21,7 +21,6 @@ from PyQt4 import QtGui, QtCore
 import ClusterLauncherBase
 import ClusterLauncherResource
 import elementtree.ElementTree as ET
-import ClusterModel
 import StanzaModel
 import Stanza
 import GlobalOptions
@@ -584,24 +583,3 @@ class ValueSheet(Sheet):
 def getModuleInfo():
    icon = QtGui.QIcon(":/ClusterLauncher/images/launch.png")
    return (ClusterLauncher, icon)
-
-def main():
-   try:
-      app = QtGui.QApplication(sys.argv)
-      tree = ET.ElementTree(file=sys.argv[1])
-      cluster_config = ClusterModel.ClusterModel(tree);
-      cs = ClusterLauncher()
-      cs.configure(cluster_config)
-      cs.show()
-      sys.exit(app.exec_())
-   except IOError, ex:
-      print "Failed to read %s: %s" % (sys.argv[1], ex.strerror)
-
-def usage():
-   print "Usage: %s <XML configuration file>" % sys.argv[0]
-
-if __name__ == '__main__':
-   if len(sys.argv) >= 2:
-      main()
-   else:
-      usage()

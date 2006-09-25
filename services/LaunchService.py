@@ -97,6 +97,9 @@ class LaunchService:
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 
             avatar_id = avatar.mAvatarId
+            creds = avatar.mCredentials
+            username = creds["username"]
+            password = creds["password"]
             
             #self.mBuffer = util.process.IOBuffer(name='<stdout>')
             #self.mProcess = util.process.ProcessProxy(command, stdout=self.mBuffer, stderr=self.mBuffer, env={'DISPLAY':':0.0'})

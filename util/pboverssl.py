@@ -61,7 +61,7 @@ class _PortalWrapper(Referenceable):
          self.mPAMCred = credentials.PluggableAuthenticationModules(username, conv)
          d = self.portal.login(self.mPAMCred, mind, pb.IPerspective)
 
-      d.addCallback(self._loggedIn)
+      d.addCallback(self._loggedIn, creds)
 #.addErrback(self.tryNext, mind)
       return d
 
@@ -70,10 +70,11 @@ class _PortalWrapper(Referenceable):
       d.addCallback(self._loggedIn)
       return d
 
-   def _loggedIn(self, (interface, perspective, logout)):
+   def _loggedIn(self, (interface, perspective, logout), creds):
       print "Log-in successful."
       if not IJellyable.providedBy(perspective):
          perspective = pb.AsReferenceable(perspective, "perspective")
+      perspective.mCredentials = creds
       self.broker.notifyOnDisconnect(logout)
       return perspective
 

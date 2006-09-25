@@ -124,6 +124,7 @@ class UserPerspective(pb.Avatar):
       """
       self.mEventManager = eventMgr
       self.mAvatarId = avatarId
+      self.mCredentials = {}
 
    def perspective_registerCallback(self, nodeId, obj):
       self.mEventManager.remote_registerCallback(nodeId, obj)
