@@ -33,6 +33,9 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       self.mProxies = {}
       self.mIpAddress = ipAddress
 
+   def setCredentials(self, creds):
+      self.mCredentials = creds
+
    def remote_registerCallback(self, nodeId, obj):
       """ Forward request to register for callback signals. """
       print "Register remote object: ", obj
@@ -73,9 +76,10 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
 
       reactor.connectSSL(nodeId, 8789, factory, ctx_factory)
 
-      creds = {'username':'aronb', 'password':'aronb', 'domain':''}
+      #creds = {'username':'aronb', 'password':'aronb', 'domain':''}
       ip_address = socket.gethostbyname(socket.gethostname())
-      d = factory.login(creds, ip_address).addCallback(lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
+      d = factory.login(self.mCredentials, ip_address).addCallback(
+         lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
 
    def completeConnect(self, nodeId, object):
       object.callRemote("registerCallback", self.mIpAddress, self)

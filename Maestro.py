@@ -34,6 +34,7 @@ import elementtree.ElementTree as ET
 import util.EventManager
 import modules
 import LogWidget
+import LoginDialog
 
 import socket
 import time
@@ -352,10 +353,10 @@ def main():
       logo_path = os.path.join(os.path.dirname(__file__), 'images', 'cpu_array.png')
       pixmap = QtGui.QPixmap(logo_path)
       splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
-      splash.show()
-      splash.showMessage("Establishing connections...")
+      #splash.show()
+      #splash.showMessage("Establishing connections...")
 
-      QtGui.qApp.processEvents()
+      #QtGui.qApp.processEvents()
 
       # Create the event manager
 
@@ -368,17 +369,24 @@ def main():
       # Parse xml config file
       tree = ET.ElementTree(file=sys.argv[1])
 
+      ld = LoginDialog.LoginDialog()
+      if QtGui.QDialog.Rejected == ld.exec_():
+         sys.exit(-1)
+      print "TEST: ", ld.getLoginInfo()
+
+      event_manager.setCredentials(ld.getLoginInfo())
+
       # Try to make inital connections
       # Create cluster configuration
       ensemble = Ensemble.Ensemble(tree)
       ensemble.init(event_manager)
-      ensemble.refreshConnections()
+#      ensemble.refreshConnections()
 
       # Create and display GUI
       m = Maestro()
       m.init(ensemble, event_manager)
       m.show()
-      splash.finish(m)
+#      splash.finish(m)
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()
