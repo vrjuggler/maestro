@@ -400,8 +400,6 @@ _SaferCreateProcess(appName=%r,
             else:
                 hProcess, hThread, processId, threadId\
                     = win32process.CreateProcess(*params)
-#            hProcess, hThread, processId, threadId\
-#                = win32process.CreateProcess(*params)
         except TypeError, ex:
             if ex.args == ('All dictionary items must be strings, or all must be unicode',):
                 # Try again with an all unicode environment.
