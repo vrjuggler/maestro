@@ -43,7 +43,7 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
 
    def setupUi(self, widget):
       """
-      Setup all initial gui settings that don't need to know about the cluster configuration.
+      Setup all initial gui settings that don't need to know about the ensemble.
       """
       ProcessViewerBase.Ui_ProcessViewerBase.setupUi(self, widget)
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
@@ -58,6 +58,12 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mProcessTable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
       self.mProcessTable.setAlternatingRowColors(True)
 
+      self.mTerminateAction = QtGui.QAction(self.tr("&Terminate"), self)
+      self.mTerminateAction.setShortcut(self.tr("Ctrl+T"))
+      self.connect(self.mTerminateAction, QtCore.SIGNAL("triggered()"), self.onTerminateProcess)
+      self.mProcessTable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+      self.mProcessTable.addAction(self.mTerminateAction)
+
    def onRefresh(self):
       """ Called when user presses the refresh button. """
       if self.mEnsemble is not None:
@@ -69,17 +75,45 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mProcessTable.reset()
       
    def onReportProcs(self, nodeId, procs):
+      """ Callback for when a node is reporting a list of processes """
       new_procs = []
       for p in procs:
          (name, pid, ppid, user, start) = p
          proc = Proc(nodeId, name, pid, ppid, user, start)
          new_procs.append(proc)
 
+      # Clear all existing process records for the node.
+      self.mProcessModel.clearProcessesForNode(nodeId)
       self.mProcessModel.mProcs.extend(new_procs)
+      # Signal the the process model changed so that the sort proxy updates.
       self.mProcessModel.changed()
+      # Update the TableView to show new changes.
       self.mProcessTable.resizeRowsToContents()
-      #self.mResourceModel.mCpuUsageMap[ip] = val
       self.mProcessTable.reset()
+
+   def onTerminateProcess(self):
+      """ Terminates all currently selected processes. """
+      nodes_to_refresh = []
+      for selected_index in self.mProcessTable.selectedIndexes():
+         # Only handle selected indices in the first column since we only
+         # need to terminate once for each row.
+         if 0 == selected_index.column():
+            # Map the current selected "sort" index into real index.
+            source_index = self.mSortedProcessModel.mapToSource(selected_index)
+
+            # Get the process record for selected index.
+            proc = self.mProcessModel.data(source_index, QtCore.Qt.UserRole)
+
+            # Fire a terminate event.
+            if proc is not None and isinstance(proc, Proc):
+               self.mEventManager.emit(proc.mNode, "process.terminate_proc", (proc.mPID,))
+               # Add node to list of nodes to refresh.
+               if nodes_to_refresh.count(proc.mNode) == 0:
+                  nodes_to_refresh.append(proc.mNode)
+
+      # Refresh process list for all nodes where we terminated a process. 
+      for node in nodes_to_refresh:
+         self.mEventManager.emit(node, "process.get_procs", ())
 
    def init(self, ensemble, eventManager):
       """ Configure the user interface with data in cluster configuration. """
@@ -106,6 +140,12 @@ class ProcessModel(QtCore.QAbstractTableModel):
       self.mEnsemble = ensemble
       self.mProcs = []
 
+   def clearProcessesForNode(self, nodeId):
+      self.mProcs = [p for p in self.mProcs if not p.mNode == nodeId]
+
+   def clearAll(self):
+      self.mProcs = []
+
    def rowCount(self, parent):
       return len(self.mProcs)
 
@@ -130,19 +170,20 @@ class ProcessModel(QtCore.QAbstractTableModel):
    def data(self, index, role):
       if not index.isValid():
          return QtCore.QVariant()
-      elif role != QtCore.Qt.DisplayRole:
-         return QtCore.QVariant()
 
       proc = self.mProcs[index.row()]
-      if index.column() == 0:
-         return QtCore.QVariant(proc.mNode)
-      elif index.column() == 1:
-         return QtCore.QVariant(proc.mName)
-      elif index.column() == 2:
-         return QtCore.QVariant(proc.mUser)
-      elif index.column() == 3:
-         return QtCore.QVariant(int(proc.mPID))
-      
+      if role == QtCore.Qt.DisplayRole:
+         if index.column() == 0:
+            return QtCore.QVariant(proc.mNode)
+         elif index.column() == 1:
+            return QtCore.QVariant(proc.mName)
+         elif index.column() == 2:
+            return QtCore.QVariant(str(proc.mUser))
+         elif index.column() == 3:
+            return QtCore.QVariant(int(proc.mPID))
+      elif role == QtCore.Qt.UserRole:
+         return proc
+
       return QtCore.QVariant()
 
 def getModuleInfo():
