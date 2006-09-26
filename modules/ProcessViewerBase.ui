@@ -71,6 +71,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="mTerminateBtn" >
+       <property name="text" >
+        <string>&amp;Terminate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer>
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>

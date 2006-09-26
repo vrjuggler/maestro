@@ -50,6 +50,10 @@ class Ui_ProcessViewerBase(object):
       self.mRefreshBtn.setObjectName("mRefreshBtn")
       self.hboxlayout.addWidget(self.mRefreshBtn)
 
+      self.mTerminateBtn = QtGui.QPushButton(ProcessViewerBase)
+      self.mTerminateBtn.setObjectName("mTerminateBtn")
+      self.hboxlayout.addWidget(self.mTerminateBtn)
+
       spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
       self.hboxlayout.addItem(spacerItem)
       self.vboxlayout.addLayout(self.hboxlayout)
@@ -61,6 +65,7 @@ class Ui_ProcessViewerBase(object):
       ProcessViewerBase.setWindowTitle(QtGui.QApplication.translate("ProcessViewerBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
       self.mTitleLbl.setText(QtGui.QApplication.translate("ProcessViewerBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("ProcessViewerBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTerminateBtn.setText(QtGui.QApplication.translate("ProcessViewerBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":

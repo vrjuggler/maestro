@@ -49,6 +49,7 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       ProcessViewerBase.Ui_ProcessViewerBase.setupUi(self, widget)
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
       self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
+      self.mTerminateBtn.setEnabled(False)
       
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
       QtCore.QObject.disconnect(self.mProcessTable.horizontalHeader(), QtCore.SIGNAL("sectionPressed(int)"),
@@ -64,6 +65,9 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.connect(self.mTerminateAction, QtCore.SIGNAL("triggered()"), self.onTerminateProcess)
       self.mProcessTable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
       self.mProcessTable.addAction(self.mTerminateAction)
+      self.mTerminateBtn.addAction(self.mTerminateAction)
+      self.connect(self.mTerminateBtn, QtCore.SIGNAL("clicked(bool)"), self.onTerminateProcess)
+
 
    def onRefresh(self):
       """ Called when user presses the refresh button. """
@@ -73,8 +77,13 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mProcessModel.mProcs = []
       self.mProcessModel.changed()
       self.mProcessTable.resizeRowsToContents()
-      self.mProcessTable.reset()
-      
+      self.mProcessTable.selectionModel().clear()
+      #self.mProcessTable.reset()
+
+   def onSelectionChanged(self, selected, deselected):
+      num_procs_selected = len(self.mProcessTable.selectionModel().selection().indexes())
+      self.mTerminateBtn.setEnabled(num_procs_selected > 0)
+
    def onReportProcs(self, nodeId, procs):
       """ Callback for when a node is reporting a list of processes """
       new_procs = []
@@ -91,9 +100,9 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       # Update the TableView to show new changes.
       self.mProcessTable.resizeRowsToContents()
       self.mProcessTable.resizeColumnsToContents()
-      self.mProcessTable.reset()
+      #self.mProcessTable.reset()
 
-   def onTerminateProcess(self):
+   def onTerminateProcess(self, checked=False):
       """ Terminates all currently selected processes. """
       nodes_to_refresh = []
       for selected_index in self.mProcessTable.selectedIndexes():
@@ -113,6 +122,9 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
                if nodes_to_refresh.count(proc.mNode) == 0:
                   nodes_to_refresh.append(proc.mNode)
 
+      # Clear the selection model since our process will now be gone.
+      self.mProcessTable.selectionModel().clear()
+
       # Refresh process list for all nodes where we terminated a process. 
       for node in nodes_to_refresh:
          self.mEventManager.emit(node, "process.get_procs", ())
@@ -128,6 +140,11 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mProcessTable.horizontalHeader().setSortIndicator(1, QtCore.Qt.AscendingOrder)
       self.mProcessTable.horizontalHeader().setSortIndicatorShown(True)
       self.mProcessTable.horizontalHeader().setClickable(True)
+
+      selection_model = self.mProcessTable.selectionModel()
+      print "Selection model: ", selection_model
+      self.connect(selection_model,
+         QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.onSelectionChanged)
 
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "process.procs", self.onReportProcs)
