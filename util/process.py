@@ -150,6 +150,8 @@ if sys.platform.startswith("win"):
     import pywintypes
     import win32process
     import win32event
+    import win32security
+    import win32con
     # constants pulled from win32con to save memory
     VER_PLATFORM_WIN32_WINDOWS = 1
     CTRL_BREAK_EVENT = 1
@@ -157,6 +159,7 @@ if sys.platform.startswith("win"):
     WM_CLOSE = 0x10
     DUPLICATE_SAME_ACCESS = 2
 else:
+    import pwd
     import signal
 
 import which # http://trentm.com/projects/which/
@@ -339,7 +342,8 @@ def _whichFirstArg(cmd, env=None):
 
 
 if sys.platform.startswith("win"):
-    def _SaferCreateProcess(appName,        # app name
+    def _SaferCreateProcess(credentials,    # credentials
+                            appName,        # app name
                             cmd,            # command line 
                             processSA,      # process security attributes 
                             threadSA,       # thread security attributes 
@@ -380,10 +384,22 @@ _SaferCreateProcess(appName=%r,
     os.getcwd(): %r
 """, appName, cmd, env, cwd, os.getcwd())
         try:
-            hProcess, hThread, processId, threadId\
-                = win32process.CreateProcess(appName, cmd, processSA,
-                                             threadSA, inheritHandles,
-                                             creationFlags, env, cwd, si)
+            params = (appName, cmd, processSA, threadSA, inheritHandles,
+                      creationFlags, env, cwd, si)
+
+            if credentials is not None:
+                user = win32security.LogonUser(credentials['username'],
+                                               credentials['domain'],
+                                               credentials['password'],
+                                               win32con.LOGON32_LOGON_INTERACTIVE,
+                                               win32con.LOGON32_PROVIDER_DEFAULT)
+                win32security.ImpersonateLoggedOnUser(user)
+                hProcess, hThread, processId, threadId\
+                    = win32process.CreateProcessAsUser(user, *params)
+                win32security.RevertToSelf()
+            else:
+                hProcess, hThread, processId, threadId\
+                    = win32process.CreateProcess(*params)
         except TypeError, ex:
             if ex.args == ('All dictionary items must be strings, or all must be unicode',):
                 # Try again with an all unicode environment.
@@ -944,6 +960,7 @@ class Process:
         try:
             self._hProcess, self._hThread, self._processId, self._threadId\
                 = _SaferCreateProcess(
+                    None,           # credentials
                     None,           # app name
                     cmd,            # command line 
                     None,           # process security attributes 
@@ -1097,7 +1114,8 @@ class ProcessOpen(Process):
     #   - Share some implementation with Process and ProcessProxy.
     #
 
-    def __init__(self, cmd, mode='t', cwd=None, env=None, avatarId=None):
+    def __init__(self, cmd, mode='t', cwd=None, env=None, avatarId=None,
+                 credentials = None):
         """Create a Process with proxy threads for each std handle.
 
         "cmd" is the command string or argument vector to run.
@@ -1122,6 +1140,7 @@ class ProcessOpen(Process):
         self._env = env
         self._mode = mode
         self._avatarId = avatarId
+        self._credentials = credentials
         if self._mode not in ('t', 'b'):
             raise ProcessError("'mode' must be 't' or 'b'.")
         self._closed = 0
@@ -1181,6 +1200,13 @@ class ProcessOpen(Process):
         """
         pid = os.fork()
         if pid == 0: # child
+            # Drop root privileges entirely and run as the authenticated user.
+            pw_entry = pwd.getpwnam(self._credentials['username'])
+            # NOTE: os.setgid() must be called first or else we will get an
+            # "operation not permitted" error.
+            os.setgid(pw_entry[3])
+            os.setuid(pw_entry[2])
+
             os.dup2(fdChildStdinRd, 0)
             os.dup2(fdChildStdoutWr, 1)
             os.dup2(fdChildStderrWr, 2)
@@ -1304,6 +1330,7 @@ class ProcessOpen(Process):
             try:
                 self._hProcess, hThread, self._processId, threadId\
                     = _SaferCreateProcess(
+                        self._credentials, # credentials
                         None,           # app name
                         cmd,            # command line 
                         None,           # process security attributes 
@@ -1747,6 +1774,7 @@ class ProcessProxy(Process):
             try:
                 self._hProcess, hThread, self._processId, threadId\
                     = _SaferCreateProcess(
+                        None,           # credentials
                         None,           # app name
                         cmd,            # command line 
                         None,           # process security attributes 
