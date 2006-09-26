@@ -22,10 +22,13 @@ import sys, os
 import os.path
 import util.process
 import util.EventManager
+import logging
+
 
 class LaunchService:
    def __init__(self):
       self.mProcess = None
+      self.mLogger = logging.getLogger('maestrod.LaunchService')
 
    def init(self, eventManager):
       self.mEventManager = eventManager
@@ -37,15 +40,15 @@ class LaunchService:
          if self.mProcess is not None:
             #if self.mBuffer._closed:
             #   result = self.mBuffer.read()
-            #   print result
+            #   self.mLogger.debug(result)
             #   #self.mEventManager.emit("*", "launch.output", (result,))
             #   self.mProcess = None
             #elif self.mBuffer._haveNumBytes(1024):
             #   result = self.mBuffer.read()
-            #   #print result
+            #   #self.mLogger.debug(result)
             #   self.mEventManager.emit("*", "launch.output", (result,))
             #result = self.isProcessRunning()
-            #print "Testing process running: ", result
+            #self.mLogger.info("Testing process running: " + str(result))
             #if not result:
             #   self.mProcess = None
             #   self.mBuffer = None
@@ -56,44 +59,56 @@ class LaunchService:
             #if line is not None:
             #   if line == "":
             #      result = self.isProcessRunning()
-            #      print "Testing process running: ", result
+            #      self.mLogger.info("Testing process running: " + str(result))
             #      if not result:
             #         self.mProcess = None
             #         return
             #   self.mEventManager.emit("*", "launch.output", (line,))
-            #   print "line: ", line
+            #   self.mLogger.debug("line: " + line)
 
             line = self.mProcess.stdout.read(4096)
             #line = self.mProcess.stdout.readline()
             if line is None or line == "":
                result = self.isProcessRunning()
-               print "Testing process running: ", result
+               self.mLogger.info("Testing process running: " + str(result))
                if not result:
                   self.mProcess = None
                   return
-            print "line: ", line
+            self.mLogger.debug("line: " + line)
             self.mEventManager.emit("*", "launch.output", (line,))
 
       except Exception, ex:
-         print "I/O Error: ", ex
+         self.mLogger.error("I/O Error: " + str(ex))
 
    def onRunCommand(self, nodeId, avatar, command, cwd, envMap):
-      print "LaunchService.onRunCommand(%s, %s, %s)" % (command, cwd, envMap)
+      def merge(d1, d2):
+         for k in d2.keys():
+            if d1.has_key(k):
+               if d1[v].find(os.path.pathsep) != -1:
+                  d1[k] = d1[k] + os.path.pathsep + d2[k]
+               else:
+                  d1[k] += d2[k]
+            else:
+               d1[k] = d2[k]
+
+      self.mLogger.debug("LaunchService.onRunCommand(%s, %s, %s)" % (command, cwd, envMap))
 
       try:
          if not None == self.mProcess and self.isProcessRunning():
-            print "Command already running."
+            self.mLogger.warning("Command already running.")
             return False
          else:
-            print "\nOriginal env:", envMap
+            self.mLogger.debug("Original env: " + str(envMap))
             self.evaluateEnvVars(envMap)
             command = self.expandEnv(command, envMap)[0]
             cwd     = self.expandEnv(cwd, envMap)[0]
             #command = command.replace('\\', '\\\\')
-            print "\nRunning command: ", command
-            print "\nWorking Dir: ", cwd
-            print "\nTranslated env:", envMap
-         
+            self.mLogger.info("Running command: " + command)
+            self.mLogger.debug("Working Dir: " + cwd)
+            self.mLogger.debug("Translated env: " + str(envMap))
+
+#            merge(envMap, os.environ)
+#            self.mLogger.debug(envMap)
             if sys.platform.startswith("win"):
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 
@@ -108,7 +123,7 @@ class LaunchService:
             return True
       except KeyError, ex:
          #traceback.print_stack()
-         print "runCommand() failed with KeyError:", ex
+         self.mLogger.error("runCommand() failed with KeyError: " + str(ex))
          return False
 
    def stopCommand(self):
@@ -144,7 +159,7 @@ class LaunchService:
       match = sEnvVarRegexBraces.search(value, start_pos)
 
       while match is not None:
-         print "1"
+         self.mLogger.debug("1")
          env_var = match.group(1)
          env_var_ex = re.compile(r'\${%s}' % env_var)
 
@@ -152,13 +167,13 @@ class LaunchService:
          # then try to get from os.environ
          if envMap.has_key(env_var) and not (env_var == key):
             new_value = env_var_ex.sub(envMap[env_var].replace('\\', '\\\\'), value)
-            print "Replaceing %s -> %s" % (value, new_value)
+            self.mLogger.debug("Replacing %s -> %s" % (value, new_value))
             value = new_value
             replaced = replaced + 1
          elif os.environ.has_key(env_var):
-            #print "%s = %s" % (env_var, os.environ[env_var])
+            #self.mLogger.debug("%s = %s" % (env_var, os.environ[env_var]))
             new_value = env_var_ex.sub(os.environ[env_var].replace('\\', '\\\\'), value)
-            print "Replaceing %s -> %s" % (value, new_value)
+            self.mLogger.debug("Replacing %s -> %s" % (value, new_value))
             value = new_value
             replaced = replaced + 1
          else:
@@ -173,13 +188,13 @@ class LaunchService:
       sEnvVarRegexBraces = re.compile('\${(\w+)}')
       replaced = 1
       while replaced > 0:
-         print "replaced:", replaced
+         self.mLogger.debug("replaced: " + str(replaced))
          replaced = 0
          for k, v in envMap.iteritems():
-            print "Trying to match: ", v
+            self.mLogger.debug("Trying to match: " + v)
             match = sEnvVarRegexBraces.search(v)
             if match is not None:
-               print "Trying to replace env vars in", v
+               self.mLogger.debug("Trying to replace env vars in " + str(v))
                (v, r) = self.expandEnv(v, envMap, k)
                envMap[k] = v
                replaced = replaced + r

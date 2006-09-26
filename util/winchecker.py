@@ -23,6 +23,8 @@ from twisted.python import failure
 from twisted.cred import credentials, checkers
 from zope import interface
 import win32security, win32con
+import logging
+
 
 class IWindowsUsernamePassword(credentials.ICredentials):
    """
@@ -35,21 +37,22 @@ class WindowsUsernamePassword:
    interface.implements(IWindowsUsernamePassword)
 
    def __init__(self, username, password, domain):
-       self.mUsername = username
-       self.mPassword = password
-       self.mDomain = domain
+      self.mUsername = username
+      self.mPassword = password
+      self.mDomain = domain
+      self.mLogger = logging.getLogger('maestrod.WindowsUsernamePassword')
 
    def attemptLogon(self):
       try:
          handle = win32security.LogonUser(self.mUsername, self.mDomain, self.mPassword,
             win32con.LOGON32_LOGON_INTERACTIVE,
             win32con.LOGON32_PROVIDER_DEFAULT)
-         print "Windows login succeeded."
+         self.mLogger.info("Windows login succeeded.")
          # XXX: Result may have to be a string.
          #      http://twistedmatrix.com/projects/core/documentation/howto/cred.html#auto5
          return handle
       except Exception, ex:
-         print "Windows login failed."
+         self.mLogger.error("Windows login failed.")
          return failure.Failure(error.UnauthorizedLogin(str(ex)))
 
 class WindowsChecker:

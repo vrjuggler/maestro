@@ -28,6 +28,8 @@ import util.EventManager
 import datetime
 import time
 import socket
+import logging
+import logging.handlers
 
 from twisted.spread import pb
 from util import pboverssl
@@ -58,7 +60,7 @@ class MaestroServer:
       self.mServices = []
 
    def remote_test(self, val):
-      print "Testing: ", val
+      logging.getLogger('maestrod.MaestroServer').debug('Testing: ' + val)
       return "Test complete"
 
    def registerInitialServices(self):
@@ -95,24 +97,44 @@ if os.name == 'nt':
 
       def __init__(self, args):
          win32serviceutil.ServiceFramework.__init__(self, args)
+         self.mNtEvent = logging.handlers.NTEventLogHandler(self._svc_name_)
+         log_file = os.path.join(os.environ['SystemRoot'], 'system32',
+                                 'maestrod.log')
+         self.mFileLog = logging.handlers.RotatingFileHandler(log_file, 'a',
+                                                              50000, 10)
 
       def SvcStop(self):
          import servicemanager
          self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
+
+         logger = logging.getLogger('')
+         logger.info('Stopped')
+         logging.shutdown()
+
          # Shutdown Server
          #self.sfcServer.server_close()
-         # Log a 'stopped message to the event log.
-         servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
-                               servicemanager.PYS_SERVICE_STOPPED,
-                               (self._svc_display_name_, 'Stopped'))
          self.ReportServiceStatus(win32service.SERVICE_STOPPED)
 
       def SvcDoRun(self):
          import servicemanager
+
+         formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
+         self.mNtEvent.setLevel(logging.INFO)
+         self.mNtEvent.setFormatter(formatter)
+         self.mFileLog.setLevel(logging.DEBUG)
+         self.mFileLog.setFormatter(formatter)
+
+         logger = logging.getLogger('')
+         logger.addHandler(self.mNtEvent)
+         logger.addHandler(self.mFileLog)
+
+         logger.info('Started')
+
          # Log a 'started' message to the event log.
          servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
                                servicemanager.PYS_SERVICE_STARTED,
-                               (self._svc_display_name_, 'Started'))
+                               (self._svc_display_name_, ''))
+
          try:
             RunServer(installSH=False)
          except Exception, ex:
@@ -144,7 +166,8 @@ class UserPerspective(pb.Avatar):
       return self.mCredentials
 
    def logout(self, nodeId):
-      print "Logging out client: ", nodeId
+      logger = logging.getLogger('maestrod.UserPerspective')
+      logger.info("Logging out client: " + str(nodeId))
       self.mEventManager.unregisterProxy(nodeId)
 
 
@@ -164,6 +187,7 @@ class TestRealm(object):
          return pb.IPerspective, avatar, lambda: avatar.logout(mind)
 
 def RunServer(installSH=True):
+   logger = logging.getLogger('maestrod.RunServer')
    try:
       cluster_server = MaestroServer()
       cluster_server.registerInitialServices()
@@ -191,7 +215,7 @@ def RunServer(installSH=True):
       #reactor.listenTCP(8789, factory)
       pk_path = os.path.join(os.path.dirname(__file__), 'server.pem')
       cert_path = os.path.join(os.path.dirname(__file__), 'server.pem')
-      print "Cert: ", cert_path
+      logger.info("Cert: " + cert_path)
       reactor.listenSSL(8789, factory,
          ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
 
@@ -199,7 +223,7 @@ def RunServer(installSH=True):
       looping_call.start(0.1)
       reactor.run(installSignalHandlers=installSH)
    except Exception, ex:
-      print "ERROR: ", ex
+      logger.error(ex)
       raise
 
 
@@ -257,6 +281,11 @@ def daemonize (stdin='/dev/null', stdout='/dev/null', stderr=None, pidfile=None)
       pf.close()
 
 if __name__ == '__main__':
+   # Set up logging to sys.stderr.
+   logging.basicConfig(level = logging.DEBUG,
+                       format = '%(name)-12s %(levelname)-8s %(message)s',
+                       datefmt = '%m-%d %H:%M')
+
    if '-debug' in sys.argv:
       # For debugging, it is handy to be able to run the servers
       # without being a service on Windows or a daemon on Linux.

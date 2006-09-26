@@ -23,6 +23,7 @@ from zope.interface import implements
 from twisted.cred import credentials
 from twisted.spread.interfaces import IJellyable, IUnjellyable
 import sys
+import logging
 
 class PortalRoot:
     """Root object, used to login to portal."""
@@ -71,7 +72,7 @@ class _PortalWrapper(Referenceable):
       return d
 
    def _loggedIn(self, (interface, perspective, logout), creds):
-      print "Log-in successful."
+      logging.getLogger('maestrod._PortalWrapper').info("Log-in successful.")
       perspective.setCredentials(creds)
       if not IJellyable.providedBy(perspective):
          perspective = pb.AsReferenceable(perspective, "perspective")

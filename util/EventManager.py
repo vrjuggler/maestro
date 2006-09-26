@@ -19,6 +19,7 @@
 import types
 import util.EventManagerBase
 import socket
+import logging
 
 from twisted.spread import pb
 from twisted.cred import credentials
@@ -32,13 +33,14 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       util.EventManagerBase.EventManagerBase.__init__(self)
       self.mProxies = {}
       self.mIpAddress = ipAddress
+      self.mLogger = logging.getLogger('maestrod.EventManager')
 
    def setCredentials(self, creds):
       self.mCredentials = creds
 
    def remote_registerCallback(self, nodeId, obj):
       """ Forward request to register for callback signals. """
-      print "Register remote object: ", obj
+      self.mLogger.debug("Register remote object: " + str(obj))
       self.registerProxy(nodeId, obj)
 
    def remote_emit(self, nodeId, sigName, argsTuple=()):
@@ -46,8 +48,8 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       util.EventManagerBase.EventManagerBase.emit(self, nodeId, sigName, argsTuple)
 
    def _catchFailure(self, failure):
-      print "error: ", str(failure.value)
-      print "error: ", failure.getErrorMessage()
+      self.mLogger.error(str(failure.value))
+      self.mLogger.error(failure.getErrorMessage())
 
    def connectToNode(self, nodeId):
       """ Connect to the given nodes event manager.
@@ -94,7 +96,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
          raise TypeError("EventManager.connect: nodeId of non-string type passed")
 
       if self.mProxies.has_key(nodeId):
-         print "DEBUG: EventManager.disconnect(%s)" % (nodeId)
+         self.mLogger.debug("EventManager.disconnect(%s)" % (nodeId))
          del self.mProxies[nodeId]
 
    def registerProxy(self, nodeId, obj):
@@ -125,14 +127,14 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       # Get local IP address to use for nodeId mask on remote nodes.
       ip_address = socket.gethostbyname(socket.gethostname())
 
-      print "DEBUG: EventManager.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple)
+      self.mLogger.debug("EventManager.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple))
       # Build up a list of all connections to emit signal on.
       nodes = []
       if nodeId == "*":
          nodes = self.mProxies.items()
       elif self.mProxies.has_key(nodeId):
          nodes = [(nodeId, self.mProxies[nodeId])]
-      print "   DEBUG: [%s][%s] " % (self.mProxies.items(), nodes)
+      self.mLogger.debug("   [%s][%s] " % (self.mProxies.items(), nodes))
 
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
@@ -140,7 +142,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
             v.callRemote("emit", ip_address, sigName, argsTuple)
          except ex:
             del self.mProxies[k]
-            print 'Removed dead connection', k
+            self.mLogger.info('Removed dead connection ' + str(k))
 
    def isConnected(self, nodeId):
       return self.mProxies.has_key(nodeId)
