@@ -70,13 +70,12 @@ class ProcessManagementService:
             (domain, return_value, user) = process.GetOwner()
             if process.CreationDate is not None:
                creation_date = wmi.to_time(process.CreationDate)
-               time_str = "%02d/%02d/%d %d:%02d:%02d" % (creation_date[1],
+               time_str = "%02d/%02d/%d %02d:%02d:%02d" % (creation_date[1],
                   creation_date[2], creation_date[0], creation_date[3],
                   creation_date[4], creation_date[5])
             procs.append((process.Name, process.ProcessId,
                process.ParentProcessId, user, time_str,
                process.CommandLine))
-            print process.ProcessId, process.Name, time_str
          return procs
       else:
          procs = []
