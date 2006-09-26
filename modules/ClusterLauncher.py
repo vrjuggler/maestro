@@ -187,19 +187,19 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
 
          command = ""
          if len(option_visitor.mCommands) == 0:
-            print "ERROR: No command for node [%s].", node.getName()
+            print "ERROR: No command for node [%s]." % node.getName()
             continue
          elif len(option_visitor.mCommands) > 1:
-            print "ERROR: More than one command for node [%s], using first command.", node.getName()
+            print "ERROR: More than one command for node [%s], using first command." % node.getName()
             command = option_visitor.mCommands[0]
          else:
             command = option_visitor.mCommands[0]
 
          cwd = ""
          if len(option_visitor.mCommands) == 0:
-            print "WARNING: No working directory  for node [%s].", node.getName()
+            print "WARNING: No working directory  for node [%s]." % node.getName()
          elif len(option_visitor.mCommands) > 1:
-            print "ERROR: More than one working directory for node [%s], using first.", node.getName()
+            print "ERROR: More than one working directory for node [%s], using first." % node.getName()
             cwd = option_visitor.mCwds[0]
          else:
             cwd = option_visitor.mCwds[0]
