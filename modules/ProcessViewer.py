@@ -21,10 +21,51 @@ import ProcessViewerBase
 import ResourceViewerResource
 
 import services.SettingsService
+import socket
+
+
+class CaseInsensitiveSortProxyModel(QtGui.QSortFilterProxyModel):
+   def __init__(self, parent=None):
+      QtGui.QSortFilterProxyModel.__init__(self, parent)
+
+   def lessThan(self, left, right):
+      if left.model() is None:
+         l = QtCore.QVariant()
+      else:
+         l = left.model().data(left, QtCore.Qt.DisplayRole)
+      
+      if right.model is None:
+         r = QtCore.QVariant()
+      else:
+         r = right.model().data(right, QtCore.Qt.DisplayRole)
+
+      if l.type() == QtCore.QVariant.Int:
+         return l.toInt() < r.toInt()
+      elif l.type() == QtCore.QVariant.UInt:
+         return l.toUInt() < r.toUInt()
+      elif l.type() == QtCore.QVariant.LongLong:
+         return l.toLongLong() < r.toLongLong()
+      elif l.type() == QtCore.QVariant.ULongLong:
+         return l.toULongLong() < r.toULongLong()
+      elif l.type() == QtCore.QVariant.Double:
+         return l.toDouble() < r.toDouble()
+      elif l.type() == QtCore.QVariant.Char:
+         return l.toChar() < r.toChar()
+      elif l.type() == QtCore.QVariant.Date:
+         return l.toDate() < r.toDate()
+      elif l.type() == QtCore.QVariant.Time:
+         return l.toTime() < r.toTime()
+      elif l.type() == QtCore.QVariant.DateTime:
+         return l.toDateTime() < r.toDateTime()
+      else:
+         return l.toString().toLower() < r.toString().toLower()
+
+      return false;
 
 class Proc:
-   def __init__(self, node, name, pid, ppid, user, start, fullCmd):
-      self.mNode = node
+   def __init__(self, nodeId, nodeName, name, pid, ppid, user, start, fullCmd):
+      self.mNodeId = nodeId
+      self.mNodeName = nodeName
       self.mName = name
       self.mPID = pid
       self.mPPID = ppid
@@ -32,9 +73,24 @@ class Proc:
       self.mStart = start
       self.mFullCmd = fullCmd
 
+      # Try to convert start time string into a real QDateTime.
+      if self.mStart != None:
+         # Linux case
+         date_time = QtCore.QDateTime.fromString(self.mStart, "ddd MMM dd hh:mm:ss yyyy")
+         if date_time != QtCore.QDateTime():
+            self.mStart = date_time
+            return
+
+         # Windows case   
+         date_time = QtCore.QDateTime.fromString(self.mStart, "MM/dd/yyyy hh:mm:ss")
+         if date_time != QtCore.QDateTime():
+            self.mStart = date_time
+            return
+         #print "FAILED QDateTime conversion: ", self.mStart
+
    def __repr__(self):
       return "<Proc node:%s name:%s pid:%s user:%s>" \
-         % (self.mNode, self.mName, self.mPID, self.mUser)
+         % (self.mNodeId, self.mName, self.mPID, self.mUser)
 
 class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
    def __init__(self, parent = None):
@@ -86,14 +142,16 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
 
    def onReportProcs(self, nodeId, procs):
       """ Callback for when a node is reporting a list of processes """
+      (host_name, alias_list, ipaddr_list) = socket.gethostbyaddr(nodeId)
+
       new_procs = []
       for p in procs:
          (name, pid, ppid, user, start, full_cmd) = p
-         proc = Proc(nodeId, name, pid, ppid, user, start, full_cmd)
+         proc = Proc(nodeId, host_name, name, pid, ppid, user, start, full_cmd)
          new_procs.append(proc)
 
       # Clear all existing process records for the node.
-      self.mProcessModel.clearProcessesForNode(nodeId)
+      self.mProcessModel.clearProcessesForNodeId(nodeId)
       self.mProcessModel.mProcs.extend(new_procs)
       # Signal the the process model changed so that the sort proxy updates.
       self.mProcessModel.changed()
@@ -117,10 +175,10 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
 
             # Fire a terminate event.
             if proc is not None and isinstance(proc, Proc):
-               self.mEventManager.emit(proc.mNode, "process.terminate_proc", (proc.mPID,))
+               self.mEventManager.emit(proc.mNodeId, "process.terminate_proc", (proc.mPID,))
                # Add node to list of nodes to refresh.
-               if nodes_to_refresh.count(proc.mNode) == 0:
-                  nodes_to_refresh.append(proc.mNode)
+               if nodes_to_refresh.count(proc.mNodeId) == 0:
+                  nodes_to_refresh.append(proc.mNodeId)
 
       # Clear the selection model since our process will now be gone.
       self.mProcessTable.selectionModel().clear()
@@ -134,7 +192,7 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mEnsemble = ensemble
 
       self.mProcessModel = ProcessModel(self.mEnsemble)
-      self.mSortedProcessModel = QtGui.QSortFilterProxyModel()
+      self.mSortedProcessModel = CaseInsensitiveSortProxyModel()
       self.mSortedProcessModel.setSourceModel(self.mProcessModel)
       self.mProcessTable.setModel(self.mSortedProcessModel)
       self.mProcessTable.horizontalHeader().setSortIndicator(1, QtCore.Qt.AscendingOrder)
@@ -159,8 +217,11 @@ class ProcessModel(QtCore.QAbstractTableModel):
       self.mEnsemble = ensemble
       self.mProcs = []
 
-   def clearProcessesForNode(self, nodeId):
-      self.mProcs = [p for p in self.mProcs if not p.mNode == nodeId]
+   def clearProcessesForNodeName(self, nodeName):
+      self.mProcs = [p for p in self.mProcs if not p.mNodeName == nodeName]
+
+   def clearProcessesForNodeId(self, nodeId):
+      self.mProcs = [p for p in self.mProcs if not p.mNodeId == nodeId]
 
    def clearAll(self):
       self.mProcs = []
@@ -197,7 +258,7 @@ class ProcessModel(QtCore.QAbstractTableModel):
       proc = self.mProcs[index.row()]
       if role == QtCore.Qt.DisplayRole:
          if index.column() == 0:
-            return QtCore.QVariant(proc.mNode)
+            return QtCore.QVariant(proc.mNodeName)
          elif index.column() == 1:
             return QtCore.QVariant(proc.mName)
          elif index.column() == 2:
@@ -205,6 +266,8 @@ class ProcessModel(QtCore.QAbstractTableModel):
          elif index.column() == 3:
             return QtCore.QVariant(int(proc.mPID))
          elif index.column() == 4:
+            if isinstance(proc.mStart, QtCore.QDateTime):
+               return QtCore.QVariant(proc.mStart.toString())
             return QtCore.QVariant(str(proc.mStart))
          elif index.column() == 5:
             return QtCore.QVariant(str(proc.mFullCmd))
