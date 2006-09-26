@@ -19,6 +19,9 @@
 import sys, os, platform
 
 import util.EventManager
+import re
+
+ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.*)")
 
 class ProcessManagementService:
    def __init__(self):
@@ -56,7 +59,7 @@ class ProcessManagementService:
             print "Terminating: %s %s" % (process.ProcessId, process.Name)
             process.Terminate()
       else:
-         pass
+         os.system('kill ' + str(pid))
 
    def _getProcs(self):
       if "win32" == sys.platform:
@@ -75,10 +78,11 @@ class ProcessManagementService:
          return procs
       else:
          procs = []
-         (stdin, stdout_stderr) = os.popen4("ps -NU root -Nu root -o comm,pid,ppid,user,start h")
+         (stdin, stdout_stderr) = os.popen4("ps -NU root -Nu root -o comm,pid,ppid,user,lstart h")
          for l in stdout_stderr.readlines():
-            p = l.split()
-            procs.append(p)
+            match_obj = ps_regex.match(l)
+            if match_obj is not None:
+               procs.append(match_obj.groups())
          return procs
 
 if __name__ == "__main__":
