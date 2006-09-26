@@ -23,13 +23,14 @@ import ResourceViewerResource
 import services.SettingsService
 
 class Proc:
-   def __init__(self, node, name, pid, ppid, user, start):
+   def __init__(self, node, name, pid, ppid, user, start, fullCmd):
       self.mNode = node
       self.mName = name
       self.mPID = pid
       self.mPPID = ppid
       self.mUser = user
       self.mStart = start
+      self.mFullCmd = fullCmd
 
    def __repr__(self):
       return "<Proc node:%s name:%s pid:%s user:%s>" \
@@ -78,8 +79,8 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       """ Callback for when a node is reporting a list of processes """
       new_procs = []
       for p in procs:
-         (name, pid, ppid, user, start) = p
-         proc = Proc(nodeId, name, pid, ppid, user, start)
+         (name, pid, ppid, user, start, full_cmd) = p
+         proc = Proc(nodeId, name, pid, ppid, user, start, full_cmd)
          new_procs.append(proc)
 
       # Clear all existing process records for the node.
@@ -89,6 +90,7 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mProcessModel.changed()
       # Update the TableView to show new changes.
       self.mProcessTable.resizeRowsToContents()
+      self.mProcessTable.resizeColumnsToContents()
       self.mProcessTable.reset()
 
    def onTerminateProcess(self):
@@ -150,7 +152,7 @@ class ProcessModel(QtCore.QAbstractTableModel):
       return len(self.mProcs)
 
    def columnCount(self, parent):
-      return 4
+      return 6
 
    def changed(self):
        self.emit(QtCore.SIGNAL("modelReset()"))
@@ -165,6 +167,10 @@ class ProcessModel(QtCore.QAbstractTableModel):
             return QtCore.QVariant("User")
          elif section == 3:
             return QtCore.QVariant("PID")
+         elif section == 4:
+            return QtCore.QVariant("Start Time")
+         elif section == 5:
+            return QtCore.QVariant("Full Command")
       return QtCore.QVariant()
 
    def data(self, index, role):
@@ -181,6 +187,10 @@ class ProcessModel(QtCore.QAbstractTableModel):
             return QtCore.QVariant(str(proc.mUser))
          elif index.column() == 3:
             return QtCore.QVariant(int(proc.mPID))
+         elif index.column() == 4:
+            return QtCore.QVariant(str(proc.mStart))
+         elif index.column() == 5:
+            return QtCore.QVariant(str(proc.mFullCmd))
       elif role == QtCore.Qt.UserRole:
          return proc
 

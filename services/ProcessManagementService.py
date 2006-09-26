@@ -21,7 +21,7 @@ import sys, os, platform
 import util.EventManager
 import re
 
-ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.*)")
+ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.+:\d+\s+\d+)\s+(\S.*)")
 
 class ProcessManagementService:
    def __init__(self):
@@ -78,7 +78,7 @@ class ProcessManagementService:
          return procs
       else:
          procs = []
-         (stdin, stdout_stderr) = os.popen4("ps -NU root -Nu root -o comm,pid,ppid,user,lstart h")
+         (stdin, stdout_stderr) = os.popen4("ps -NU root -Nu root -o comm,pid,ppid,user,lstart,args h")
          for l in stdout_stderr.readlines():
             match_obj = ps_regex.match(l)
             if match_obj is not None:
