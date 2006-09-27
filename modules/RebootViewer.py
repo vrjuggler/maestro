@@ -89,6 +89,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       # Set the default action for the target selection buttons.
       self.mSelectWinBtn.setDefaultAction(self.mSetAllTargetsToWindowsAction)
       self.mSelectLinuxBtn.setDefaultAction(self.mSetAllTargetsToLinuxAction)
+      self.mRebootBtn.setDefaultAction(self.mRebootClusterAction)
    
    def init(self, ensemble, eventManager):
       """ Configure the user interface.
@@ -116,12 +117,14 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mNodeTableView.setModel(self.mRebootModel)
 
       # Tell the last column in the table to take up remaining space.
-      self.mNodeTableView.horizontalHeader().setStretchLastSection(True)
-      #self.mNodeTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
-      #self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+      #self.mNodeTableView.horizontalHeader().setStretchLastSection(True)
+      
+      # Tell the both columns to split the availible space.
+      self.mNodeTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
    def onNodeContextMenu(self, point):
-
+      """ Create a pop-up menu listing all valid operations for selection. """
       # Get the currently selected node.
       node = self.__getSelectedNode()
       temp_callbacks = []
@@ -169,7 +172,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
    def onRebootNode(self):
       """ Slot that reboots the selected cluster. """
-      node = __getSelectedNode()
+      node = self.__getSelectedNode()
       if node is not None:
          self.mEventManager.emit(node.getId(), "reboot.reboot", ())
 
@@ -262,7 +265,7 @@ class RebootDelegate(QtGui.QItemDelegate):
 
       # Get both the current and new boot targets.
       current_target = node.getCurrentTarget()
-      new_target = node.mTargets[widget.currentIndex()]
+      new_target = node.getTarget(widget.currentIndex())
 
       # If the new boot target is different, emit a signal to force change.
       if not current_target == new_target:
@@ -288,7 +291,7 @@ class TargetModel(QtCore.QAbstractListModel):
          return QtCore.QVariant()
 
       # Get the boot target tuple from node.
-      target = self.mNode.mTargets[index.row()]
+      target = self.mNode.getTarget(index.row())
       (title, os, target_index) = target
 
       if role == QtCore.Qt.DecorationRole:
@@ -356,9 +359,9 @@ class RebootModel(QtCore.QAbstractTableModel):
       # We only want to return the title for each column.
       if orientation == QtCore.Qt.Horizontal and QtCore.Qt.DisplayRole == role:
          if section == 0:
-            return QtCore.QVariant("Node")
+            return QtCore.QVariant("Node (Current OS)")
          elif section == 1:
-            return QtCore.QVariant("Boot Target")
+            return QtCore.QVariant("Operating System On Reboot")
       return QtCore.QVariant()
 
    def data(self, index, role):
@@ -380,6 +383,8 @@ class RebootModel(QtCore.QAbstractTableModel):
       (title, os, target_index) = current_target
 
       if role == QtCore.Qt.DecorationRole:
+         if index.column() == 0:
+            return QtCore.QVariant(Icons[node.mPlatform])
          if index.column() == 1:
             # Return an icon representing the operating system.
             return QtCore.QVariant(Icons[os])

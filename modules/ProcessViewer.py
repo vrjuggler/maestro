@@ -115,6 +115,8 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
 
       self.mProcessTable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
       self.mProcessTable.setAlternatingRowColors(True)
+      # Tell the last column in the table to take up remaining space.
+      self.mProcessTable.horizontalHeader().setStretchLastSection(True)
 
       self.mTerminateAction = QtGui.QAction(self.tr("&Terminate"), self)
       self.mTerminateAction.setShortcut(self.tr("Ctrl+T"))
