@@ -165,7 +165,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.setupUi(self)
       self.mEnsemble = None
 
-   def init(self, clusterModel, eventManager):
+   def init(self, clusterModel, eventManager, cfgFilePath):
       # Set the new cluster configuration
       self.mEnsemble = clusterModel
       self.mEventManager = eventManager
@@ -366,7 +366,8 @@ def main():
       ip_address = socket.gethostbyname(socket.gethostname())
       event_manager = util.EventManager.EventManager(ip_address)
 
-      # Parse xml config file
+      # Parse XML ensemble file. This provides the initial set of cluster
+      # nodes.
       tree = ET.ElementTree(file=sys.argv[1])
 
       ld = LoginDialog.LoginDialog()
@@ -382,9 +383,37 @@ def main():
       ensemble.init(event_manager)
 #      ensemble.refreshConnections()
 
+      # All platforms use the same name for the Maestro client settings, but
+      # the file comes from a platform-specific location.
+      cfg_file_name = 'maestro.xml'
+      data_dir      = None
+
+      # Windows.
+      if sys.platform.startswith("win"):
+         if os.environ.has_key('APPDATA'):
+            data_dir = os.path.join(os.environ['APPDATA'], 'Maestro')
+         elif os.environ.has_key('USERPROFILE'):
+            data_dir = os.path.join(os.environ['USERPROFILE'],
+                                    'Application Data', 'Maestro')
+      # Mac OS X.
+      elif sys.platform == 'darwin':
+         data_dir = os.path.join(os.environ['HOME'], 'Library', 'Maestro')
+      # Everything else.
+      else:
+         data_dir = os.path.join(os.environ['HOME'], '.maestro')
+
+      print data_dir
+      if data_dir is not None:
+         if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+
+         cfg_file_path = os.path.join(data_dir, cfg_file_name)
+      else:
+         cfg_file_path = cfg_file_name
+
       # Create and display GUI
       m = Maestro()
-      m.init(ensemble, event_manager)
+      m.init(ensemble, event_manager, cfg_file_path)
       m.show()
 #      splash.finish(m)
       reactor.run()
