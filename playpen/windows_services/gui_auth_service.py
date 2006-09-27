@@ -125,30 +125,15 @@ def openWindow():
    if desktop is not None:
       desktop.CloseDesktop()
 
-def copyACL(src, dest):
-   revision = src.GetAclRevision()
-   for i in range(src.GetAceCount()):
-      ace = src.GetAce(i)
-      logging.debug(src.GetAce(i))
-      # XXX: Not sure if these are actually correct.
-      # See http://aspn.activestate.com/ASPN/docs/ActivePython/2.4/pywin32/PyACL__GetAce_meth.html
-      if ace[0][0] == win32con.ACCESS_ALLOWED_ACE_TYPE:
-         dest.AddAccessAllowedAce(revision, ace[1], ace[2])
-      elif ace[0][0] == win32con.ACCESS_DENIED_ACE_TYPE:
-         dest.AddAccessDeniedAce(revision, ace[1], ace[2])
-      elif ace[0][0] == win32con.SYSTEM_AUDIT_ACE_TYPE:
-         dest.AddAuditAccessAce(revision, ace[1], ace[2], 1, 1)
-      elif ace[0][0] == win32con.ACCESS_ALLOWED_OBJECT_ACE_TYPE:
-         dest.AddAccessAllowedObjectAce(revision, ace[0][1], ace[1], ace[2],
-                                        ace[3], ace[4])
-      elif ace[0][0] == win32con.ACCESS_DENIED_OBJECT_ACE_TYPE:
-         dest.AddAccessDeniedObjectAce(revision, ace[0][1], ace[1], ace[2],
-                                       ace[3], ace[4])
-      elif ace[0][0] == win32con.SYSTEM_AUDIT_OBJECT_ACE_TYPE:
-         dest.AddAuditAccessObjectAce(revision, ace[0][1], ace[1], ace[2],
-                                      ace[3], ace[4], 1, 1)
+def updateACL(handle, acl):
+   # Create a new security descriptor for handle and set its DACL.
+   new_security_desc = win32security.SECURITY_DESCRIPTOR()
+   new_security_desc.SetSecurityDescriptorDacl(True, acl, False)
 
-   return src.GetAceCount()
+   # Set the new security descriptor for winsta.
+   win32security.SetUserObjectSecurity(handle,
+                                       win32con.DACL_SECURITY_INFORMATION,
+                                       new_security_desc)
 
 def addUserToWindowStation(winsta, userSid):
    '''
@@ -184,38 +169,27 @@ def addUserToWindowStation(winsta, userSid):
    # Get discretionary access-control list (DACL) for winsta.
    acl = security_desc.GetSecurityDescriptorDacl()
 
-   # Create a new access control list for winsta.
-   new_acl = win32security.ACL()
-
-   if acl is not None:
-      copyACL(acl, new_acl)
-
    # Add the first ACE for userSid to the window station.
-   ace0_index = new_acl.GetAceCount()
+   ace0_index = acl.GetAceCount()
    ace_flags = win32con.CONTAINER_INHERIT_ACE | \
                win32con.INHERIT_ONLY_ACE      | \
                win32con.OBJECT_INHERIT_ACE
-   new_acl.AddAccessAllowedAceEx(win32con.ACL_REVISION, ace_flags,
-                                 generic_access, userSid)
+   acl.AddAccessAllowedAceEx(win32con.ACL_REVISION, ace_flags, generic_access,
+                             userSid)
 
    # Add the second ACE for userSid to the window station.
-   ace1_index = new_acl.GetAceCount()
+   ace1_index = acl.GetAceCount()
    ace_flags = win32con.NO_PROPAGATE_INHERIT_ACE
-   new_acl.AddAccessAllowedAceEx(win32con.ACL_REVISION, ace_flags,
-                                 winsta_all, userSid)
+   acl.AddAccessAllowedAceEx(win32con.ACL_REVISION, ace_flags, winsta_all,
+                             userSid)
 
-   # Create a new security descriptor and set its new DACL.
+   # Update the DACL for winsta. This is the crux of all this. Just adding
+   # ACEs to acl does not propagate back automatically.
    # NOTE: Simply creating a new security descriptor and assigning it as
    # the security descriptor for winsta (without setting the DACL) is
    # sufficient to allow windows to be opened, but that is probably not
    # providing any kind of security on winsta.
-   new_security_desc = win32security.SECURITY_DESCRIPTOR()
-   new_security_desc.SetSecurityDescriptorDacl(True, new_acl, False)
-
-   # Set the new security descriptor for winsta.
-   win32security.SetUserObjectSecurity(winsta,
-                                       win32con.DACL_SECURITY_INFORMATION,
-                                       new_security_desc)
+   updateACL(winsta, acl)
 
    return [ace0_index, ace1_index]
 
@@ -246,24 +220,13 @@ def addUserToDesktop(desktop, userSid):
    # Get discretionary access-control list (DACL) for desktop.
    acl = security_desc.GetSecurityDescriptorDacl()
 
-   # Create a new access control list for desktop.
-   new_acl = win32security.ACL()
-
-   if acl is not None:
-      copyACL(acl, new_acl)
-
    # Add the ACE for user_sid to the desktop.
-   ace0_index = new_acl.GetAceCount()
-   new_acl.AddAccessAllowedAce(win32con.ACL_REVISION, desktop_all, userSid)
+   ace0_index = acl.GetAceCount()
+   acl.AddAccessAllowedAce(win32con.ACL_REVISION, desktop_all, userSid)
 
-   # Create a new security descriptor and set its new DACL.
-   new_security_desc = win32security.SECURITY_DESCRIPTOR()
-   new_security_desc.SetSecurityDescriptorDacl(True, new_acl, False)
-
-   # Set the new security descriptor for desktop.
-   win32security.SetUserObjectSecurity(desktop,
-                                       win32con.DACL_SECURITY_INFORMATION,
-                                       new_security_desc)
+   # Update the DACL for desktop. This is the crux of all this. Just adding
+   # ACEs to acl does not propagate back automatically.
+   updateACL(desktop, acl)
 
    return [ace0_index]
 
@@ -289,14 +252,7 @@ def removeACEs(handle, aceIndices):
    logging.debug("ACE count before %d" % old_count)
    logging.debug("ACE count after %d" % acl.GetAceCount())
 
-   # Create a new security descriptor and set its new DACL.
-   new_security_desc = win32security.SECURITY_DESCRIPTOR()
-   new_security_desc.SetSecurityDescriptorDacl(True, acl, False)
-
-   # Set the new security descriptor for desktop.
-   win32security.SetUserObjectSecurity(handle,
-                                       win32con.DACL_SECURITY_INFORMATION,
-                                       new_security_desc)
+   updateACL(handle, acl)
 
 def runCommandAsOtherUser():
    '''
