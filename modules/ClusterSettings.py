@@ -44,19 +44,19 @@ class TargetListItem(QtGui.QListWidgetItem):
    def __init__(self, title, id, index, parent=None):
       QtGui.QListWidgetItem.__init__(self, parent)
       self.mTitle = title
-      self.mId = id
+      self.mOs = id
       self.mIndex = index
 
    def data(self, role):
       if role == QtCore.Qt.EditRole or role == QtCore.Qt.DisplayRole:
          return QtCore.QVariant(self.mTitle)
       elif role == QtCore.Qt.DecorationRole:
-         if Icons.has_key(self.mId):
-            return QtCore.QVariant(Icons[self.mId])
+         if Icons.has_key(self.mOs):
+            return QtCore.QVariant(Icons[self.mOs])
          else:
             return QtCore.QVariant()
       elif role == QtCore.Qt.UserRole:
-         return (self.mTitle, self.mId, self.mIndex)
+         return (self.mTitle, self.mOs, self.mIndex)
       return QtCore.QVariant()
 
 class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase):
@@ -79,8 +79,8 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       QtCore.QObject.connect(self.mRemoveBtn,QtCore.SIGNAL("clicked()"), self.onRemove)
       # Call if you want an icon view
       #self.mClusterListView.setViewMode(QtGui.QListView.IconMode)
-      self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.nodeSettingsChanged)
-      self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.nodeSettingsChanged)
+      self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
+      self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
 
       # Setup a custom context menu callback.
       self.mClusterListView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -89,6 +89,22 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
 
       self.connect(self.mTargetList, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*, QListWidgetItem*)"),
          self.onCurrentTargetChanged)
+
+      xp_icon = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      self.mRebootToWindowsAction = QtGui.QAction(xp_icon, self.tr("Windows"), self)
+      self.connect(self.mRebootToWindowsAction, QtCore.SIGNAL("triggered()"), self.onRebootToWindows)
+      self.mRebootAllToWindowsAction = QtGui.QAction(xp_icon, self.tr("Windows"), self)
+      self.connect(self.mRebootAllToWindowsAction, QtCore.SIGNAL("triggered()"), self.onRebootAllToWindows)
+
+      linux_icon = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+      self.mRebootToLinuxAction = QtGui.QAction(linux_icon, self.tr("Linux"), self)
+      self.connect(self.mRebootToLinuxAction, QtCore.SIGNAL("triggered()"), self.onRebootToLinux)
+      self.mRebootAllToLinuxAction = QtGui.QAction(linux_icon, self.tr("Linux"), self)
+      self.connect(self.mRebootAllToLinuxAction, QtCore.SIGNAL("triggered()"), self.onRebootAllToLinux)
+
+      # Set the default action for the reboot all buttons.
+      self.mRebootWinBtn.setDefaultAction(self.mRebootAllToWindowsAction)
+      self.mRebootLinuxBtn.setDefaultAction(self.mRebootAllToLinuxAction)
 
       self.mTestAction = QtGui.QAction(self.tr("&Test"), self)
       self.mTestAction.setShortcut(self.tr("Ctrl+T"))
@@ -101,43 +117,64 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
    def onNodeContextMenu(self, point):
       menu = QtGui.QMenu("Reboot", self)
 
-      xp_icon = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      linux_icon = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
-
-      menu.addAction(self.mTestAction)
-      menu.addAction(xp_icon, "Windows")
-      menu.addAction(linux_icon, "Linux")
+      temp_callbacks = []
+      menu.addAction(self.mRebootToLinuxAction)
+      menu.addAction(self.mRebootToWindowsAction)
       menu.addSeparator()
-      menu.addAction(linux_icon, "Linux 5.65")
-      menu.addAction(linux_icon, "Linux 3.45")
-      #menu.addAction(self.copyAct)
-      #menu.addAction(self.pasteAct)
+      if self.mSelectedNode is not None:
+         # For each target operation system, build a TargetListItem
+         for target in self.mSelectedNode.mTargets:
+            (title, os, index) = target
+            icon = Icons[os]
+            node_id = self.mSelectedNode.getId()
+            callback = lambda ni=node_id, i=index, t=title: (self.onTargetTriggered(ni, i, t))
+            temp_callbacks.append(callback)
+            menu.addAction(icon, title, callback)
+
       menu.exec_(self.mClusterListView.mapToGlobal(point))
+
+   def onTargetTriggered(self, node_id, index, title):
+      print "Target: [%s][%s]" % (index, title)
+      self.mEventManager.emit(node_id, "reboot.set_default_target", (index, title))
    
    def init(self, ensemble, eventManager):
-      """ Configure the user interface with data in cluster configuration. """
-      # Set the new cluster configuration
-      if not None == self.mEnsemble:
+      """ Configure the user interface.
+
+          @param ensemble: The current Ensemble configuration.
+          @param eventManager: Reference to Maestro's EventManager.
+      """
+
+      # If an ensemble already exists, disconnect it.
+      if self.mEnsemble is not None:
          self.disconnect(self.mEnsemble, QtCore.SIGNAL("newConnections()"), self.onNewConnections)
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+
+      # Set the new ensemble configuration.
       self.mEnsemble = ensemble
+
+      # Connect the new ensemble.
       self.connect(self.mEnsemble, QtCore.SIGNAL("newConnections()"), self.onNewConnections)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+
       self.mEventManager = eventManager
 
+      # Create a model for our ListView
       self.mEnsembleModel = EnsembleModel.EnsembleModel(self.mEnsemble)
 
       # If selection model already exists then disconnect signal
       if not None == self.mClusterListView.selectionModel():
          QtCore.QObject.disconnect(self.mClusterListView.selectionModel(),
             QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
+
+      # Set the model.
       self.mClusterListView.setModel(self.mEnsembleModel)
-      #self.mMasterCB.setModel(self.mClusterModel)
 
       # Connect new selection model
       QtCore.QObject.connect(self.mClusterListView.selectionModel(),
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
 
    def onRefresh(self):
-      """ Get current data from remote objects. """
+      """ Slot that requests information about all nodes in the Ensemble. """
       if not self.mEnsemble is None:
          self.mEnsemble.refreshConnections()
 
@@ -157,12 +194,13 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       #   self.mClusterModel.removeRow(row)
       pass
 
-   def nodeSettingsChanged(self):
-      """ Apply any user changes. """
+   def onNodeSettingsChanged(self):
+      """ Slot that is called when the user has finished editing a
+          field in the node settings.
+      """
 
       # Get the currently selected node.
       selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
-
 
       # Can't get a change if a node is not selected
       assert not None == selected_node
@@ -193,70 +231,66 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
 
       # Only update gui if something really changed.
       if modified:
-         self.refreshNodeInfo()
+         self.refreshNodeSettings()
          # Force the cluster model to generate a dataChanged signal.
          self.mClusterListView.model().setData(self.mClusterListView.currentIndex(), QtCore.QVariant(), QtCore.Qt.DisplayRole)
    
    def onNodeSelected(self, selected, deselected):
-      """ Called when a cluster node in the list is selected. """
-      selected_indexes = self.mClusterListView.selectedIndexes()
-      if len(selected_indexes) > 0:
-         assert (len(selected_indexes) == 1)
-         selected_index = selected_indexes[0]
-         # Get the currently selected node.
-         selected_node = self.mEnsembleModel.data(selected_index, QtCore.Qt.UserRole)
+      """ Slot that is called when a cluster node is selected. """
+      # Get the currently selected node and save it.
+      selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
+      self.mSelectedNode = selected_node
+      # Refresh all node information.
+      self.refreshNodeSettings()
+      # We must also refresh the list of all operating system targets.
+      self.refreshTargetList()
 
-         self.mSelectedNode = selected_node
-         self.refreshNodeInfo()
-
-
-   def refreshNodeInfo(self):
+   def refreshNodeSettings(self):
       """
       Fills in the node information for the currently selected node. This gets called
       whenever a new node is selected in the list.
       """
+
+      # Clear all information
       self.mNameEdit.clear()
       self.mHostnameEdit.clear()
       self.mCurrentOsEdit.clear()
       self.mIpAddressEdit.clear()
 
-      # Set node information that we know
-      self.mNameEdit.setText(self.mSelectedNode.getName())
-      self.mHostnameEdit.setText(self.mSelectedNode.getHostname())
+      # Early out if there is no node selected.
+      if self.mSelectedNode is not None:      
+         # Set node information that we know
+         self.mNameEdit.setText(self.mSelectedNode.getName())
+         self.mHostnameEdit.setText(self.mSelectedNode.getHostname())
 
-      # Get IP address
-      try:
-         self.mIpAddressEdit.setText(self.mSelectedNode.getIpAddress())
-      except:
-         self.mIpAddressEdit.setText('Unknown')
+         # Get IP address
+         try:
+            self.mIpAddressEdit.setText(self.mSelectedNode.getIpAddress())
+         except:
+            self.mIpAddressEdit.setText('Unknown')
 
-      # Get the name of the current platform.
-      self.mCurrentOsEdit.setText(self.mSelectedNode.getPlatformName())
-
-      self.refreshTargetList(self.mSelectedNode)
+         # Get the name of the current platform.
+         self.mCurrentOsEdit.setText(self.mSelectedNode.getPlatformName())
          
-
-   def refreshTargetList(self, node):
-      """ Refresh the list of target operation systems.
-
-          @param node: The selected node.
-      """
+   def refreshTargetList(self):
+      """ Refresh the list of target operation systems. """
 
       # Clear all current targets out of list.
       self.mTargetList.clear()
 
-      # For each target operation system, build a TargetListItem
-      for target in node.mTargets:
-         (title, it, index) = target
-         tli = TargetListItem(title, id, index)
-         self.mTargetList.addItem(tli)
+      if self.mSelectedNode is not None:
+         # For each target operation system, build a TargetListItem
+         for target in self.mSelectedNode.mTargets:
+            (title, os, index) = target
+            tli = TargetListItem(title, os, index)
+            self.mTargetList.addItem(tli)
 
-      # Selected the current default target if specified.
-      if node.mDefaultTargetIndex >= 0:
-         self.mTargetList.setCurrentRow(node.mDefaultTargetIndex)
-         # Ensure that the selected target is visible.
-         if self.mTargetList.currentItem() is not None:
-            self.mTargetList.scrollToItem(self.mTargetList.currentItem())
+         # Selected the current default target if specified.
+         if self.mSelectedNode.mDefaultTargetIndex >= 0:
+            self.mTargetList.setCurrentRow(self.mSelectedNode.mDefaultTargetIndex)
+            # Ensure that the selected target is visible.
+            if self.mTargetList.currentItem() is not None:
+               self.mTargetList.scrollToItem(self.mTargetList.currentItem())
 
    def onCurrentTargetChanged(self, current, previous):
       """ Slot that sets the default target on the selected node to the
@@ -273,10 +307,44 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
          # Tell the selected node to change it's default target.
          self.mEventManager.emit(node_id, "reboot.set_default_target", (current.mIndex, current.mTitle))
 
+   def onNodeChanged(self, nodeId):
+      """ Slot that is called when a node's state changes. If the currently
+          selected node changes, we need to update the target list and the
+          current default target.
+
+          @param nodeId: The id of the node that changed.
+      """
+      if self.mSelectedNode is not None and nodeId == self.mSelectedNode.getId():
+         self.refreshTargetList()
+         self.mClusterListView.model().setData(self.mClusterListView.currentIndex(), QtCore.QVariant(), QtCore.Qt.DisplayRole)
+
+   def onRebootToLinux(self):
+      """ Slot that makes the selected node reboot to Linux. """
+      assert(self.mSelectedNode is not None)
+      node_id = self.mSelectedNode.getId()
+      self.mEventManager.emit(node_id, "reboot.switch_os", (MaestroConstants.LINUX,))
+
+   def onRebootToWindows(self):
+      """ Slot that makes the selected node reboot to Windows. """
+      assert(self.mSelectedNode is not None)
+      node_id = self.mSelectedNode.getId()
+      self.mEventManager.emit(node_id, "reboot.switch_os", (MaestroConstants.WINXP,))
+
+   def onRebootAllToLinux(self):
+      """ Slot that makes all nodes reboot to Linux. """
+      self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.LINUX,))
+
+   def onRebootAllToWindows(self):
+      """ Slot that makes all nodes reboot to Windows. """
+      self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.WINXP,))
+
    def onNewConnections(self):
       """ Called when the cluster control has connected to another node. """
       self.mClusterListView.reset()
-      self.refreshNodeInfo()
+      # Refresh the information about the node.
+      self.refreshNodeSettings()
+      # We must also refresh the list of all operating system targets.
+      self.refreshTargetList()
 
 
    def getName():

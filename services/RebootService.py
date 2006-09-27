@@ -61,6 +61,63 @@ def grubIdToMaestroId(id):
    else:
       return MaestroConstants.UNKNOWN
 
+
+
+#import os
+#import re
+#import string
+#import sys
+
+
+
+
+def makeLinuxDefault(grubConf):
+   def compare(v1, v2):
+      if v1 < v2:
+         return -1
+      elif v1 > v2:
+         return 1
+      else:
+         return 0
+
+   newest_version  = [0, 0, 0]
+   newest_revision = [0]
+
+   smp_re = re.compile('smp')
+
+   new_target = None
+
+   for t in grubConf.getTargets():
+      if t.isLinux():
+         kernel_extra_text = t.getKernelPkgExtraText()
+
+         # We only care about SMP kernels.
+         # TODO: Make this more flexible.
+         if smp_re.search(kernel_extra_text) is not None:
+            kernel_version = [int(s) for s in t.getKernelVersion().split('.')]
+            kernel_revision = [int(s) for s in t.getKernelPkgRevision().split('.')]
+
+            version_result = compare(newest_version, kernel_version)
+
+            # If newest_version is older than kernel_version, then we have
+            # found a newer version to use for the default boot target.
+            if version_result == -1:
+               newest_version  = kernel_version
+               newest_revision = kernel_revision
+               new_target = t
+            # If newest_version and kernel_version are the same, then we need
+            # to compare the package revisions.
+            elif version_result == 0 and \
+                 compare(newest_revision, kernel_revision) == 1:
+               newest_version  = kernel_version
+               newest_revision = kernel_revision
+               new_target = t
+
+   if new_target is not None:
+      grubConf.setDefault(new_target.getIndex())
+   else:
+      print "WARNING: Could not find appropriate Linux target to be default"
+
 class RebootService:
    def __init__(self):
       grub_path = "/boot/grub/grub.conf"
@@ -72,6 +129,7 @@ class RebootService:
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "reboot.get_targets", self.onGetTargets)
       self.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)
+      self.mEventManager.connect("*", "reboot.switch_os", self.onSwitchBootPlatform)
       self.mEventManager.connect("*", "reboot.reboot", self.onReboot)
 
    def onGetTargets(self, nodeId, avatar):
@@ -80,18 +138,18 @@ class RebootService:
           @param nodeId: IP address of maestro client that sent event.
           @param avatar: System avatar that represents the remote user.
       """
+
       if self.mGrubConfig is None:
-         return
+         return []
 
       targets = []
       for t in self.mGrubConfig.getTargets():
          title = t.mTitle.lstrip("title").strip()
-         id = grubIdToMaestroId(t.mOS)
+         os = grubIdToMaestroId(t.mOS)
          index = t.mIndex
-         targets.append((title, id, index))
+         targets.append((title, os, index))
 
       default_index = self.mGrubConfig.getDefault()
-
       self.mEventManager.emit(nodeId, "reboot.report_targets", (targets, default_index))
 
    def onSetDefaultTarget(self, nodeId, avatar, index, title):
@@ -105,15 +163,82 @@ class RebootService:
       if self.mGrubConfig is None:
          return
 
+      current_target = self.mGrubConfig.getTarget(self.mGrubConfig.getDefault())
+      new_target = self.mGrubConfig.getTargets()[index]
+
+      
       print "[%s][%s]" % (index, title)
-      target = self.mGrubConfig.getTargets()[index]
-      title_on_disk = target.mTitle.lstrip("title").strip()
+      title_on_disk = new_target.mTitle.lstrip("title").strip()
       if title == title_on_disk:
+         # If we are going to Windows, save our current default so we know
+         # which Linux target to boot back into.
+         if not current_target.isWindows() and new_target.isWindows():
+            print "Saving default because we are going to Windows"
+            self.mGrubConfig.saveDefault()
+
          print "Setting default to: ", title
          self.mGrubConfig.setDefault(index)
          self.mGrubConfig.save()
+         self.onGetTargets("*", avatar)
 
+   def onSwitchBootPlatform(self, nodeId, avatar, targetOs):
+      def matchLinuxTarget(target):
+         return target.isLinux()
 
+      def matchWindowsTarget(target):
+         return target.isWindows()
+
+      current_target = self.mGrubConfig.getTarget(self.mGrubConfig.getDefault())
+
+      if MaestroConstants.LINUX == targetOs and current_target.isLinux():
+         print "Already booting into Linux."
+         return
+      elif MaestroConstants.WINXP == targetOs and current_target.isWindows():
+         print "Already booting into windows."
+         return
+
+      print "Target Linux: ", MaestroConstants.LINUX == targetOs
+      print "Target Windows: ", MaestroConstants.WINXP == targetOs
+      print "Current Linux: ", current_target.isLinux()
+      print "Current Windows: ", current_target.isWindows()
+
+      # If we are in Windows, restore whatever the default Linux target was.
+      if MaestroConstants.LINUX == targetOs:
+         # If there is a saved default, we make sure that it is a Linux target
+         # and then set it as the default.
+         if self.mGrubConfig.hasSavedDefault():
+            saved_default = self.mGrubConfig.getTarget(self.mGrubConfig.getSavedDefault())
+
+            # Verify that the saved default is a Linux target.
+            if saved_default.isLinux():
+               self.mGrubConfig.restoreDefault(matchLinuxTarget)
+            # If there is no Linux default, then we need to figure out what it
+            # should be.
+            else:
+               makeLinuxDefault(self.mGrubConfig)
+         # If there is no Linux default, then we need to figure out what it
+         # should be.
+         else:
+            makeLinuxDefault(self.mGrubConfig)
+
+      # If we are in Linux (i.e., not in Windows), save the current Linux default
+      # target and make the first Widows target the default.
+      elif MaestroConstants.WINXP == targetOs:
+         print "Switching to Windows"
+         self.mGrubConfig.saveDefault()
+         self.mGrubConfig.makeDefault(matchWindowsTarget)
+      else:
+         target_name = "Unknown"
+         try:
+            target_name = Constants.OsNameMap[targetOS]
+         except:
+            pass
+         print "Can not currently reboot into: [%s][%d]" % (target_name, targetOs)
+         return
+
+      # All done!
+      self.mGrubConfig.save()
+      self.onGetTargets("*", avatar)
 
    def onReboot(self, nodeId, avatar):
       """ Slot that causes the node to reboot.
