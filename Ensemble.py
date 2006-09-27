@@ -74,6 +74,7 @@ class Ensemble(QtCore.QObject):
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
       self.mEventManager.connect("*", "settings.os", self.onReportOs)
+      self.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
 
    def getNode(self, index):
       return self.mNodes[index]
@@ -97,6 +98,12 @@ class Ensemble(QtCore.QObject):
       except Exception, ex:
          print "ERROR: ", ex
 
+   def onReportTargets(self, nodeId, targets, defaultTargetIndex):
+      for node in self.mNodes:
+         if node.getIpAddress() == nodeId:
+            node.mTargets = targets
+            node.mDefaultTargetIndex = defaultTargetIndex
+
    def onEnsembleChanged(self):
       self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
 
@@ -116,6 +123,7 @@ class Ensemble(QtCore.QObject):
                   new_connections = True
                   # Tell the new node to report it's os.
                   self.mEventManager.emit(ip_address, "settings.get_os", ())
+                  self.mEventManager.emit(ip_address, "reboot.get_targets", ())
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 
@@ -137,6 +145,8 @@ class ClusterNode:
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("sub_class")
       self.mPlatform = ERROR 
+      self.mTargets = []
+      self.mDefaultTargetIndex = 0
 
    def getName(self):
       return self.mElement.get("name")
@@ -150,6 +160,9 @@ class ClusterNode:
    def setHostname(self, newHostname):
       self.mPlatform = ERROR
       return self.mElement.set("hostname", newHostname)
+
+   def getId(self):
+      return self.getIpAddress()
 
    def getIpAddress(self):
       try:

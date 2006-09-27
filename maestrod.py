@@ -21,9 +21,11 @@
 import sys, os, platform
 
 import services.LaunchService
-import services.SettingsService
-import services.ResourceService
 import services.ProcessManagementService
+import services.RebootService
+import services.ResourceService
+import services.SettingsService
+
 import util.EventManager
 import datetime
 import time
@@ -76,6 +78,10 @@ class MaestroServer:
       pm = services.ProcessManagementService.ProcessManagementService()
       pm.init(self.mEventManager)
       self.mServices.append(pm)
+
+      reboot_service = services.RebootService.RebootService()
+      reboot_service.init(self.mEventManager)
+      self.mServices.append(reboot_service)
       
       launch_service = services.LaunchService.LaunchService()
       launch_service.init(self.mEventManager)

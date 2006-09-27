@@ -24,31 +24,11 @@ import string
 import socket
 
 import util.EventManager
+import MaestroConstants
 
 from Queue import Queue
 from threading import Thread
 
-ERROR = 0
-LINUX = 1
-WIN = 2
-WINXP = 3
-MACOS = 4
-MACOSX = 5
-HPUX = 6
-AIX = 7
-SOLARIS = 8
-
-TIMEFORMAT = "%m/%d/%y %H:%M:%S"
-
-OsNameMap = {ERROR  : 'Error',
-             LINUX  : 'Linux',
-             WIN    : 'Windows',
-             WINXP  : 'Windows XP',
-             MACOS  : 'MacOS',
-             MACOSX : 'MacOS X',
-             HPUX   : 'HP UX',
-             AIX    : 'AIX',
-             SOLARIS : 'Solaris'}
 
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
@@ -75,15 +55,15 @@ class SettingsService:
       """Returns tuple with error code and platform code.
          1 is Linux, 2 is Windows, and 0 is unknown."""
       if platform.system() == 'Linux':
-         return LINUX
+         return MaestroConstants.LINUX
       elif os.name == 'nt':
-         return WINXP
+         return MaestroConstants.WINXP
       else:
-         return ERROR
+         return MaestroConstants.ERROR
 
    def _getPlatformName(self):
       try:
-         return OsNameMap[self._getPlatform()]
+         return MaestroConstants.OsNameMap[self._getPlatform()]
       except:
          return 'Unknown'
 

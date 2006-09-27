@@ -22,6 +22,7 @@ import ClusterSettingsBase
 import ClusterSettingsResource
 import Ensemble
 import EnsembleModel
+import MaestroConstants
 
 ERROR = 0
 LINUX = 1
@@ -33,54 +34,37 @@ HPUX = 6
 AIX = 7
 SOLARIS = 8
 
-class SettingsModel(QtCore.QAbstractListModel):
-   def __init__(self, ensemble, parent=None):
-      QtCore.QAbstractListModel.__init__(self, parent)
+Icons = {}
+Icons[MaestroConstants.UNKNOWN] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
+Icons[MaestroConstants.WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+Icons[MaestroConstants.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+Icons[MaestroConstants.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
 
-      self.mEnsemble = ensemble
-      self.mIcons = {}
-      self.mIcons[ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
-      self.mIcons[WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+class TargetListItem(QtGui.QListWidgetItem):
+   def __init__(self, title, id, index, parent=None):
+      QtGui.QListWidgetItem.__init__(self, parent)
+      self.mTitle = title
+      self.mId = id
+      self.mIndex = index
 
-      self.mOsMap = {}
-
-   def data(self, index, role=QtCore.Qt.DisplayRole):
-      if not index.isValid():
-         return QtCore.QVariant()
-
-      cluster_node = self.mEnsemble.getNode(index.row())
-      if role == QtCore.Qt.DecorationRole:
-         try:
-            ip_address = cluster_node.getIpAddress()
-            index = self.mOsMap[ip_address]
-            return QtCore.QVariant(self.mIcons[index])
-         except:
-            return QtCore.QVariant(self.mIcons[ERROR])
-      elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-         return QtCore.QVariant(str(cluster_node.getName()))
+   def data(self, role):
+      if role == QtCore.Qt.EditRole or role == QtCore.Qt.DisplayRole:
+         return QtCore.QVariant(self.mTitle)
+      elif role == QtCore.Qt.DecorationRole:
+         if Icons.has_key(self.mId):
+            return QtCore.QVariant(Icons[self.mId])
+         else:
+            return QtCore.QVariant()
       elif role == QtCore.Qt.UserRole:
-         return cluster_node
-       
+         return (self.mTitle, self.mId, self.mIndex)
       return QtCore.QVariant()
-
-   def rowCount(self, parent=QtCore.QModelIndex()):
-      if parent.isValid():
-         return 0
-      else:
-         return self.mEnsemble.getNumNodes()
-
-   def setOperatingSystem(self, ipAddress, value):
-      self.mOsMap[ipAddress] = value
-      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
-      self.emit(QtCore.SIGNAL("dataChanged(int)"), 0)
 
 class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
       self.mEnsemble = None
+      self.mSelectedNode = None
 
    def setupUi(self, widget):
       """
@@ -97,6 +81,37 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       #self.mClusterListView.setViewMode(QtGui.QListView.IconMode)
       self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.nodeSettingsChanged)
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.nodeSettingsChanged)
+
+      # Setup a custom context menu callback.
+      self.mClusterListView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+      self.connect(self.mClusterListView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+         self.onNodeContextMenu)
+
+      self.connect(self.mTargetList, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*, QListWidgetItem*)"),
+         self.onCurrentTargetChanged)
+
+      self.mTestAction = QtGui.QAction(self.tr("&Test"), self)
+      self.mTestAction.setShortcut(self.tr("Ctrl+T"))
+      self.connect(self.mTestAction, QtCore.SIGNAL("triggered()"), self.onTest)
+
+   def onTest(self):
+      print "onTest"
+
+   def onNodeContextMenu(self, point):
+      menu = QtGui.QMenu("Reboot", self)
+
+      xp_icon = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      linux_icon = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+
+      menu.addAction(self.mTestAction)
+      menu.addAction(xp_icon, "Windows")
+      menu.addAction(linux_icon, "Linux")
+      menu.addSeparator()
+      menu.addAction(linux_icon, "Linux 5.65")
+      menu.addAction(linux_icon, "Linux 3.45")
+      #menu.addAction(self.copyAct)
+      #menu.addAction(self.pasteAct)
+      menu.exec_(self.mClusterListView.mapToGlobal(point))
    
    def init(self, ensemble, eventManager):
       """ Configure the user interface with data in cluster configuration. """
@@ -108,8 +123,6 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       self.mEventManager = eventManager
 
       self.mEnsembleModel = EnsembleModel.EnsembleModel(self.mEnsemble)
-      #self.mSettingsModel = SettingsModel(self.mEnsemble)
-
 
       # If selection model already exists then disconnect signal
       if not None == self.mClusterListView.selectionModel():
@@ -128,6 +141,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
          self.mEnsemble.refreshConnections()
 
       self.mEventManager.emit("*", "settings.get_os", ())
+      self.mEventManager.emit("*", "reboot.get_targets", ())
 
    def onAdd(self):
       """ Called when user presses the add button. """
@@ -203,6 +217,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
          selected_index = selected_indexes[0]
          # Get the currently selected node.
          selected_node = self.mEnsembleModel.data(selected_index, QtCore.Qt.UserRole)
+         self.mSelectedNode = selected_node
 
          # Set node information that we know
          self.mNameEdit.setText(selected_node.getName())
@@ -216,6 +231,31 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
 
          # Get the name of the current platform.
          self.mCurrentOsEdit.setText(selected_node.getPlatformName())
+
+         self.refreshTargetList(selected_node)
+         
+
+   def refreshTargetList(self, node):
+      self.mTargetList.clear()
+
+      for target in node.mTargets:
+         (title, it, index) = target
+         tli = TargetListItem(title, id, index)
+         self.mTargetList.addItem(tli)
+
+      self.mTargetList.setCurrentRow(node.mDefaultTargetIndex)
+      self.mTargetList.scrollToItem(self.mTargetList.currentItem())
+
+   def onCurrentTargetChanged(self, current, previous):
+      assert(self.mSelectedNode is not None)
+      # If the previous selection was None, then we know the change was
+      # due to UI initialization.
+      if current is not None and previous is not None:
+         node_id = self.mSelectedNode.getId()
+         self.mEventManager.emit(node_id, "reboot.set_default_target", (current.mIndex, current.mTitle))
+
+         print self.mTargetList.currentItem()
+         print "[%s] [%s]" % (current, previous)
 
    def onNewConnections(self):
       """ Called when the cluster control has connected to another node. """
