@@ -53,7 +53,7 @@ class ResourceService:
       else:
          self.mLastCPUTime = [0,0,0,0]
 
-   def init(self, eventManager):
+   def init(self, eventManager, settings):
       self.mEventManager = eventManager
 
       self.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)

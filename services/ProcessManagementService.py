@@ -31,7 +31,7 @@ class ProcessManagementService:
       else:
          pass
 
-   def init(self, eventManager):
+   def init(self, eventManager, settings):
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "process.get_procs", self.onGetProcs)
       self.mEventManager.connect("*", "process.terminate_proc", self.onTerminateProc)

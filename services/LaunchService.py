@@ -30,7 +30,7 @@ class LaunchService:
       self.mProcess = None
       self.mLogger = logging.getLogger('maestrod.LaunchService')
 
-   def init(self, eventManager):
+   def init(self, eventManager, settings):
       self.mEventManager = eventManager
 
       self.mEventManager.connect("*", "launch.run_command", self.onRunCommand)

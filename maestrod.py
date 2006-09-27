@@ -20,6 +20,10 @@
 
 import sys, os, platform
 
+import MaestroConstants
+
+MaestroConstants.EXEC_DIR = os.path.dirname(__file__)
+
 import services.LaunchService
 import services.ProcessManagementService
 import services.RebootService
@@ -40,6 +44,8 @@ from zope.interface import implements
 from twisted.internet import ssl
 from twisted.python import failure
 
+from elementtree.ElementTree import parse
+
 if os.name == 'nt':
    import win32api, win32event, win32serviceutil, win32service, win32security
    import ntsecuritycon, win32con
@@ -59,34 +65,48 @@ if os.name == 'nt':
 
 class MaestroServer:
    def __init__(self):
+      self.mLogger = logging.getLogger('maestrod.MaestroServer')
       ip_address = socket.gethostbyname(socket.gethostname())
       self.mEventManager = util.EventManager.EventManager(ip_address)
       self.mServices = []
+      self.mSettings = {}
+      self.mSettingsFile = os.path.join(MaestroConstants.EXEC_DIR,
+                                        'maestrod.xcfg')
+
+      if os.path.exists(self.mSettingsFile) and os.path.isfile(self.mSettingsFile):
+         tree = parse(self.mSettingsFile)
+         root = tree.getroot()
+         for node in root:
+            for child in node.getiterator():
+               if child.text is not None:
+                  self.mSettings[node.tag] = child.text
+
+      self.mLogger.debug(self.mSettings)
 
    def remote_test(self, val):
-      logging.getLogger('maestrod.MaestroServer').debug('Testing: ' + val)
+      self.mLogger.debug('Testing: ' + val)
       return "Test complete"
 
    def registerInitialServices(self):
       # Register initial services
       settings = services.SettingsService.SettingsService()
-      settings.init(self.mEventManager)
+      settings.init(self.mEventManager, self.mSettings)
       self.mServices.append(settings)
 
       resource = services.ResourceService.ResourceService()
-      resource.init(self.mEventManager)
+      resource.init(self.mEventManager, self.mSettings)
       self.mServices.append(resource)
 
       pm = services.ProcessManagementService.ProcessManagementService()
-      pm.init(self.mEventManager)
+      pm.init(self.mEventManager, self.mSettings)
       self.mServices.append(pm)
 
       reboot_service = services.RebootService.RebootService()
-      reboot_service.init(self.mEventManager)
+      reboot_service.init(self.mEventManager, self.mSettings)
       self.mServices.append(reboot_service)
       
       launch_service = services.LaunchService.LaunchService()
-      launch_service.init(self.mEventManager)
+      launch_service.init(self.mEventManager, self.mSettings)
       self.mServices.append(launch_service)
 
       # Register callbacks to send info to clients
@@ -282,8 +302,8 @@ def RunServer(installSH=True):
       except:
          pass
       #reactor.listenTCP(8789, factory)
-      pk_path = os.path.join(os.path.dirname(__file__), 'server.pem')
-      cert_path = os.path.join(os.path.dirname(__file__), 'server.pem')
+      pk_path = os.path.join(MaestroConstants.EXEC_DIR, 'server.pem')
+      cert_path = os.path.join(MaestroConstants.EXEC_DIR, 'server.pem')
       logger.info("Cert: " + cert_path)
       reactor.listenSSL(8789, factory,
          ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))

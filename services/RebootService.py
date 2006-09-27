@@ -120,12 +120,14 @@ def makeLinuxDefault(grubConf):
 
 class RebootService:
    def __init__(self):
-      grub_path = "/boot/grub/grub.conf"
       self.mGrubConfig = None
-      if os.path.exists(grub_path) and os.path.isfile(grub_path):
-         self.mGrubConfig = grubconfig.GrubConfig("/boot/grub/grub.conf")
 
-   def init(self, eventManager):
+   def init(self, eventManager, settings):
+      if settings.has_key('grub_conf'):
+         grub_path = settings['grub_conf']
+         if os.path.exists(grub_path) and os.path.isfile(grub_path):
+            self.mGrubConfig = grubconfig.GrubConfig(grub_path)
+
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "reboot.get_targets", self.onGetTargets)
       self.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)

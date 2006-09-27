@@ -37,7 +37,7 @@ class SettingsService:
    def __init__(self):
       self.mQueue = Queue()
 
-   def init(self, eventManager):
+   def init(self, eventManager, settings):
       self.mEventManager = eventManager
 
       self.mEventManager.connect("*", "settings.get_os", self.onGetOs)
