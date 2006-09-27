@@ -1,13 +1,17 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/Maestro" >
+        <file>images/construction.png</file>
         <file>images/copy.png</file>
         <file>images/cut.png</file>
         <file>images/editredo.png</file>
         <file>images/exit.png</file>
+        <file>images/error2.png</file>
+        <file>images/linux2.png</file>
         <file>images/new.png</file>
         <file>images/open.png</file>
         <file>images/paste.png</file>
+        <file>images/reboot.png</file>
         <file>images/save.png</file>
-        <file>images/construction.png</file>
+        <file>images/win_xp.png</file>
     </qresource>
 </RCC>
