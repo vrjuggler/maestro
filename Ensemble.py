@@ -136,6 +136,11 @@ class ClusterNode:
       self.mTargets = []
       self.mDefaultTargetIndex = -1
 
+   def getCurrentTarget(self):
+      if self.mDefaultTargetIndex >= 0 and self.mDefaultTargetIndex < len(self.mTargets):
+         return self.mTargets[self.mDefaultTargetIndex]
+      return ("", MaestroConstants.ERROR, -1)
+
    def getName(self):
       return self.mElement.get("name")
 

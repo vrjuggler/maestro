@@ -28,6 +28,7 @@ from Queue import Queue
 import copy
 import socket
 
+import Ensemble
 import modules.ClusterSettingsResource
 import MaestroConstants
 
@@ -100,10 +101,9 @@ class EnsembleModel(QtCore.QAbstractListModel):
    def insertRows(self, row, count, parent):
       self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
       for i in xrange(count):
-         new_element = ET.SubElement(self.mElement, "cluster_node", name="NewNode", hostname="NewNode")
-         new_node = ClusterNode(new_element)
+         new_element = ET.SubElement(self.mEnsemble.mElement, "cluster_node", name="NewNode", hostname="NewNode")
+         new_node = Ensemble.ClusterNode(new_element)
          self.mEnsemble.mNodes.insert(row, new_node);
-      self.refreshConnections()
       self.endInsertRows()
       self.emit(QtCore.SIGNAL("rowsInserted(int, int)"), row, count)
       return True
@@ -115,7 +115,7 @@ class EnsembleModel(QtCore.QAbstractListModel):
          node = self.mEnsemble.mNodes[row]
 
          # Remove node's element from XML tree.
-         self.mElement.remove(node.mElement)
+         self.mEnsemble.mElement.remove(node.mElement)
          # Remove node data structure
          self.mEnsemble.mNodes.remove(node)
       self.endRemoveRows()
