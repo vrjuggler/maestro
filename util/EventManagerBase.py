@@ -90,7 +90,7 @@ class EventManagerBase(object):
                del slots[i]
    
       
-   def emit(self, nodeId, sigName, argsTuple=()):
+   def localEmit(self, nodeId, sigName, argsTuple=()):
       """ Emit the named signal on the given node.
           If there are no registered slots, just do nothing.
       """

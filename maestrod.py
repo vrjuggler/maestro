@@ -273,7 +273,7 @@ class TestRealm(object):
          raise NotImplementedError, "No supported avatar interface."
       else:
          avatar = UserPerspective(self.mEventManager, avatarId)
-         return pb.IPerspective, avatar, lambda: avatar.logout(mind)
+         return pb.IPerspective, avatar, lambda nodeId=mind: avatar.logout(nodeId)
 
 def RunServer(installSH=True):
    logger = logging.getLogger('maestrod.RunServer')

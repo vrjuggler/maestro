@@ -43,10 +43,6 @@ class Ensemble(QtCore.QObject):
       self.refreshTimer.start()
       QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"), self.refreshConnections)
 
-      # Simple callback to print all output to stdout
-      def debugCallback(message):
-         print "DEBUG: ", message
-
    def init(self, eventManager):
       self.mEventManager = eventManager
 
@@ -56,6 +52,7 @@ class Ensemble(QtCore.QObject):
       # Register to receive signals from all nodes about their current os.
       self.mEventManager.connect("*", "settings.os", self.onReportOs)
       self.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
+      self.mEventManager.connect("*", "lostConnection", self.onLostConnection)
 
    def getNode(self, index):
       """ Return the node at the given index. Returns None if index is out of range.
@@ -118,6 +115,14 @@ class Ensemble(QtCore.QObject):
       if new_connections:
          print "We had new connections"
          self.emit(QtCore.SIGNAL("newConnections()"))
+
+   def onLostConnection(self, dummy, nodeId):
+      print "lostConnection: [%s]" % (nodeId)
+      for node in self.mNodes:
+         if node.getId() == nodeId:
+            node.lostConnection()
+            
+      self.emit(QtCore.SIGNAL("newConnections()"))
  
 class ClusterNode:
    """ Represents a node in the active cluster configuration. Most of this
@@ -132,6 +137,14 @@ class ClusterNode:
       self.mName = self.mElement.get("name")
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("sub_class")
+      self.mPlatform = MaestroConstants.ERROR 
+      self.mTargets = []
+      self.mDefaultTargetIndex = -1
+
+   def lostConnection(self):
+      """ Slot that is called when the connection to this node is lost. All
+          cached data should be cleared and set to it's inital state.
+      """
       self.mPlatform = MaestroConstants.ERROR 
       self.mTargets = []
       self.mDefaultTargetIndex = -1

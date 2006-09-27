@@ -45,7 +45,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
 
    def remote_emit(self, nodeId, sigName, argsTuple=()):
       """ Forward incoming signals to event manager. """
-      util.EventManagerBase.EventManagerBase.emit(self, nodeId, sigName, argsTuple)
+      self.localEmit(nodeId, sigName, argsTuple)
 
    def _catchFailure(self, failure):
       self.mLogger.error(str(failure.value))
@@ -81,10 +81,16 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       #creds = {'username':'aronb', 'password':'aronb', 'domain':''}
       ip_address = socket.gethostbyname(socket.gethostname())
       d = factory.login(self.mCredentials, ip_address).addCallback(
-         lambda object: self.completeConnect(nodeId, object)).addErrback(self._catchFailure)
+         lambda object: self.completeConnect(nodeId, factory, object)).addErrback(self._catchFailure)
 
-   def completeConnect(self, nodeId, object):
+   def lostConnection(self, nodeId):
+      self.mLogger.debug("EventManager.lostConnection(%s)" % (nodeId))
+      self.unregisterProxy(nodeId)
+      self.localEmit("*", "lostConnection", (nodeId, ))
+
+   def completeConnect(self, nodeId, factory, object):
       object.callRemote("registerCallback", self.mIpAddress, self)
+      factory._broker.notifyOnDisconnect(lambda n=nodeId: self.lostConnection(n))
       self.registerProxy(nodeId, object)
       # As soon as we connect to a new node, we want to know what OS it is running.
       self.emit("*", "settings.get_os", ())
