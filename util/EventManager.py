@@ -141,7 +141,7 @@ class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
       for k, v in nodes:
          try:
             v.callRemote("emit", ip_address, sigName, argsTuple)
-         except ex:
+         except Exception, ex:
             del self.mProxies[k]
             self.mLogger.info('Removed dead connection ' + str(k))
 
