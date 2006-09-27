@@ -23,6 +23,34 @@ import MaestroConstants
 from util import grubconfig
 import re
 
+if "win32" == sys.platform:
+   import win32api
+   import win32con
+   import win32file
+
+   from ntsecuritycon import *
+   import win32security
+
+   def AdjustPrivilege(priv, enable = 1):
+      # Get the process token.
+      flags = TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY
+      htoken = win32security.OpenProcessToken(win32api.GetCurrentProcess(), flags)
+      # Get the ID for the system shutdown privilege.
+      id = win32security.LookupPrivilegeValue(None, priv)
+      # Now obtain the privilege for this process.
+      # Create a list of the privileges to be added.
+      if enable:
+         newPrivileges = [(id, SE_PRIVILEGE_ENABLED)]
+      else:
+         newPrivileges = [(id, 0)]
+      # and make the adjustment.
+      win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
+
+   def Reboot(message = "Rebooting", timeout = 30, bForce = 0, bReboot = 1):
+      AdjustPrivilege(SE_SHUTDOWN_NAME)
+      win32api.InitiateSystemShutdown(None, message, timeout, bForce, bReboot)
+
+
 def grubIdToMaestroId(id):
    if id == grubconfig.GrubBootTarget.LINUX:
       return MaestroConstants.LINUX
@@ -86,19 +114,21 @@ class RebootService:
          self.mGrubConfig.save()
 
 
-   def onReboot(self, nodeId, avatar, index, title):
+
+   def onReboot(self, nodeId, avatar):
       """ Slot that causes the node to reboot.
 
           @param nodeId: IP address of maestro client that sent event.
           @param avatar: System avatar that represents the remote user.
           @param pid: Process ID of the process to terminate.
       """
-      if self.mGrubConfig is None:
-         return
 
-      target = self.mGrubConfig.getTargets()[index]
-      if title == target.mTitle:
-         print "Setting default to: ", title
+      if "win32" == sys.platform:
+         print "Rebooting..."
+         Reboot(timeout = 0)
+      else:
+         print "Rebooting..."
+         os.system('/sbin/shutdown -r now')
 
 
 if __name__ == "__main__":

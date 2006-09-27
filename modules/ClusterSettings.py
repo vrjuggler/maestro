@@ -95,7 +95,8 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       self.connect(self.mTestAction, QtCore.SIGNAL("triggered()"), self.onTest)
 
    def onTest(self):
-      print "onTest"
+      if self.mSelectedNode is not None:
+         self.mEventManager.emit(self.mSelectedNode.getId(), "reboot.reboot", ())
 
    def onNodeContextMenu(self, point):
       menu = QtGui.QMenu("Reboot", self)
@@ -198,7 +199,15 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
    
    def onNodeSelected(self, selected, deselected):
       """ Called when a cluster node in the list is selected. """
-      self.refreshNodeInfo()
+      selected_indexes = self.mClusterListView.selectedIndexes()
+      if len(selected_indexes) > 0:
+         assert (len(selected_indexes) == 1)
+         selected_index = selected_indexes[0]
+         # Get the currently selected node.
+         selected_node = self.mEnsembleModel.data(selected_index, QtCore.Qt.UserRole)
+
+         self.mSelectedNode = selected_node
+         self.refreshNodeInfo()
 
 
    def refreshNodeInfo(self):
@@ -210,29 +219,21 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       self.mHostnameEdit.clear()
       self.mCurrentOsEdit.clear()
       self.mIpAddressEdit.clear()
-      
-      selected_indexes = self.mClusterListView.selectedIndexes()
-      if len(selected_indexes) > 0:
-         assert (len(selected_indexes) == 1)
-         selected_index = selected_indexes[0]
-         # Get the currently selected node.
-         selected_node = self.mEnsembleModel.data(selected_index, QtCore.Qt.UserRole)
-         self.mSelectedNode = selected_node
 
-         # Set node information that we know
-         self.mNameEdit.setText(selected_node.getName())
-         self.mHostnameEdit.setText(selected_node.getHostname())
+      # Set node information that we know
+      self.mNameEdit.setText(self.mSelectedNode.getName())
+      self.mHostnameEdit.setText(self.mSelectedNode.getHostname())
 
-         # Get IP address
-         try:
-            self.mIpAddressEdit.setText(selected_node.getIpAddress())
-         except:
-            self.mIpAddressEdit.setText('Unknown')
+      # Get IP address
+      try:
+         self.mIpAddressEdit.setText(self.mSelectedNode.getIpAddress())
+      except:
+         self.mIpAddressEdit.setText('Unknown')
 
-         # Get the name of the current platform.
-         self.mCurrentOsEdit.setText(selected_node.getPlatformName())
+      # Get the name of the current platform.
+      self.mCurrentOsEdit.setText(self.mSelectedNode.getPlatformName())
 
-         self.refreshTargetList(selected_node)
+      self.refreshTargetList(self.mSelectedNode)
          
 
    def refreshTargetList(self, node):
@@ -251,7 +252,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
          self.mTargetList.addItem(tli)
 
       # Selected the current default target if specified.
-      if node.mDefaultTargetIndex > 0:
+      if node.mDefaultTargetIndex >= 0:
          self.mTargetList.setCurrentRow(node.mDefaultTargetIndex)
          # Ensure that the selected target is visible.
          if self.mTargetList.currentItem() is not None:

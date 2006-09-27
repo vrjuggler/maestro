@@ -146,7 +146,7 @@ class ClusterNode:
       self.mClass = self.mElement.get("sub_class")
       self.mPlatform = ERROR 
       self.mTargets = []
-      self.mDefaultTargetIndex = 0
+      self.mDefaultTargetIndex = -1
 
    def getName(self):
       return self.mElement.get("name")
