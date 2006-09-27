@@ -83,6 +83,7 @@ class RebootService:
       if title == title_on_disk:
          print "Setting default to: ", title
          self.mGrubConfig.setDefault(index)
+         self.mGrubConfig.save()
 
 
    def onReboot(self, nodeId, avatar, index, title):

@@ -236,26 +236,41 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
          
 
    def refreshTargetList(self, node):
+      """ Refresh the list of target operation systems.
+
+          @param node: The selected node.
+      """
+
+      # Clear all current targets out of list.
       self.mTargetList.clear()
 
+      # For each target operation system, build a TargetListItem
       for target in node.mTargets:
          (title, it, index) = target
          tli = TargetListItem(title, id, index)
          self.mTargetList.addItem(tli)
 
-      self.mTargetList.setCurrentRow(node.mDefaultTargetIndex)
-      self.mTargetList.scrollToItem(self.mTargetList.currentItem())
+      # Selected the current default target if specified.
+      if node.mDefaultTargetIndex > 0:
+         self.mTargetList.setCurrentRow(node.mDefaultTargetIndex)
+         # Ensure that the selected target is visible.
+         if self.mTargetList.currentItem() is not None:
+            self.mTargetList.scrollToItem(self.mTargetList.currentItem())
 
    def onCurrentTargetChanged(self, current, previous):
+      """ Slot that sets the default target on the selected node to the
+          specified index.
+
+          @param current: The currently selected TargetListItem
+          @param previous: The previously selected TargetListItem
+      """
       assert(self.mSelectedNode is not None)
       # If the previous selection was None, then we know the change was
       # due to UI initialization.
       if current is not None and previous is not None:
          node_id = self.mSelectedNode.getId()
+         # Tell the selected node to change it's default target.
          self.mEventManager.emit(node_id, "reboot.set_default_target", (current.mIndex, current.mTitle))
-
-         print self.mTargetList.currentItem()
-         print "[%s] [%s]" % (current, previous)
 
    def onNewConnections(self):
       """ Called when the cluster control has connected to another node. """
