@@ -373,7 +373,6 @@ def main():
       ld = LoginDialog.LoginDialog()
       if QtGui.QDialog.Rejected == ld.exec_():
          sys.exit(-1)
-      print "TEST: ", ld.getLoginInfo()
 
       event_manager.setCredentials(ld.getLoginInfo())
 
@@ -402,7 +401,6 @@ def main():
       else:
          data_dir = os.path.join(os.environ['HOME'], '.maestro')
 
-      print data_dir
       if data_dir is not None:
          if not os.path.exists(data_dir):
             os.makedirs(data_dir)
