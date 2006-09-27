@@ -342,7 +342,7 @@ def _whichFirstArg(cmd, env=None):
 
 
 if sys.platform.startswith("win"):
-    def _SaferCreateProcess(credentials,    # credentials
+    def _SaferCreateProcess(avatar,         # avatar
                             appName,        # app name
                             cmd,            # command line 
                             processSA,      # process security attributes 
@@ -384,15 +384,15 @@ _SaferCreateProcess(appName=%r,
     os.getcwd(): %r
 """, appName, cmd, env, cwd, os.getcwd())
         try:
+            si.lpDesktop = r"winsta0\default"
             params = (appName, cmd, processSA, threadSA, inheritHandles,
                       creationFlags, env, cwd, si)
 
-            if credentials is not None:
-                user = win32security.LogonUser(credentials['username'],
-                                               credentials['domain'],
-                                               credentials['password'],
-                                               win32con.LOGON32_LOGON_INTERACTIVE,
-                                               win32con.LOGON32_PROVIDER_DEFAULT)
+            # If we have been given an avatar with credentials, create the
+            # process as the identified user.
+            if avatar is not None and avatar.mUserHandle is not None:
+                # Run the command ase the authenticated user.
+                user = avatar.mUserHandle
                 win32security.ImpersonateLoggedOnUser(user)
                 hProcess, hThread, processId, threadId\
                     = win32process.CreateProcessAsUser(user, *params)
@@ -1114,8 +1114,7 @@ class ProcessOpen(Process):
     #   - Share some implementation with Process and ProcessProxy.
     #
 
-    def __init__(self, cmd, mode='t', cwd=None, env=None, avatarId=None,
-                 credentials = None):
+    def __init__(self, cmd, mode='t', cwd=None, env=None, avatar = None):
         """Create a Process with proxy threads for each std handle.
 
         "cmd" is the command string or argument vector to run.
@@ -1139,8 +1138,8 @@ class ProcessOpen(Process):
         self._cwd = cwd
         self._env = env
         self._mode = mode
-        self._avatarId = avatarId
-        self._credentials = credentials
+        self._avatarId = avatar.mAvatarId
+        self._avatar = avatar
         if self._mode not in ('t', 'b'):
             raise ProcessError("'mode' must be 't' or 'b'.")
         self._closed = 0
@@ -1201,7 +1200,7 @@ class ProcessOpen(Process):
         pid = os.fork()
         if pid == 0: # child
             # Drop root privileges entirely and run as the authenticated user.
-            pw_entry = pwd.getpwnam(self._credentials['username'])
+            pw_entry = pwd.getpwnam(self._avatar.getCredentials()['username'])
             # NOTE: os.setgid() must be called first or else we will get an
             # "operation not permitted" error.
             os.setgid(pw_entry[3])
@@ -1330,7 +1329,7 @@ class ProcessOpen(Process):
             try:
                 self._hProcess, hThread, self._processId, threadId\
                     = _SaferCreateProcess(
-                        self._credentials, # credentials
+                        self._avatar,   # avatar
                         None,           # app name
                         cmd,            # command line 
                         None,           # process security attributes 

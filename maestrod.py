@@ -41,7 +41,9 @@ from twisted.internet import ssl
 from twisted.python import failure
 
 if os.name == 'nt':
-    import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
+   import win32api, win32event, win32serviceutil, win32service, win32security
+   import ntsecuritycon, win32con
+   import util.windesktop as windesktop
 
 if os.name == 'nt':
     def AdjustPrivilege(priv, enable):
@@ -158,6 +160,10 @@ class UserPerspective(pb.Avatar):
       self.mEventManager = eventMgr
       self.mAvatarId = avatarId
       self.mCredentials = {}
+      self.mUserHandle = None
+      self.mUserSID    = None
+      self.mWinsta     = None
+      self.mDesktop    = None
 
    def perspective_registerCallback(self, nodeId, obj):
       self.mEventManager.remote_registerCallback(nodeId, obj)
@@ -168,14 +174,71 @@ class UserPerspective(pb.Avatar):
    def setCredentials(self, creds):
       self.mCredentials = creds
 
+      if sys.platform.startswith("win"):
+         # Save the current window station for later.
+         cur_winsta = win32service.GetProcessWindowStation()
+
+         # Open window station winsta0 and make it the window station
+         # for this process.
+         winsta_flags = win32con.READ_CONTROL | win32con.WRITE_DAC
+         new_winsta = win32service.OpenWindowStation("winsta0", False,
+                                                     winsta_flags)
+         new_winsta.SetProcessWindowStation()
+
+         # Get a handle to the default desktop so that we can change
+         # its access control list.
+         desktop_flags = win32con.READ_CONTROL         | \
+                         win32con.WRITE_DAC            | \
+                         win32con.DESKTOP_WRITEOBJECTS | \
+                         win32con.DESKTOP_READOBJECTS
+         desktop = win32service.OpenDesktop("default", 0, False,
+                                            desktop_flags)
+
+         # Get the handle to the user.
+         user = win32security.LogonUser(creds['username'], creds['domain'],
+                                        creds['password'],
+                                        win32con.LOGON32_LOGON_INTERACTIVE,
+                                        win32con.LOGON32_PROVIDER_DEFAULT)
+         self.mUserHandle = user
+
+         # Get the PySID object for user's logon ID.
+         tic = win32security.GetTokenInformation(user,
+                                                 ntsecuritycon.TokenGroups)
+         user_sid = None
+         for sid, flags in tic:
+            if flags & win32con.SE_GROUP_LOGON_ID:
+               user_sid = sid
+               break
+
+         if user_sid is None:
+            raise Exception('Failed to determine logon ID')
+
+         windesktop.addUserToWindowStation(new_winsta, user_sid)
+         windesktop.addUserToDesktop(desktop, user_sid)
+
+         cur_winsta.SetProcessWindowStation()
+
+         self.mUserSID = user_sid
+         self.mWinsta  = new_winsta
+         self.mDesktop = desktop
+
    def getCredentials(self):
       return self.mCredentials
 
    def logout(self, nodeId):
+      if sys.platform.startswith("win"):
+         windesktop.removeUserSID(self.mWinsta, self.mUserSID)
+         windesktop.removeUserSID(self.mDesktop, self.mUserSID)
+
+         self.mWinsta.CloseWindowStation()
+         self.mDesktop.CloseDesktop()
+
+         self.mUserSID = None
+         self.mUserHandle.Close()
+
       logger = logging.getLogger('maestrod.UserPerspective')
       logger.info("Logging out client: " + str(nodeId))
       self.mEventManager.unregisterProxy(nodeId)
-
 
 class TestRealm(object):
    implements(portal.IRealm)
