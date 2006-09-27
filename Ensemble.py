@@ -19,27 +19,8 @@
 import elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
 from PyQt4 import QtCore, QtGui
-import socket
-
-ERROR = 0
-LINUX = 1
-WIN = 2
-WINXP = 3
-MACOS = 4
-MACOSX = 5
-HPUX = 6
-AIX = 7
-SOLARIS = 8
-
-OsNameMap = {ERROR  : 'Error',
-             LINUX  : 'Linux',
-             WIN    : 'Windows',
-             WINXP  : 'Windows XP',
-             MACOS  : 'MacOS',
-             MACOSX : 'MacOS X',
-             HPUX   : 'HP UX',
-             AIX    : 'AIX',
-             SOLARIS : 'Solaris'}
+import MaestroConstants
+import socket, types
 
 class Ensemble(QtCore.QObject):
    def __init__(self, xmlTree, parent=None):
@@ -77,24 +58,33 @@ class Ensemble(QtCore.QObject):
       self.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
 
    def getNode(self, index):
+      """ Return the node at the given index. Returns None if index is out of range.
+
+          @param index: The index of the node to return.
+      """
+      if index < 0 or index >= len(self.mNodes):
+         return None
       return self.mNodes[index]
 
    def getNumNodes(self):
+      """ Returns the number of nodes in Ensemble. """
       return len(self.mNodes)
 
    def onReportOs(self, nodeId, os):
+      """ Slot that gets called when a node reports it's operating system.
+
+          @param nodeId: The ID of the node that is reporting its OS.
+          @param os: Operating system integer constant.
+      """
+      assert(type(os) == types.IntType)
       try:
          print "onReportOs [%s] [%s]" % (nodeId, os)
-         changed = False
          for node in self.mNodes:
             if node.getIpAddress() == nodeId:
                if os != node.mPlatform:
                   node.mPlatform = os
-                  changed = True
+                  self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
 
-         if changed:
-            # TODO: Only send changed signal when nodes really changed os.
-            self.emit(QtCore.SIGNAL("ensembleChanged()"))
       except Exception, ex:
          print "ERROR: ", ex
 
@@ -103,9 +93,7 @@ class Ensemble(QtCore.QObject):
          if node.getIpAddress() == nodeId:
             node.mTargets = targets
             node.mDefaultTargetIndex = defaultTargetIndex
-
-   def onEnsembleChanged(self):
-      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
+            self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
 
    def refreshConnections(self):
       """Try to connect to all nodes."""
@@ -144,7 +132,7 @@ class ClusterNode:
       self.mName = self.mElement.get("name")
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("sub_class")
-      self.mPlatform = ERROR 
+      self.mPlatform = MaestroConstants.ERROR 
       self.mTargets = []
       self.mDefaultTargetIndex = -1
 
@@ -158,7 +146,7 @@ class ClusterNode:
       return self.mElement.get("hostname")
 
    def setHostname(self, newHostname):
-      self.mPlatform = ERROR
+      self.mPlatform = MaestroConstants.ERROR
       return self.mElement.set("hostname", newHostname)
 
    def getId(self):
@@ -171,7 +159,7 @@ class ClusterNode:
          return "0.0.0.0"
 
    def getPlatformName(self):
-      return OsNameMap[self.mPlatform]
+      return MaestroConstants.OsNameMap[self.mPlatform]
 
    def getClass(self):
       platform = self.getPlatformName()

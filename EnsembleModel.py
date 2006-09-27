@@ -29,39 +29,26 @@ import copy
 import socket
 
 import modules.ClusterSettingsResource
-
-ERROR = 0
-LINUX = 1
-WIN = 2
-WINXP = 3
-MACOS = 4
-MACOSX = 5
-HPUX = 6
-AIX = 7
-SOLARIS = 8
-
-OsNameMap = {ERROR  : 'Error',
-             LINUX  : 'Linux',
-             WIN    : 'Windows',
-             WINXP  : 'Windows XP',
-             MACOS  : 'MacOS',
-             MACOSX : 'MacOS X',
-             HPUX   : 'HP UX',
-             AIX    : 'AIX',
-             SOLARIS : 'Solaris'}
+import MaestroConstants
 
 class EnsembleModel(QtCore.QAbstractListModel):
    def __init__(self, ensemble, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
       self.mEventManager = None
+
+      # Set the new ensemble configuration.
       self.mEnsemble = ensemble
 
+      # Connect the new ensemble.
+      self.connect(self.mEnsemble, QtCore.SIGNAL("newConnections()"), self.onEnsembleChanged)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+
       self.mIcons = {}
-      self.mIcons[ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
-      self.mIcons[WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+      self.mIcons[MaestroConstants.ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
+      self.mIcons[MaestroConstants.WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      self.mIcons[MaestroConstants.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      self.mIcons[MaestroConstants.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
 
    def init(self, eventManager):
       self.mEventManager = eventManager
@@ -71,6 +58,28 @@ class EnsembleModel(QtCore.QAbstractListModel):
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
       self.mEventManager.connect("*", "settings.os", self.onReportOs)
+
+
+   def onNodeChanged(self, nodeId):
+      """ Slot that is called when a node's state changes. If the currently
+          selected node changes, we need to update the target list and the
+          current default target.
+
+          @param nodeId: The id of the node that changed.
+      """
+
+      for i in xrange(self.mEnsemble.getNumNodes()):
+         node = self.mEnsemble.getNode(i)
+         if nodeId == node.getId():
+            changed_index = self.index(i)
+            self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
+               changed_index, changed_index)
+
+   def onEnsembleChanged(self):
+      """ Slot that is called when the ensemble has changed. This will
+          force all views to be updated.
+      """
+      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
 
    def onReportOs(self, nodeId, os):
       try:
