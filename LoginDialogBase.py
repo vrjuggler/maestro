@@ -84,7 +84,7 @@ class Ui_LoginDialogBase(object):
       LoginDialogBase.setTabOrder(self.mLoginBtn,self.mCancelBtn)
 
    def retranslateUi(self, LoginDialogBase):
-      LoginDialogBase.setWindowTitle(QtGui.QApplication.translate("LoginDialogBase", "Login", None, QtGui.QApplication.UnicodeUTF8))
+      LoginDialogBase.setWindowTitle(QtGui.QApplication.translate("LoginDialogBase", "Maestro Client Login", None, QtGui.QApplication.UnicodeUTF8))
       self.mUserLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "User:", None, QtGui.QApplication.UnicodeUTF8))
       self.mDomainLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "Domain:", None, QtGui.QApplication.UnicodeUTF8))
       self.mPasswordLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "Password:", None, QtGui.QApplication.UnicodeUTF8))

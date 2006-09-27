@@ -175,7 +175,7 @@ class Ui_MaestroBase(object):
       QtCore.QMetaObject.connectSlotsByName(MaestroBase)
 
    def retranslateUi(self, MaestroBase):
-      MaestroBase.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Infiscape Cluster Control", None, QtGui.QApplication.UnicodeUTF8))
+      MaestroBase.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Maestro Client by Infiscape", None, QtGui.QApplication.UnicodeUTF8))
       self.mOldBtn1.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
       self.mOldBtn3.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
       self.mOldBtn2.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))

@@ -13,7 +13,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Login</string>
+   <string>Maestro Client Login</string>
   </property>
   <property name="modal" >
    <bool>true</bool>

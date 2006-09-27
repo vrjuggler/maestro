@@ -13,7 +13,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Infiscape Cluster Control</string>
+   <string>Maestro Client by Infiscape</string>
   </property>
   <property name="windowIcon" >
    <iconset resource="MaestroResource.qrc" >:/images/construction.png</iconset>
