@@ -183,16 +183,14 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
 
    def onAdd(self):
       """ Called when user presses the add button. """
-      #if not None == self.mClusterModel:
-      #   self.mClusterModel.insertRow(self.mClusterModel.rowCount())
-      pass
+      if not None == self.mEnsembleModel:
+         self.mEnsembleModel.insertRow(self.mEnsembleModel.rowCount())
 
    def onRemove(self):
       """ Called when user presses the remove button. """
-      #row = self.mClusterListView.currentIndex().row()
-      #if (not None == self.mClusterModel) and row >= 0:
-      #   self.mClusterModel.removeRow(row)
-      pass
+      row = self.mClusterListView.currentIndex().row()
+      if (not None == self.mEnsembleModel) and row >= 0:
+         self.mEnsembleModel.removeRow(row)
 
    def onNodeSettingsChanged(self):
       """ Slot that is called when the user has finished editing a
