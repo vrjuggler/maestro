@@ -191,6 +191,7 @@ def addUserToWindowStation(winsta, userSid):
       copyACL(acl, new_acl)
 
    # Add the first ACE for userSid to the window station.
+   ace0_index = new_acl.GetAceCount()
    ace_flags = win32con.CONTAINER_INHERIT_ACE | \
                win32con.INHERIT_ONLY_ACE      | \
                win32con.OBJECT_INHERIT_ACE
@@ -198,6 +199,7 @@ def addUserToWindowStation(winsta, userSid):
                                  generic_access, userSid)
 
    # Add the second ACE for userSid to the window station.
+   ace1_index = new_acl.GetAceCount()
    ace_flags = win32con.NO_PROPAGATE_INHERIT_ACE
    new_acl.AddAccessAllowedAceEx(win32con.ACL_REVISION, ace_flags,
                                  winsta_all, userSid)
@@ -215,7 +217,7 @@ def addUserToWindowStation(winsta, userSid):
                                        win32con.DACL_SECURITY_INFORMATION,
                                        new_security_desc)
 
-   return security_desc
+   return [ace0_index, ace1_index]
 
 def addUserToDesktop(desktop, userSid):
    '''
@@ -251,6 +253,7 @@ def addUserToDesktop(desktop, userSid):
       copyACL(acl, new_acl)
 
    # Add the ACE for user_sid to the desktop.
+   ace0_index = new_acl.GetAceCount()
    new_acl.AddAccessAllowedAce(win32con.ACL_REVISION, desktop_all, userSid)
 
    # Create a new security descriptor and set its new DACL.
@@ -262,13 +265,39 @@ def addUserToDesktop(desktop, userSid):
                                        win32con.DACL_SECURITY_INFORMATION,
                                        new_security_desc)
 
-   return security_desc
+   return [ace0_index]
 
-def restoreSecurityDescriptor(handle, desc):
+def removeACEs(handle, aceIndices):
+   security_desc = \
+      win32security.GetUserObjectSecurity(handle,
+                                          win32con.DACL_SECURITY_INFORMATION)
+   acl = security_desc.GetSecurityDescriptorDacl()
+
+   # Make a copy of aceIndices that is sorted in decreasing order of ACE
+   # index. This allows us to iterate over the indices and remove them from
+   # acl without worrying about indices being invalidated.
+   old_count = acl.GetAceCount()
+   ace_list = [i for i in aceIndices]
+   ace_list.sort()
+   ace_list.reverse()
+
+   for i in ace_list:
+      logging.debug("Removing ACE %d from %s's ACL" % (i, handle))
+      acl.DeleteAce(i)
+
+   assert acl.GetAceCount() == old_count - len(ace_list)
+   logging.debug("ACE count before %d" % old_count)
+   logging.debug("ACE count after %d" % acl.GetAceCount())
+
+   # Create a new security descriptor and set its new DACL.
+   new_security_desc = win32security.SECURITY_DESCRIPTOR()
+   new_security_desc.SetSecurityDescriptorDacl(True, acl, False)
+
+   # Set the new security descriptor for desktop.
    win32security.SetUserObjectSecurity(handle,
                                        win32con.DACL_SECURITY_INFORMATION,
-                                       desc)
-   
+                                       new_security_desc)
+
 def runCommandAsOtherUser():
    '''
    Runs a command (C:\Python24\python.exe C:\read_files.py) as another
@@ -317,8 +346,8 @@ def runCommandAsOtherUser():
       if user_sid is None:
          raise Exception('Failed to determine logon ID')
 
-      winsta_secdesc  = addUserToWindowStation(new_winsta, user_sid)
-      desktop_secdesc = addUserToDesktop(desktop, user_sid)
+      winsta_ace_indices  = addUserToWindowStation(new_winsta, user_sid)
+      desktop_ace_indices = addUserToDesktop(desktop, user_sid)
 
       si = win32process.STARTUPINFO()
       # Copied from process.py. I don't know what these should be in general.
@@ -333,6 +362,8 @@ def runCommandAsOtherUser():
       # service.
       # This command validates that the process has the access rights of the
       # logged on (impersonated) user.
+#      logging.debug('LOG_FILE = ' + LOG_FILE)
+#      logging.debug('TEST_DIR = ' + TEST_DIR)
 #      (process, thread, proc_id, thread_id) = \
 #         win32process.CreateProcessAsUser(handle, None,
 #                                          r"C:\Python24\python.exe C:\read_files.py %s %s" % (LOG_FILE, TEST_DIR),
@@ -356,8 +387,10 @@ def runCommandAsOtherUser():
       win32event.WaitForSingleObject(process, win32event.INFINITE)
       logging.debug("Done!")
 
-      restoreSecurityDescriptor(new_winsta, winsta_secdesc)
-      restoreSecurityDescriptor(desktop, desktop_secdesc)
+      logging.debug("Removing added ACEs from new_winsta")
+      removeACEs(new_winsta, winsta_ace_indices)
+      logging.debug("Removing added ACEs from desktop")
+      removeACEs(desktop, desktop_ace_indices)
 
       new_winsta.CloseWindowStation()
       desktop.CloseDesktop()
