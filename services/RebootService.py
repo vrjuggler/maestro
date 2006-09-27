@@ -52,6 +52,10 @@ if "win32" == sys.platform:
 
 
 def grubIdToMaestroId(id):
+   """ Map grubconf constants to Maestro constants.
+
+       @param id: grubconf constant.
+   """
    if id == grubconfig.GrubBootTarget.LINUX:
       return MaestroConstants.LINUX
    elif id == grubconfig.GrubBootTarget.WINDOWS:
@@ -61,17 +65,8 @@ def grubIdToMaestroId(id):
    else:
       return MaestroConstants.UNKNOWN
 
-
-
-#import os
-#import re
-#import string
-#import sys
-
-
-
-
 def makeLinuxDefault(grubConf):
+   """ Makes a best guess at the latest kernel that should be used. """
    def compare(v1, v2):
       if v1 < v2:
          return -1
@@ -119,6 +114,9 @@ def makeLinuxDefault(grubConf):
       print "WARNING: Could not find appropriate Linux target to be default"
 
 class RebootService:
+   """ Reboot service that allows remote Maestro connections to change the
+       default boot target and reboot the machine.
+   """
    def __init__(self):
       self.mGrubConfig = None
 
