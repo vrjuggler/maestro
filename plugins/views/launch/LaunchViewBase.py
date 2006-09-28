@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'modules/ClusterLauncherBase.ui'
+# Form implementation generated from reading ui file 'plugins/views/launch/LaunchViewBase.ui'
 #
 #      by: PyQt4 UI code generator 4-snapshot-20060828
 #
@@ -9,17 +9,17 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
-class Ui_ClusterLauncherBase(object):
-   def setupUi(self, ClusterLauncherBase):
-      ClusterLauncherBase.setObjectName("ClusterLauncherBase")
-      ClusterLauncherBase.resize(QtCore.QSize(QtCore.QRect(0,0,671,596).size()).expandedTo(ClusterLauncherBase.minimumSizeHint()))
+class Ui_LaunchViewBase(object):
+   def setupUi(self, LaunchViewBase):
+      LaunchViewBase.setObjectName("LaunchViewBase")
+      LaunchViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,671,596).size()).expandedTo(LaunchViewBase.minimumSizeHint()))
 
-      self.vboxlayout = QtGui.QVBoxLayout(ClusterLauncherBase)
+      self.vboxlayout = QtGui.QVBoxLayout(LaunchViewBase)
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(ClusterLauncherBase)
+      self.mTitleLbl = QtGui.QLabel(LaunchViewBase)
 
       font = QtGui.QFont(self.mTitleLbl.font())
       font.setFamily("Sans Serif")
@@ -37,7 +37,7 @@ class Ui_ClusterLauncherBase(object):
       self.mTitleLbl.setObjectName("mTitleLbl")
       self.vboxlayout.addWidget(self.mTitleLbl)
 
-      self.mTabWidget = QtGui.QTabWidget(ClusterLauncherBase)
+      self.mTabWidget = QtGui.QTabWidget(LaunchViewBase)
       self.mTabWidget.setObjectName("mTabWidget")
 
       self.mLaunchTab = QtGui.QWidget()
@@ -170,26 +170,26 @@ class Ui_ClusterLauncherBase(object):
       self.mTabWidget.addTab(self.mEditTab, "")
       self.vboxlayout.addWidget(self.mTabWidget)
 
-      self.retranslateUi(ClusterLauncherBase)
-      QtCore.QMetaObject.connectSlotsByName(ClusterLauncherBase)
+      self.retranslateUi(LaunchViewBase)
+      QtCore.QMetaObject.connectSlotsByName(LaunchViewBase)
 
-   def retranslateUi(self, ClusterLauncherBase):
-      ClusterLauncherBase.setWindowTitle(QtGui.QApplication.translate("ClusterLauncherBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("ClusterLauncherBase", "Application Launcher", None, QtGui.QApplication.UnicodeUTF8))
-      self.mLaunchBtn.setText(QtGui.QApplication.translate("ClusterLauncherBase", "&Launch", None, QtGui.QApplication.UnicodeUTF8))
-      self.mKillBtn.setText(QtGui.QApplication.translate("ClusterLauncherBase", "&Kill Application", None, QtGui.QApplication.UnicodeUTF8))
-      self.mHelpBtn.setText(QtGui.QApplication.translate("ClusterLauncherBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTabWidget.setTabText(self.mTabWidget.indexOf(self.mLaunchTab), QtGui.QApplication.translate("ClusterLauncherBase", "Launch", None, QtGui.QApplication.UnicodeUTF8))
-      self.mAddBtn.setText(QtGui.QApplication.translate("ClusterLauncherBase", "&Add", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setText(QtGui.QApplication.translate("ClusterLauncherBase", "&Remove", None, QtGui.QApplication.UnicodeUTF8))
-      self.mSaveBtn.setText(QtGui.QApplication.translate("ClusterLauncherBase", "&Save", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTabWidget.setTabText(self.mTabWidget.indexOf(self.mEditTab), QtGui.QApplication.translate("ClusterLauncherBase", "Edit", None, QtGui.QApplication.UnicodeUTF8))
+   def retranslateUi(self, LaunchViewBase):
+      LaunchViewBase.setWindowTitle(QtGui.QApplication.translate("LaunchViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTitleLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application Launcher", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLaunchBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Launch", None, QtGui.QApplication.UnicodeUTF8))
+      self.mKillBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Kill Application", None, QtGui.QApplication.UnicodeUTF8))
+      self.mHelpBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTabWidget.setTabText(self.mTabWidget.indexOf(self.mLaunchTab), QtGui.QApplication.translate("LaunchViewBase", "Launch", None, QtGui.QApplication.UnicodeUTF8))
+      self.mAddBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Add", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRemoveBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Remove", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Save", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTabWidget.setTabText(self.mTabWidget.indexOf(self.mEditTab), QtGui.QApplication.translate("LaunchViewBase", "Edit", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
-   ClusterLauncherBase = QtGui.QWidget()
-   ui = Ui_ClusterLauncherBase()
-   ui.setupUi(ClusterLauncherBase)
-   ClusterLauncherBase.show()
+   LaunchViewBase = QtGui.QWidget()
+   ui = Ui_LaunchViewBase()
+   ui.setupUi(LaunchViewBase)
+   LaunchViewBase.show()
    sys.exit(app.exec_())

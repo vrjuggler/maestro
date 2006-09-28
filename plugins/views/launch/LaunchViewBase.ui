@@ -2,8 +2,8 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>ClusterLauncherBase</class>
- <widget class="QWidget" name="ClusterLauncherBase" >
+ <class>LaunchViewBase</class>
+ <widget class="QWidget" name="LaunchViewBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -277,8 +277,5 @@
   </layout>
  </widget>
  <pixmapfunction></pixmapfunction>
- <resources>
-  <include location="ClusterLauncherResource.qrc" />
- </resources>
  <connections/>
 </ui>

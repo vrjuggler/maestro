@@ -18,15 +18,30 @@
 
 import sys
 from PyQt4 import QtGui, QtCore
-import ClusterLauncherBase
-import ClusterLauncherResource
+import LaunchViewBase
 import elementtree.ElementTree as ET
-import StanzaModel
-import Stanza
+
+import MaestroConstants
+
+import core
+from core import StanzaModel
+from core import Stanza
 import GlobalOptions
 
 import os.path
 pj = os.path.join
+
+class LaunchViewPlugin(core.IViewPlugin):
+   def __init__(self):
+      core.IViewPlugin.__init__(self)
+      self.widget = LaunchView()
+      
+   @staticmethod
+   def getName():
+      return "Reboot View"
+      
+   def getViewWidget(self):
+      return self.widget
 
 def numClassMatches(nodeClassString, subClassString):
    node_classes = nodeClassString.split(",")
@@ -60,7 +75,7 @@ def getMaxMatchValue(valueMap, nodeClassString):
          max_match_value = value
    return max_match_value
 
-class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase):
+class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -72,8 +87,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
       self.activeThread        = None
 
    def scanForStanzas(self):
-      file_dir = os.path.dirname(os.path.abspath(__file__))
-      stanza_path = pj(file_dir, "..", "stanzas")
+      stanza_path = pj(MaestroConstants.EXEC_DIR, "stanzas")
       assert os.path.exists(stanza_path)
       assert os.path.isdir(stanza_path)
       files = os.listdir(stanza_path)
@@ -106,7 +120,7 @@ class ClusterLauncher(QtGui.QWidget, ClusterLauncherBase.Ui_ClusterLauncherBase)
          QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
 
    def setupUi(self, widget):
-      ClusterLauncherBase.Ui_ClusterLauncherBase.setupUi(self, widget)
+      LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
       self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
       
@@ -578,8 +592,3 @@ class ValueSheet(Sheet):
    def onEdited(self):
       if self.mValueEditor:
          self.mObj.mValue = str(self.mValueEditor.text())
-
-
-def getModuleInfo():
-   icon = QtGui.QIcon(":/ClusterLauncher/images/launch.png")
-   return (ClusterLauncher, icon)
