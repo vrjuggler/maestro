@@ -37,7 +37,11 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
       
    @staticmethod
    def getName():
-      return "Reboot View"
+      return "Launch View"
+      
+   @staticmethod
+   def getIcon():
+      return QtGui.QIcon(":/Maestro/images/launch.png")
       
    def getViewWidget(self):
       return self.widget
@@ -234,10 +238,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          ip_address = node.getIpAddress()
          self.mEventManager.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
          
-
-   def getName():
-        return "Cluster Launcher"
-   getName = staticmethod(getName)
 
 
    def _resetAppState(self):

@@ -29,6 +29,10 @@ class ResourceViewPlugin(maestro.core.IViewPlugin):
    @staticmethod
    def getName():
       return "Reboot View"
+   
+   @staticmethod
+   def getIcon():
+      return QtGui.QIcon(":/Maestro/images/resources.png")   
       
    def getViewWidget(self):
       return self.widget

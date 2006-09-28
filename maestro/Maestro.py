@@ -35,7 +35,6 @@ const = maestro.core.const
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET
-import modules
 import LogWidget
 import LoginDialog
 
@@ -223,12 +222,12 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          print "Creating new view: %s %s"%(pluginTypeName, vtype.__name__)
          new_view = vtype()
          new_view_widget = new_view.getViewWidget()
+         new_icon = vtype.getIcon()
 
          # Add the view widget to the GUI.
          index = self.mStack.addWidget(new_view_widget)
 
          btn = QtGui.QToolButton(self.mToolbox)
-         new_icon = QtGui.QIcon(":/Maestro/images/construction.png")
          btn.setIcon(new_icon)
          btn.setAutoRaise(1)
          btn.setCheckable(True)

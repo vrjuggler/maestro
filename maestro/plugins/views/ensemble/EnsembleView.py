@@ -32,6 +32,10 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
    @staticmethod
    def getName():
       return "Ensemble View"
+
+   @staticmethod
+   def getIcon():
+      return QtGui.QIcon(":/Maestro/images/management.png")
       
    def getViewWidget(self):
       return self.widget
@@ -346,19 +350,3 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.refreshNodeSettings()
       # We must also refresh the list of all operating system targets.
       self.refreshTargetList()
-
-
-   def getName():
-        return "Cluster Settings"
-   getName = staticmethod(getName)
-
-def getModuleInfo():
-   icon = QtGui.QIcon(":/EnsembleView/images/management.png")
-   return (EnsembleView, icon)
-
-if __name__ == "__main__":
-   app = QtGui.QApplication(sys.argv)
-   cs = EnsembleView()
-   cs.show()
-   sys.exit(app.exec_())
-

@@ -18,19 +18,13 @@
 
 
 import elementtree.ElementTree as ET
-from xml.dom.minidom import parseString
-import threading
-import time, types, re, sys
 
 from PyQt4 import QtCore, QtGui
-from Queue import Queue
 
-import copy
-import socket
+import maestro.core
+const = maestro.core.const
 
 import Ensemble
-import modules.ClusterSettingsResource
-const = maestro.core.const
 
 class EnsembleModel(QtCore.QAbstractListModel):
    def __init__(self, ensemble, parent=None):

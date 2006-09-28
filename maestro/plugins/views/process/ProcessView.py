@@ -31,6 +31,10 @@ class ProcessViewPlugin(maestro.core.IViewPlugin):
    def getName():
       return "Process View"
       
+   @staticmethod
+   def getIcon():
+      return QtGui.QIcon(":/Maestro/images/resources.png")
+      
    def getViewWidget(self):
       return self.widget
 

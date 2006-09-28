@@ -18,6 +18,10 @@ class IViewPlugin(maestro.util.plugin.Plugin):
    @staticmethod
    def getName():
       not_implemented()
+
+   @staticmethod
+   def getIcon():
+      not_implemented()
    
    def getViewWidget(self):
       not_implemented()

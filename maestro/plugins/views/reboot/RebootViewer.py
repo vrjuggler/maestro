@@ -20,11 +20,9 @@ import sys, socket
 from PyQt4 import QtGui, QtCore
 
 import RebootViewerBase
-import maestro.MaestroResource
 import maestro.core
 const = maestro.core.const
 from maestro.core import Ensemble
-
 
 class RebootViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
@@ -34,6 +32,10 @@ class RebootViewPlugin(maestro.core.IViewPlugin):
    @staticmethod
    def getName():
       return "Reboot View"
+
+   @staticmethod
+   def getIcon():
+      return QtGui.QIcon(":/Maestro/images/reboot.png")
       
    def getViewWidget(self):
       return self.widget
@@ -437,8 +439,3 @@ class RebootModel(QtCore.QAbstractTableModel):
             end_changed_index = self.index(i, self.columnCount())
             self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
                start_changed_index, end_changed_index)
-
-
-def getModuleInfo():
-   icon = QtGui.QIcon(":/Maestro/images/reboot.png")
-   return (RebootViewer, icon)
