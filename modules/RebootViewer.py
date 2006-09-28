@@ -323,7 +323,7 @@ class RebootModel(QtCore.QAbstractTableModel):
       self.mEnsemble = ensemble
 
       # Connect the new ensemble.
-      self.connect(self.mEnsemble, QtCore.SIGNAL("newConnections()"), self.onEnsembleChanged)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
 
    def flags(self, index):

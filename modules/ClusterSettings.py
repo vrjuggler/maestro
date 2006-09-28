@@ -146,14 +146,14 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
 
       # If an ensemble already exists, disconnect it.
       if self.mEnsemble is not None:
-         self.disconnect(self.mEnsemble, QtCore.SIGNAL("newConnections()"), self.onNewConnections)
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
          self.disconnect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
 
       # Connect the new ensemble.
-      self.connect(self.mEnsemble, QtCore.SIGNAL("newConnections()"), self.onNewConnections)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
 
       self.mEventManager = eventManager
@@ -336,7 +336,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       """ Slot that makes all nodes reboot to Windows. """
       self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.WINXP,))
 
-   def onNewConnections(self):
+   def onEnsembleChanged(self):
       """ Called when the cluster control has connected to another node. """
       self.mClusterListView.reset()
       # Refresh the information about the node.

@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import os, sys, os.path, traceback, types, weakref, time
-
+import logging
 
 class EventManagerBase(object):
    """ Class to capture and handle event processing in the system.
@@ -31,6 +31,7 @@ class EventManagerBase(object):
       # the callable is held using a weak reference
       self.mConnections = {}
       self.mTimerHandler = TimerHandler()
+      self.mLogger = logging.getLogger('maestrod.EventManagerBase')
       
    def update(self):
       """ Update method.  Called once per frame. """
@@ -105,7 +106,7 @@ class EventManagerBase(object):
          # Append out hostname to distinguish where messages are coming from.
          argsTuple = (nodeId,) + argsTuple
 
-         print "DEBUG: EventManager.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple)
+         self.mLogger.debug("EventManager.localEmit([%s][%s][%s])" % (nodeId, sigName, argsTuple))
 
          # If there are slots, loop over them and call
          if self.mConnections.has_key(nodeId):
@@ -129,7 +130,7 @@ class EventManagerBase(object):
                      # remove slot
                      pass
       except Exception, ex:
-         print "ERROR: EventManager.emit(%s, %s, %s) [%s]" % (nodeId, sigName, argsTuple, ex)
+         self.mLogger.error("EventManager.localEmit(%s, %s, %s) [%s]" % (nodeId, sigName, argsTuple, ex))
          
 
    def timers(self):
@@ -238,13 +239,13 @@ class TimerHandler(object):
                   slot_ref()               # Call the slot
                except Exception, ex:
                   err_text = "Error calling timer callback: %s\n  exception:"%slot_ref + str(ex)
-                  print err_text
-                  print "Removing slot."
-                  traceback.print_exc()
+                  self.mLogger.error(err_txt)
+                  self.mLogger.error("Removing slot: " + ex)
+                  #traceback.print_exc()
                   null_keys.append(slot_ref)
                except:
-                  print "Unknown exception in timer callback:"
-                  traceback.print_exc()
+                  self.mLogger.error("Unknown exception in timer callback.")
+                  #traceback.print_exc()
                   null_keys.append(slot_ref)
                
                if 0 != next_time:       # Ignore zero since that is trigger always

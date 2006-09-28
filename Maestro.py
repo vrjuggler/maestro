@@ -36,8 +36,7 @@ import modules
 import LogWidget
 import LoginDialog
 
-import socket
-import time
+import logging, socket, time
 
 gui_base_dir = ""
 try:
@@ -349,6 +348,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    #   self.mTextEdit.append("Aron")
 
 def main():
+   # Set up logging to sys.stderr.
+   logging.basicConfig(level = logging.DEBUG,
+                       format = '%(name)-12s %(levelname)-8s %(message)s',
+                       datefmt = '%m-%d %H:%M')
    try:
       logo_path = os.path.join(os.path.dirname(__file__), 'images', 'cpu_array.png')
       pixmap = QtGui.QPixmap(logo_path)
@@ -417,6 +420,7 @@ def main():
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()
+      logging.shutdown()
       sys.exit()
    except IOError, ex:
       print "Failed to read %s: %s" % (sys.argv[1], ex.strerror)

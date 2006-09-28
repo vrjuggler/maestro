@@ -114,15 +114,20 @@ class Ensemble(QtCore.QObject):
 
       if new_connections:
          print "We had new connections"
-         self.emit(QtCore.SIGNAL("newConnections()"))
+         self.emit(QtCore.SIGNAL("ensembleChanged()"))
 
-   def onLostConnection(self, dummy, nodeId):
-      print "lostConnection: [%s]" % (nodeId)
+   def onLostConnection(self, msgFrom, nodeId):
+      """ Slot that is called when a connection is lost to a node.
+
+          @param msgFrom: Source of signal, in this case always '*'.
+          @param nodeId: ID of the node that lost it's connection.
+      """
       for node in self.mNodes:
          if node.getId() == nodeId:
             node.lostConnection()
-            
-      self.emit(QtCore.SIGNAL("newConnections()"))
+
+      # Refresh all views of the Ensemble.
+      self.emit(QtCore.SIGNAL("ensembleChanged()"))
  
 class ClusterNode:
    """ Represents a node in the active cluster configuration. Most of this
