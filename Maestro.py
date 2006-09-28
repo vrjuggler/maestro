@@ -57,24 +57,29 @@ def main():
                        format = '%(name)-12s %(levelname)-8s %(message)s',
                        datefmt = '%m-%d %H:%M')
    try:
-      logo_path = os.path.join(os.path.dirname(__file__), 'images', 'cpu_array.png')
-      pixmap = QtGui.QPixmap(logo_path)
-      splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
+      logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'images', 'cpu_array.png')
 
-      def cb(percent, msg):
-         print "[%s][%s]" % (percent, msg)
+      # --- Bootstrap the environment --- #
+      splash_map = QtGui.QPixmap(logo_path)
+      #splash = QtGui.QSplashScreen(splash_map, QtCore.Qt.WindowStaysOnTopHint)
+      splash = QtGui.QSplashScreen(splash_map)
+      splash.show()
+      splash.showMessage("Bootstrapping system...")
+      app.processEvents()
 
-      #splash.show()
-      #splash.showMessage("Establishing connections...")
-
-      #QtGui.qApp.processEvents()
+      def splashProgressCB(percent, message):
+         splash.showMessage("%3.0f%% %s"%(percent*100,message))
+         app.processEvents()   
+         time.sleep(0.1)
 
       env = maestro.core.Environment()
-      env.initialize(progressCB=cb)
+      env.initialize(progressCB=splashProgressCB)
 
       # Parse XML ensemble file. This provides the initial set of cluster
       # nodes.
       tree = ET.ElementTree(file=sys.argv[1])
+
+      splash.finish(None)
 
       ld = maestro.LoginDialog.LoginDialog()
       if QtGui.QDialog.Rejected == ld.exec_():
