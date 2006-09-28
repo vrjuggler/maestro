@@ -1,4 +1,5 @@
 <?xml version="1.0" ?>
 <maestrod version="1">
+   <boot_loader>GRUB</boot_loader>
    <grub_conf>/boot/grub/grub.conf</grub_conf>
 </maestrod>

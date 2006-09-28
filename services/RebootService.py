@@ -121,7 +121,13 @@ class RebootService:
       self.mGrubConfig = None
 
    def init(self, eventManager, settings):
-      if settings.has_key('grub_conf'):
+      # Find out which boot loader we are using. If none is set, assume that
+      # we are using GRUB.
+      boot_loader = settings.get('boot_loader', 'GRUB')
+
+      # If GRUB is our boot loader, then we need to get the GRUB configuration
+      # loaded for later manipulations.
+      if boot_loader == 'GRUB' and settings.has_key('grub_conf'):
          grub_path = settings['grub_conf']
          if os.path.exists(grub_path) and os.path.isfile(grub_path):
             self.mGrubConfig = grubconfig.GrubConfig(grub_path)
