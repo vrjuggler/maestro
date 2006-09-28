@@ -25,14 +25,14 @@ class Preferences:
       self.mFile = file
       self.mRoot = ET.parse(file)
 
-   def create(self, prefsFile):
+   def create(self, prefsFile, rootToken):
       '''
       Creates an empty preferences structure and saves it to the named file.
       If this preferences object already held a preferences structure, it
       is lost. The given preferences file name is stored for later use.
       '''
       self.mFile = prefsFile
-      self.mRoot = ET.Element("maestro")
+      self.mRoot = ET.Element(rootToken)
       self.save(prefsFile)
 
    def save(self, prefsFile = None):

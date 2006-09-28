@@ -105,7 +105,7 @@ def main():
                                       (cfg_file_path, ex.strerror))
          if not os.path.exists(cfg_file_path):
             try:
-               gui_settings.create(cfg_file_path)
+               gui_settings.create(cfg_file_path, 'maestro')
             except IOError, ex:
                QtGui.QMessageBox.warning(None, "Warning",
                                          "Failed to create preferences file: %s: %s" \
