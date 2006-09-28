@@ -33,8 +33,9 @@ import services.SettingsService
 
 import maestro
 import maestro.core
-
+import maestro.core.prefs
 import maestro.core.EventManager
+
 import datetime
 import time
 import socket
@@ -67,25 +68,30 @@ if os.name == 'nt':
             newPrivileges = [(id, 0)]
         win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
 
+class ServerSettings(maestro.core.prefs.Preferences):
+   pass
+
 class MaestroServer:
    def __init__(self):
       self.mLogger = logging.getLogger('maestrod.MaestroServer')
       ip_address = socket.gethostbyname(socket.gethostname())
       self.mEventManager = maestro.core.EventManager.EventManager(ip_address)
       self.mServices = []
-      self.mSettings = {}
-      self.mSettingsFile = os.path.join(const.EXEC_DIR,
-                                        'maestrod.xcfg')
 
-      if os.path.exists(self.mSettingsFile) and os.path.isfile(self.mSettingsFile):
-         tree = parse(self.mSettingsFile)
-         root = tree.getroot()
-         for node in root:
-            for child in node.getiterator():
-               if child.text is not None:
-                  self.mSettings[node.tag] = child.text
+      server_settings = ServerSettings()
 
-      self.mLogger.debug(self.mSettings)
+      settings_file = os.path.join(const.EXEC_DIR, 'maestrod.xcfg')
+
+      try:
+         server_settings.load(settings_file)
+      except IOError, ex:
+         self.mLogger.warning('Failed to read settings file %s: %s' % \
+                                 (settings_file, ex.strerror))
+
+      env = maestro.core.Environment()
+      env.initialize(server_settings)
+
+      self.mLogger.debug(server_settings)
 
    def remote_test(self, val):
       self.mLogger.debug('Testing: ' + val)
@@ -94,23 +100,23 @@ class MaestroServer:
    def registerInitialServices(self):
       # Register initial services
       settings = services.SettingsService.SettingsService()
-      settings.init(self.mEventManager, self.mSettings)
+      settings.init(self.mEventManager)
       self.mServices.append(settings)
 
       resource = services.ResourceService.ResourceService()
-      resource.init(self.mEventManager, self.mSettings)
+      resource.init(self.mEventManager)
       self.mServices.append(resource)
 
       pm = services.ProcessManagementService.ProcessManagementService()
-      pm.init(self.mEventManager, self.mSettings)
+      pm.init(self.mEventManager)
       self.mServices.append(pm)
 
       reboot_service = services.RebootService.RebootService()
-      reboot_service.init(self.mEventManager, self.mSettings)
+      reboot_service.init(self.mEventManager)
       self.mServices.append(reboot_service)
       
       launch_service = services.LaunchService.LaunchService()
-      launch_service.init(self.mEventManager, self.mSettings)
+      launch_service.init(self.mEventManager)
       self.mServices.append(launch_service)
 
       # Register callbacks to send info to clients
