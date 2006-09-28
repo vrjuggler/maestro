@@ -23,7 +23,21 @@ import RebootViewerBase
 import MaestroResource
 import MaestroConstants
 import Ensemble
+import core
 
+
+class RebootViewPlugin(core.IViewPlugin):
+   def __init__(self):
+      core.IViewPlugin.__init__(self)
+      self.widget = RebootViewer()
+      
+   @staticmethod
+   def getName():
+      return "Reboot View"
+      
+   def getViewWidget(self):
+      return self.widget
+      
 Icons = {}
 Icons[MaestroConstants.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
 Icons[MaestroConstants.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
