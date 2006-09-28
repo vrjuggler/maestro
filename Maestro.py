@@ -142,17 +142,14 @@ def main():
       m.show()
 #      splash.finish(m)
       reactor.run()
+      reactor.stop()
+      reactor.runUntilCurrent()
+      logging.shutdown()
+      sys.exit()
    except IOError, ex:
       QtGui.QMessageBox.critical(None, "Error",
                                  "Failed to read ensemble file %s: %s" % \
                                     (sys.argv[1], ex.strerror))
-   except Exception, ex:
-      QtGui.QMessageBox.critical(None, "Fatal Error", str(ex))
-
-   reactor.stop()
-   reactor.runUntilCurrent()
-   logging.shutdown()
-   sys.exit()
 
 def usage():
    print "Usage: %s <XML configuration file>" % sys.argv[0]
