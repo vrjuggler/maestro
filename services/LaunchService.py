@@ -20,10 +20,9 @@
 import re
 import sys, os
 import os.path
-import util.process
-import util.EventManager
-import logging
 
+import maestro.util.process
+import logging
 
 class LaunchService:
    def __init__(self):
@@ -112,12 +111,7 @@ class LaunchService:
             if sys.platform.startswith("win"):
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 
-            #self.mBuffer = util.process.IOBuffer(name='<stdout>')
-            #self.mProcess = util.process.ProcessProxy(command, stdout=self.mBuffer, stderr=self.mBuffer, env={'DISPLAY':':0.0'})
-            #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=sys.stdout)
-            #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=self.mBuffer, stderr=self.mBuffer)
-            #self.mProcess = util.process.ProcessProxy(cmd=command, cwd=cwd, env=envMap, stdout=sys.stdout, stderr=self.mBuffer)
-            self.mProcess = util.process.ProcessOpen(cmd=command, cwd=cwd, env=envMap, avatar = avatar)
+            self.mProcess = maestro.util.process.ProcessOpen(cmd=command, cwd=cwd, env=envMap, avatar = avatar)
             return True
       except KeyError, ex:
          #traceback.print_stack()
@@ -139,8 +133,8 @@ class LaunchService:
             timeout = os.WNOHANG
          if self.mProcess is not None:
             self.mProcess.wait(timeout)
-      except util.process.ProcessError, ex:
-         if ex.errno == util.process.ProcessProxy.WAIT_TIMEOUT:
+      except maestro.util.process.ProcessError, ex:
+         if ex.errno == maestro.util.process.ProcessProxy.WAIT_TIMEOUT:
             return True
          else:
             raise

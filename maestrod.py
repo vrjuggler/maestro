@@ -30,7 +30,10 @@ import services.RebootService
 import services.ResourceService
 import services.SettingsService
 
-import util.EventManager
+import maestro
+import maestro.core
+
+import maestro.core.EventManager
 import datetime
 import time
 import socket
@@ -38,7 +41,7 @@ import logging
 import logging.handlers
 
 from twisted.spread import pb
-from util import pboverssl
+from maestro.util import pboverssl
 from twisted.cred import checkers, credentials, portal, error
 from zope.interface import implements
 from twisted.internet import ssl
@@ -49,7 +52,7 @@ from elementtree.ElementTree import parse
 if os.name == 'nt':
    import win32api, win32event, win32serviceutil, win32service, win32security
    import ntsecuritycon, win32con
-   import util.windesktop as windesktop
+   import maestro.util.windesktop as windesktop
 
 if os.name == 'nt':
     def AdjustPrivilege(priv, enable):
@@ -67,7 +70,7 @@ class MaestroServer:
    def __init__(self):
       self.mLogger = logging.getLogger('maestrod.MaestroServer')
       ip_address = socket.gethostbyname(socket.gethostname())
-      self.mEventManager = util.EventManager.EventManager(ip_address)
+      self.mEventManager = maestro.core.EventManager.EventManager(ip_address)
       self.mServices = []
       self.mSettings = {}
       self.mSettingsFile = os.path.join(MaestroConstants.EXEC_DIR,
@@ -292,12 +295,12 @@ def RunServer(installSH=True):
       p.registerChecker(
          checkers.InMemoryUsernamePasswordDatabaseDontUse(aronb="aronb"))
       try:
-         from util.pamchecker import PAMChecker
+         from maestro.util.pamchecker import PAMChecker
          p.registerChecker(PAMChecker())
       except:
          pass
       try:
-         from util.winchecker import WindowsChecker
+         from maestro.util.winchecker import WindowsChecker
          p.registerChecker(WindowsChecker())
       except:
          pass

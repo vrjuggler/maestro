@@ -23,8 +23,6 @@ import time
 import string
 import socket
 
-import util.EventManager
-
 from Queue import Queue
 from threading import Thread
 

@@ -23,7 +23,6 @@ import time
 import string
 import socket
 
-import util.EventManager
 import MaestroConstants
 
 from Queue import Queue

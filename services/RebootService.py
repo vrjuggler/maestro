@@ -18,9 +18,8 @@
 
 import sys, os, platform
 
-import util.EventManager
 import MaestroConstants
-from util import grubconfig
+from maestro.util import grubconfig
 import re
 
 if "win32" == sys.platform:

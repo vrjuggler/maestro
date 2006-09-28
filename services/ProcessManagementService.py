@@ -18,7 +18,6 @@
 
 import sys, os, platform
 
-import util.EventManager
 import re
 
 ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.+:\d+\s+\d+)\s+(\S.*)")
@@ -26,7 +25,7 @@ ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.+:\d+\s+\d+)\s+(\S.
 class ProcessManagementService:
    def __init__(self):
       if "win32" == sys.platform:
-         from util import wmi
+         from maestro.util import wmi
          self.mWMIConnection = wmi.WMI()
       else:
          pass
@@ -53,7 +52,7 @@ class ProcessManagementService:
           @param pid: Process ID of the process to terminate.
       """
       if "win32" == sys.platform:
-         from util import wmi
+         from maestro.util import wmi
          print "Trying to terminate process: ", pid
          for process in self.mWMIConnection.Win32_Process(ProcessId=pid):
             print "Terminating: %s %s" % (process.ProcessId, process.Name)
@@ -63,7 +62,7 @@ class ProcessManagementService:
 
    def _getProcs(self):
       if "win32" == sys.platform:
-         from util import wmi
+         from maestro.util import wmi
          procs = []
          time_str = ""
          for process in self.mWMIConnection.Win32_Process():
