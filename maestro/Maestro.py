@@ -157,7 +157,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mEnsemble = None
       self.mActiveViewPlugins = {}
 
-   def init(self, clusterModel, cfgFilePath):
+   def init(self, clusterModel):
       # Set the new cluster configuration
       self.mEnsemble = clusterModel
       self.mOutputTab.init(self.mEnsemble)

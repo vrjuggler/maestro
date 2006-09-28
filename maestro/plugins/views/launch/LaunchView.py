@@ -25,7 +25,7 @@ import maestro.core
 const = maestro.core.const
 from maestro.core import StanzaModel
 from maestro.core import Stanza
-import GlobalOptions
+import maestro.core.environment as env
 
 import os.path
 pj = os.path.join
@@ -540,8 +540,8 @@ def isPointless(obj):
        not editable then there is no point displaying it unless it is
        in a choice.
    """
-   user_mode = GlobalOptions.instance.mOptions["UserMode"]
-   return (GlobalOptions.ADVANCED != user_mode and not obj.mHidden and not obj.mEditable)
+   user_mode = env.Environment().settings.getUserMode()
+   return (const.ADVANCED != user_mode and not obj.mHidden and not obj.mEditable)
 
 
 class ValueSheet(Sheet):
@@ -566,8 +566,8 @@ class ValueSheet(Sheet):
       # Create editor if we want to allow the user to edit the value
       # or we are in advanced mode.
       self.mValueEditor = None
-      user_mode = GlobalOptions.instance.mOptions["UserMode"]
-      if (self.mObj.mEditable or GlobalOptions.ADVANCED == user_mode):
+      user_mode = env.Environment().settings.getUserMode()
+      if (self.mObj.mEditable or const.ADVANCED == user_mode):
          self.mValueEditor = QtGui.QLineEdit(self)
          self.mValueEditor.setText(self.mObj.mValue)
          self.mValueEditor.setEnabled(self.mObj.mEditable)

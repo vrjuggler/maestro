@@ -35,6 +35,7 @@ const = maestro.core.const
 const.EXEC_DIR = os.path.dirname(__file__)
 
 import maestro.Maestro
+import maestro.guiprefs
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET
@@ -67,31 +68,6 @@ def main():
       splash.showMessage("Bootstrapping system...")
       app.processEvents()
 
-      def splashProgressCB(percent, message):
-         splash.showMessage("%3.0f%% %s"%(percent*100,message))
-         app.processEvents()   
-         time.sleep(0.1)
-
-      env = maestro.core.Environment()
-      env.initialize(progressCB=splashProgressCB)
-
-      # Parse XML ensemble file. This provides the initial set of cluster
-      # nodes.
-      tree = ET.ElementTree(file=sys.argv[1])
-
-      splash.finish(None)
-
-      ld = maestro.LoginDialog.LoginDialog()
-      if QtGui.QDialog.Rejected == ld.exec_():
-         sys.exit(-1)
-
-      env.mEventManager.setCredentials(ld.getLoginInfo())
-
-      # Try to make inital connections
-      # Create cluster configuration
-      ensemble = Ensemble.Ensemble(tree)
-#      ensemble.refreshConnections()
-
       # All platforms use the same name for the Maestro client settings, but
       # the file comes from a platform-specific location.
       cfg_file_name = 'maestro.xml'
@@ -119,9 +95,50 @@ def main():
       else:
          cfg_file_path = cfg_file_name
 
+      gui_settings = maestro.guiprefs.GuiPrefs()
+
+      try:
+         gui_settings.load(cfg_file_path)
+      except IOError, ex:
+         QtGui.QMessageBox.warning(None, "Warning",
+                                   "Failed to read preferences file %s: %s" % \
+                                      (cfg_file_path, ex.strerror))
+         if not os.path.exists(cfg_file_path):
+            try:
+               gui_settings.create(cfg_file_path)
+            except IOError, ex:
+               QtGui.QMessageBox.warning(None, "Warning",
+                                         "Failed to create preferences file: %s: %s" \
+                                            (cfg_file_path, ex.strerror))
+
+      def splashProgressCB(percent, message):
+         splash.showMessage("%3.0f%% %s"%(percent*100,message))
+         app.processEvents()   
+         time.sleep(0.1)
+
+      env = maestro.core.Environment()
+      env.initialize(gui_settings, splashProgressCB)
+
+      # Parse XML ensemble file. This provides the initial set of cluster
+      # nodes.
+      tree = ET.ElementTree(file=sys.argv[1])
+
+      splash.finish(None)
+
+      ld = maestro.LoginDialog.LoginDialog()
+      if QtGui.QDialog.Rejected == ld.exec_():
+         sys.exit(-1)
+
+      env.mEventManager.setCredentials(ld.getLoginInfo())
+
+      # Try to make inital connections
+      # Create cluster configuration
+      ensemble = Ensemble.Ensemble(tree)
+#      ensemble.refreshConnections()
+
       # Create and display GUI
       m = maestro.Maestro.Maestro()
-      m.init(ensemble, cfg_file_path)
+      m.init(ensemble)
       m.show()
 #      splash.finish(m)
       reactor.run()
@@ -131,7 +148,6 @@ def main():
                                     (sys.argv[1], ex.strerror))
    except Exception, ex:
       QtGui.QMessageBox.critical(None, "Fatal Error", str(ex))
-
 
    reactor.stop()
    reactor.runUntilCurrent()

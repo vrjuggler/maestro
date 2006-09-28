@@ -54,3 +54,7 @@ const.OsNameMap = \
     const.HPUX   : 'HP UX',
     const.AIX    : 'AIX',
     const.SOLARIS : 'Solaris'}
+
+# GUI user levels.
+const.NOVICE   = 100
+const.ADVANCED = 101
