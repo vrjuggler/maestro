@@ -69,7 +69,7 @@ class RebootService(maestro.core.IServicePlugin):
       if boot_loader == 'GRUB' and env.settings.has_key('grub_conf'):
          import grub_plugin
          self.mBootPlugin = grub_plugin.GrubPlugin()
-      else:
+      elif boot_loader == 'ntldr':
          import ntloader_plugin
          self.mBootPlugin = ntloader_plugin.NtLoaderPlugin()
 
