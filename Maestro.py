@@ -134,7 +134,11 @@ def main():
       logging.shutdown()
       sys.exit()
    except IOError, ex:
-      print "Failed to read %s: %s" % (sys.argv[1], ex.strerror)
+      QtGui.QMessageBox.critical(None, "Error",
+                                 "Failed to read ensemble file %s: %s" % \
+                                    (sys.argv[1], ex.strerror))
+   except Exception, ex:
+      QtGui.QMessageBox.critical(None, "Fatal Error", str(ex))
 
 def usage():
    print "Usage: %s <XML configuration file>" % sys.argv[0]
