@@ -142,7 +142,8 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Add custom boot targets.
       if node is not None:
-         menu.addSeparator()
+         if len(node.mTargets) > 0:
+            menu.addSeparator()
          # For each target operation system, build a TargetListItem
          for target in node.mTargets:
             (title, os, index) = target
