@@ -13,7 +13,7 @@ class Ui_MaestroBase(object):
    def setupUi(self, MaestroBase):
       MaestroBase.setObjectName("MaestroBase")
       MaestroBase.resize(QtCore.QSize(QtCore.QRect(0,0,788,711).size()).expandedTo(MaestroBase.minimumSizeHint()))
-      MaestroBase.setWindowIcon(QtGui.QIcon(":/images/construction.png"))
+      MaestroBase.setWindowIcon(QtGui.QIcon(":/Maestro/images/maestro_icon.png"))
       MaestroBase.setAutoFillBackground(True)
       MaestroBase.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
 

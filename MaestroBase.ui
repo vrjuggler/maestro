@@ -16,7 +16,7 @@
    <string>Maestro Client by Infiscape</string>
   </property>
   <property name="windowIcon" >
-   <iconset resource="MaestroResource.qrc" >:/images/construction.png</iconset>
+   <iconset resource="MaestroResource.qrc" >:/Maestro/images/maestro_icon.png</iconset>
   </property>
   <property name="autoFillBackground" >
    <bool>true</bool>

@@ -15,6 +15,9 @@
   <property name="windowTitle" >
    <string>Maestro Client Login</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="MaestroResource.qrc" >:/Maestro/images/maestro_icon.png</iconset>
+  </property>
   <property name="modal" >
    <bool>true</bool>
   </property>
@@ -129,7 +132,9 @@
   <tabstop>mLoginBtn</tabstop>
   <tabstop>mCancelBtn</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="MaestroResource.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>mLoginBtn</sender>

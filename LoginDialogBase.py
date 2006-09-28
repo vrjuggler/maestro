@@ -13,6 +13,7 @@ class Ui_LoginDialogBase(object):
    def setupUi(self, LoginDialogBase):
       LoginDialogBase.setObjectName("LoginDialogBase")
       LoginDialogBase.resize(QtCore.QSize(QtCore.QRect(0,0,277,138).size()).expandedTo(LoginDialogBase.minimumSizeHint()))
+      LoginDialogBase.setWindowIcon(QtGui.QIcon(":/Maestro/images/maestro_icon.png"))
       LoginDialogBase.setModal(True)
 
       self.vboxlayout = QtGui.QVBoxLayout(LoginDialogBase)
