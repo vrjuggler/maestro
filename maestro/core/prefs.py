@@ -53,18 +53,23 @@ class Preferences:
    def __getitem__(self, item):
       '''
       Searches for the identified item under the root of the preferences
-      XML tree. If no such item is found, then a KeyError is raised.
+      XML tree. If the item is found, its text property is returned. If no
+      such item is found, then a KeyError is raised.
       '''
       element = self.mRoot.find(item)
       if element is None:
          raise KeyError, '%s is not a child of the root' % item
 
-      return element
+      return element.text
 
    def __setitem__(self, item):
+      # TODO: Implement me!
       pass
 
    def __iter__(self):
+      '''
+      Returns this preferences structure as a flattened list.
+      '''
       return self.mRoot.getiterator()
 
    def __delitem__(self, item):
@@ -86,12 +91,29 @@ class Preferences:
 
       parent.remove(cur_node)
 
+   def has_key(self, item):
+      '''
+      Determines if item (an element path string) is a child of the root of
+      this preferences structure. True is returned if item is a child; False
+      is returned otherwise.
+      '''
+      element = self.mRoot.find(item)
+      return element is not None
+
    def get(self, item, default = None):
-      result = self[item]
-      if result is None:
+      '''
+      Retrieves the text property for the given item (an element path string)
+      if it is a child of the root of this preferences structure. If item is
+      not a child, then default is returned.
+      '''
+      element = self.mRoot.find(item)
+      if element is None:
          return default
       else:
-         return result
+         return element.text
 
    def keys(self):
+      '''
+      Returns this preferences structure as a flattened list.
+      '''
       return self.mRoot.getiterator()
