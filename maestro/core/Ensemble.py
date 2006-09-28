@@ -19,7 +19,10 @@
 import elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
 from PyQt4 import QtCore, QtGui
-import MaestroConstants
+
+import maestro
+import maestro.core
+const = maestro.core.const
 import socket, types
 
 class Ensemble(QtCore.QObject):
@@ -142,7 +145,7 @@ class ClusterNode:
       self.mName = self.mElement.get("name")
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("sub_class")
-      self.mPlatform = MaestroConstants.ERROR 
+      self.mPlatform = const.ERROR 
       self.mTargets = []
       self.mDefaultTargetIndex = -1
 
@@ -150,7 +153,7 @@ class ClusterNode:
       """ Slot that is called when the connection to this node is lost. All
           cached data should be cleared and set to it's inital state.
       """
-      self.mPlatform = MaestroConstants.ERROR 
+      self.mPlatform = const.ERROR 
       self.mTargets = []
       self.mDefaultTargetIndex = -1
 
@@ -159,7 +162,7 @@ class ClusterNode:
 
    def getTarget(self, index):
       if index < 0 or index >= len(self.mTargets):
-         return ("Unknown", MaestroConstants.ERROR, -1)
+         return ("Unknown", const.ERROR, -1)
       return self.mTargets[index]
 
    def getName(self):
@@ -172,7 +175,7 @@ class ClusterNode:
       return self.mElement.get("hostname")
 
    def setHostname(self, newHostname):
-      self.mPlatform = MaestroConstants.ERROR
+      self.mPlatform = const.ERROR
       return self.mElement.set("hostname", newHostname)
 
    def getId(self):
@@ -185,7 +188,7 @@ class ClusterNode:
          return "0.0.0.0"
 
    def getPlatformName(self):
-      return MaestroConstants.OsNameMap[self.mPlatform]
+      return const.OsNameMap[self.mPlatform]
 
    def getClass(self):
       platform = self.getPlatformName()

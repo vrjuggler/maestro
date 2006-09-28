@@ -18,7 +18,8 @@
 
 import sys, os, platform
 
-import MaestroConstants
+import maestro.core
+const = maestro.core.const
 from maestro.util import grubconfig
 import re
 
@@ -56,13 +57,13 @@ def grubIdToMaestroId(id):
        @param id: grubconf constant.
    """
    if id == grubconfig.GrubBootTarget.LINUX:
-      return MaestroConstants.LINUX
+      return const.LINUX
    elif id == grubconfig.GrubBootTarget.WINDOWS:
-      return MaestroConstants.WINXP
+      return const.WINXP
    elif id == grubconfig.GrubBootTarget.FREEBSD:
-      return MaestroConstants.FREEBSD
+      return const.FREEBSD
    else:
-      return MaestroConstants.UNKNOWN
+      return const.UNKNOWN
 
 def makeLinuxDefault(grubConf):
    """ Makes a best guess at the latest kernel that should be used. """
@@ -195,20 +196,20 @@ class RebootService:
 
       current_target = self.mGrubConfig.getTarget(self.mGrubConfig.getDefault())
 
-      if MaestroConstants.LINUX == targetOs and current_target.isLinux():
+      if const.LINUX == targetOs and current_target.isLinux():
          print "Already booting into Linux."
          return
-      elif MaestroConstants.WINXP == targetOs and current_target.isWindows():
+      elif const.WINXP == targetOs and current_target.isWindows():
          print "Already booting into windows."
          return
 
-      print "Target Linux: ", MaestroConstants.LINUX == targetOs
-      print "Target Windows: ", MaestroConstants.WINXP == targetOs
+      print "Target Linux: ", const.LINUX == targetOs
+      print "Target Windows: ", const.WINXP == targetOs
       print "Current Linux: ", current_target.isLinux()
       print "Current Windows: ", current_target.isWindows()
 
       # If we are in Windows, restore whatever the default Linux target was.
-      if MaestroConstants.LINUX == targetOs:
+      if const.LINUX == targetOs:
          # If there is a saved default, we make sure that it is a Linux target
          # and then set it as the default.
          if self.mGrubConfig.hasSavedDefault():
@@ -228,14 +229,14 @@ class RebootService:
 
       # If we are in Linux (i.e., not in Windows), save the current Linux default
       # target and make the first Widows target the default.
-      elif MaestroConstants.WINXP == targetOs:
+      elif const.WINXP == targetOs:
          print "Switching to Windows"
          self.mGrubConfig.saveDefault()
          self.mGrubConfig.makeDefault(matchWindowsTarget)
       else:
          target_name = "Unknown"
          try:
-            target_name = Constants.OsNameMap[targetOS]
+            target_name = const.OsNameMap[targetOS]
          except:
             pass
          print "Can not currently reboot into: [%s][%d]" % (target_name, targetOs)

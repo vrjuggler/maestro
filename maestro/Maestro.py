@@ -23,8 +23,6 @@ pj = os.path.join
 from PyQt4 import QtGui, QtCore
 
 
-import MaestroConstants
-
 import maestro
 from maestro.util import plugin
 
@@ -33,6 +31,7 @@ import MaestroResource
 
 import maestro
 import maestro.core
+const = maestro.core.const
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET

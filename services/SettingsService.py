@@ -23,7 +23,8 @@ import time
 import string
 import socket
 
-import MaestroConstants
+import maestro.core
+const = maestro.core.const
 
 from Queue import Queue
 from threading import Thread
@@ -54,15 +55,15 @@ class SettingsService:
       """Returns tuple with error code and platform code.
          1 is Linux, 2 is Windows, and 0 is unknown."""
       if platform.system() == 'Linux':
-         return MaestroConstants.LINUX
+         return const.LINUX
       elif os.name == 'nt':
-         return MaestroConstants.WINXP
+         return const.WINXP
       else:
-         return MaestroConstants.ERROR
+         return const.ERROR
 
    def _getPlatformName(self):
       try:
-         return MaestroConstants.OsNameMap[self._getPlatform()]
+         return const.OsNameMap[self._getPlatform()]
       except:
          return 'Unknown'
 

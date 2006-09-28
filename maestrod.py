@@ -20,9 +20,10 @@
 
 import sys, os, platform
 
-import MaestroConstants
+import maestro.core
+const = maestro.core.const
 
-MaestroConstants.EXEC_DIR = os.path.dirname(__file__)
+const.EXEC_DIR = os.path.dirname(__file__)
 
 import services.LaunchService
 import services.ProcessManagementService
@@ -73,7 +74,7 @@ class MaestroServer:
       self.mEventManager = maestro.core.EventManager.EventManager(ip_address)
       self.mServices = []
       self.mSettings = {}
-      self.mSettingsFile = os.path.join(MaestroConstants.EXEC_DIR,
+      self.mSettingsFile = os.path.join(const.EXEC_DIR,
                                         'maestrod.xcfg')
 
       if os.path.exists(self.mSettingsFile) and os.path.isfile(self.mSettingsFile):
@@ -305,8 +306,8 @@ def RunServer(installSH=True):
       except:
          pass
       #reactor.listenTCP(8789, factory)
-      pk_path = os.path.join(MaestroConstants.EXEC_DIR, 'server.pem')
-      cert_path = os.path.join(MaestroConstants.EXEC_DIR, 'server.pem')
+      pk_path = os.path.join(const.EXEC_DIR, 'server.pem')
+      cert_path = os.path.join(const.EXEC_DIR, 'server.pem')
       logger.info("Cert: " + cert_path)
       reactor.listenSSL(8789, factory,
          ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))

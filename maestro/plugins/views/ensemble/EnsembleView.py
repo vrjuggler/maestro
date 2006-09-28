@@ -19,8 +19,8 @@
 import sys, socket
 from PyQt4 import QtGui, QtCore
 import EnsembleViewBase
-import MaestroConstants
 import maestro.core
+const = maestro.core.const
 from maestro.core import Ensemble
 from maestro.core import EnsembleModel
 
@@ -37,10 +37,10 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
       return self.widget
 
 Icons = {}
-Icons[MaestroConstants.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
-Icons[MaestroConstants.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[MaestroConstants.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[MaestroConstants.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
+Icons[const.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
+Icons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+Icons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+Icons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
 
 class TargetListItem(QtGui.QListWidgetItem):
    def __init__(self, title, id, index, parent=None):
@@ -323,21 +323,21 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """ Slot that makes the selected node reboot to Linux. """
       assert(self.mSelectedNode is not None)
       node_id = self.mSelectedNode.getId()
-      self.mEventManager.emit(node_id, "reboot.switch_os", (MaestroConstants.LINUX,))
+      self.mEventManager.emit(node_id, "reboot.switch_os", (const.LINUX,))
 
    def onRebootToWindows(self):
       """ Slot that makes the selected node reboot to Windows. """
       assert(self.mSelectedNode is not None)
       node_id = self.mSelectedNode.getId()
-      self.mEventManager.emit(node_id, "reboot.switch_os", (MaestroConstants.WINXP,))
+      self.mEventManager.emit(node_id, "reboot.switch_os", (const.WINXP,))
 
    def onRebootAllToLinux(self):
       """ Slot that makes all nodes reboot to Linux. """
-      self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.LINUX,))
+      self.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
 
    def onRebootAllToWindows(self):
       """ Slot that makes all nodes reboot to Windows. """
-      self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.WINXP,))
+      self.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
 
    def onEnsembleChanged(self):
       """ Called when the cluster control has connected to another node. """

@@ -30,7 +30,7 @@ import socket
 
 import Ensemble
 import modules.ClusterSettingsResource
-import MaestroConstants
+const = maestro.core.const
 
 class EnsembleModel(QtCore.QAbstractListModel):
    def __init__(self, ensemble, parent=None):
@@ -46,10 +46,10 @@ class EnsembleModel(QtCore.QAbstractListModel):
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
 
       self.mIcons = {}
-      self.mIcons[MaestroConstants.ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
-      self.mIcons[MaestroConstants.WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[MaestroConstants.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[MaestroConstants.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+      self.mIcons[const.ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
+      self.mIcons[const.WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      self.mIcons[const.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      self.mIcons[const.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
 
    def init(self, eventManager):
       self.mEventManager = eventManager

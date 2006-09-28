@@ -21,8 +21,8 @@ from PyQt4 import QtGui, QtCore
 
 import RebootViewerBase
 import maestro.MaestroResource
-import MaestroConstants
 import maestro.core
+const = maestro.core.const
 from maestro.core import Ensemble
 
 
@@ -39,10 +39,10 @@ class RebootViewPlugin(maestro.core.IViewPlugin):
       return self.widget
       
 Icons = {}
-Icons[MaestroConstants.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
-Icons[MaestroConstants.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[MaestroConstants.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[MaestroConstants.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
+Icons[const.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
+Icons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+Icons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+Icons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
 
 class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
    def __init__(self, parent = None):
@@ -76,17 +76,17 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          self.onNodeContextMenu)
 
       # Create action to change the selected node's boot target to Windows.
-      self.mSetTargetToWindowsAction = QtGui.QAction(Icons[MaestroConstants.WINXP], self.tr("Windows"), self)
+      self.mSetTargetToWindowsAction = QtGui.QAction(Icons[const.WINXP], self.tr("Windows"), self)
       self.connect(self.mSetTargetToWindowsAction, QtCore.SIGNAL("triggered()"), self.onSetTargetToWindows)
       # Create action to change all nodes' boot target to Windows.
-      self.mSetAllTargetsToWindowsAction = QtGui.QAction(Icons[MaestroConstants.WINXP], self.tr("Windows"), self)
+      self.mSetAllTargetsToWindowsAction = QtGui.QAction(Icons[const.WINXP], self.tr("Windows"), self)
       self.connect(self.mSetAllTargetsToWindowsAction, QtCore.SIGNAL("triggered()"), self.onSetAllTargetsToWindows)
 
       # Create action to change the selected node's boot target to Linux.
-      self.mSetTargetToLinuxAction = QtGui.QAction(Icons[MaestroConstants.LINUX], self.tr("Linux"), self)
+      self.mSetTargetToLinuxAction = QtGui.QAction(Icons[const.LINUX], self.tr("Linux"), self)
       self.connect(self.mSetTargetToLinuxAction, QtCore.SIGNAL("triggered()"), self.onSetTargetToLinux)
       # Create action to change all nodes' boot target to Linux.
-      self.mSetAllTargetsToLinuxAction = QtGui.QAction(Icons[MaestroConstants.LINUX], self.tr("Linux"), self)
+      self.mSetAllTargetsToLinuxAction = QtGui.QAction(Icons[const.LINUX], self.tr("Linux"), self)
       self.connect(self.mSetAllTargetsToLinuxAction, QtCore.SIGNAL("triggered()"), self.onSetAllTargetsToLinux)
 
       # Load a reboot icon
@@ -198,20 +198,20 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
    def onSetTargetToLinux(self):
       """ Slot that makes the selected node reboot to Linux. """
       node = self.__getSelectedNode()
-      self.mEventManager.emit(node.getId(), "reboot.switch_os", (MaestroConstants.LINUX,))
+      self.mEventManager.emit(node.getId(), "reboot.switch_os", (const.LINUX,))
 
    def onSetTargetToWindows(self):
       """ Slot that makes the selected node reboot to Windows. """
       node = self.__getSelectedNode()
-      self.mEventManager.emit(node.getId(), "reboot.switch_os", (MaestroConstants.WINXP,))
+      self.mEventManager.emit(node.getId(), "reboot.switch_os", (const.WINXP,))
 
    def onSetAllTargetsToLinux(self):
       """ Slot that makes all nodes reboot to Linux. """
-      self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.LINUX,))
+      self.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
 
    def onSetAllTargetsToWindows(self):
       """ Slot that makes all nodes reboot to Windows. """
-      self.mEventManager.emit("*", "reboot.switch_os", (MaestroConstants.WINXP,))
+      self.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
 
    def onTargetTriggered(self, node_id, index, title):
       """ Slot called by the context menu that causes the default target to change. """

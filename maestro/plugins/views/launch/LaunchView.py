@@ -21,9 +21,8 @@ from PyQt4 import QtGui, QtCore
 import LaunchViewBase
 import elementtree.ElementTree as ET
 
-import MaestroConstants
-
 import maestro.core
+const = maestro.core.const
 from maestro.core import StanzaModel
 from maestro.core import Stanza
 import GlobalOptions
@@ -87,7 +86,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.activeThread        = None
 
    def scanForStanzas(self):
-      stanza_path = pj(MaestroConstants.EXEC_DIR, "stanzas")
+      stanza_path = pj(const.EXEC_DIR, "stanzas")
       assert os.path.exists(stanza_path)
       assert os.path.isdir(stanza_path)
       files = os.listdir(stanza_path)

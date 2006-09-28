@@ -22,9 +22,9 @@ import sys, os, os.path, time, traceback
 pj = os.path.join
 from PyQt4 import QtGui, QtCore
 
-
-import MaestroConstants
-MaestroConstants.EXEC_DIR = os.path.dirname(__file__)
+import maestro.core
+const = maestro.core.const
+const.EXEC_DIR = os.path.dirname(__file__)
 
 app = QtGui.QApplication(sys.argv)
 import maestro.util
@@ -66,7 +66,7 @@ def main():
          print "[%s][%s]" % (percent, msg)
 
       plugin_mgr = plugin.PluginManager()
-      plugin_mgr.scan(pj(MaestroConstants.EXEC_DIR, 'maestro', 'plugins'), cb)
+      plugin_mgr.scan(pj(const.EXEC_DIR, 'maestro', 'plugins'), cb)
       #splash.show()
       #splash.showMessage("Establishing connections...")
 
