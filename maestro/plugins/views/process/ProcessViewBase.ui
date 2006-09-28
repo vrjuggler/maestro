@@ -2,8 +2,8 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>ProcessViewerBase</class>
- <widget class="QWidget" name="ProcessViewerBase" >
+ <class>ProcessViewBase</class>
+ <widget class="QWidget" name="ProcessViewBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>

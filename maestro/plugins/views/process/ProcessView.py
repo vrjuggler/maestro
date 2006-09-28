@@ -17,12 +17,22 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
-import ProcessViewerBase
-import ResourceViewerResource
 
-import services.SettingsService
+import ProcessViewBase
 import socket
+import maestro.core
 
+class ProcessViewPlugin(maestro.core.IViewPlugin):
+   def __init__(self):
+      maestro.core.IViewPlugin.__init__(self)
+      self.widget = ProcessView()
+      
+   @staticmethod
+   def getName():
+      return "Process View"
+      
+   def getViewWidget(self):
+      return self.widget
 
 class CaseInsensitiveSortProxyModel(QtGui.QSortFilterProxyModel):
    def __init__(self, parent=None):
@@ -92,7 +102,7 @@ class Proc:
       return "<Proc node:%s name:%s pid:%s user:%s>" \
          % (self.mNodeId, self.mName, self.mPID, self.mUser)
 
-class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
+class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -102,7 +112,7 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       """
       Setup all initial gui settings that don't need to know about the ensemble.
       """
-      ProcessViewerBase.Ui_ProcessViewerBase.setupUi(self, widget)
+      ProcessViewBase.Ui_ProcessViewBase.setupUi(self, widget)
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
       self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
       self.mTerminateBtn.setEnabled(False)
@@ -209,10 +219,6 @@ class ProcessViewer(QtGui.QWidget, ProcessViewerBase.Ui_ProcessViewerBase):
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "process.procs", self.onReportProcs)
 
-   def getName():
-        return "Process Viewer"
-   getName = staticmethod(getName)
-
 class ProcessModel(QtCore.QAbstractTableModel):
    def __init__(self, ensemble, parent=None):
       QtCore.QAbstractTableModel.__init__(self, parent)
@@ -277,7 +283,3 @@ class ProcessModel(QtCore.QAbstractTableModel):
          return proc
 
       return QtCore.QVariant()
-
-def getModuleInfo():
-   icon = QtGui.QIcon(":/ResourceViewer/images/resources.png")
-   return (ProcessViewer, icon)

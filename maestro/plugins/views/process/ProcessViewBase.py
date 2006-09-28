@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'modules/ProcessViewerBase.ui'
+# Form implementation generated from reading ui file 'maestro/plugins/views/process/ProcessViewBase.ui'
 #
 #      by: PyQt4 UI code generator 4-snapshot-20060828
 #
@@ -9,17 +9,17 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
-class Ui_ProcessViewerBase(object):
-   def setupUi(self, ProcessViewerBase):
-      ProcessViewerBase.setObjectName("ProcessViewerBase")
-      ProcessViewerBase.resize(QtCore.QSize(QtCore.QRect(0,0,609,485).size()).expandedTo(ProcessViewerBase.minimumSizeHint()))
+class Ui_ProcessViewBase(object):
+   def setupUi(self, ProcessViewBase):
+      ProcessViewBase.setObjectName("ProcessViewBase")
+      ProcessViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,609,485).size()).expandedTo(ProcessViewBase.minimumSizeHint()))
 
-      self.vboxlayout = QtGui.QVBoxLayout(ProcessViewerBase)
+      self.vboxlayout = QtGui.QVBoxLayout(ProcessViewBase)
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(ProcessViewerBase)
+      self.mTitleLbl = QtGui.QLabel(ProcessViewBase)
 
       font = QtGui.QFont(self.mTitleLbl.font())
       font.setFamily("Sans Serif")
@@ -37,7 +37,7 @@ class Ui_ProcessViewerBase(object):
       self.mTitleLbl.setObjectName("mTitleLbl")
       self.vboxlayout.addWidget(self.mTitleLbl)
 
-      self.mProcessTable = QtGui.QTableView(ProcessViewerBase)
+      self.mProcessTable = QtGui.QTableView(ProcessViewBase)
       self.mProcessTable.setObjectName("mProcessTable")
       self.vboxlayout.addWidget(self.mProcessTable)
 
@@ -46,11 +46,11 @@ class Ui_ProcessViewerBase(object):
       self.hboxlayout.setSpacing(6)
       self.hboxlayout.setObjectName("hboxlayout")
 
-      self.mRefreshBtn = QtGui.QPushButton(ProcessViewerBase)
+      self.mRefreshBtn = QtGui.QPushButton(ProcessViewBase)
       self.mRefreshBtn.setObjectName("mRefreshBtn")
       self.hboxlayout.addWidget(self.mRefreshBtn)
 
-      self.mTerminateBtn = QtGui.QPushButton(ProcessViewerBase)
+      self.mTerminateBtn = QtGui.QPushButton(ProcessViewBase)
       self.mTerminateBtn.setObjectName("mTerminateBtn")
       self.hboxlayout.addWidget(self.mTerminateBtn)
 
@@ -58,20 +58,20 @@ class Ui_ProcessViewerBase(object):
       self.hboxlayout.addItem(spacerItem)
       self.vboxlayout.addLayout(self.hboxlayout)
 
-      self.retranslateUi(ProcessViewerBase)
-      QtCore.QMetaObject.connectSlotsByName(ProcessViewerBase)
+      self.retranslateUi(ProcessViewBase)
+      QtCore.QMetaObject.connectSlotsByName(ProcessViewBase)
 
-   def retranslateUi(self, ProcessViewerBase):
-      ProcessViewerBase.setWindowTitle(QtGui.QApplication.translate("ProcessViewerBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("ProcessViewerBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRefreshBtn.setText(QtGui.QApplication.translate("ProcessViewerBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTerminateBtn.setText(QtGui.QApplication.translate("ProcessViewerBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
+   def retranslateUi(self, ProcessViewBase):
+      ProcessViewBase.setWindowTitle(QtGui.QApplication.translate("ProcessViewBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTitleLbl.setText(QtGui.QApplication.translate("ProcessViewBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRefreshBtn.setText(QtGui.QApplication.translate("ProcessViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTerminateBtn.setText(QtGui.QApplication.translate("ProcessViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
-   ProcessViewerBase = QtGui.QWidget()
-   ui = Ui_ProcessViewerBase()
-   ui.setupUi(ProcessViewerBase)
-   ProcessViewerBase.show()
+   ProcessViewBase = QtGui.QWidget()
+   ui = Ui_ProcessViewBase()
+   ui.setupUi(ProcessViewBase)
+   ProcessViewBase.show()
    sys.exit(app.exec_())
