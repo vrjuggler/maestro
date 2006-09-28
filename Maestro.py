@@ -27,8 +27,9 @@ import MaestroConstants
 MaestroConstants.EXEC_DIR = os.path.dirname(__file__)
 
 app = QtGui.QApplication(sys.argv)
-from util import qt4reactor
-from util import plugin
+import maestro.util
+from maestro.util import qt4reactor
+from maestro.util import plugin
 qt4reactor.install(app)
 from twisted.internet import reactor
 
@@ -38,7 +39,7 @@ import maestro.core
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET
-import util.EventManager
+import maestro.core.EventManager
 import maestro.LoginDialog
 
 import logging, socket, time
@@ -77,7 +78,7 @@ def main():
       #   - Connect to remote event manager objects.
       #   - Emit events to remote event manager objects.
       ip_address = socket.gethostbyname(socket.gethostname())
-      event_manager = util.EventManager.EventManager(ip_address)
+      event_manager = maestro.core.EventManager.EventManager(ip_address)
 
       # Parse XML ensemble file. This provides the initial set of cluster
       # nodes.

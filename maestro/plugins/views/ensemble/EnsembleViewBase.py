@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'modules/ClusterSettingsBase.ui'
+# Form implementation generated from reading ui file 'maestro/plugins/views/ensemble/EnsembleViewBase.ui'
 #
 #      by: PyQt4 UI code generator 4-snapshot-20060828
 #
@@ -9,17 +9,17 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
-class Ui_ClusterSettingsBase(object):
-   def setupUi(self, ClusterSettingsBase):
-      ClusterSettingsBase.setObjectName("ClusterSettingsBase")
-      ClusterSettingsBase.resize(QtCore.QSize(QtCore.QRect(0,0,742,489).size()).expandedTo(ClusterSettingsBase.minimumSizeHint()))
+class Ui_EnsembleViewBase(object):
+   def setupUi(self, EnsembleViewBase):
+      EnsembleViewBase.setObjectName("EnsembleViewBase")
+      EnsembleViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,742,489).size()).expandedTo(EnsembleViewBase.minimumSizeHint()))
 
-      self.vboxlayout = QtGui.QVBoxLayout(ClusterSettingsBase)
+      self.vboxlayout = QtGui.QVBoxLayout(EnsembleViewBase)
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(ClusterSettingsBase)
+      self.mTitleLbl = QtGui.QLabel(EnsembleViewBase)
 
       font = QtGui.QFont(self.mTitleLbl.font())
       font.setFamily("Sans Serif")
@@ -47,7 +47,7 @@ class Ui_ClusterSettingsBase(object):
       self.vboxlayout1.setSpacing(6)
       self.vboxlayout1.setObjectName("vboxlayout1")
 
-      self.mClusterListView = QtGui.QListView(ClusterSettingsBase)
+      self.mClusterListView = QtGui.QListView(EnsembleViewBase)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
       sizePolicy.setHorizontalStretch(0)
@@ -65,15 +65,15 @@ class Ui_ClusterSettingsBase(object):
       spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Maximum,QtGui.QSizePolicy.Minimum)
       self.hboxlayout1.addItem(spacerItem)
 
-      self.mRefreshBtn = QtGui.QPushButton(ClusterSettingsBase)
+      self.mRefreshBtn = QtGui.QPushButton(EnsembleViewBase)
       self.mRefreshBtn.setObjectName("mRefreshBtn")
       self.hboxlayout1.addWidget(self.mRefreshBtn)
 
-      self.mAddBtn = QtGui.QPushButton(ClusterSettingsBase)
+      self.mAddBtn = QtGui.QPushButton(EnsembleViewBase)
       self.mAddBtn.setObjectName("mAddBtn")
       self.hboxlayout1.addWidget(self.mAddBtn)
 
-      self.mRemoveBtn = QtGui.QPushButton(ClusterSettingsBase)
+      self.mRemoveBtn = QtGui.QPushButton(EnsembleViewBase)
       self.mRemoveBtn.setObjectName("mRemoveBtn")
       self.hboxlayout1.addWidget(self.mRemoveBtn)
       self.vboxlayout1.addLayout(self.hboxlayout1)
@@ -84,7 +84,7 @@ class Ui_ClusterSettingsBase(object):
       self.vboxlayout2.setSpacing(6)
       self.vboxlayout2.setObjectName("vboxlayout2")
 
-      self.mClusterGroup = QtGui.QGroupBox(ClusterSettingsBase)
+      self.mClusterGroup = QtGui.QGroupBox(EnsembleViewBase)
       self.mClusterGroup.setObjectName("mClusterGroup")
 
       self.hboxlayout2 = QtGui.QHBoxLayout(self.mClusterGroup)
@@ -97,13 +97,13 @@ class Ui_ClusterSettingsBase(object):
       self.hboxlayout2.addWidget(self.label)
 
       self.mRebootLinuxBtn = QtGui.QToolButton(self.mClusterGroup)
-      self.mRebootLinuxBtn.setIcon(QtGui.QIcon(":/ClusterSettings/images/linux2.png"))
+      self.mRebootLinuxBtn.setIcon(QtGui.QIcon(":/EnsembleView/images/linux2.png"))
       self.mRebootLinuxBtn.setIconSize(QtCore.QSize(24,24))
       self.mRebootLinuxBtn.setObjectName("mRebootLinuxBtn")
       self.hboxlayout2.addWidget(self.mRebootLinuxBtn)
 
       self.mRebootWinBtn = QtGui.QToolButton(self.mClusterGroup)
-      self.mRebootWinBtn.setIcon(QtGui.QIcon(":/ClusterSettings/images/win_xp.png"))
+      self.mRebootWinBtn.setIcon(QtGui.QIcon(":/EnsembleView/images/win_xp.png"))
       self.mRebootWinBtn.setIconSize(QtCore.QSize(24,24))
       self.mRebootWinBtn.setObjectName("mRebootWinBtn")
       self.hboxlayout2.addWidget(self.mRebootWinBtn)
@@ -112,7 +112,7 @@ class Ui_ClusterSettingsBase(object):
       self.hboxlayout2.addItem(spacerItem1)
       self.vboxlayout2.addWidget(self.mClusterGroup)
 
-      self.mNodeGroup = QtGui.QGroupBox(ClusterSettingsBase)
+      self.mNodeGroup = QtGui.QGroupBox(EnsembleViewBase)
       self.mNodeGroup.setObjectName("mNodeGroup")
 
       self.gridlayout = QtGui.QGridLayout(self.mNodeGroup)
@@ -172,42 +172,42 @@ class Ui_ClusterSettingsBase(object):
       self.mIpAddressLbl.setBuddy(self.mIpAddressEdit)
       self.mCurrentOsLbl.setBuddy(self.mCurrentOsEdit)
 
-      self.retranslateUi(ClusterSettingsBase)
-      QtCore.QMetaObject.connectSlotsByName(ClusterSettingsBase)
-      ClusterSettingsBase.setTabOrder(self.mClusterListView,self.mRefreshBtn)
-      ClusterSettingsBase.setTabOrder(self.mRefreshBtn,self.mAddBtn)
-      ClusterSettingsBase.setTabOrder(self.mAddBtn,self.mRemoveBtn)
-      ClusterSettingsBase.setTabOrder(self.mRemoveBtn,self.mNameEdit)
-      ClusterSettingsBase.setTabOrder(self.mNameEdit,self.mHostnameEdit)
-      ClusterSettingsBase.setTabOrder(self.mHostnameEdit,self.mIpAddressEdit)
-      ClusterSettingsBase.setTabOrder(self.mIpAddressEdit,self.mCurrentOsEdit)
+      self.retranslateUi(EnsembleViewBase)
+      QtCore.QMetaObject.connectSlotsByName(EnsembleViewBase)
+      EnsembleViewBase.setTabOrder(self.mClusterListView,self.mRefreshBtn)
+      EnsembleViewBase.setTabOrder(self.mRefreshBtn,self.mAddBtn)
+      EnsembleViewBase.setTabOrder(self.mAddBtn,self.mRemoveBtn)
+      EnsembleViewBase.setTabOrder(self.mRemoveBtn,self.mNameEdit)
+      EnsembleViewBase.setTabOrder(self.mNameEdit,self.mHostnameEdit)
+      EnsembleViewBase.setTabOrder(self.mHostnameEdit,self.mIpAddressEdit)
+      EnsembleViewBase.setTabOrder(self.mIpAddressEdit,self.mCurrentOsEdit)
 
-   def retranslateUi(self, ClusterSettingsBase):
-      ClusterSettingsBase.setWindowTitle(QtGui.QApplication.translate("ClusterSettingsBase", "Cluster Settings", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Cluster Management", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRefreshBtn.setText(QtGui.QApplication.translate("ClusterSettingsBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
-      self.mAddBtn.setToolTip(QtGui.QApplication.translate("ClusterSettingsBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-      self.mAddBtn.setWhatsThis(QtGui.QApplication.translate("ClusterSettingsBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-      self.mAddBtn.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Add", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setToolTip(QtGui.QApplication.translate("ClusterSettingsBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setWhatsThis(QtGui.QApplication.translate("ClusterSettingsBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Remove", None, QtGui.QApplication.UnicodeUTF8))
-      self.mClusterGroup.setTitle(QtGui.QApplication.translate("ClusterSettingsBase", "Cluster Maintenance", None, QtGui.QApplication.UnicodeUTF8))
-      self.label.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Reboot All:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootLinuxBtn.setText(QtGui.QApplication.translate("ClusterSettingsBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootWinBtn.setText(QtGui.QApplication.translate("ClusterSettingsBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mNodeGroup.setTitle(QtGui.QApplication.translate("ClusterSettingsBase", "Node Settings", None, QtGui.QApplication.UnicodeUTF8))
-      self.mHostnameLbl.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Hostname:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mNameLbl.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Name:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mIpAddressLbl.setText(QtGui.QApplication.translate("ClusterSettingsBase", "IP Address:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mCurrentOsLbl.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Current OS:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootTargetLbl.setText(QtGui.QApplication.translate("ClusterSettingsBase", "Reboot to:", None, QtGui.QApplication.UnicodeUTF8))
+   def retranslateUi(self, EnsembleViewBase):
+      EnsembleViewBase.setWindowTitle(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Settings", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTitleLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Management", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRefreshBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
+      self.mAddBtn.setToolTip(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mAddBtn.setWhatsThis(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mAddBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "Add", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRemoveBtn.setToolTip(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRemoveBtn.setWhatsThis(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRemoveBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+      self.mClusterGroup.setTitle(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Maintenance", None, QtGui.QApplication.UnicodeUTF8))
+      self.label.setText(QtGui.QApplication.translate("EnsembleViewBase", "Reboot All:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRebootLinuxBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRebootWinBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNodeGroup.setTitle(QtGui.QApplication.translate("EnsembleViewBase", "Node Settings", None, QtGui.QApplication.UnicodeUTF8))
+      self.mHostnameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Hostname:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Name:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mIpAddressLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "IP Address:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mCurrentOsLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Current OS:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRebootTargetLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Reboot to:", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
-   ClusterSettingsBase = QtGui.QWidget()
-   ui = Ui_ClusterSettingsBase()
-   ui.setupUi(ClusterSettingsBase)
-   ClusterSettingsBase.show()
+   EnsembleViewBase = QtGui.QWidget()
+   ui = Ui_EnsembleViewBase()
+   ui.setupUi(EnsembleViewBase)
+   EnsembleViewBase.show()
    sys.exit(app.exec_())

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MaestroBase.ui'
+# Form implementation generated from reading ui file 'maestro/MaestroBase.ui'
 #
 #      by: PyQt4 UI code generator 4-snapshot-20060828
 #

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Resource object code
 #
 #      by: The Resource Compiler for PyQt (Qt v4.1.2)

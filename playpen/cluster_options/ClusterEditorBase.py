@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'playpen/cluster_options/ClusterEditorBase.ui'
 #
-#      by: PyQt4 UI code generator 4.0-snapshot-20060705
+#      by: PyQt4 UI code generator 4-snapshot-20060828
 #
 # WARNING! All changes made in this file will be lost!
 

@@ -2,8 +2,8 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>ResourceViewerBase</class>
- <widget class="QWidget" name="ResourceViewerBase" >
+ <class>ResourceViewBase</class>
+ <widget class="QWidget" name="ResourceViewBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -88,8 +88,5 @@
   </layout>
  </widget>
  <pixmapfunction></pixmapfunction>
- <resources>
-  <include location="ResourceViewerResource.qrc" />
- </resources>
  <connections/>
 </ui>

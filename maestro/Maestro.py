@@ -25,7 +25,8 @@ from PyQt4 import QtGui, QtCore
 
 import MaestroConstants
 
-from util import plugin
+import maestro
+from maestro.util import plugin
 
 import MaestroBase
 import MaestroResource
@@ -35,7 +36,6 @@ import maestro.core
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET
-import util.EventManager
 import modules
 import LogWidget
 import LoginDialog

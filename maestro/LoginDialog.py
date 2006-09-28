@@ -20,6 +20,8 @@ import sys
 from PyQt4 import QtGui, QtCore
 import LoginDialogBase
 
+import maestro.MaestroResource
+
 import os.path
 pj = os.path.join
 

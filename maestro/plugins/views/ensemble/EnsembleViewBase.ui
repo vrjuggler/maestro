@@ -2,8 +2,8 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>ClusterSettingsBase</class>
- <widget class="QWidget" name="ClusterSettingsBase" >
+ <class>EnsembleViewBase</class>
+ <widget class="QWidget" name="EnsembleViewBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -174,7 +174,7 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="ClusterSettingsResource.qrc" >:/ClusterSettings/images/linux2.png</iconset>
+             <iconset resource="EnsembleViewResource.qrc" >:/EnsembleView/images/linux2.png</iconset>
             </property>
             <property name="iconSize" >
              <size>
@@ -190,7 +190,7 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="ClusterSettingsResource.qrc" >:/ClusterSettings/images/win_xp.png</iconset>
+             <iconset resource="EnsembleViewResource.qrc" >:/EnsembleView/images/win_xp.png</iconset>
             </property>
             <property name="iconSize" >
              <size>
@@ -330,7 +330,7 @@
  </tabstops>
  <resources>
   <include location="../ClusterControlResource.qrc" />
-  <include location="ClusterSettingsResource.qrc" />
+  <include location="EnsembleViewResource.qrc" />
  </resources>
  <connections/>
 </ui>

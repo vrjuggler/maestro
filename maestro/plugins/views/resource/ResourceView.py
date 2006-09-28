@@ -17,12 +17,23 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
-import ResourceViewerBase
-import ResourceViewerResource
+import ResourceViewBase
+import maestro
+import maestro.core
 
-import services.SettingsService
+class ResourceViewPlugin(maestro.core.IViewPlugin):
+   def __init__(self):
+      maestro.core.IViewPlugin.__init__(self)
+      self.widget = ResourceView()
+      
+   @staticmethod
+   def getName():
+      return "Reboot View"
+      
+   def getViewWidget(self):
+      return self.widget
 
-class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
+class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -32,7 +43,7 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
       """
       Setup all initial gui settings that don't need to know about the cluster configuration.
       """
-      ResourceViewerBase.Ui_ResourceViewerBase.setupUi(self, widget)
+      ResourceViewBase.Ui_ResourceViewBase.setupUi(self, widget)
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
       self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
       
@@ -68,10 +79,6 @@ class ResourceViewer(QtGui.QWidget, ResourceViewerBase.Ui_ResourceViewerBase):
       self.mEventManager = eventManager
       self.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
       self.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)
-
-   def getName():
-        return "Resource Viewer"
-   getName = staticmethod(getName)
 
 class PixelDelegate(QtGui.QItemDelegate):
     def __init__(self, parent=None):
@@ -149,14 +156,3 @@ class ResourceModel(QtCore.QAbstractTableModel):
             return QtCore.QVariant(0.0)
       
       return QtCore.QVariant()
-
-def getModuleInfo():
-   icon = QtGui.QIcon(":/ResourceViewer/images/resources.png")
-   return (ResourceViewer, icon)
-
-if __name__ == "__main__":
-   app = QtGui.QApplication(sys.argv)
-   cs = ResourceViewer()
-   cs.show()
-   sys.exit(app.exec_())
-

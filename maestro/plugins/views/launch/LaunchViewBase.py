@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'plugins/views/launch/LaunchViewBase.ui'
+# Form implementation generated from reading ui file 'maestro/plugins/views/launch/LaunchViewBase.ui'
 #
 #      by: PyQt4 UI code generator 4-snapshot-20060828
 #

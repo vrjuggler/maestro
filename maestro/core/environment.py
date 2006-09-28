@@ -2,12 +2,12 @@
 import os, os.path, pickle
 pj = os.path.join
 
-import util.plugin
-import util.mixins
+import maestro.util.plugin
+import maestro.util.mixins
 import maestro.core
 
 
-class Environment(util.mixins.Singleton):
+class Environment(maestro.util.mixins.Singleton):
    """ The main environment/namespace for the Maestro.
        This class is a singleton.
        
@@ -26,7 +26,7 @@ class Environment(util.mixins.Singleton):
       #self.loadSettings()
       
       # -- Plugin manager -- #
-      self.pluginManager = util.plugin.PluginManager()
+      self.pluginManager = maestro.util.plugin.PluginManager()
       #self.pluginManager.scan(self.settings.plugin_paths, progressCB)
       #plugins = self.pluginManager.getPlugins(returnNameDict=True)
       #print "Environment found plugins: "      

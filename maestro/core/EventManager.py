@@ -17,20 +17,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import types
-import util.EventManagerBase
+import EventManagerBase
 import socket
 import logging
 
 from twisted.spread import pb
 from twisted.cred import credentials
-from util import pboverssl
+import maestro
+from maestro.util import pboverssl
 
-class EventManager(pb.Root, util.EventManagerBase.EventManagerBase):
+class EventManager(pb.Root, EventManagerBase.EventManagerBase):
    """ Handles sending messages to remote objects.
    """
    def __init__(self, ipAddress):
       """ Initialize the event dispatcher. """
-      util.EventManagerBase.EventManagerBase.__init__(self)
+      EventManagerBase.EventManagerBase.__init__(self)
       self.mProxies = {}
       self.mIpAddress = ipAddress
       self.mLogger = logging.getLogger('maestrod.EventManager')

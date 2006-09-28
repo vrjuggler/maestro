@@ -18,27 +18,29 @@
 
 import sys, socket
 from PyQt4 import QtGui, QtCore
-import ClusterSettingsBase
-import ClusterSettingsResource
-import Ensemble
-import EnsembleModel
+import EnsembleViewBase
 import MaestroConstants
+import maestro.core
+from maestro.core import Ensemble
+from maestro.core import EnsembleModel
 
-ERROR = 0
-LINUX = 1
-WIN = 2
-WINXP = 3
-MACOS = 4
-MACOSX = 5
-HPUX = 6
-AIX = 7
-SOLARIS = 8
+class EnsembleViewPlugin(maestro.core.IViewPlugin):
+   def __init__(self):
+      maestro.core.IViewPlugin.__init__(self)
+      self.widget = EnsembleView()
+      
+   @staticmethod
+   def getName():
+      return "Ensemble View"
+      
+   def getViewWidget(self):
+      return self.widget
 
 Icons = {}
-Icons[MaestroConstants.UNKNOWN] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
-Icons[MaestroConstants.WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-Icons[MaestroConstants.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-Icons[MaestroConstants.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+Icons[MaestroConstants.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
+Icons[MaestroConstants.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+Icons[MaestroConstants.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+Icons[MaestroConstants.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
 
 class TargetListItem(QtGui.QListWidgetItem):
    def __init__(self, title, id, index, parent=None):
@@ -59,7 +61,7 @@ class TargetListItem(QtGui.QListWidgetItem):
          return (self.mTitle, self.mOs, self.mIndex)
       return QtCore.QVariant()
 
-class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase):
+class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -70,7 +72,7 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       """
       Setup all initial gui settings that don't need to know about the cluster configuration.
       """
-      ClusterSettingsBase.Ui_ClusterSettingsBase.setupUi(self, widget)
+      EnsembleViewBase.Ui_EnsembleViewBase.setupUi(self, widget)
 
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
       self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
@@ -91,13 +93,13 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
       self.connect(self.mTargetList, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*, QListWidgetItem*)"),
          self.onCurrentTargetChanged)
 
-      xp_icon = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
+      xp_icon = QtGui.QIcon(":/EnsembleView/images/win_xp.png")
       self.mRebootToWindowsAction = QtGui.QAction(xp_icon, self.tr("Windows"), self)
       self.connect(self.mRebootToWindowsAction, QtCore.SIGNAL("triggered()"), self.onRebootToWindows)
       self.mRebootAllToWindowsAction = QtGui.QAction(xp_icon, self.tr("Windows"), self)
       self.connect(self.mRebootAllToWindowsAction, QtCore.SIGNAL("triggered()"), self.onRebootAllToWindows)
 
-      linux_icon = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
+      linux_icon = QtGui.QIcon(":/EnsembleView/images/linux2.png")
       self.mRebootToLinuxAction = QtGui.QAction(linux_icon, self.tr("Linux"), self)
       self.connect(self.mRebootToLinuxAction, QtCore.SIGNAL("triggered()"), self.onRebootToLinux)
       self.mRebootAllToLinuxAction = QtGui.QAction(linux_icon, self.tr("Linux"), self)
@@ -351,12 +353,12 @@ class ClusterSettings(QtGui.QWidget, ClusterSettingsBase.Ui_ClusterSettingsBase)
    getName = staticmethod(getName)
 
 def getModuleInfo():
-   icon = QtGui.QIcon(":/ClusterSettings/images/management.png")
-   return (ClusterSettings, icon)
+   icon = QtGui.QIcon(":/EnsembleView/images/management.png")
+   return (EnsembleView, icon)
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
-   cs = ClusterSettings()
+   cs = EnsembleView()
    cs.show()
    sys.exit(app.exec_())
 
