@@ -89,10 +89,11 @@ class GrubPlugin:
    """ Reboot service that allows remote Maestro connections to change the
        default boot target and reboot the machine.
    """
-   def __init__(self, settings):
+   def __init__(self):
+      env = maestro.core.Environment()
       self.mGrubConfig = None
-      if settings.has_key('grub_conf'):
-         grub_path = settings['grub_conf']
+      if env.settings.has_key('grub_conf'):
+         grub_path = env.settings['grub_conf']
          if os.path.exists(grub_path) and os.path.isfile(grub_path):
             self.mGrubConfig = grubconfig.GrubConfig(grub_path)
 

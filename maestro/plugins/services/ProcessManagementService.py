@@ -19,21 +19,23 @@
 import sys, os, platform
 
 import re
+import maestro.core
 
 ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.+:\d+\s+\d+)\s+(\S.*)")
 
-class ProcessManagementService:
+class ProcessManagementService(maestro.core.IServicePlugin):
    def __init__(self):
+      maestro.core.IServicePlugin.__init__(self)
       if "win32" == sys.platform:
          from maestro.util import wmi
          self.mWMIConnection = wmi.WMI()
       else:
          pass
 
-   def init(self, eventManager, settings):
-      self.mEventManager = eventManager
-      self.mEventManager.connect("*", "process.get_procs", self.onGetProcs)
-      self.mEventManager.connect("*", "process.terminate_proc", self.onTerminateProc)
+   def registerCallbacks(self):
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "process.get_procs", self.onGetProcs)
+      env.mEventManager.connect("*", "process.terminate_proc", self.onTerminateProc)
 
    def onGetProcs(self, nodeId, avatar):
       """ Slot that returns a process list to the calling maestro client.
@@ -42,7 +44,7 @@ class ProcessManagementService:
           @param avatar: System avatar that represents the remote user.
       """
       procs = self._getProcs()
-      self.mEventManager.emit(nodeId, "process.procs", (procs,))
+      env.mEventManager.emit(nodeId, "process.procs", (procs,))
 
    def onTerminateProc(self, nodeId, avatar, pid):
       """ Slot that terminates the process that has the given pid.

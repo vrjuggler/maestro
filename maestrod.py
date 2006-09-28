@@ -24,12 +24,7 @@ import maestro.core
 const = maestro.core.const
 
 const.EXEC_DIR = os.path.dirname(__file__)
-
-import services.LaunchService
-import services.ProcessManagementService
-import services.RebootService
-import services.ResourceService
-import services.SettingsService
+const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'plugins', 'services')
 
 import maestro
 import maestro.core
@@ -76,7 +71,7 @@ class MaestroServer:
       self.mLogger = logging.getLogger('maestrod.MaestroServer')
       ip_address = socket.gethostbyname(socket.gethostname())
       self.mEventManager = maestro.core.EventManager.EventManager(ip_address)
-      self.mServices = []
+      self.mServices = {}
 
       server_settings = ServerSettings()
 
@@ -97,32 +92,28 @@ class MaestroServer:
       self.mLogger.debug('Testing: ' + val)
       return "Test complete"
 
-   def registerInitialServices(self):
-      # Register initial services
-      settings = services.SettingsService.SettingsService()
-      settings.init(self.mEventManager)
-      self.mServices.append(settings)
+   def loadServices(self):
+      env = maestro.core.Environment()
+      self.mServicePlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IServicePlugin, returnNameDict=True)
+      for name, vtype in self.mServicePlugins.iteritems():
+         # Try to load the view
+         new_service = None
+         try:
+            new_service = vtype()
+            new_service.registerCallbacks()
 
-      resource = services.ResourceService.ResourceService()
-      resource.init(self.mEventManager)
-      self.mServices.append(resource)
-
-      pm = services.ProcessManagementService.ProcessManagementService()
-      pm.init(self.mEventManager)
-      self.mServices.append(pm)
-
-      reboot_service = services.RebootService.RebootService()
-      reboot_service.init(self.mEventManager)
-      self.mServices.append(reboot_service)
-      
-      launch_service = services.LaunchService.LaunchService()
-      launch_service.init(self.mEventManager)
-      self.mServices.append(launch_service)
+            # Keep track of widgets to remove them later
+            self.mServices[name] = new_service
+         except Exception, ex:
+            if new_service:
+               new_service = None
+            print "Error loading service:" + name + "\n  exception:" + str(ex)
 
       # Register callbacks to send info to clients
       #self.mEventManager.timers().createTimer(settings.update, 2.0)
       #self.mEventManager.timers().createTimer(resource.update, 2.0)
-      self.mEventManager.timers().createTimer(launch_service.update, 0)
+
+      #self.mEventManager.timers().createTimer(launch_service.update, 0)
 
    def update(self):
       """ Give the event manager time to handle it's timers. """
@@ -288,8 +279,15 @@ class TestRealm(object):
 def RunServer(installSH=True):
    logger = logging.getLogger('maestrod.RunServer')
    try:
+
+      def logCB(percent, message):
+         logger.info(message)
+
+      env = maestro.core.Environment()
+      env.initialize(None, progressCB=logCB)
+
       cluster_server = MaestroServer()
-      cluster_server.registerInitialServices()
+      cluster_server.loadServices()
       from twisted.internet import reactor
       from twisted.internet import task
 

@@ -65,7 +65,7 @@ def main():
       #splash = QtGui.QSplashScreen(splash_map, QtCore.Qt.WindowStaysOnTopHint)
       splash = QtGui.QSplashScreen(splash_map)
       splash.show()
-      splash.showMessage("Bootstrapping system...")
+      splash.showMessage("Loading Maestro by Infiscape")
       app.processEvents()
 
       # All platforms use the same name for the Maestro client settings, but

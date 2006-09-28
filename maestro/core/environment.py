@@ -49,7 +49,7 @@ class Environment(maestro.util.mixins.Singleton):
 
       # -- Plugin manager -- #
       self.mPluginManager = maestro.util.plugin.PluginManager()
-      self.mPluginManager.scan(pj(maestro.core.const.EXEC_DIR, 'maestro', 'plugins'), progressCB)
+      self.mPluginManager.scan(pj(maestro.core.const.PLUGIN_DIR), progressCB)
       #self.pluginManager.scan(self.settings.plugin_paths, progressCB)
       plugins = self.mPluginManager.getPlugins(returnNameDict=True)
       print "Environment found plugins: "      

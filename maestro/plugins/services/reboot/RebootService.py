@@ -18,6 +18,7 @@
 
 import sys, os, platform
 
+import maestro.core
 import maestro.core.EventManager
 import re
 
@@ -49,32 +50,33 @@ if "win32" == sys.platform:
       win32api.InitiateSystemShutdown(None, message, timeout, bForce, bReboot)
 
 
-class RebootService:
+class RebootService(maestro.core.IServicePlugin):
    """ Reboot service that allows remote Maestro connections to change the
        default boot target and reboot the machine.
    """
    def __init__(self):
-      self.mGrubConfig = None
+      maestro.core.IServicePlugin.__init__(self)
+      self.mBootPlugin = None
 
-   def init(self, eventManager, settings):
+   def registerCallbacks(self):
+      env = maestro.core.Environment()
       # Find out which boot loader we are using. If none is set, assume that
       # we are using GRUB.
-      boot_loader = settings.get('boot_loader', 'GRUB')
+      boot_loader = env.settings.get('boot_loader', 'GRUB')
 
       # If GRUB is our boot loader, then we need to get the GRUB configuration
       # loaded for later manipulations.
-      if boot_loader == 'GRUB' and settings.has_key('grub_conf'):
-         from services import grub_plugin
-         self.mBootPlugin = grub_plugin.GrubPlugin(settings)
+      if boot_loader == 'GRUB' and env.settings.has_key('grub_conf'):
+         import grub_plugin
+         self.mBootPlugin = grub_plugin.GrubPlugin()
       else:
-         from services import ntloader_plugin
+         import ntloader_plugin
          self.mBootPlugin = ntloader_plugin.NtLoaderPlugin()
 
-      self.mEventManager = eventManager
-      self.mEventManager.connect("*", "reboot.get_targets", self.onGetTargets)
-      self.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)
-      self.mEventManager.connect("*", "reboot.switch_os", self.onSwitchBootPlatform)
-      self.mEventManager.connect("*", "reboot.reboot", self.onReboot)
+      env.mEventManager.connect("*", "reboot.get_targets", self.onGetTargets)
+      env.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)
+      env.mEventManager.connect("*", "reboot.switch_os", self.onSwitchBootPlatform)
+      env.mEventManager.connect("*", "reboot.reboot", self.onReboot)
 
    def onGetTargets(self, nodeId, avatar):
       """ Slot that returns a process list to the calling maestro client.
@@ -87,7 +89,8 @@ class RebootService:
          return []
 
       tuple = self.mBootPlugin.getTargetsAndDefaultIndex()
-      self.mEventManager.emit(nodeId, "reboot.report_targets", tuple)
+      env = maestro.core.Environment()
+      env.mEventManager.emit(nodeId, "reboot.report_targets", tuple)
 
    def onSetDefaultTarget(self, nodeId, avatar, index, title):
       """ Slot that sets the default target OS for reboot.

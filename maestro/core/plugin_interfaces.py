@@ -25,3 +25,28 @@ class IViewPlugin(maestro.util.plugin.Plugin):
    
    def getViewWidget(self):
       not_implemented()
+
+class IServicePlugin(maestro.util.plugin.Plugin):
+   
+   def __init__(self):
+      pass
+   
+   def registerCallbacks(self):
+      not_implemented()
+
+
+class IBootPlugin(maestro.util.plugin.Plugin):
+   
+   def __init__(self):
+      pass
+   
+   @staticmethod
+   def getName():
+      not_implemented()
+
+   @staticmethod
+   def getIcon():
+      not_implemented()
+   
+   def getViewWidget(self):
+      not_implemented()

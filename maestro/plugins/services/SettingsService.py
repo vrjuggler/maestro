@@ -33,23 +33,25 @@ from threading import Thread
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
 
-class SettingsService:
+class SettingsService(maestro.core.IServicePlugin):
    def __init__(self):
+      maestro.core.IServicePlugin.__init__(self)
       self.mQueue = Queue()
 
-   def init(self, eventManager, settings):
-      self.mEventManager = eventManager
-
-      self.mEventManager.connect("*", "settings.get_os", self.onGetOs)
+   def registerCallbacks(self):
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "settings.get_os", self.onGetOs)
 
    def onGetOs(self, nodeId, avatar):
       platform = self._getPlatform()
 
-      self.mEventManager.emit(nodeId, "settings.os", (platform,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(nodeId, "settings.os", (platform,))
 
    def update(self):
       platform = self._getPlatform()
-      self.mEventManager.emit("*", "settings.os", (platform,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "settings.os", (platform,))
 
    def _getPlatform(self):
       """Returns tuple with error code and platform code.

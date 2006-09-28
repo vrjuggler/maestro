@@ -26,6 +26,8 @@ import socket
 from Queue import Queue
 from threading import Thread
 
+import maestro.core
+
 TIMEFORMAT = "%m/%d/%y %H:%M:%S"
 
 PAT_STAT_CPU = re.compile(r"cpu +([0-9]+) +([0-9]+) +([0-9]+) +([0-9]+)", re.I)
@@ -41,8 +43,9 @@ PAT_MEMINFO_INACTIVE = re.compile(r"inactive: *([0-9]+)", re.I)
 if os.name == 'nt':
     import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
 
-class ResourceService:
+class ResourceService(maestro.core.IServicePlugin):
    def __init__(self):
+      maestro.core.IServicePlugin.__init__(self)
       self.mQueue = Queue()
 
       if os.name == 'nt':
@@ -51,22 +54,23 @@ class ResourceService:
       else:
          self.mLastCPUTime = [0,0,0,0]
 
-   def init(self, eventManager, settings):
-      self.mEventManager = eventManager
-
-      self.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)
+   def registerCallbacks(self):
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)
 
    def onGetUsage(self, nodeId, avatar):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()
-      self.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
-      self.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
+      env.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
          
    def update(self):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()
-      self.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
-      self.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
+      env.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
 
    def _getCpuUsage(self):
       if os.name == 'nt':

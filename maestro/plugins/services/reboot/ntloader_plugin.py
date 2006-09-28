@@ -21,7 +21,11 @@ import sys, os, platform
 import maestro.core
 const = maestro.core.const
 import re
-import wmi
+
+try:
+   import wmi
+except:
+   wmi = None
 
 sWindowsRe = re.compile(r'Windows', re.IGNORECASE)
 
@@ -33,10 +37,8 @@ class NtLoaderPlugin:
        default boot target and reboot the machine.
    """
    def __init__(self):
-      self.mWMIConnection = wmi.WMI()
-
-   def init(self, settings):
-      pass
+      if wmi is not None:
+         self.mWMIConnection = wmi.WMI()
 
    def getTargetsAndDefaultIndex(self):
       """ Slot that returns a process list to the calling maestro client.

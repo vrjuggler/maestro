@@ -21,18 +21,19 @@ import re
 import sys, os
 import os.path
 
+import maestro.core
 import maestro.util.process
 import logging
 
-class LaunchService:
+class LaunchService(maestro.core.IServicePlugin):
    def __init__(self):
+      maestro.core.IServicePlugin.__init__(self)
       self.mProcess = None
       self.mLogger = logging.getLogger('maestrod.LaunchService')
 
-   def init(self, eventManager, settings):
-      self.mEventManager = eventManager
-
-      self.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
+   def registerCallbacks(self):
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
 
    def update(self):
       try:
@@ -74,7 +75,8 @@ class LaunchService:
                   self.mProcess = None
                   return
             self.mLogger.debug("line: " + line)
-            self.mEventManager.emit("*", "launch.output", (line,))
+            env = maestro.core.Environment()
+            env.mEventManager.emit("*", "launch.output", (line,))
 
       except Exception, ex:
          self.mLogger.error("I/O Error: " + str(ex))
