@@ -4,7 +4,7 @@ pj = os.path.join
 
 import util.plugin
 import util.mixins
-import core
+import maestro.core
 
 
 class Environment(util.mixins.Singleton):

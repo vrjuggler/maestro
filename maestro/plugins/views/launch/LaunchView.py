@@ -23,17 +23,17 @@ import elementtree.ElementTree as ET
 
 import MaestroConstants
 
-import core
-from core import StanzaModel
-from core import Stanza
+import maestro.core
+from maestro.core import StanzaModel
+from maestro.core import Stanza
 import GlobalOptions
 
 import os.path
 pj = os.path.join
 
-class LaunchViewPlugin(core.IViewPlugin):
+class LaunchViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
-      core.IViewPlugin.__init__(self)
+      maestro.core.IViewPlugin.__init__(self)
       self.widget = LaunchView()
       
    @staticmethod

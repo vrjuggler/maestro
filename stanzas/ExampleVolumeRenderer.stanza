@@ -9,11 +9,38 @@ Basically there are only a few restrictions.
   <command class="" hidden="true">./build.linux-i686/Viewer/infi_app</command>
   <env_var class="" hidden="true" label="Display" key="DISPLAY">:0.0</env_var>
   <cwd class="" hidden="true">/home/aronb/Source/Infiscape/common/IOV</cwd>
+  <arg label="World location" editable="true" flag="-w">world.config</arg>
+  <arg label="Master" editable="true" flag="-m">timmy</arg>
+  <group label="VRJ Configuration">
+    <arg label="Base config" editable="true" flag="-j">sim.base.jconf</arg>
+    <group label="Input Configuration">
+      <arg label="Tracker config" editable="true" flag="-j">sim.base.jconf</arg>
+      <arg label="Wand config" editable="true" flag="-j">sim.wand.mixin.jconf</arg>
+    </group>
+  </group>
+  <choice label="Stereo" tooltip="" type="one">
+    <arg label="Active Stereo" selected="true" editable="true" flag="-j">sim.active.jconf</arg>
+    <choice label="Side " tooltip="" type="one">
+      <arg label="Left" editable="true" flag="-j">sim.passive.jconf</arg>
+      <arg label="Right" editable="true" flag="-j">sim.passive.jconf</arg>
+    </choice>
+  </choice>
+  <!--
+  <group label="IOV Configuration">
+    <arg label="Viewer config" editable="true" flag="-j">sim.base.jconf</arg>
+    <arg label="Cluster config" editable="true" flag="-j">sim.wand.mixin.jconf</arg>
+  </group>
+  -->
+  <!--
   <choice label="VR Juggler Configuration" parent_path="Configuration Files" tooltip="" type="one">
     <group label="Simulator" selected="true">
-      <arg label="Simulator Config" editable="true" class="" flag="-j">sim.base.jconf</arg>
-      <arg label="Simulator Config" editable="true" class="" flag="-j">sim.wand.mixin.jconf</arg>
+      <arg label="Simulator Config" editable="true" flag="-j">sim.base.jconf</arg>
+      <arg label="Simulator Config" editable="true" flag="-j">sim.wand.mixin.jconf</arg>
     </group>
+    <choice label="CAVE Configuration" type="one">
+      <arg label="Open" editable="true" flag="-j">open.displays.jconf</arg>
+      <arg label="Closed" editable="true" flag="-j">closed.displays.jconf</arg>
+    </choice>
   </choice>
   <arg label="IOV Config" editable="true" class="Linux,master" flag="-a">viewer-nav.jconf</arg>
   <group label="IOV CVS" hidden="true">
@@ -26,18 +53,22 @@ Basically there are only a few restrictions.
      <env_var label="PATH" key="PATH">${OSG_BASE_DIR}/bin:${PATH}</env_var>
      <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${OSG_BASE_DIR}/lib/dbg:${LD_LIBRARY_PATH}</env_var>
   </group>
-  <choice label="VR Juggler Version" type="one_cb">
-    <group label="VR Juggler CVS" hidden="true" selected="true">
+  -->
+  <!--
+  <choice label="VR Juggler Version" type="one">
+    <group label="VR Juggler CVS" selected="true">
       <env_var label="VR Juggler Location" key="VJ_BASE_DIR">/home/aronb/Source/CurrentJuggler/juggler/build_linux_fc4/instlinks</env_var>
       <env_var label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
       <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
     </group>
-    <group label="VR Juggler 2.0" hidden="true">
+    <group label="VR Juggler 2.0">
       <env_var label="VR Juggler Location" key="VJ_BASE_DIR">/path/to/vrjuggler2.0</env_var>
       <env_var label="PATH" key="PATH">${VJ_BASE_DIR}/bin:${PATH}</env_var>
       <env_var label="LD_LIBRARY_PATH" key="LD_LIBRARY_PATH">${VJ_BASE_DIR}/lib:${LD_LIBRARY_PATH}</env_var>
     </group>
   </choice>
+  -->
+  <!--
   <choice label="Debug Output Level" parent_path="" tooltip="" type="one_cb">
      <env_var selected="true" label="Critical Messages" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
      <env_var label="Warning Messages" key="VPR_DEBUG_NFY_LEVEL">1</env_var>
@@ -50,4 +81,5 @@ Basically there are only a few restrictions.
      <env_var label="Hexidecimal" key="VPR_DEBUG_NFY_LEVEL">8</env_var>
      <env_var editable="true" label="Other" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
   </choice>
+  -->
 </stanza>

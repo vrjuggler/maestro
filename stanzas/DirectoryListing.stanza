@@ -2,6 +2,6 @@
 <stanza label="Directory Listing" global_options="" tooltip="List files in a directory." helpUrl="">
   <command class="Linux">ls</command>
   <command class="Windows XP">dir</command>
-  <cwd class="Linux">~</cwd>
+  <cwd class="Linux">/</cwd>
   <cwd class="Windows XP">C:\</cwd>
 </stanza>

@@ -20,15 +20,15 @@ import sys, socket
 from PyQt4 import QtGui, QtCore
 
 import RebootViewerBase
-import MaestroResource
+import maestro.MaestroResource
 import MaestroConstants
-import Ensemble
-import core
+import maestro.core
+from maestro.core import Ensemble
 
 
-class RebootViewPlugin(core.IViewPlugin):
+class RebootViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
-      core.IViewPlugin.__init__(self)
+      maestro.core.IViewPlugin.__init__(self)
       self.widget = RebootViewer()
       
    @staticmethod
