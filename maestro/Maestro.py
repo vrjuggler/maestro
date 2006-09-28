@@ -157,13 +157,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mEnsemble = None
       self.mActiveViewPlugins = {}
 
-   def init(self, clusterModel, pluginMgr, cfgFilePath):
+   def init(self, clusterModel, cfgFilePath):
       # Set the new cluster configuration
       self.mEnsemble = clusterModel
-      self.mPluginManager = pluginMgr
       self.mOutputTab.init(self.mEnsemble)
 
-      self.mViewPlugins = self.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
+      env = maestro.core.Environment()
+      self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
       for name, cls in self.mViewPlugins.iteritems():
          self.addView(name)
 
@@ -174,7 +174,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
 
 
-      env = maestro.core.Environment()
       # Initialize all loaded modules.
       for (view, view_widget) in self.mActiveViewPlugins.values():
          view_widget.init(self.mEnsemble)

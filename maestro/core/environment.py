@@ -2,6 +2,7 @@
 import os, os.path, pickle, socket
 pj = os.path.join
 
+import maestro
 import maestro.util.plugin
 import maestro.util.mixins
 import maestro.core
@@ -16,7 +17,7 @@ class Environment(maestro.util.mixins.Singleton):
    def __init__(self):
       if not hasattr(self, '_init_called'):
          self._init_called = True
-         self.pluginManager = None
+         self.mPluginManager = None
          self.settings = None
          self.mViewPluginsHolder = None
          
@@ -33,12 +34,13 @@ class Environment(maestro.util.mixins.Singleton):
       self.mEventManager = EventManager.EventManager(ip_address)
 
       # -- Plugin manager -- #
-      self.pluginManager = maestro.util.plugin.PluginManager()
+      self.mPluginManager = maestro.util.plugin.PluginManager()
+      self.mPluginManager.scan(pj(maestro.core.const.EXEC_DIR, 'maestro', 'plugins'), progressCB)
       #self.pluginManager.scan(self.settings.plugin_paths, progressCB)
-      #plugins = self.pluginManager.getPlugins(returnNameDict=True)
-      #print "Environment found plugins: "      
-      #for (name,p) in plugins.iteritems():
-      #   print "  %s : %s"%(name,p)
+      plugins = self.mPluginManager.getPlugins(returnNameDict=True)
+      print "Environment found plugins: "      
+      for (name,p) in plugins.iteritems():
+         print "  %s : %s"%(name,p)
       
       # -- Initialize the plugin holders -- #
       #self.mViewPluginsHolder = lucid.core.ViewPluginsHolder()

@@ -22,6 +22,8 @@ import sys, os, os.path, time, traceback
 pj = os.path.join
 from PyQt4 import QtGui, QtCore
 app = QtGui.QApplication(sys.argv)
+
+import maestro
 import maestro.util
 from maestro.util import qt4reactor
 from maestro.util import plugin
@@ -32,11 +34,7 @@ import maestro.core
 const = maestro.core.const
 const.EXEC_DIR = os.path.dirname(__file__)
 
-
-
-import maestro
 import maestro.Maestro
-import maestro.core
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET
@@ -66,15 +64,13 @@ def main():
       def cb(percent, msg):
          print "[%s][%s]" % (percent, msg)
 
-      plugin_mgr = plugin.PluginManager()
-      plugin_mgr.scan(pj(const.EXEC_DIR, 'maestro', 'plugins'), cb)
       #splash.show()
       #splash.showMessage("Establishing connections...")
 
       #QtGui.qApp.processEvents()
 
       env = maestro.core.Environment()
-      env.initialize()
+      env.initialize(progressCB=cb)
 
       # Parse XML ensemble file. This provides the initial set of cluster
       # nodes.
@@ -120,20 +116,22 @@ def main():
 
       # Create and display GUI
       m = maestro.Maestro.Maestro()
-      m.init(ensemble, plugin_mgr, cfg_file_path)
+      m.init(ensemble, cfg_file_path)
       m.show()
 #      splash.finish(m)
       reactor.run()
-      reactor.stop()
-      reactor.runUntilCurrent()
-      logging.shutdown()
-      sys.exit()
    except IOError, ex:
       QtGui.QMessageBox.critical(None, "Error",
                                  "Failed to read ensemble file %s: %s" % \
                                     (sys.argv[1], ex.strerror))
    except Exception, ex:
       QtGui.QMessageBox.critical(None, "Fatal Error", str(ex))
+
+
+   reactor.stop()
+   reactor.runUntilCurrent()
+   logging.shutdown()
+   sys.exit()
 
 def usage():
    print "Usage: %s <XML configuration file>" % sys.argv[0]
