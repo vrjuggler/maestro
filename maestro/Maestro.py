@@ -55,7 +55,7 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       self.mTabMap = {}
       self.mEditMap = {}
 
-   def init(self, clusterModel, eventManager):
+   def init(self, ensemble):
       #if not None == self.mClusterModel:
          #self.disconnect(self.mClusterModel, QtCore.SIGNAL(dataChanged(QModelIndex,QModelIndex)),
          #          self, QtCore.SLOT(dataChanged(QModelIndex,QModelIndex)));
@@ -68,8 +68,7 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
          #disconnect(d->model, SIGNAL(modelReset()), this, SLOT(reset()));
          #disconnect(d->model, SIGNAL(layoutChanged()), this, SLOT(doItemsLayout()));
 
-      self.mEnsemble = clusterModel
-      self.mEventManager = eventManager
+      self.mEnsemble = ensemble
 
       #self.connect(self.mClusterModel, QtCore.SIGNAL("rowsAboutToBeRemoved(int,int)"),
       #             self.rowsAboutToBeRemoved)
@@ -78,7 +77,8 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       #self.connect(self.mClusterModel, QtCore.SIGNAL("dataChanged(int)"),
       #             self.dataChanged)
 
-      self.mEventManager.connect("*", "launch.output", self.onOutput)
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "launch.output", self.onOutput)
 
       self.reset()
 
@@ -144,14 +144,7 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       scroll_area.setWidget(log_widget)
       hboxlayout.addWidget(scroll_area)
       
-      #textedit = QtGui.QTextEdit(tab)
-      #textedit.setObjectName("TextEdit")
-      #hboxlayout.addWidget(textedit)
       self.insertTab(index, tab, node.getName())
-      #self.setTabText(self.indexOf(tab), node.getName())
-
-      #self.mClusterModel.getOutputLogger().subscribeForNode(node, textedit.append)
-      #self.mEventManager.connect(ip_address, "launch.output", textedit.append)
       
       self.mTabMap[ip_address] = tab
       #self.mEditMap[ip_address] = textedit
@@ -164,12 +157,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mEnsemble = None
       self.mActiveViewPlugins = {}
 
-   def init(self, clusterModel, eventManager, pluginMgr, cfgFilePath):
+   def init(self, clusterModel, pluginMgr, cfgFilePath):
       # Set the new cluster configuration
       self.mEnsemble = clusterModel
-      self.mEventManager = eventManager
       self.mPluginManager = pluginMgr
-      self.mOutputTab.init(self.mEnsemble, self.mEventManager)
+      self.mOutputTab.init(self.mEnsemble)
 
       self.mViewPlugins = self.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
       for name, cls in self.mViewPlugins.iteritems():
@@ -182,9 +174,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
 
 
+      env = maestro.core.Environment()
       # Initialize all loaded modules.
       for (view, view_widget) in self.mActiveViewPlugins.values():
-         view_widget.init(self.mEnsemble, self.mEventManager)
+         view_widget.init(self.mEnsemble)
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)

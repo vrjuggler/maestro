@@ -119,7 +119,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
    def onTest(self):
       if self.mSelectedNode is not None:
-         self.mEventManager.emit(self.mSelectedNode.getId(), "reboot.reboot", ())
+         env = maestro.core.Environment()
+         env.mEventManager.emit(self.mSelectedNode.getId(), "reboot.reboot", ())
 
    def onNodeContextMenu(self, point):
       menu = QtGui.QMenu("Reboot", self)
@@ -142,9 +143,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
    def onTargetTriggered(self, node_id, index, title):
       print "Target: [%s][%s]" % (index, title)
-      self.mEventManager.emit(node_id, "reboot.set_default_target", (index, title))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(node_id, "reboot.set_default_target", (index, title))
    
-   def init(self, ensemble, eventManager):
+   def init(self, ensemble):
       """ Configure the user interface.
 
           @param ensemble: The current Ensemble configuration.
@@ -162,8 +164,6 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Connect the new ensemble.
       self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
-
-      self.mEventManager = eventManager
 
       # Create a model for our ListView
       self.mEnsembleModel = EnsembleModel.EnsembleModel(self.mEnsemble)
@@ -185,8 +185,9 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       if not self.mEnsemble is None:
          self.mEnsemble.refreshConnections()
 
-      self.mEventManager.emit("*", "settings.get_os", ())
-      self.mEventManager.emit("*", "reboot.get_targets", ())
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "settings.get_os", ())
+      env.mEventManager.emit("*", "reboot.get_targets", ())
 
    def onAdd(self):
       """ Called when user presses the add button. """
@@ -221,7 +222,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          # Disconnect and try to connect to new hostname later..
          try:
             ip_address = selected_node.getIpAddress()
-            self.mEventManager.disconnectFromNode(ip_address)
+            env = maestro.core.Environment()
+            env.mEventManager.disconnectFromNode(ip_address)
          except:
             # Do nothing
             pass
@@ -310,7 +312,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       if current is not None and previous is not None:
          node_id = self.mSelectedNode.getId()
          # Tell the selected node to change it's default target.
-         self.mEventManager.emit(node_id, "reboot.set_default_target", (current.mIndex, current.mTitle))
+         env = maestro.core.Environment()
+         env.mEventManager.emit(node_id, "reboot.set_default_target", (current.mIndex, current.mTitle))
 
    def onNodeChanged(self, nodeId):
       """ Slot that is called when a node's state changes. If the currently
@@ -327,21 +330,25 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """ Slot that makes the selected node reboot to Linux. """
       assert(self.mSelectedNode is not None)
       node_id = self.mSelectedNode.getId()
-      self.mEventManager.emit(node_id, "reboot.switch_os", (const.LINUX,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(node_id, "reboot.switch_os", (const.LINUX,))
 
    def onRebootToWindows(self):
       """ Slot that makes the selected node reboot to Windows. """
       assert(self.mSelectedNode is not None)
       node_id = self.mSelectedNode.getId()
-      self.mEventManager.emit(node_id, "reboot.switch_os", (const.WINXP,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(node_id, "reboot.switch_os", (const.WINXP,))
 
    def onRebootAllToLinux(self):
       """ Slot that makes all nodes reboot to Linux. """
-      self.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
 
    def onRebootAllToWindows(self):
       """ Slot that makes all nodes reboot to Windows. """
-      self.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
 
    def onEnsembleChanged(self):
       """ Called when the cluster control has connected to another node. """

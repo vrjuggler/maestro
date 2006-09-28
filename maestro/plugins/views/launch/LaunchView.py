@@ -106,12 +106,10 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          self.mStanzas.append(stanza)
 
 
-   def init(self, ensemble, eventManager):
+   def init(self, ensemble):
       self.mEnsemble = ensemble
       self.mElement = self.mEnsemble.mElement
       self.scanForStanzas()
-
-      self.mEventManager = eventManager
 
       self._fillInApps()
 
@@ -235,10 +233,10 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          print "   Final Cmd [%s]" % (total_command)
          print "   Cwd       [%s]" % (cwd)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
-         ip_address = node.getIpAddress()
-         self.mEventManager.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
-         
 
+         ip_address = node.getIpAddress()
+         env = maestro.core.Environment()
+         env.mEventManager.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
 
    def _resetAppState(self):
       """ Resets the information associated with the selected application. """

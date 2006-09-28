@@ -1,11 +1,11 @@
 # Environment code
-import os, os.path, pickle
+import os, os.path, pickle, socket
 pj = os.path.join
 
 import maestro.util.plugin
 import maestro.util.mixins
 import maestro.core
-
+import EventManager
 
 class Environment(maestro.util.mixins.Singleton):
    """ The main environment/namespace for the Maestro.
@@ -24,7 +24,14 @@ class Environment(maestro.util.mixins.Singleton):
       """ Initialize the environment. """
       # -- Settings --- #
       #self.loadSettings()
-      
+
+      # -- Event Manager -- #
+      # Create an event dispatcher that will:
+      #   - Connect to remote event manager objects.
+      #   - Emit events to remote event manager objects.
+      ip_address = socket.gethostbyname(socket.gethostname())
+      self.mEventManager = EventManager.EventManager(ip_address)
+
       # -- Plugin manager -- #
       self.pluginManager = maestro.util.plugin.PluginManager()
       #self.pluginManager.scan(self.settings.plugin_paths, progressCB)

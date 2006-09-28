@@ -145,7 +145,9 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       """ Called when user presses the refresh button. """
       if self.mEnsemble is not None:
          self.mEnsemble.refreshConnections()
-      self.mEventManager.emit("*", "process.get_procs", ())
+
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "process.get_procs", ())
       self.mProcessModel.mProcs = []
       self.mProcessModel.changed()
       self.mProcessTable.resizeRowsToContents()
@@ -179,6 +181,8 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
    def onTerminateProcess(self, checked=False):
       """ Terminates all currently selected processes. """
       nodes_to_refresh = []
+
+      env = maestro.core.Environment()
       for selected_index in self.mProcessTable.selectedIndexes():
          # Only handle selected indices in the first column since we only
          # need to terminate once for each row.
@@ -191,7 +195,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
 
             # Fire a terminate event.
             if proc is not None and isinstance(proc, Proc):
-               self.mEventManager.emit(proc.mNodeId, "process.terminate_proc", (proc.mPID,))
+               env.mEventManager.emit(proc.mNodeId, "process.terminate_proc", (proc.mPID,))
                # Add node to list of nodes to refresh.
                if nodes_to_refresh.count(proc.mNodeId) == 0:
                   nodes_to_refresh.append(proc.mNodeId)
@@ -201,9 +205,9 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
 
       # Refresh process list for all nodes where we terminated a process. 
       for node in nodes_to_refresh:
-         self.mEventManager.emit(node, "process.get_procs", ())
+         env.mEventManager.emit(node, "process.get_procs", ())
 
-   def init(self, ensemble, eventManager):
+   def init(self, ensemble):
       """ Configure the user interface with data in cluster configuration. """
       self.mEnsemble = ensemble
 
@@ -220,8 +224,8 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       self.connect(selection_model,
          QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.onSelectionChanged)
 
-      self.mEventManager = eventManager
-      self.mEventManager.connect("*", "process.procs", self.onReportProcs)
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "process.procs", self.onReportProcs)
 
 class ProcessModel(QtCore.QAbstractTableModel):
    def __init__(self, ensemble, parent=None):

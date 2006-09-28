@@ -30,8 +30,6 @@ class EnsembleModel(QtCore.QAbstractListModel):
    def __init__(self, ensemble, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
-      self.mEventManager = None
-
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
 
@@ -45,14 +43,12 @@ class EnsembleModel(QtCore.QAbstractListModel):
       self.mIcons[const.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
       self.mIcons[const.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
 
-   def init(self, eventManager):
-      self.mEventManager = eventManager
-
+      env = maestro.core.Environment()
       # XXX: Should we manage this signal on a per node basis? We would have
       #      to make each node generate a signal when it's OS changed and
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
-      self.mEventManager.connect("*", "settings.os", self.onReportOs)
+      env.mEventManager.connect("*", "settings.os", self.onReportOs)
 
 
    def onNodeChanged(self, nodeId):

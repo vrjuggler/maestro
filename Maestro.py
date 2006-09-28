@@ -21,17 +21,18 @@
 import sys, os, os.path, time, traceback
 pj = os.path.join
 from PyQt4 import QtGui, QtCore
-
-import maestro.core
-const = maestro.core.const
-const.EXEC_DIR = os.path.dirname(__file__)
-
 app = QtGui.QApplication(sys.argv)
 import maestro.util
 from maestro.util import qt4reactor
 from maestro.util import plugin
 qt4reactor.install(app)
 from twisted.internet import reactor
+
+import maestro.core
+const = maestro.core.const
+const.EXEC_DIR = os.path.dirname(__file__)
+
+
 
 import maestro
 import maestro.Maestro
@@ -72,13 +73,8 @@ def main():
 
       #QtGui.qApp.processEvents()
 
-      # Create the event manager
-
-      # Create an event dispatcher that will:
-      #   - Connect to remote event manager objects.
-      #   - Emit events to remote event manager objects.
-      ip_address = socket.gethostbyname(socket.gethostname())
-      event_manager = maestro.core.EventManager.EventManager(ip_address)
+      env = maestro.core.Environment()
+      env.initialize()
 
       # Parse XML ensemble file. This provides the initial set of cluster
       # nodes.
@@ -88,12 +84,11 @@ def main():
       if QtGui.QDialog.Rejected == ld.exec_():
          sys.exit(-1)
 
-      event_manager.setCredentials(ld.getLoginInfo())
+      env.mEventManager.setCredentials(ld.getLoginInfo())
 
       # Try to make inital connections
       # Create cluster configuration
       ensemble = Ensemble.Ensemble(tree)
-      ensemble.init(event_manager)
 #      ensemble.refreshConnections()
 
       # All platforms use the same name for the Maestro client settings, but
@@ -125,7 +120,7 @@ def main():
 
       # Create and display GUI
       m = maestro.Maestro.Maestro()
-      m.init(ensemble, event_manager, plugin_mgr, cfg_file_path)
+      m.init(ensemble, plugin_mgr, cfg_file_path)
       m.show()
 #      splash.finish(m)
       reactor.run()

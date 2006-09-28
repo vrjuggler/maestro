@@ -55,7 +55,6 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Default values that will change in init().
       self.mEnsemble = None
-      self.mEventManager = None
 
    def setupUi(self, widget):
       """
@@ -107,18 +106,14 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mSelectLinuxBtn.setDefaultAction(self.mSetAllTargetsToLinuxAction)
       self.mRebootBtn.setDefaultAction(self.mRebootClusterAction)
    
-   def init(self, ensemble, eventManager):
+   def init(self, ensemble):
       """ Configure the user interface.
 
           @param ensemble: The current Ensemble configuration.
-          @param eventManager: Reference to Maestro's EventManager.
       """
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
-
-      # Keep a reference to the event manager to emit signals.
-      self.mEventManager = eventManager
 
       # Create a model for our NodeTableView
       self.mRebootModel = RebootModel(self.mEnsemble)
@@ -126,7 +121,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          self.onRebootModelChanged)
 
       # Create ItemDelegate to allow editing boot target with a combo box.
-      self.mRebootDelegate = RebootDelegate(self.mEventManager, self.mNodeTableView)
+      self.mRebootDelegate = RebootDelegate(self.mNodeTableView)
       self.mNodeTableView.setItemDelegate(self.mRebootDelegate)
 
       # Set the model.
@@ -191,33 +186,40 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       """ Slot that reboots the selected cluster. """
       node = self.__getSelectedNode()
       if node is not None:
-         self.mEventManager.emit(node.getId(), "reboot.reboot", ())
+         env = maestro.core.Environment()
+         env.mEventManager.emit(node.getId(), "reboot.reboot", ())
 
    def onRebootCluster(self):
       """ Slot that reboots the entire cluster. """
-      self.mEventManager.emit("*", "reboot.reboot", ())
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "reboot.reboot", ())
 
    def onSetTargetToLinux(self):
       """ Slot that makes the selected node reboot to Linux. """
       node = self.__getSelectedNode()
-      self.mEventManager.emit(node.getId(), "reboot.switch_os", (const.LINUX,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(node.getId(), "reboot.switch_os", (const.LINUX,))
 
    def onSetTargetToWindows(self):
       """ Slot that makes the selected node reboot to Windows. """
       node = self.__getSelectedNode()
-      self.mEventManager.emit(node.getId(), "reboot.switch_os", (const.WINXP,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(node.getId(), "reboot.switch_os", (const.WINXP,))
 
    def onSetAllTargetsToLinux(self):
       """ Slot that makes all nodes reboot to Linux. """
-      self.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
 
    def onSetAllTargetsToWindows(self):
       """ Slot that makes all nodes reboot to Windows. """
-      self.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
 
    def onTargetTriggered(self, node_id, index, title):
       """ Slot called by the context menu that causes the default target to change. """
-      self.mEventManager.emit(node_id, "reboot.set_default_target", (index, title))
+      env = maestro.core.Environment()
+      env.mEventManager.emit(node_id, "reboot.set_default_target", (index, title))
 
    def onRebootModelChanged(self, start_index, end_index):
       self.mNodeTableView.resizeColumnToContents(0)
@@ -229,11 +231,8 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
 class RebootDelegate(QtGui.QItemDelegate):
    """ ItemDelegate that allows us to use a QComboBox to choose a boot target. """
-   def __init__(self, eventMgr, parent = None):
+   def __init__(self, parent = None):
       QtGui.QItemDelegate.__init__(self, parent)
-
-      # Keep a reference to the event manager to emit signals.
-      self.mEventManager = eventMgr
 
    def createEditor(self, parent, option, index):
       """ Create a QComboBox with the correct TargetModel.
@@ -288,7 +287,8 @@ class RebootDelegate(QtGui.QItemDelegate):
       if not current_target == new_target:
          (title, os, target_index) = new_target
          # Tell the selected node to change it's default target.
-         self.mEventManager.emit(node.getId(), "reboot.set_default_target", (target_index, title))
+         env = maestro.core.Environment()
+         env.mEventManager.emit(node.getId(), "reboot.set_default_target", (target_index, title))
 
    def updateEditorGeometry(self, editor, option, index):
       editor.setGeometry(option.rect)

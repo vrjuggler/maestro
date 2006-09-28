@@ -26,10 +26,10 @@ const = maestro.core.const
 import socket, types
 
 class Ensemble(QtCore.QObject):
+   """ Contains information about a cluster of nodes. """
    def __init__(self, xmlTree, parent=None):
       QtCore.QObject.__init__(self, parent)
 
-      self.mEventManager = None
       # Store cluster XML element
       self.mElement = xmlTree.getroot()
       assert self.mElement.tag == "ensemble"
@@ -46,16 +46,14 @@ class Ensemble(QtCore.QObject):
       self.refreshTimer.start()
       QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"), self.refreshConnections)
 
-   def init(self, eventManager):
-      self.mEventManager = eventManager
-
       # XXX: Should we manage this signal on a per node basis? We would have
       #      to make each node generate a signal when it's OS changed and
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
-      self.mEventManager.connect("*", "settings.os", self.onReportOs)
-      self.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
-      self.mEventManager.connect("*", "lostConnection", self.onLostConnection)
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "settings.os", self.onReportOs)
+      env.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
+      env.mEventManager.connect("*", "lostConnection", self.onLostConnection)
 
    def getNode(self, index):
       """ Return the node at the given index. Returns None if index is out of range.
@@ -89,6 +87,7 @@ class Ensemble(QtCore.QObject):
          print "ERROR: ", ex
 
    def onReportTargets(self, nodeId, targets, defaultTargetIndex):
+      """ Slot that is called when a node reports it's possible boot targets. """
       for node in self.mNodes:
          if node.getIpAddress() == nodeId:
             node.mTargets = targets
@@ -98,6 +97,7 @@ class Ensemble(QtCore.QObject):
    def refreshConnections(self):
       """Try to connect to all nodes."""
 
+      env = maestro.core.Environment()
       new_connections = False
 
       # Iterate over nodes and try to connect to nodes that are not connected.
@@ -106,12 +106,12 @@ class Ensemble(QtCore.QObject):
             # Attempt to get the IP address from the hostname.
             ip_address = node.getIpAddress()
             # If node is not connected, attempt to connect.
-            if not self.mEventManager.isConnected(ip_address):
-               if self.mEventManager.connectToNode(ip_address):
+            if not env.mEventManager.isConnected(ip_address):
+               if env.mEventManager.connectToNode(ip_address):
                   new_connections = True
                   # Tell the new node to report it's os.
-                  self.mEventManager.emit(ip_address, "settings.get_os", ())
-                  self.mEventManager.emit(ip_address, "reboot.get_targets", ())
+                  env.mEventManager.emit(ip_address, "settings.get_os", ())
+                  env.mEventManager.emit(ip_address, "reboot.get_targets", ())
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 

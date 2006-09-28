@@ -60,8 +60,10 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       """ Called when user presses the refresh button. """
       if self.mEnsemble is not None:
          self.mEnsemble.refreshConnections()
-      self.mEventManager.emit("*", "settings.get_usage", ())
-      self.mEventManager.emit("*", "settings.get_mem_usage", ())
+
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "settings.get_usage", ())
+      env.mEventManager.emit("*", "settings.get_mem_usage", ())
       
    def reportCpuUsage(self, ip, val):
       print "RV CPU Usage [%s]: %s" % (ip, val)
@@ -73,16 +75,16 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       self.mResourceModel.mMemUsageMap[ip] = val
       self.mResourceTable.reset()
 
-   def init(self, ensemble, eventManager):
+   def init(self, ensemble):
       """ Configure the user interface with data in cluster configuration. """
       self.mEnsemble = ensemble
 
       self.mResourceModel = ResourceModel(self.mEnsemble)
       self.mResourceTable.setModel(self.mResourceModel)
 
-      self.mEventManager = eventManager
-      self.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
-      self.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
+      env.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)
 
 class PixelDelegate(QtGui.QItemDelegate):
     def __init__(self, parent=None):
