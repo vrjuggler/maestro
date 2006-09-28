@@ -22,8 +22,13 @@ import sys, os, os.path, time, traceback
 pj = os.path.join
 from PyQt4 import QtGui, QtCore
 
+
+import MaestroConstants
+MaestroConstants.EXEC_DIR = os.path.dirname(__file__)
+
 app = QtGui.QApplication(sys.argv)
 from util import qt4reactor
+from util import plugin
 qt4reactor.install(app)
 from twisted.internet import reactor
 
@@ -35,6 +40,8 @@ import util.EventManager
 import modules
 import LogWidget
 import LoginDialog
+
+import core
 
 import logging, socket, time
 
@@ -79,9 +86,6 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       self.mEventManager.connect("*", "launch.output", self.onOutput)
 
       self.reset()
-
-   def test(self):
-      print "TEST"
 
    def reset(self):
       for i in xrange(self.count()):
@@ -163,16 +167,29 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       QtGui.QMainWindow.__init__(self, parent)
       self.setupUi(self)
       self.mEnsemble = None
+      self.mActiveViewPlugins = {}
 
-   def init(self, clusterModel, eventManager, cfgFilePath):
+   def init(self, clusterModel, eventManager, pluginMgr, cfgFilePath):
       # Set the new cluster configuration
       self.mEnsemble = clusterModel
       self.mEventManager = eventManager
+      self.mPluginManager = pluginMgr
       self.mOutputTab.init(self.mEnsemble, self.mEventManager)
 
+      self.mViewPlugins = self.mPluginManager.getPlugins(plugInType=core.IViewPlugin, returnNameDict=True)
+      for name, cls in self.mViewPlugins.iteritems():
+         self.addView(name)
+
+      QtCore.QObject.connect(self.mToolboxButtonGroup,QtCore.SIGNAL("buttonClicked(int)"),self.mStack.setCurrentIndex)
+      # Set the default button to display
+      btn = self.mToolboxButtonGroup.buttons()[0]
+      btn.click()
+      self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
+
+
       # Initialize all loaded modules.
-      for module in self.mModulePanels:
-         module.init(self.mEnsemble, self.mEventManager)
+      for (view, view_widget) in self.mActiveViewPlugins.values():
+         view_widget.init(self.mEnsemble, self.mEventManager)
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
@@ -186,158 +203,60 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
-      self.mModulePanels = []
       self.mModuleButtons = []
-      self.buildGUI()
-
-   def reloadModules(self):
-      """ Reload the entire GUI and all class code for it (ie. modules). """
-      self.tearDownGUI()
-      #self.reloadGUIModules()
-      #self.buildGUI()
-
-   def reloadGUIModules(self):
-      """ Reload any GUI related modules. """
-      print "Reloading all GUI related modules:"
-      try:
-         reload(modules)
-      except Exception, ex:
-         print "Exception reloading gui modules:\n", ex
-
-   def tearDownGUI(self):
-      for f in self.mModulePanels:
-         self.mStack.removeWidget(f)
-         self.mStack.removeChild(f)
-      self.mModulePanels = []
-      for b in self.mModuleButtons:
-         self.mToolbox.removeChild(b)
-         self.mToolboxButtonGroup.removeButton(btn)
-      self.mModuleButtons = []
-      self.mToolbox.layout().removeItem(self.mToolboxSpacer)
-
-   def buildGUI (self):
-      self.scanAndLoadPlugins()         # Scan the set of plugins we have
-      self.loadModulePlugins()            # Find and load any view plugins
-      self.mToolboxSpacer = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
-      self.mToolbox.layout().addItem(self.mToolboxSpacer)
 
 
-   def scanAndLoadPlugins(self):
-      """ Scan for plugins in the sub-dirs.  Do initial import as well.
-          Recursively scans sub directories looking for "plugin" modules 
-         to add to the gui.
+   def addView(self, pluginTypeName):
+      """ Add a new view with the given plugin name.
+          If we fail, display the reason why so the user will know.
       """
-      def get_mods(mod_list, dirpath, namelist):
-         """ Given a dirpath and list of files in that directory, add all files
-             ending in .py to the existing mod_list. """
-         mod_list.extend( [pj(dirpath,n) for n in namelist if n.endswith('.py')])
-
-      # XXX: Need better way to find the plugins
-      print "Scanning for plugins..."
-      mod_list = []
-      base_plugin_dir = os.path.join(gui_base_dir,'modules')
-      if not os.path.isdir(base_plugin_dir):
-         print "Error: plugin dir does not exist: ", base_plugin_dir
+      # Try to get the plugin
+      vtype = self.mViewPlugins.get(pluginTypeName,None)
+      if not vtype:
+         warning_text = "Warning: could not find view plugin of name: %s"%pluginTypeName      
+         print warning_text
+         QtGui.QMessageBox.critical(self, "Plugin Failure", warning_text, 
+                                    QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
          return
+      view_name = vtype.getName()
+      
+      # Try to load the view
+      new_view = None
+      try:
+         print "Creating new view: %s %s"%(pluginTypeName, vtype.__name__)
+         new_view = vtype()
+         new_view_widget = new_view.getViewWidget()
 
-      os.path.walk(base_plugin_dir, get_mods, mod_list)
+         # Add the view widget to the GUI.
+         index = self.mStack.addWidget(new_view_widget)
 
-      mod_list = [x for x in mod_list if x.find("__init__") == -1]   # Remove __init__.py files
-      mod_list = [x.replace(gui_base_dir,"") for x in mod_list]      # Remove the gui base dir part: view/thing.py
-      mod_list = [x.replace(os.sep,".")[:-3] for x in mod_list]      # Replace / with .: .view.thing
-      mod_list = [x.lstrip('.') for x in mod_list]                   # strip off the last . : view.thing
+         btn = QtGui.QToolButton(self.mToolbox)
+         new_icon = QtGui.QIcon(":/Maestro/images/construction.png")
+         btn.setIcon(new_icon)
+         btn.setAutoRaise(1)
+         btn.setCheckable(True)
+         btn.setMinimumSize(QtCore.QSize(40,40))
+         btn.setIconSize(QtCore.QSize(40,40))
+         self.mToolbox.layout().addWidget(btn)
+         self.mToolboxButtonGroup.addButton(btn, index)
 
-      print "   found modules:"
-      for m in mod_list:
-         print " "*6, m,
-         try:
-            if not self.mPlugins.has_key(m):        # New module, so import
-               print "   importing...",
-               __import__(m)
-               new_mod = sys.modules[m]             # Must do this way to handle package.mod case correctly (???)
-               self.mPlugins[m] = (new_mod,None)
-            else:                                   # Existing module, so reload
-               print "   reloading...",
-               reload(self.mPlugins[m][0])
-            print " "*3, "[OK]"
-         except Exception, ex:
-            print " "*3, "[FAILED]"
-            if self.mPlugins.has_key(m):
-               del self.mPlugins[m]
-            print "Error loading module: [%s] deleting it."%(m,)
-            print "   exception:", ex
-            traceback.print_exc()
-
-   def loadModulePlugins(self):
-      # Find all the view plugin classes
-      self.mModulePanels = []
-      self.mModuleButtons = []
-      num = 0
-      for p in self.mPlugins.items():
-         mod_name = p[0]
-         mod = p[1][0]
-         if hasattr(mod,'getModuleInfo'):    # If it has view classes registered
-            mod_info = mod.getModuleInfo()
-            module_class = None
-            new_module = None
-            new_icon = None
-            try:
-               module_class = mod_info[0]
-               new_icon = mod_info[1]
-               size = QtCore.QSize()
-               if None == new_icon:
-                  new_icon = QtGui.QIcon(":/construction.png")
-               print "Opening view: ", module_class.__name__
-            
-               # Create module
-               new_module = module_class()
-
-               # Keep track of widgets to remove them later
-               self.mModulePanels.append(new_module)
-               #self.mStack.addWidget(new_module, num)
-               index = self.mStack.addWidget(new_module)
-
-               btn = QtGui.QToolButton(self.mToolbox)
-               btn.setIcon(new_icon)
-               btn.setAutoRaise(1)
-               btn.setCheckable(True)
-               btn.setMinimumSize(QtCore.QSize(40,40))
-               btn.setIconSize(QtCore.QSize(40,40))
-               self.mToolbox.layout().addWidget(btn)
-               self.mToolboxButtonGroup.addButton(btn, index)
-
-               #self.mToolbox.addWidget(btn)
-               #self.mToolbox.insert(btn, num)
-               num = num + 1
-
-               QtCore.QObject.connect(self.mToolboxButtonGroup,QtCore.SIGNAL("buttonClicked(int)"),self.mStack.setCurrentIndex)
-               #QtCore.QObject.connect(self.mToolboxButtonGroup,QtCore.SIGNAL("buttonClicked(int)"),self.test)
-               #self.connect(self.mToolbox,SIGNAL("clicked(int)"),self.test)
-
-
-               # Keep track of widgets to remove them later
-               self.mModuleButtons.append(btn)
-
-            except Exception, ex:
-               view_name = "Unknown"
-               if module_class:
-                  view_name = module_class.getName()
-               if new_module:
-                  #new_module.destroy()
-                  new_module = None
-               err_text = "Error loading view:" + view_name + "\n  exception:" + str(ex)
-               print err_text
-               traceback.print_exc()
-               #error_dialog = pyglui.dialogs.StdDialog("Exception: View Load Failed", err_text)         
-               #error_dialog.doModal()
-
-      # Set the default button to display
-      btn = self.mToolboxButtonGroup.buttons()[0]
-      btn.click()
-      self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
-
-   def test(self, e):
-      print e
+         # Keep track of widgets to remove them later
+         self.mActiveViewPlugins[pluginTypeName] = [new_view, new_view_widget]
+      except Exception, ex:
+         view_name = "Unknown"
+         if vtype:
+            view_name = vtype.getName()
+         if new_view and new_view.getViewWidget():
+            new_view.getViewWidget().destroy()
+            new_view = None
+         err_text = "Error loading view:" + view_name + "\n  exception:" + str(ex)
+         print err_text
+         traceback.print_exc()
+         
+         QtGui.QMessageBox.critical(self, "Plugin Failure", err_text, 
+                                    QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
 
    def __tr(self,s,c = None):
       return qApp.translate("MainWindow",s,c)
@@ -356,6 +275,12 @@ def main():
       logo_path = os.path.join(os.path.dirname(__file__), 'images', 'cpu_array.png')
       pixmap = QtGui.QPixmap(logo_path)
       splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
+
+      def cb(percent, msg):
+         print "[%s][%s]" % (percent, msg)
+
+      plugin_mgr = plugin.PluginManager()
+      plugin_mgr.scan("/home/aronb/Source/Infiscape/maestro/trunk/plugins", cb)
       #splash.show()
       #splash.showMessage("Establishing connections...")
 
@@ -414,7 +339,7 @@ def main():
 
       # Create and display GUI
       m = Maestro()
-      m.init(ensemble, event_manager, cfg_file_path)
+      m.init(ensemble, event_manager, plugin_mgr, cfg_file_path)
       m.show()
 #      splash.finish(m)
       reactor.run()

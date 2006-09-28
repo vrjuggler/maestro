@@ -113,7 +113,8 @@ class PluginManager(object):
                progressCB(i/num_modules, "Reloading: %s"%mod_name)
                reload(self.modules[mod_name][0])
             else:
-               assert not sys.modules.has_key(mod_name)
+               # It is possible that the module was imported from another plugin.
+               #assert not sys.modules.has_key(mod_name)
                progressCB(i/num_modules, "Importing: %s"%mod_name)            
                # For some reason this returns the package module in the case of pkg.mod
                # So, lookup out of sys.modules
