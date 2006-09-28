@@ -87,7 +87,7 @@ class Ui_RebootViewerBase(object):
 
    def retranslateUi(self, RebootViewerBase):
       RebootViewerBase.setWindowTitle(QtGui.QApplication.translate("RebootViewerBase", "Reboot Cluster", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:12pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Reboot Cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTitleLbl.setText(QtGui.QApplication.translate("RebootViewerBase", "Reboot Cluster", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootClusterLbl.setText(QtGui.QApplication.translate("RebootViewerBase", "Set Cluster Boot Target:", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectWinBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectLinuxBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
