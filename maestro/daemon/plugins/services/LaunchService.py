@@ -34,6 +34,7 @@ class LaunchService(maestro.core.IServicePlugin):
    def registerCallbacks(self):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
+      env.mEventManager.timers().createTimer(self.update, 0)
 
    def update(self):
       try:

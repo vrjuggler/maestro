@@ -33,7 +33,7 @@ from twisted.internet import reactor
 import maestro.core
 const = maestro.core.const
 const.EXEC_DIR = os.path.dirname(__file__)
-
+const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'plugins')
 import maestro.Maestro
 import maestro.guiprefs
 from maestro.core import Ensemble

@@ -44,6 +44,7 @@ class ProcessManagementService(maestro.core.IServicePlugin):
           @param avatar: System avatar that represents the remote user.
       """
       procs = self._getProcs()
+      env = maestro.core.Environment()
       env.mEventManager.emit(nodeId, "process.procs", (procs,))
 
    def onTerminateProc(self, nodeId, avatar, pid):

@@ -24,7 +24,7 @@ import maestro.core
 const = maestro.core.const
 
 const.EXEC_DIR = os.path.dirname(__file__)
-const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'plugins', 'services')
+const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'daemon', 'plugins')
 
 import maestro
 import maestro.core
@@ -70,7 +70,6 @@ class MaestroServer:
    def __init__(self):
       self.mLogger = logging.getLogger('maestrod.MaestroServer')
       ip_address = socket.gethostbyname(socket.gethostname())
-      self.mEventManager = maestro.core.EventManager.EventManager(ip_address)
       self.mServices = {}
 
       server_settings = ServerSettings()
@@ -117,7 +116,8 @@ class MaestroServer:
 
    def update(self):
       """ Give the event manager time to handle it's timers. """
-      self.mEventManager.update()
+      env = maestro.core.Environment()
+      env.mEventManager.update()
 
 if os.name == 'nt':
    class vrjclusterserver(win32serviceutil.ServiceFramework):
@@ -172,13 +172,12 @@ if os.name == 'nt':
                                (self._svc_display_name_, 'error' + str(ex)))
 
 class UserPerspective(pb.Avatar):
-   def __init__(self, eventMgr, avatarId):
+   def __init__(self, avatarId):
       """ Constructs a UserPerspective used to access the event manager.
           @param eventMgr: A reference to the event manager to use.
           @param avatarId: Handle to the user's authentication.
           @note avatarId is a username on UNIX and a handle on win32.
       """
-      self.mEventManager = eventMgr
       self.mAvatarId = avatarId
       self.mCredentials = {}
       self.mUserHandle = None
@@ -187,10 +186,12 @@ class UserPerspective(pb.Avatar):
       self.mDesktop    = None
 
    def perspective_registerCallback(self, nodeId, obj):
-      self.mEventManager.remote_registerCallback(nodeId, obj)
+      env = maestro.core.Environment()
+      env.mEventManager.remote_registerCallback(nodeId, obj)
 
    def perspective_emit(self, nodeId, sigName, argsTuple=()):
-      self.mEventManager.remote_emit(nodeId, sigName, (self,) + argsTuple)
+      env = maestro.core.Environment()
+      env.mEventManager.remote_emit(nodeId, sigName, (self,) + argsTuple)
 
    def setCredentials(self, creds):
       self.mCredentials = creds
@@ -259,13 +260,14 @@ class UserPerspective(pb.Avatar):
 
       logger = logging.getLogger('maestrod.UserPerspective')
       logger.info("Logging out client: " + str(nodeId))
-      self.mEventManager.unregisterProxy(nodeId)
+      env = maestro.core.Environment()
+      env.mEventManager.unregisterProxy(nodeId)
 
 class TestRealm(object):
    implements(portal.IRealm)
 
-   def __init__(self, eventMgr):
-      self.mEventManager = eventMgr
+   def __init__(self):
+      pass
 
    def requestAvatar(self, avatarId, mind, *interfaces):
       """ mind is nodeId
@@ -273,7 +275,7 @@ class TestRealm(object):
       if not pb.IPerspective in interfaces:
          raise NotImplementedError, "No supported avatar interface."
       else:
-         avatar = UserPerspective(self.mEventManager, avatarId)
+         avatar = UserPerspective(avatarId)
          return pb.IPerspective, avatar, lambda nodeId=mind: avatar.logout(nodeId)
 
 def RunServer(installSH=True):
@@ -292,7 +294,7 @@ def RunServer(installSH=True):
       from twisted.internet import task
 
       #reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
-      p = portal.Portal(TestRealm(cluster_server.mEventManager))
+      p = portal.Portal(TestRealm())
       pb_portal = pboverssl.PortalRoot(p)
       #factory = pb.PBServerFactory(p)
       factory = pboverssl.PBServerFactory(pb_portal)
