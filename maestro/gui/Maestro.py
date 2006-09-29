@@ -316,7 +316,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mModuleButtons = []
 
    def onExit(self):
-      QApplication.exit(0)
+      self.close()
+      QtGui.QApplication.exit(0)
 
    def addView(self, pluginTypeName):
       """ Add a new view with the given plugin name.
@@ -374,6 +375,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       return qApp.translate("MainWindow",s,c)
 
    def closeEvent(self, event):
+      print "Closing"
       self.mFileLogger.close()
       env = maestro.core.Environment()
       clean = True
