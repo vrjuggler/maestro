@@ -1,10 +1,24 @@
-# -*- coding: utf-8 -*-
+#!/bin/env python
 
-# Form implementation generated from reading ui file 'maestro/plugins/views/reboot/RebootViewerBase.ui'
+# Maestro is Copyright (C) 2006 by Infiscape
 #
-#      by: PyQt4 UI code generator 4-snapshot-20060828
+# Original Author: Aron Bierbaum
 #
-# WARNING! All changes made in this file will be lost!
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -72,6 +86,12 @@ class Ui_RebootViewerBase(object):
       self.hboxlayout1.setSpacing(6)
       self.hboxlayout1.setObjectName("hboxlayout1")
 
+      self.mRefreshBtn = QtGui.QToolButton(RebootViewerBase)
+      self.mRefreshBtn.setIcon(QtGui.QIcon(":/Maestro/images/reload.png"))
+      self.mRefreshBtn.setIconSize(QtCore.QSize(24,24))
+      self.mRefreshBtn.setObjectName("mRefreshBtn")
+      self.hboxlayout1.addWidget(self.mRefreshBtn)
+
       spacerItem1 = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
       self.hboxlayout1.addItem(spacerItem1)
 
@@ -91,6 +111,7 @@ class Ui_RebootViewerBase(object):
       self.mRebootClusterLbl.setText(QtGui.QApplication.translate("RebootViewerBase", "Set Cluster Boot Target:", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectWinBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectLinuxBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRefreshBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Reboot Entire Cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
 

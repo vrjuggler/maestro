@@ -328,9 +328,5 @@
   <tabstop>mIpAddressEdit</tabstop>
   <tabstop>mCurrentOsEdit</tabstop>
  </tabstops>
- <resources>
-  <include location="../ClusterControlResource.qrc" />
-  <include location="EnsembleViewResource.qrc" />
- </resources>
  <connections/>
 </ui>
