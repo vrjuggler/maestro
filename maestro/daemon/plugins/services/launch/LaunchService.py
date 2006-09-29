@@ -22,7 +22,7 @@ import sys, os
 import os.path
 
 import maestro.core
-import maestro.util.process
+import process
 import logging
 
 class LaunchService(maestro.core.IServicePlugin):
@@ -114,7 +114,8 @@ class LaunchService(maestro.core.IServicePlugin):
             if sys.platform.startswith("win"):
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 
-            self.mProcess = maestro.util.process.ProcessOpen(cmd=command, cwd=cwd, env=envMap, avatar = avatar)
+            self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
+                                                env = envMap, avatar = avatar)
             return True
       except KeyError, ex:
          #traceback.print_stack()
@@ -136,8 +137,8 @@ class LaunchService(maestro.core.IServicePlugin):
             timeout = os.WNOHANG
          if self.mProcess is not None:
             self.mProcess.wait(timeout)
-      except maestro.util.process.ProcessError, ex:
-         if ex.errno == maestro.util.process.ProcessProxy.WAIT_TIMEOUT:
+      except process.ProcessError, ex:
+         if ex.errno == process.ProcessProxy.WAIT_TIMEOUT:
             return True
          else:
             raise

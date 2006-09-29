@@ -20,7 +20,7 @@ import sys, os, platform
 
 import maestro.core
 const = maestro.core.const
-from maestro.util import grubconfig
+import grubconfig
 import re
 
 def grubIdToMaestroId(id):

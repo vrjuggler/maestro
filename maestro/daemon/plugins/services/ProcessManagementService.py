@@ -27,7 +27,7 @@ class ProcessManagementService(maestro.core.IServicePlugin):
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
       if "win32" == sys.platform:
-         from maestro.util import wmi
+         from maestro.daemon import wmi
          self.mWMIConnection = wmi.WMI()
       else:
          pass

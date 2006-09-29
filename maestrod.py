@@ -49,7 +49,7 @@ from elementtree.ElementTree import parse
 if os.name == 'nt':
    import win32api, win32event, win32serviceutil, win32service, win32security
    import ntsecuritycon, win32con
-   import maestro.util.windesktop as windesktop
+   import maestro.daemon.windesktop as windesktop
 
 if os.name == 'nt':
     def AdjustPrivilege(priv, enable):
