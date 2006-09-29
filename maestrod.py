@@ -381,9 +381,17 @@ def daemonize (stdin='/dev/null', stdout='/dev/null', stderr=None, pidfile=None)
 
 if __name__ == '__main__':
    # Set up logging to sys.stderr.
-   logging.basicConfig(level = logging.DEBUG,
-                       format = '%(name)-12s %(levelname)-8s %(message)s',
-                       datefmt = '%m-%d %H:%M')
+   fmt_str  = '%(name)-12s %(levelname)-8s %(message)s'
+   date_fmt = '%m-%d %H:%M'
+   if sys.version_info[0] == 2 and sys.version_info[1] < 4:
+      handler = logging.StreamHandler()
+      handler.setFormatter(logging.Formatter(fmt_str, date_fmt))
+      logger = logging.getLogger('')
+      logger.setLevel(logging.DEBUG)
+      logger.addHandler(handler)
+   else:
+      logging.basicConfig(level = logging.DEBUG, format = fmt_str,
+                          datefmt = date_fmt)
 
    if '-debug' in sys.argv:
       # For debugging, it is handy to be able to run the servers

@@ -15,14 +15,14 @@ class IViewPlugin(maestro.util.plugin.Plugin):
    def __init__(self):
       pass
    
-   @staticmethod
    def getName():
       not_implemented()
+   getName = staticmethod(getName)
 
-   @staticmethod
    def getIcon():
       not_implemented()
-   
+   getIcon = staticmethod(getIcon)
+
    def getViewWidget(self):
       not_implemented()
 
@@ -40,13 +40,13 @@ class IBootPlugin(maestro.util.plugin.Plugin):
    def __init__(self):
       pass
    
-   @staticmethod
    def getName():
       not_implemented()
+   getName = staticmethod(getName)
 
-   @staticmethod
    def getIcon():
       not_implemented()
+   getIcon = staticmethod(getIcon)
    
    def getViewWidget(self):
       not_implemented()
