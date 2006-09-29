@@ -58,7 +58,7 @@ def main():
                        format = '%(name)-12s %(levelname)-8s %(message)s',
                        datefmt = '%m-%d %H:%M')
    try:
-      logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'images', 'cpu_array.png')
+      logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'images', 'cpu_array.png')
 
       # --- Bootstrap the environment --- #
       splash_map = QtGui.QPixmap(logo_path)
@@ -114,7 +114,7 @@ def main():
       def splashProgressCB(percent, message):
          splash.showMessage("%3.0f%% %s"%(percent*100,message))
          app.processEvents()   
-         time.sleep(0.1)
+         time.sleep(0.03)
 
       env = maestro.core.Environment()
       env.initialize(gui_settings, splashProgressCB)
