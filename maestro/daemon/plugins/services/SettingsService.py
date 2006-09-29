@@ -39,7 +39,7 @@ class SettingsService(maestro.core.IServicePlugin):
       maestro.core.IServicePlugin.__init__(self)
       self.mQueue = Queue()
       if os.name == 'nt':
-         import wmi
+         import maestro.daemon.wmi as wmi
          self.mWMIConnection = wmi.WMI()
 
    def registerCallbacks(self):
