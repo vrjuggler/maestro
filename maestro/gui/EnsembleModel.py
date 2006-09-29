@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 import maestro.core
 const = maestro.core.const
 
-import Ensemble
+from maestro.core import Ensemble
 
 class EnsembleModel(QtCore.QAbstractListModel):
    def __init__(self, ensemble, parent=None):
