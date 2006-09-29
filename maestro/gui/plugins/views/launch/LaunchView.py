@@ -156,7 +156,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          self.mAppComboBox.setCurrentIndex(0)
          self._setApplication(0)
       else:
-         print "ERROR: No applications defined!"
+         QtGui.QMessageBox.critical(self.parentWidget(), "Fatal Error",
+                                    "No applications defined!")
          QApplication.exit(0)
 
    def _setApplication(self, index):
@@ -201,7 +202,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
          command = ""
          if len(option_visitor.mCommands) == 0:
-            print "ERROR: No command for node [%s]." % node.getName()
+            QtGui.QMessageBox.warning(self.parentWidget(), "Cannot Execute",
+                                      "No command for node %s" % node.getName())
             continue
          elif len(option_visitor.mCommands) > 1:
             print "ERROR: More than one command for node [%s], using first command." % node.getName()
@@ -211,7 +213,9 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
          cwd = ""
          if len(option_visitor.mCommands) == 0:
-            print "WARNING: No working directory  for node [%s]." % node.getName()
+            QtGui.QMessageBox.warning(self.parentWidget(),
+                                      "Working Directory Missing",
+                                      "No working directory for node %s" % node.getName())
          elif len(option_visitor.mCommands) > 1:
             print "ERROR: More than one working directory for node [%s], using first." % node.getName()
             cwd = option_visitor.mCwds[0]
@@ -401,10 +405,10 @@ class ChoiceSheetCB(Sheet):
          self.mChoice.setCurrentIndex(selected_index)
          self._setChoice(selected_index)
       else:
-         print "ERROR: No choices defined!"
+         QtGui.QMessageBox.critical(self.parentWidget(), "Fatal Error",
+                                    "No choices defined!")
          QApplication.exit(0)
 
-   
    def choiceSelected(self):
      self._setChoice(self.mChoice.currentIndex())
 
