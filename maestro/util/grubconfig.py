@@ -13,13 +13,13 @@ class GrubBootTarget:
    # additional text.
    #
    # Groups:
-   #    1 - full kernel path (/boot/vmlinuz-...)
+   #    1 - full kernel path (/boot/vmlinuz-... or /vmlinuz-...)
    #    2 - kernel version with RPM revision (2.x.y-...)
    #    3 - kernel version (2.x.y)
    #    4 - RPM revision
    #    5 - additional package text (may be nothing)
    #    6 - kernel boot options
-   sLinuxKernelBootRe = re.compile(r'kernel\s+(/boot/vmlinuz-((\d+\.\d+\.\d+)-(\d+\.\d+|\d+)(\S*)))\s+(.*)\s*$')
+   sLinuxKernelBootRe = re.compile(r'kernel\s+(/(boot/|)vmlinuz-((\d+\.\d+\.\d+)-([\d.]+)\.(\S*)))\s+(.*)\s*$')
 
    # This matches the target typically used for booting FreeBSD from GRUB.
    #
