@@ -101,7 +101,6 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
 
 
    def onOutput(self, nodeId, output):
-      print "[%s]: %s" % (nodeId, output)
       try:
          textedit = self.mEditMap[nodeId]
          textedit.append(output)
@@ -157,17 +156,131 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       #self.mEditMap[ip_address] = textedit
       self.mEditMap[ip_address] = log_widget
 
+class NodeLogger:
+   def __init__(self):
+      self.mLoggers = {}
+
+   def init(self, ensemble):
+      self.mLoggers = {}
+      for e in ensemble.mNodes:
+         self.addLogger(e)
+
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "launch.output", self.onAppOutput)
+
+   def setLevel(self, level):
+      for k, v in self.mLoggers:
+         v.setLevel(level)
+
+   def onAppOutput(self, nodeId, output):
+      print nodeId
+      if not self.mLoggers.has_key(nodeId):
+         self.addLogger(nodeId)
+
+      self.mLoggers[nodeId].debug(output)
+
+   def addLogger(self, nodeId):
+      assert "Not implemented"
+
+class OutputFileLogger(NodeLogger):
+   '''
+   This class adds a logger for each node in the ensemble that writes to
+   a log file named based on the node name. The log file will be stored in
+   the user's home directory unless the GUI preferences include a setting
+   for the 'logdir' property.
+   '''
+
+   def __init__(self, level):
+      NodeLogger.__init__(self)
+      self.mLevel = level
+      self.mFiles = []
+      self.mHandlers = {}
+
+   def close(self):
+      for key in self.mHandlers.keys():
+         handler = self.mHandlers[key]
+         handler.close()
+         self.mLoggers[key].removeHandler(handler)
+      self.mHandlers = None
+      self.mLoggers  = None
+
+   def getLogFiles(self):
+      return self.mFiles
+
+   def addLogger(self, nodeId):
+      env = maestro.core.Environment()
+      if env.settings.has_key('logdir'):
+         logdir = env.settings['logdir']
+      else:
+         if os.environ.has_key('HOME'):
+            logdir = os.environ['HOME']
+         elif os.environ.has_key('HOMESHARE'):
+            logdir = os.environ['HOMESHARE']
+         elif os.environ.has_key('HOMEDRIVE'):
+            logdir = '%s%s' % (os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
+         elif os.environ.has_key('APPDATA'):
+            logdir = os.path.join(os.environ['APPDATA'], 'Maestro')
+
+      file_name = os.path.join(logdir, '%s.log' % nodeId)
+
+      try:
+         handler = logging.FileHandler(file_name, 'w')
+#         formatter = logging.Formatter('%(levelname)-8s %(message)s')
+         formatter = logging.Formatter('%(message)s')
+         handler.setFormatter(formatter)
+
+         logger = logging.getLogger('node.%s' % nodeId)
+         logger.addHandler(handler)
+         logger.setLevel(self.mLevel)
+
+         self.mHandlers[nodeId] = handler
+         self.mLoggers[nodeId] = logger
+         self.mFiles.append(file_name)
+      except:
+         print sys.exc_info()
+
+# NOTE: Given that __main__ sets up a default StreamHandler for everything
+# when this code is launched, this class is not necessarily useful.
+class ConsoleLogger(NodeLogger):
+   '''
+   This class adds a logger for each node in the ensemble that writes to
+   sys.stdout.
+   '''
+
+   def __init__(self, level):
+      NodeLogger.__init__(self)
+      self.mLevel = level
+
+   def addLogger(self, nodeId):
+      assert False
+      handler = logging.StreamHandler(sys.stdout)
+      formatter = logging.Formatter('%(name)-12s %(levelname)-8s %(message)s',
+                                    '%m-%d %H:%M')
+      handler.setFormatter(formatter)
+      logger = logging.getLogger('node.%s' % nodeId)
+      logger.addHandler(handler)
+      logger.setLevel(self.mLevel)
+      self.mLoggers[nodeId] = logger
+
 class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def __init__(self, parent = None):
       QtGui.QMainWindow.__init__(self, parent)
       self.setupUi(self)
       self.mEnsemble = None
       self.mActiveViewPlugins = {}
+      self.mLoggers = []
 
    def init(self, clusterModel):
       # Set the new cluster configuration
       self.mEnsemble = clusterModel
       self.mOutputTab.init(self.mEnsemble)
+
+      self.mFileLogger = OutputFileLogger(logging.DEBUG)
+      self.mFileLogger.init(self.mEnsemble)
+
+#      console_logger = ConsoleLogger(logging.DEBUG)
+#      console_logger.init(self.mEnsemble)
+#      self.mLoggers.append(console_logger)
 
       env = maestro.core.Environment()
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
@@ -191,7 +304,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mToolboxButtonGroup = QtGui.QButtonGroup()
       widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mStatusWindow)
       self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
-      
+
+      self.connect(self.action_Exit, QtCore.SIGNAL("triggered()"),
+                   self.onExit)
+
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout3.addWidget(self.mOutputTab)
 
@@ -199,6 +315,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
       self.mModuleButtons = []
 
+   def onExit(self):
+      QApplication.exit(0)
 
    def addView(self, pluginTypeName):
       """ Add a new view with the given plugin name.
@@ -254,6 +372,24 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def __tr(self,s,c = None):
       return qApp.translate("MainWindow",s,c)
+
+   def closeEvent(self, event):
+      self.mFileLogger.close()
+      env = maestro.core.Environment()
+      clean = True
+
+      if env.settings.has_key('clean_logfiles'):
+         cleanup_str = env.settings['clean_logfiles'].lower()
+         if cleanup_str == 'true' or cleanup_str == '1':
+            clean = True
+         else:
+            clean = False
+
+      if clean:
+         for f in self.mFileLogger.getLogFiles():
+            os.remove(f)
+
+      QtGui.QMainWindow.closeEvent(self, event)
 
    #def onDebugOutput(self, message):
    #   #self.mTextEdit.append(str(message))
