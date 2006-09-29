@@ -2,4 +2,6 @@
 <maestrod version="1">
    <boot_loader>GRUB</boot_loader>
    <grub_conf>/boot/grub/grub.conf</grub_conf>
+   <xauth_cmd>/usr/X11R6/bin/xauth</xauth_cmd>
+   <xauthority_file>/var/gdm/:0.Xauth</xauthority_file>
 </maestrod>

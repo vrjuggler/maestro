@@ -113,6 +113,11 @@ class LaunchService(maestro.core.IServicePlugin):
 #            self.mLogger.debug(envMap)
             if sys.platform.startswith("win"):
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+            # XXX: We should not assume that a non-Windows platform is running
+            # the X Window System.
+            else:
+               envMap['DISPLAY']    = os.environ['DISPLAY']
+               envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
 
             self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
                                                 env = envMap, avatar = avatar)

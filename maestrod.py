@@ -50,6 +50,10 @@ if os.name == 'nt':
    import win32api, win32event, win32serviceutil, win32service, win32security
    import ntsecuritycon, win32con
    import maestro.daemon.windesktop as windesktop
+# XXX: We should not assume that a non-Windows platform is running the
+# X Window System.
+else:
+   import maestro.daemon.x11desktop as x11desktop
 
 if os.name == 'nt':
     def AdjustPrivilege(priv, enable):
@@ -243,6 +247,19 @@ class UserPerspective(pb.Avatar):
          self.mUserSID = user_sid
          self.mWinsta  = new_winsta
          self.mDesktop = desktop
+      # XXX: We should not assume that a non-Windows platform is running the
+      # X Window System.
+      else:
+         import socket
+
+         env = maestro.core.Environment()
+         user_name = creds['username']
+         display_name = x11desktop.addAuthority(user_name,
+                                                env.settings['xauth_cmd'],
+                                                env.settings['xauthority_file'])
+         os.environ['DISPLAY'] = display_name
+         os.environ['USER_XAUTHORITY'] = x11desktop.getUserXauthFile(user_name)
+         self.mDisplayName = display_name
 
    def getCredentials(self):
       return self.mCredentials
@@ -257,6 +274,16 @@ class UserPerspective(pb.Avatar):
 
          self.mUserSID = None
          self.mUserHandle.Close()
+      # XXX: We should not assume that a non-Windows platform is running the
+      # X Window System.
+      else:
+         env = maestro.core.Environment()
+         x11desktop.removeAuthority(self.mCredentials['username'],
+                                    env.settings['xauth_cmd'],
+                                    self.mDisplayName)
+         self.mDisplayName = None
+         del os.environ['DISPLAY']
+         del os.environ['USER_XAUTHORITY']
 
       logger = logging.getLogger('maestrod.UserPerspective')
       logger.info("Logging out client: " + str(nodeId))
