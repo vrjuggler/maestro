@@ -90,8 +90,9 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mSetAllTargetsToLinuxAction = QtGui.QAction(Icons[const.LINUX], self.tr("Linux"), self)
       self.connect(self.mSetAllTargetsToLinuxAction, QtCore.SIGNAL("triggered()"), self.onSetAllTargetsToLinux)
 
-      # Load a reboot icon
+      # Load a reboot/reload icon
       reboot_icon = QtGui.QIcon(":/Maestro/images/reboot.png")
+      reload_icon = QtGui.QIcon(":/Maestro/images/reload.png")
 
       # Create action to reboot the selected node.
       self.mRebootNodeAction = QtGui.QAction(reboot_icon, self.tr("Reboot Node"), self)
@@ -101,10 +102,15 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mRebootClusterAction = QtGui.QAction(reboot_icon, self.tr("Reboot Entire Cluster"), self)
       self.connect(self.mRebootClusterAction, QtCore.SIGNAL("triggered()"), self.onRebootCluster)
 
+      # Create action to refresh targets for all nodes.
+      self.mRefreshAction = QtGui.QAction(reload_icon, self.tr("Refresh Boot Targetsr"), self)
+      self.connect(self.mRefreshAction, QtCore.SIGNAL("triggered()"), self.onRefresh)
+
       # Set the default action for the target selection buttons.
       self.mSelectWinBtn.setDefaultAction(self.mSetAllTargetsToWindowsAction)
       self.mSelectLinuxBtn.setDefaultAction(self.mSetAllTargetsToLinuxAction)
       self.mRebootBtn.setDefaultAction(self.mRebootClusterAction)
+      self.mRefreshBtn.setDefaultAction(self.mRefreshAction)
    
    def init(self, ensemble):
       """ Configure the user interface.
@@ -181,6 +187,11 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          return None
       node = index.model().data(index, QtCore.Qt.UserRole)
       return node
+
+   def onRefresh(self):
+      """ Slot that reboots the entire cluster. """
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "reboot.get_targets", ())
 
    def onRebootNode(self):
       """ Slot that reboots the selected cluster. """
