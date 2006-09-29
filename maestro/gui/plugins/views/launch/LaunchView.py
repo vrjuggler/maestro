@@ -23,9 +23,10 @@ import elementtree.ElementTree as ET
 
 import maestro.core
 const = maestro.core.const
-from maestro.core import StanzaModel
 from maestro.core import Stanza
 import maestro.core.environment as env
+
+from maestro.gui import StanzaModel
 
 import os.path
 pj = os.path.join

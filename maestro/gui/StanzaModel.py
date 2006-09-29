@@ -20,7 +20,7 @@
 import elementtree.ElementTree as ET
 from PyQt4 import QtCore
 
-import Stanza
+from maestro.core import Stanza
 
 class StanzaAdapter:
    def __init__(self, obj):

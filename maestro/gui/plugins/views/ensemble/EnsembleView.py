@@ -22,7 +22,7 @@ import EnsembleViewBase
 import maestro.core
 const = maestro.core.const
 from maestro.core import Ensemble
-from maestro.core import EnsembleModel
+from maestro.gui import EnsembleModel
 
 class EnsembleViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
