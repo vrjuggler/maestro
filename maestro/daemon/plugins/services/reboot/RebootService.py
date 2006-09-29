@@ -19,6 +19,7 @@
 import sys, os, platform
 
 import maestro.core
+Env = maestro.core.Environment
 import maestro.core.EventManager
 import re
 import logging
@@ -61,22 +62,24 @@ class RebootService(maestro.core.IServicePlugin):
       self.mBootPlugin = None
 
    def registerCallbacks(self):
-      env = maestro.core.Environment()
+      env = Env()
       # Find out which boot loader we are using. If none is set, assume that
       # we are using GRUB.
       boot_loader = env.settings.get('boot_loader', 'GRUB')
       self.mLogger.debug("RebootService.registerCallbacks boot_loader: %s" % boot_loader)
 
-      # If GRUB is our boot loader, then we need to get the GRUB configuration
-      # loaded for later manipulations.
-      if boot_loader == 'GRUB' and env.settings.has_key('grub_conf'):
-         self.mLogger.debug("RebootService using GRUB")
-         import grub_plugin
-         self.mBootPlugin = grub_plugin.GrubPlugin()
-      elif boot_loader == 'ntldr':
-         self.mLogger.debug("RebootService using ntloader")
-         import ntloader_plugin
-         self.mBootPlugin = ntloader_plugin.NtLoaderPlugin()
+
+      boot_plugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IBootPlugin,
+         returnNameDict=False)
+
+      for bpc in boot_plugins:
+         name = bpc.getName()
+         if name.lower() == boot_loader.lower():
+            self.mBootPlugin = bpc()
+            break
+
+      if self.mBootPlugin is not None:
+         self.mLogger.debug("Using boot plugin: %s", self.mBootPlugin.getName())
 
       env.mEventManager.connect("*", "reboot.get_targets", self.onGetTargets)
       env.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)
@@ -93,7 +96,9 @@ class RebootService(maestro.core.IServicePlugin):
       if self.mBootPlugin is None:
          return []
 
-      tuple = self.mBootPlugin.getTargetsAndDefaultIndex()
+      targets = self.mBootPlugin.getTargets()
+      default = self.mBootPlugin.getDefault()
+      tuple = (targets, default)
       env = maestro.core.Environment()
       env.mEventManager.emit(nodeId, "reboot.report_targets", tuple)
 
@@ -108,14 +113,14 @@ class RebootService(maestro.core.IServicePlugin):
       if self.mBootPlugin is None:
          return
 
-      if self.mBootPlugin.setDefaultTarget(index, title):
+      if self.mBootPlugin.setDefault(index, title):
          self.onGetTargets("*", avatar)
 
    def onSwitchBootPlatform(self, nodeId, avatar, targetOs):
       if self.mBootPlugin is None:
          return
 
-      if self.mBootPlugin.switchBootPlatform(targetOs):
+      if self.mBootPlugin.switchPlatform(targetOs):
          self.onGetTargets("*", avatar)
 
    def onReboot(self, nodeId, avatar):

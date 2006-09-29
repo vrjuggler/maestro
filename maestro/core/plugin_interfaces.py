@@ -43,10 +43,17 @@ class IBootPlugin(maestro.util.plugin.Plugin):
    def getName():
       not_implemented()
    getName = staticmethod(getName)
-
-   def getIcon():
-      not_implemented()
-   getIcon = staticmethod(getIcon)
    
-   def getViewWidget(self):
+   def getTargets(self):
       not_implemented()
+   getTargets = staticmethod(getTargets)
+
+   def getDefault(self):
+      not_implemented()
+
+   def setDefault(self, index, title):
+      not_implemented()
+
+   def switchPlatform(self, targetOs):
+      not_implemented()
+

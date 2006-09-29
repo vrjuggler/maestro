@@ -85,11 +85,12 @@ def makeLinuxDefault(grubConf):
    else:
       print "WARNING: Could not find appropriate Linux target to be default"
 
-class GrubPlugin:
+class GrubPlugin(maestro.core.IBootPlugin):
    """ Reboot service that allows remote Maestro connections to change the
        default boot target and reboot the machine.
    """
    def __init__(self):
+      maestro.core.IBootPlugin.__init__(self)
       env = maestro.core.Environment()
       self.mGrubConfig = None
       if env.settings.has_key('grub_conf'):
@@ -97,7 +98,11 @@ class GrubPlugin:
          if os.path.exists(grub_path) and os.path.isfile(grub_path):
             self.mGrubConfig = grubconfig.GrubConfig(grub_path)
 
-   def getTargetsAndDefaultIndex(self):
+   def getName():
+      return "GRUB"
+   getName = staticmethod(getName)
+
+   def getTargets(self):
       """ Slot that returns a process list to the calling maestro client.
 
           @param nodeId: IP address of maestro client that sent event.
@@ -114,10 +119,12 @@ class GrubPlugin:
          index = t.mIndex
          targets.append((title, os, index))
 
-      default_index = self.mGrubConfig.getDefault()
-      return (targets, default_index)
+      return targets
 
-   def setDefaultTarget(self, index, title):
+   def getDefault(self):
+      return self.mGrubConfig.getDefault()
+
+   def setDefault(self, index, title):
       """ Slot that sets the default target OS for reboot.
 
           @param nodeId: IP address of maestro client that sent event.
@@ -147,7 +154,7 @@ class GrubPlugin:
          return True
       return False
 
-   def switchBootPlatform(self, targetOs):
+   def switchPlatform(self, targetOs):
       def matchLinuxTarget(target):
          return target.isLinux()
 

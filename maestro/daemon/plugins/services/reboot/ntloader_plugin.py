@@ -32,15 +32,20 @@ sWindowsRe = re.compile(r'Windows', re.IGNORECASE)
 def isWindows(title):
    return (title.count("Windows") > 0 or title.count("windows") > 0)
 
-class NtLoaderPlugin:
+class NtLoaderPlugin(maestro.core.IBootPlugin):
    """ Reboot service that allows remote Maestro connections to change the
        default boot target and reboot the machine.
    """
    def __init__(self):
+      maestro.core.IBootPlugin.__init__(self)
       if wmi is not None:
          self.mWMIConnection = wmi.WMI()
 
-   def getTargetsAndDefaultIndex(self):
+   def getName():
+      return "ntldr"
+   getName = staticmethod(getName)
+
+   def getTargets(self):
       """ Slot that returns a process list to the calling maestro client.
 
           @param nodeId: IP address of maestro client that sent event.
@@ -59,10 +64,13 @@ class NtLoaderPlugin:
             target = (title, const.LINUX, i)
          targets.append(target)
 
-      default_index = computer.SystemStartupSetting
-      return (targets, default_index)
+      return targets
 
-   def setDefaultTarget(self, index, title):
+   def getDefault(self):
+      computer = self.mWMIConnection.Win32_ComputerSystem()[0]
+      return computer.SystemStartupSetting
+
+   def setDefault(self, index, title):
       """ Slot that sets the default target OS for reboot.
 
           @param nodeId: IP address of maestro client that sent event.
@@ -83,5 +91,14 @@ class NtLoaderPlugin:
 
       return False
 
-   def switchBootPlatform(self, targetOs):
-      return True
+   def switchPlatform(self, targetOs):
+      targets = self.getTargets()
+      for target in targets:
+         (title, os, index) = target
+         if targetOs == const.WINXP and os == const.WINXP:
+            self.setDefault(index, title)
+            return True
+         if targetOs == const.LINUX and os == const.LINUX:
+            self.setDefault(index, title)
+            return True
+      return False
