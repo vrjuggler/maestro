@@ -4,6 +4,10 @@ import os, sys, traceback
 pj = os.path.join
 import reloader
 
+if sys.version_info[0] == 2 and sys.version_info[1] < 4:
+   import sets
+   set = sets.Set
+
 
 class Plugin(reloader.AutoReloader):
    """ Base class for all plugins.
