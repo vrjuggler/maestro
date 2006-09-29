@@ -21,6 +21,7 @@ import sys, os, platform
 import maestro.core
 import maestro.core.EventManager
 import re
+import logging
 
 if "win32" == sys.platform:
    import win32api
@@ -56,6 +57,7 @@ class RebootService(maestro.core.IServicePlugin):
    """
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
+      self.mLogger = logging.getLogger('maestrod.MaestroServer')
       self.mBootPlugin = None
 
    def registerCallbacks(self):
@@ -63,13 +65,16 @@ class RebootService(maestro.core.IServicePlugin):
       # Find out which boot loader we are using. If none is set, assume that
       # we are using GRUB.
       boot_loader = env.settings.get('boot_loader', 'GRUB')
+      self.mLogger.debug("RebootService.registerCallbacks boot_loader: %s" % boot_loader)
 
       # If GRUB is our boot loader, then we need to get the GRUB configuration
       # loaded for later manipulations.
       if boot_loader == 'GRUB' and env.settings.has_key('grub_conf'):
+         self.mLogger.debug("RebootService using GRUB")
          import grub_plugin
          self.mBootPlugin = grub_plugin.GrubPlugin()
       elif boot_loader == 'ntldr':
+         self.mLogger.debug("RebootService using ntloader")
          import ntloader_plugin
          self.mBootPlugin = ntloader_plugin.NtLoaderPlugin()
 
