@@ -23,8 +23,6 @@ pj = os.path.join
 from PyQt4 import QtGui, QtCore
 app = QtGui.QApplication(sys.argv)
 
-import maestro
-import maestro.util
 from maestro.util import qt4reactor
 from maestro.util import plugin
 qt4reactor.install(app)
@@ -33,14 +31,16 @@ from twisted.internet import reactor
 import maestro.core
 const = maestro.core.const
 const.EXEC_DIR = os.path.dirname(__file__)
-const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'plugins')
-import maestro.Maestro
-import maestro.guiprefs
+const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'plugins')
 from maestro.core import Ensemble
+
+import maestro.gui as gui
+import maestro.gui.Maestro
+import maestro.gui.LoginDialog
+import maestro.gui.guiprefs
 
 import elementtree.ElementTree as ET
 import maestro.core.EventManager
-import maestro.LoginDialog
 
 import logging, socket, time
 
@@ -95,7 +95,7 @@ def main():
       else:
          cfg_file_path = cfg_file_name
 
-      gui_settings = maestro.guiprefs.GuiPrefs()
+      gui_settings = gui.guiprefs.GuiPrefs()
 
       try:
          gui_settings.load(cfg_file_path)
@@ -125,7 +125,7 @@ def main():
 
       splash.finish(None)
 
-      ld = maestro.LoginDialog.LoginDialog()
+      ld = gui.LoginDialog.LoginDialog()
       if QtGui.QDialog.Rejected == ld.exec_():
          sys.exit(-1)
 
@@ -137,7 +137,7 @@ def main():
 #      ensemble.refreshConnections()
 
       # Create and display GUI
-      m = maestro.Maestro.Maestro()
+      m = gui.Maestro.Maestro()
       m.init(ensemble)
       m.show()
 #      splash.finish(m)

@@ -37,12 +37,6 @@ class EnsembleModel(QtCore.QAbstractListModel):
       self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
 
-      self.mIcons = {}
-      self.mIcons[const.ERROR] = QtGui.QIcon(":/ClusterSettings/images/error2.png")
-      self.mIcons[const.WIN] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[const.WINXP] = QtGui.QIcon(":/ClusterSettings/images/win_xp.png")
-      self.mIcons[const.LINUX] = QtGui.QIcon(":/ClusterSettings/images/linux2.png")
-
       env = maestro.core.Environment()
       # XXX: Should we manage this signal on a per node basis? We would have
       #      to make each node generate a signal when it's OS changed and
@@ -130,7 +124,7 @@ class EnsembleModel(QtCore.QAbstractListModel):
 
       # Return an icon representing the operating system.
       if role == QtCore.Qt.DecorationRole:
-         return QtCore.QVariant(self.mIcons[cluster_node.mPlatform])
+         return QtCore.QVariant(const.mOsIcons[cluster_node.mPlatform])
       # Return the name of the node.
       elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
          return QtCore.QVariant(str(cluster_node.getName()))

@@ -130,8 +130,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.connect(self.mAppComboBox,QtCore.SIGNAL("activated(int)"),self.onAppSelect)
       #self.connect(self.mAddBtn, QtCore.SIGNAL("clicked()"), self.onClicked)
 
-      self.icon = QtGui.QIcon(":/linux2.png")
-
    def onElementSelected(self, newSelection, oldSelection):
       #print "Current row: %s" % (self.mTreeView.currentIndex().row())
       if len(newSelection.indexes()) > 0:

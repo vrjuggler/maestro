@@ -40,12 +40,6 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
-Icons = {}
-Icons[const.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
-Icons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
-
 class TargetListItem(QtGui.QListWidgetItem):
    def __init__(self, title, id, index, parent=None):
       QtGui.QListWidgetItem.__init__(self, parent)
@@ -57,8 +51,8 @@ class TargetListItem(QtGui.QListWidgetItem):
       if role == QtCore.Qt.EditRole or role == QtCore.Qt.DisplayRole:
          return QtCore.QVariant(self.mTitle)
       elif role == QtCore.Qt.DecorationRole:
-         if Icons.has_key(self.mOs):
-            return QtCore.QVariant(Icons[self.mOs])
+         if const.mOsIcons.has_key(self.mOs):
+            return QtCore.QVariant(const.mOsIcons[self.mOs])
          else:
             return QtCore.QVariant()
       elif role == QtCore.Qt.UserRole:
@@ -133,7 +127,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          # For each target operation system, build a TargetListItem
          for target in self.mSelectedNode.mTargets:
             (title, os, index) = target
-            icon = Icons[os]
+            icon = const.mOsIcons[os]
             node_id = self.mSelectedNode.getId()
             callback = lambda ni=node_id, i=index, t=title: (self.onTargetTriggered(ni, i, t))
             temp_callbacks.append(callback)

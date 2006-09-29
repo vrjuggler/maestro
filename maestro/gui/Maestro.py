@@ -48,6 +48,13 @@ except:
 
 print "Base gui dir:", gui_base_dir
 
+# Only load the OS icons once.
+const.mOsIcons = {}
+const.mOsIcons[const.ERROR] = QtGui.QIcon(":/Maestro/images/error2.png")
+const.mOsIcons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+const.mOsIcons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
+const.mOsIcons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
+
 class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
    def __init__(self, parent):
       QtGui.QTabWidget.__init__(self, parent)

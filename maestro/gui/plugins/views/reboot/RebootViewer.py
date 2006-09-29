@@ -40,12 +40,6 @@ class RebootViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
       
-Icons = {}
-Icons[const.UNKNOWN] = QtGui.QIcon(":/Maestro/images/error2.png")
-Icons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
-Icons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
-
 class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -77,17 +71,17 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          self.onNodeContextMenu)
 
       # Create action to change the selected node's boot target to Windows.
-      self.mSetTargetToWindowsAction = QtGui.QAction(Icons[const.WINXP], self.tr("Windows"), self)
+      self.mSetTargetToWindowsAction = QtGui.QAction(const.mOsIcons[const.WINXP], self.tr("Windows"), self)
       self.connect(self.mSetTargetToWindowsAction, QtCore.SIGNAL("triggered()"), self.onSetTargetToWindows)
       # Create action to change all nodes' boot target to Windows.
-      self.mSetAllTargetsToWindowsAction = QtGui.QAction(Icons[const.WINXP], self.tr("Windows"), self)
+      self.mSetAllTargetsToWindowsAction = QtGui.QAction(const.mOsIcons[const.WINXP], self.tr("Windows"), self)
       self.connect(self.mSetAllTargetsToWindowsAction, QtCore.SIGNAL("triggered()"), self.onSetAllTargetsToWindows)
 
       # Create action to change the selected node's boot target to Linux.
-      self.mSetTargetToLinuxAction = QtGui.QAction(Icons[const.LINUX], self.tr("Linux"), self)
+      self.mSetTargetToLinuxAction = QtGui.QAction(const.mOsIcons[const.LINUX], self.tr("Linux"), self)
       self.connect(self.mSetTargetToLinuxAction, QtCore.SIGNAL("triggered()"), self.onSetTargetToLinux)
       # Create action to change all nodes' boot target to Linux.
-      self.mSetAllTargetsToLinuxAction = QtGui.QAction(Icons[const.LINUX], self.tr("Linux"), self)
+      self.mSetAllTargetsToLinuxAction = QtGui.QAction(const.mOsIcons[const.LINUX], self.tr("Linux"), self)
       self.connect(self.mSetAllTargetsToLinuxAction, QtCore.SIGNAL("triggered()"), self.onSetAllTargetsToLinux)
 
       # Load a reboot/reload icon
@@ -164,7 +158,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          # For each target operation system, build a TargetListItem
          for target in node.mTargets:
             (title, os, index) = target
-            icon = Icons[os]
+            icon = const.mOsIcons[os]
             node_id = node.getId()
             callback = lambda ni=node_id, i=index, t=title: (self.onTargetTriggered(ni, i, t))
             temp_callbacks.append(callback)
@@ -324,7 +318,7 @@ class TargetModel(QtCore.QAbstractListModel):
 
       if role == QtCore.Qt.DecorationRole:
          # Return an icon representing the operating system.
-         return QtCore.QVariant(Icons[os])
+         return QtCore.QVariant(const.mOsIcons[os])
       if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
          # Return the name of the boot target.
          return QtCore.QVariant(title)
@@ -412,10 +406,10 @@ class RebootModel(QtCore.QAbstractTableModel):
 
       if role == QtCore.Qt.DecorationRole:
          if index.column() == 0:
-            return QtCore.QVariant(Icons[node.mPlatform])
+            return QtCore.QVariant(const.mOsIcons[node.mPlatform])
          if index.column() == 1:
             # Return an icon representing the operating system.
-            return QtCore.QVariant(Icons[os])
+            return QtCore.QVariant(const.mOsIcons[os])
       elif role == QtCore.Qt.DisplayRole:
          if index.column() == 0:
             # Return the name of the node.
