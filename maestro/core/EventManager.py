@@ -94,7 +94,8 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       factory._broker.notifyOnDisconnect(lambda n=nodeId: self.lostConnection(n))
       self.registerProxy(nodeId, object)
       # As soon as we connect to a new node, we want to know what OS it is running.
-      self.emit("*", "settings.get_os", ())
+      self.emit("*", "ensemble.get_os", ())
+      self.emit("*", "ensemble.get_settings", ())
       self.emit("*", "reboot.get_targets", ())
 
    def disconnectFromNode(self, nodeId):

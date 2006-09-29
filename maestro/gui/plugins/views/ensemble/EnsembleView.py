@@ -21,6 +21,7 @@ from PyQt4 import QtGui, QtCore
 import EnsembleViewBase
 import maestro.core
 const = maestro.core.const
+env = maestro.core.Environment
 from maestro.core import Ensemble
 from maestro.gui import EnsembleModel
 
@@ -40,26 +41,100 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
-class TargetListItem(QtGui.QListWidgetItem):
-   def __init__(self, title, id, index, parent=None):
-      QtGui.QListWidgetItem.__init__(self, parent)
-      self.mTitle = title
-      self.mOs = id
-      self.mIndex = index
+class NodeSettingsModel(QtCore.QAbstractTableModel):
+   """ TableModel that represents node settings returned from
+       EnsembleService.
+   """
+   def __init__(self, parent=None):
+      QtCore.QAbstractTableModel.__init__(self, parent)
 
-   def data(self, role):
-      if role == QtCore.Qt.EditRole or role == QtCore.Qt.DisplayRole:
-         return QtCore.QVariant(self.mTitle)
-      elif role == QtCore.Qt.DecorationRole:
-         if const.mOsIcons.has_key(self.mOs):
-            return QtCore.QVariant(const.mOsIcons[self.mOs])
-         else:
-            return QtCore.QVariant()
+      self.mNodeSettings = {}
+      self.mNodeId = None
+
+      env().mEventManager.connect("*", "ensemble.report_settings", self.onReportSettings)
+
+   def onReportSettings(self, nodeId, settings):
+      """ Slot that gets called when a node reports it's settings. """
+      self.mNodeSettings[nodeId] = settings
+      if nodeId == self.mNodeId:
+         self.emit(QtCore.SIGNAL("modelChanged()"))
+
+   def setNode(self, nodeId):
+      """ Set the node that we want to view settings for. """
+      if isinstance(nodeId, Ensemble.ClusterNode):
+         self.mNodeId = nodeId.getId()
+      elif type(nodeId) == types.StringType:
+         self.mNodeId = nodeId
+      else:
+         self.mNodeId = None
+
+      self.emit(QtCore.SIGNAL("modelChanged()"))
+
+   def rowCount(self, parent=QtCore.QModelIndex()):
+      """ Return the number of settings for node.. """
+      if not self.mNodeSettings.has_key(self.mNodeId):
+         return 0
+      return len(self.mNodeSettings[self.mNodeId])
+
+   def columnCount(self, parent=QtCore.QModelIndex()):
+      """ Return the number of columns of data we are showing. """
+      return 2
+
+   def headerData(self, section, orientation, role):
+      """ Return the header data for the given section and orientation.
+
+          @param section: The row or column depending on the orientation.
+          @param orientation: The orientation of the header.
+          @param role: Data role being requested.
+      """
+
+      # We only want to return the title for each column.
+      if orientation == QtCore.Qt.Horizontal and QtCore.Qt.DisplayRole == role:
+         if section == 0:
+            return QtCore.QVariant("Name")
+         elif section == 1:
+            return QtCore.QVariant("Value")
+      return QtCore.QVariant()
+
+   def data(self, index, role):
+      """ Return the model data for the given cell and data role.
+
+          @param index: Cell that we are requesting data for.
+          @param role: Data role being requested.
+      """
+      if not index.isValid():
+         print "Invalid index"
+         return QtCore.QVariant()
+
+      # Ensure that the row is valid
+      row = index.row()
+      if row < 0 or row >= self.rowCount():
+         return QtCore.QVariant()
+      if not self.mNodeSettings.has_key(self.mNodeId):
+         return QtCore.QVariant()
+
+      # Get the settings for the selected node.
+      node_settings = self.mNodeSettings[self.mNodeId]
+      (name, value) = node_settings.items()[index.row()]
+
+      if role == QtCore.Qt.DisplayRole:
+         if index.column() == 0:
+            # Return the name of the node.
+            return QtCore.QVariant(name)
+         elif index.column() == 1:
+            # Return the title of the boot target
+            return QtCore.QVariant(value)
       elif role == QtCore.Qt.UserRole:
-         return (self.mTitle, self.mOs, self.mIndex)
+         # Return the node settings for easy access.
+         return node_settings
+
       return QtCore.QVariant()
 
 class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
+   """ Presents the user with a high level view of the entire ensemble.
+       They can add/remove nodes to the ensemble and view detailed settings
+       for each node.
+   """
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -83,63 +158,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
 
-      # Setup a custom context menu callback.
-      self.mClusterListView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-      self.connect(self.mClusterListView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-         self.onNodeContextMenu)
 
-      self.connect(self.mTargetList, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*, QListWidgetItem*)"),
-         self.onCurrentTargetChanged)
-
-      xp_icon = QtGui.QIcon(":/EnsembleView/images/win_xp.png")
-      self.mRebootToWindowsAction = QtGui.QAction(xp_icon, self.tr("Windows"), self)
-      self.connect(self.mRebootToWindowsAction, QtCore.SIGNAL("triggered()"), self.onRebootToWindows)
-      self.mRebootAllToWindowsAction = QtGui.QAction(xp_icon, self.tr("Windows"), self)
-      self.connect(self.mRebootAllToWindowsAction, QtCore.SIGNAL("triggered()"), self.onRebootAllToWindows)
-
-      linux_icon = QtGui.QIcon(":/EnsembleView/images/linux2.png")
-      self.mRebootToLinuxAction = QtGui.QAction(linux_icon, self.tr("Linux"), self)
-      self.connect(self.mRebootToLinuxAction, QtCore.SIGNAL("triggered()"), self.onRebootToLinux)
-      self.mRebootAllToLinuxAction = QtGui.QAction(linux_icon, self.tr("Linux"), self)
-      self.connect(self.mRebootAllToLinuxAction, QtCore.SIGNAL("triggered()"), self.onRebootAllToLinux)
-
-      # Set the default action for the reboot all buttons.
-      self.mRebootWinBtn.setDefaultAction(self.mRebootAllToWindowsAction)
-      self.mRebootLinuxBtn.setDefaultAction(self.mRebootAllToLinuxAction)
-
-      self.mTestAction = QtGui.QAction(self.tr("&Test"), self)
-      self.mTestAction.setShortcut(self.tr("Ctrl+T"))
-      self.connect(self.mTestAction, QtCore.SIGNAL("triggered()"), self.onTest)
-
-   def onTest(self):
-      if self.mSelectedNode is not None:
-         env = maestro.core.Environment()
-         env.mEventManager.emit(self.mSelectedNode.getId(), "reboot.reboot", ())
-
-   def onNodeContextMenu(self, point):
-      menu = QtGui.QMenu("Reboot", self)
-
-      temp_callbacks = []
-      menu.addAction(self.mRebootToLinuxAction)
-      menu.addAction(self.mRebootToWindowsAction)
-      menu.addSeparator()
-      if self.mSelectedNode is not None:
-         # For each target operation system, build a TargetListItem
-         for target in self.mSelectedNode.mTargets:
-            (title, os, index) = target
-            icon = const.mOsIcons[os]
-            node_id = self.mSelectedNode.getId()
-            callback = lambda ni=node_id, i=index, t=title: (self.onTargetTriggered(ni, i, t))
-            temp_callbacks.append(callback)
-            menu.addAction(icon, title, callback)
-
-      menu.exec_(self.mClusterListView.mapToGlobal(point))
-
-   def onTargetTriggered(self, node_id, index, title):
-      print "Target: [%s][%s]" % (index, title)
-      env = maestro.core.Environment()
-      env.mEventManager.emit(node_id, "reboot.set_default_target", (index, title))
-   
    def init(self, ensemble):
       """ Configure the user interface.
 
@@ -170,9 +189,25 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Set the model.
       self.mClusterListView.setModel(self.mEnsembleModel)
 
+      # Create a settings model and pass it to the view.
+      self.mNodeSettingsModel = NodeSettingsModel()
+      self.mSettingsTableView.setModel(self.mNodeSettingsModel)
+
+      # Tell the both columns to split the availible space.
+      self.mSettingsTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mSettingsTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+
       # Connect new selection model
       QtCore.QObject.connect(self.mClusterListView.selectionModel(),
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
+
+      # Connect node settings model to update view when it changes.
+      QtCore.QObject.connect(self.mNodeSettingsModel,
+         QtCore.SIGNAL("modelChanged()"), self.onNodeModelChanged)
+
+   def onNodeModelChanged(self):
+      """ Slot that is called when the node settings model changes. """
+      self.mSettingsTableView.reset()
 
    def onRefresh(self):
       """ Slot that requests information about all nodes in the Ensemble. """
@@ -180,8 +215,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          self.mEnsemble.refreshConnections()
 
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "settings.get_os", ())
-      env.mEventManager.emit("*", "reboot.get_targets", ())
+      env.mEventManager.emit("*", "ensemble.get_os", ())
+      env.mEventManager.emit("*", "ensemble.get_settings", ())
 
    def onAdd(self):
       """ Called when user presses the add button. """
@@ -243,8 +278,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.mSelectedNode = selected_node
       # Refresh all node information.
       self.refreshNodeSettings()
-      # We must also refresh the list of all operating system targets.
-      self.refreshTargetList()
+      # Refresh the settings model.
+      self.mNodeSettingsModel.setNode(selected_node)
 
    def refreshNodeSettings(self):
       """
@@ -273,42 +308,6 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          # Get the name of the current platform.
          self.mCurrentOsEdit.setText(self.mSelectedNode.getPlatformName())
          
-   def refreshTargetList(self):
-      """ Refresh the list of target operation systems. """
-
-      # Clear all current targets out of list.
-      self.mTargetList.clear()
-
-      if self.mSelectedNode is not None:
-         # For each target operation system, build a TargetListItem
-         for target in self.mSelectedNode.mTargets:
-            (title, os, index) = target
-            tli = TargetListItem(title, os, index)
-            self.mTargetList.addItem(tli)
-
-         # Selected the current default target if specified.
-         if self.mSelectedNode.mDefaultTargetIndex >= 0:
-            self.mTargetList.setCurrentRow(self.mSelectedNode.mDefaultTargetIndex)
-            # Ensure that the selected target is visible.
-            if self.mTargetList.currentItem() is not None:
-               self.mTargetList.scrollToItem(self.mTargetList.currentItem())
-
-   def onCurrentTargetChanged(self, current, previous):
-      """ Slot that sets the default target on the selected node to the
-          specified index.
-
-          @param current: The currently selected TargetListItem
-          @param previous: The previously selected TargetListItem
-      """
-      assert(self.mSelectedNode is not None)
-      # If the previous selection was None, then we know the change was
-      # due to UI initialization.
-      if current is not None and previous is not None:
-         node_id = self.mSelectedNode.getId()
-         # Tell the selected node to change it's default target.
-         env = maestro.core.Environment()
-         env.mEventManager.emit(node_id, "reboot.set_default_target", (current.mIndex, current.mTitle))
-
    def onNodeChanged(self, nodeId):
       """ Slot that is called when a node's state changes. If the currently
           selected node changes, we need to update the target list and the
@@ -317,37 +316,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
           @param nodeId: The id of the node that changed.
       """
       if self.mSelectedNode is not None and nodeId == self.mSelectedNode.getId():
-         self.refreshTargetList()
          self.mClusterListView.model().setData(self.mClusterListView.currentIndex(), QtCore.QVariant(), QtCore.Qt.DisplayRole)
-
-   def onRebootToLinux(self):
-      """ Slot that makes the selected node reboot to Linux. """
-      assert(self.mSelectedNode is not None)
-      node_id = self.mSelectedNode.getId()
-      env = maestro.core.Environment()
-      env.mEventManager.emit(node_id, "reboot.switch_os", (const.LINUX,))
-
-   def onRebootToWindows(self):
-      """ Slot that makes the selected node reboot to Windows. """
-      assert(self.mSelectedNode is not None)
-      node_id = self.mSelectedNode.getId()
-      env = maestro.core.Environment()
-      env.mEventManager.emit(node_id, "reboot.switch_os", (const.WINXP,))
-
-   def onRebootAllToLinux(self):
-      """ Slot that makes all nodes reboot to Linux. """
-      env = maestro.core.Environment()
-      env.mEventManager.emit("*", "reboot.switch_os", (const.LINUX,))
-
-   def onRebootAllToWindows(self):
-      """ Slot that makes all nodes reboot to Windows. """
-      env = maestro.core.Environment()
-      env.mEventManager.emit("*", "reboot.switch_os", (const.WINXP,))
 
    def onEnsembleChanged(self):
       """ Called when the cluster control has connected to another node. """
       self.mClusterListView.reset()
       # Refresh the information about the node.
       self.refreshNodeSettings()
-      # We must also refresh the list of all operating system targets.
-      self.refreshTargetList()

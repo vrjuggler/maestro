@@ -1,24 +1,11 @@
-#!/bin/env python
+# -*- coding: utf-8 -*-
 
-# Maestro is Copyright (C) 2006 by Infiscape
+# Form implementation generated from reading ui file 'maestro\gui\plugins\views\ensemble\EnsembleViewBase.ui'
 #
-# Original Author: Aron Bierbaum
+# Created: Fri Sep 29 13:27:30 2006
+#      by: PyQt4 UI code generator 4.0.1
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
-
+# WARNING! All changes made in this file will be lost!
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -98,34 +85,6 @@ class Ui_EnsembleViewBase(object):
       self.vboxlayout2.setSpacing(6)
       self.vboxlayout2.setObjectName("vboxlayout2")
 
-      self.mClusterGroup = QtGui.QGroupBox(EnsembleViewBase)
-      self.mClusterGroup.setObjectName("mClusterGroup")
-
-      self.hboxlayout2 = QtGui.QHBoxLayout(self.mClusterGroup)
-      self.hboxlayout2.setMargin(9)
-      self.hboxlayout2.setSpacing(6)
-      self.hboxlayout2.setObjectName("hboxlayout2")
-
-      self.label = QtGui.QLabel(self.mClusterGroup)
-      self.label.setObjectName("label")
-      self.hboxlayout2.addWidget(self.label)
-
-      self.mRebootLinuxBtn = QtGui.QToolButton(self.mClusterGroup)
-      self.mRebootLinuxBtn.setIcon(QtGui.QIcon(":/EnsembleView/images/linux2.png"))
-      self.mRebootLinuxBtn.setIconSize(QtCore.QSize(24,24))
-      self.mRebootLinuxBtn.setObjectName("mRebootLinuxBtn")
-      self.hboxlayout2.addWidget(self.mRebootLinuxBtn)
-
-      self.mRebootWinBtn = QtGui.QToolButton(self.mClusterGroup)
-      self.mRebootWinBtn.setIcon(QtGui.QIcon(":/EnsembleView/images/win_xp.png"))
-      self.mRebootWinBtn.setIconSize(QtCore.QSize(24,24))
-      self.mRebootWinBtn.setObjectName("mRebootWinBtn")
-      self.hboxlayout2.addWidget(self.mRebootWinBtn)
-
-      spacerItem1 = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
-      self.hboxlayout2.addItem(spacerItem1)
-      self.vboxlayout2.addWidget(self.mClusterGroup)
-
       self.mNodeGroup = QtGui.QGroupBox(EnsembleViewBase)
       self.mNodeGroup.setObjectName("mNodeGroup")
 
@@ -171,14 +130,14 @@ class Ui_EnsembleViewBase(object):
       self.mCurrentOsLbl.setObjectName("mCurrentOsLbl")
       self.gridlayout.addWidget(self.mCurrentOsLbl,3,0,1,1)
 
-      self.mTargetList = QtGui.QListWidget(self.mNodeGroup)
-      self.mTargetList.setObjectName("mTargetList")
-      self.gridlayout.addWidget(self.mTargetList,4,1,1,1)
+      self.mOtherLbl = QtGui.QLabel(self.mNodeGroup)
+      self.mOtherLbl.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+      self.mOtherLbl.setObjectName("mOtherLbl")
+      self.gridlayout.addWidget(self.mOtherLbl,4,0,1,1)
 
-      self.mRebootTargetLbl = QtGui.QLabel(self.mNodeGroup)
-      self.mRebootTargetLbl.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
-      self.mRebootTargetLbl.setObjectName("mRebootTargetLbl")
-      self.gridlayout.addWidget(self.mRebootTargetLbl,4,0,1,1)
+      self.mSettingsTableView = QtGui.QTableView(self.mNodeGroup)
+      self.mSettingsTableView.setObjectName("mSettingsTableView")
+      self.gridlayout.addWidget(self.mSettingsTableView,4,1,1,1)
       self.vboxlayout2.addWidget(self.mNodeGroup)
       self.hboxlayout.addLayout(self.vboxlayout2)
       self.vboxlayout.addLayout(self.hboxlayout)
@@ -197,7 +156,7 @@ class Ui_EnsembleViewBase(object):
       EnsembleViewBase.setTabOrder(self.mIpAddressEdit,self.mCurrentOsEdit)
 
    def retranslateUi(self, EnsembleViewBase):
-      EnsembleViewBase.setWindowTitle(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Settings", None, QtGui.QApplication.UnicodeUTF8))
+      EnsembleViewBase.setWindowTitle(QtGui.QApplication.translate("EnsembleViewBase", "Ensemble View", None, QtGui.QApplication.UnicodeUTF8))
       self.mTitleLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Management", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddBtn.setToolTip(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
@@ -206,16 +165,12 @@ class Ui_EnsembleViewBase(object):
       self.mRemoveBtn.setToolTip(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveBtn.setWhatsThis(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "Remove", None, QtGui.QApplication.UnicodeUTF8))
-      self.mClusterGroup.setTitle(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Maintenance", None, QtGui.QApplication.UnicodeUTF8))
-      self.label.setText(QtGui.QApplication.translate("EnsembleViewBase", "Reboot All:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootLinuxBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootWinBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mNodeGroup.setTitle(QtGui.QApplication.translate("EnsembleViewBase", "Node Settings", None, QtGui.QApplication.UnicodeUTF8))
       self.mHostnameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Hostname:", None, QtGui.QApplication.UnicodeUTF8))
       self.mNameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Name:", None, QtGui.QApplication.UnicodeUTF8))
       self.mIpAddressLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "IP Address:", None, QtGui.QApplication.UnicodeUTF8))
       self.mCurrentOsLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Current OS:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootTargetLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Reboot to:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mOtherLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Other:", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":

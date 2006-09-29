@@ -51,7 +51,7 @@ class Ensemble(QtCore.QObject):
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
       env = maestro.core.Environment()
-      env.mEventManager.connect("*", "settings.os", self.onReportOs)
+      env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
       env.mEventManager.connect("*", "lostConnection", self.onLostConnection)
 
@@ -80,7 +80,7 @@ class Ensemble(QtCore.QObject):
          for node in self.mNodes:
             if node.getIpAddress() == nodeId:
                if os != node.mPlatform:
-                  node.mPlatform = os
+                  node.setPlatform(os)
                   self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
 
       except Exception, ex:
@@ -90,7 +90,7 @@ class Ensemble(QtCore.QObject):
       """ Slot that is called when a node reports it's possible boot targets. """
       for node in self.mNodes:
          if node.getIpAddress() == nodeId:
-            node.mTargets = targets
+            node.setTargets(targets)
             node.mDefaultTargetIndex = defaultTargetIndex
             self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
 
@@ -110,7 +110,8 @@ class Ensemble(QtCore.QObject):
                if env.mEventManager.connectToNode(ip_address):
                   new_connections = True
                   # Tell the new node to report it's os.
-                  env.mEventManager.emit(ip_address, "settings.get_os", ())
+                  env.mEventManager.emit(ip_address, "ensemble.get_os", ())
+                  env.mEventManager.emit(ip_address, "ensemble.get_settings", ())
                   env.mEventManager.emit(ip_address, "reboot.get_targets", ())
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
@@ -132,12 +133,13 @@ class Ensemble(QtCore.QObject):
       # Refresh all views of the Ensemble.
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
  
-class ClusterNode:
+class ClusterNode(QtCore.QObject):
    """ Represents a node in the active cluster configuration. Most of this
        information is loaded from the configuration file. But things like
        the current OS are retrieved from the remote object.
    """
-   def __init__(self, xmlElt):
+   def __init__(self, xmlElt, parent=None):
+      QtCore.QObject.__init__(self, parent)
       assert xmlElt.tag == "cluster_node"
       self.mElement = xmlElt
       #print "Name:", self.mElement.get("name")
@@ -165,6 +167,10 @@ class ClusterNode:
          return ("Unknown", const.ERROR, -1)
       return self.mTargets[index]
 
+   def setTargets(self, targets):
+      self.mTargets = targets
+      self.emit(QtCore.SIGNAL("targetsChanged(QList)"), self.mTargets)
+
    def getName(self):
       return self.mElement.get("name")
 
@@ -186,6 +192,10 @@ class ClusterNode:
          return socket.gethostbyname(self.getHostname())
       except:
          return "0.0.0.0"
+
+   def setPlatform(self, os):
+      self.mPlatform = os
+      self.emit(QtCore.SIGNAL("platformChanged(int)"), self.mPlatform)
 
    def getPlatformName(self):
       return const.OsNameMap[self.mPlatform]

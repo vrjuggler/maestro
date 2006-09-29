@@ -25,6 +25,7 @@ import socket
 
 import maestro.core
 const = maestro.core.const
+Env = maestro.core.Environment
 
 from Queue import Queue
 from threading import Thread
@@ -37,21 +38,26 @@ class SettingsService(maestro.core.IServicePlugin):
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
       self.mQueue = Queue()
+      if os.name == 'nt':
+         import wmi
+         self.mWMIConnection = wmi.WMI()
 
    def registerCallbacks(self):
-      env = maestro.core.Environment()
-      env.mEventManager.connect("*", "settings.get_os", self.onGetOs)
+      env = Env()
+      env.mEventManager.connect("*", "ensemble.get_os", self.onGetOs)
+      env.mEventManager.connect("*", "ensemble.get_settings", self.onGetSettings)
 
    def onGetOs(self, nodeId, avatar):
       platform = self._getPlatform()
+      Env().mEventManager.emit(nodeId, "ensemble.report_os", (platform,))
 
-      env = maestro.core.Environment()
-      env.mEventManager.emit(nodeId, "settings.os", (platform,))
+   def onGetSettings(self, nodeId, avatar):
+      settings = self._getSettings()
+      Env().mEventManager.emit(nodeId, "ensemble.report_settings", (settings,))
 
    def update(self):
       platform = self._getPlatform()
-      env = maestro.core.Environment()
-      env.mEventManager.emit("*", "settings.os", (platform,))
+      Env().mEventManager.emit("*", "ensemble.get_os", (platform,))
 
    def _getPlatform(self):
       """Returns tuple with error code and platform code.
@@ -69,6 +75,25 @@ class SettingsService(maestro.core.IServicePlugin):
       except:
          return 'Unknown'
 
+   def _getSettings(self):
+      settings = {}
+      if os.name == 'nt':
+         comp = self.mWMIConnection.Win32_ComputerSystem()[0]
+         settings['Caption'] = comp.Caption
+         settings['Description'] = comp.Description
+         settings['Domain'] = comp.Domain
+         settings['Manufacturer'] = comp.Manufacturer
+         settings['Model'] = comp.Model
+         settings['Name'] = comp.Name
+         settings['Number Of Processors'] = comp.NumberOfProcessors
+         settings['Primary Owner'] = comp.PrimaryOwnerName
+         settings['Status'] = comp.Status
+         settings['System Type'] = comp.SystemType
+         settings['TotalPhysicalMemory'] = comp.TotalPhysicalMemory
+         settings['UserName'] = comp.UserName
+         settings['Workgroup'] = comp.Workgroup
+      return settings
+      
    def getTime(self):
       return time.strftime(TIMEFORMAT)
 
