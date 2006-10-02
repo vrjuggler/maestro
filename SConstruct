@@ -91,7 +91,8 @@ for sfile in pyuic_rc_files:
    generated_entries += env.Pyrcc(sfile)
 
 for entry in generated_entries:
-   removeComments(entry.path)
+   if os.path.exists(entry.path):
+      removeComments(entry.path)
 
 
 Default(".");
