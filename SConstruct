@@ -10,35 +10,6 @@ import SConsAddons.Util as sca_util
 
 pj = os.path.join;
 
-# Pyuic builder
-def registerPyuicBuilder(env):
-  #pyuic_build_str = 'pyuic4 -x -i3 -o $TARGET $SOURCE';
-  pyuic_build_str = 'pyuic4 -x -i3 $SOURCE -o $TARGET';
-  pyuic_builder = Builder(action = pyuic_build_str,
-                          src_suffix = '.ui',
-                          suffix = '.py');                            env.Append(BUILDERS = {'Pyuic' : pyuic_builder});
-
-  #pyuic_build_str = 'pyrcc4 -compress 5 -o $TARGET $SOURCE';
-  pyuic_build_str = 'pyrcc4 -compress 5 $SOURCE -o $TARGET';
-  pyuic_builder = Builder(action = pyuic_build_str,
-                          src_suffix = '.qrc',
-                          suffix = '.py');                            env.Append(BUILDERS = {'Pyrcc' : pyuic_builder});
-  #pyuic_build_str = 'pyuic4 -x -i3 -subimpl ${TARGET.filebase} -o $TARGET $SOURCE';
-  #pyuic_builder = Builder(action = pyuic_build_str,
-  #                        src_suffix = '.ui',
-  #                        suffix = '.py');                            env.Append(BUILDERS = {'PyuicImpl' : pyuic_builder});
-
-
-# ###############################
-# Create builder
-# ###############################
-
-env = Environment(ENV=os.environ)
-
-registerPyuicBuilder(env);    # Register custom builders
-
-
-opts = Options(files = ['options.cache', 'options.custom']);  # Add options
 
 license = \
 """#!/bin/env python
@@ -59,17 +30,56 @@ license = \
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-"""
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA."""
 
-def removeComments(path):
-   f = open(path, 'r')
-   lines = f.readlines()
-   f.close()
-   lines = [line for line in lines if not line.startswith('#')]
-   lines[:0] = license
-   f = open(path, 'w+')
-   f.writelines(lines)
+def addLicense(source, target, env):
+   if os.path.exists(source[0].path):
+      f = open(source[0].path, 'r')
+      lines = f.readlines()
+      f.close()
+      lines = [line for line in lines if not line.startswith('#')]
+      lines[:0] = license
+      f = open(source[0].path, 'w+')
+      f.writelines(lines)
+
+
+# Pyuic builder
+def registerPyuicBuilder(env):
+  pyuic_build_str = 'pyuic4 -x -i3 $SOURCE -o $TARGET'
+  pyuic_builder = Builder(action = pyuic_build_str,
+                          src_suffix = '.ui',
+                          suffix = '.py')
+
+  pyuic_license = SCons.Builder.MultiStepBuilder(action=SCons.Action.Action(addLicense),
+                                            src_builder = pyuic_builder,
+                                            src_suffix = '.py')
+
+  env.Append(BUILDERS = {'Pyuic' : pyuic_license})
+
+  pyrcc_build_str = 'pyrcc4 -compress 5 $SOURCE -o $TARGET'
+  pyrcc_builder = Builder(action = pyrcc_build_str,
+                          src_suffix = '.qrc',
+                          suffix = '.py')
+  pyrcc_license = SCons.Builder.MultiStepBuilder(action=SCons.Action.Action(addLicense),
+                                            src_builder = pyrcc_builder,
+                                            src_suffix = '.py')
+
+
+  env.Append(BUILDERS = {'Pyrcc' : pyrcc_license})
+
+
+# ###############################
+# Create builder
+# ###############################
+
+env = Environment(ENV=os.environ)
+
+registerPyuicBuilder(env);    # Register custom builders
+
+
+opts = Options(files = ['options.cache', 'options.custom']);  # Add options
+
+
 
 # Python UI files
 pyuic_src_files = []
@@ -90,9 +100,9 @@ for sfile in pyuic_src_files:
 for sfile in pyuic_rc_files:
    generated_entries += env.Pyrcc(sfile)
 
-for entry in generated_entries:
-   if os.path.exists(entry.path):
-      removeComments(entry.path)
+#for entry in generated_entries:
+#   if os.path.exists(entry.path):
+#      removeComments(entry.path)
 
 
 Default(".");
