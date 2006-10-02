@@ -131,6 +131,15 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.connect(self.mAppComboBox,QtCore.SIGNAL("activated(int)"),self.onAppSelect)
       #self.connect(self.mAddBtn, QtCore.SIGNAL("clicked()"), self.onClicked)
 
+      # Make the AppFrame be inside a ScrollArea.
+      self.mAppFrame.setParent(None)
+      self.mScrollArea = QtGui.QScrollArea(self.mLaunchTab)
+      self.vboxlayout1.insertWidget(1, self.mScrollArea)
+      self.mScrollArea.setWidget(self.mAppFrame)
+      self.mScrollArea.setWidgetResizable(True)
+      self.mScrollArea.setFrameShape(QtGui.QFrame.StyledPanel)
+      self.mScrollArea.setFrameShadow(QtGui.QFrame.Raised)
+
    def onElementSelected(self, newSelection, oldSelection):
       #print "Current row: %s" % (self.mTreeView.currentIndex().row())
       if len(newSelection.indexes()) > 0:

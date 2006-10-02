@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-
 import sys
 from PyQt4 import QtCore, QtGui
 
@@ -62,6 +61,10 @@ class Ui_LaunchViewBase(object):
       self.vboxlayout1.setSpacing(6)
       self.vboxlayout1.setObjectName("vboxlayout1")
 
+      self.mAppComboBox = QtGui.QComboBox(self.mLaunchTab)
+      self.mAppComboBox.setObjectName("mAppComboBox")
+      self.vboxlayout1.addWidget(self.mAppComboBox)
+
       self.mAppFrame = QtGui.QFrame(self.mLaunchTab)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
@@ -69,18 +72,12 @@ class Ui_LaunchViewBase(object):
       sizePolicy.setVerticalStretch(1)
       sizePolicy.setHeightForWidth(self.mAppFrame.sizePolicy().hasHeightForWidth())
       self.mAppFrame.setSizePolicy(sizePolicy)
-      self.mAppFrame.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mAppFrame.setFrameShadow(QtGui.QFrame.Raised)
       self.mAppFrame.setObjectName("mAppFrame")
 
       self.vboxlayout2 = QtGui.QVBoxLayout(self.mAppFrame)
       self.vboxlayout2.setMargin(9)
       self.vboxlayout2.setSpacing(6)
       self.vboxlayout2.setObjectName("vboxlayout2")
-
-      self.mAppComboBox = QtGui.QComboBox(self.mAppFrame)
-      self.mAppComboBox.setObjectName("mAppComboBox")
-      self.vboxlayout2.addWidget(self.mAppComboBox)
 
       spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
       self.vboxlayout2.addItem(spacerItem)
