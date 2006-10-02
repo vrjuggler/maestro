@@ -191,13 +191,23 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       """ Slot that reboots the selected cluster. """
       node = self.__getSelectedNode()
       if node is not None:
-         env = maestro.core.Environment()
-         env.mEventManager.emit(node.getId(), "reboot.reboot", ())
+         reply = QtGui.QMessageBox.question(self, self.tr("Reboot Node"),
+            self.tr("Are you sure you want to reboot %s?" % node.getName()),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         if reply == QtGui.QMessageBox.Yes:
+            env = maestro.core.Environment()
+            env.mEventManager.emit(node.getId(), "reboot.reboot", ())
 
    def onRebootCluster(self):
       """ Slot that reboots the entire cluster. """
-      env = maestro.core.Environment()
-      env.mEventManager.emit("*", "reboot.reboot", ())
+      reply = QtGui.QMessageBox.question(self, self.tr("Reboot Cluster"),
+         self.tr("Are you sure you want to reboot the entire cluster?"),
+         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+         QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+      if reply == QtGui.QMessageBox.Yes:
+         env = maestro.core.Environment()
+         env.mEventManager.emit("*", "reboot.reboot", ())
 
    def onSetTargetToLinux(self):
       """ Slot that makes the selected node reboot to Linux. """
