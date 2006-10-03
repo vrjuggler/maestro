@@ -85,6 +85,11 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       self.mResourceModel = ResourceModel(self.mEnsemble)
       self.mResourceTable.setModel(self.mResourceModel)
 
+      # Tell all columns both columns to split the availible space.
+      self.mResourceTable.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mResourceTable.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+      self.mResourceTable.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
+
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
       env.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)
@@ -148,6 +153,7 @@ class GraphDelegate(QtGui.QItemDelegate):
          linear_gradient.setColorAt(1.0, QtCore.Qt.gray)
          painter.fillRect(rect, QtGui.QBrush(linear_gradient))
 
+         self.mXMap.setScaleInterval(0, len(data))
          self.mXMap.setPaintInterval(rect.left(), rect.right())
          self.mYMap.setPaintInterval(rect.top(), rect.bottom())
          painter.save()
@@ -160,8 +166,8 @@ class GraphDelegate(QtGui.QItemDelegate):
          text_width = max(option.fontMetrics.width(''), option.fontMetrics.width("100%")) + 6;
          overlay_text = ("%.2f " % data[-1]) + "%"
          style = QtGui.QApplication.style()
-         style.drawItemText(painter, option.rect, QtCore.Qt.TextSingleLine,
-            option.palette, True, overlay_text)
+         align_flags = QtCore.Qt.AlignHorizontal_Mask | QtCore.Qt.TextSingleLine
+         style.drawItemText(painter, option.rect, align_flags, option.palette, True, overlay_text)
 
 
 class ResourceModel(QtCore.QAbstractTableModel):
