@@ -230,7 +230,8 @@ class Scale:
 class Curve:
    LINES = 0
    STICKS = 1
-   LAST_STYLE = STICKS
+   STEPS = 2
+   LAST_STYLE = STEPS
    def __init__(self):
       self.mPen = QtGui.QPen()
       self.mBrush = QtGui.QBrush()
@@ -307,8 +308,31 @@ class Curve:
          self.drawLines(painter, xMap, yMap, fromItem, toItem)
       elif self.mStyle == Curve.STICKS:
          self.drawSticks(painter, xMap, yMap, fromItem, toItem)
+      elif self.mStyle == Curve.STEPS:
+         self.drawSteps(painter, xMap, yMap, fromItem, toItem)
       else:
          self.drawLines(painter, xMap, yMap, fromItem, toItem)
+
+   def drawSteps(self, painter, xMap, yMap, fromItem, toItem):
+      size = toItem - fromItem + 1
+      if size <= 0:
+         return
+
+      polyline = QtGui.QPolygonF()
+      polyline.fill(QtCore.QPointF(), 2 * (toItem - fromItem) + 1)
+
+      ip = 0
+      for i in xrange(fromItem, toItem+1):
+         xi = xMap.transform(self.x(i))
+         yi = yMap.transform(self.y(i))
+         if ip > 0:
+            polyline[ip - 1] = QtCore.QPointF(xi, polyline[ip-2].y())
+         polyline[ip] = QtCore.QPointF(xi, yi)
+         ip += 2
+
+      painter.drawPolyline(polyline)
+      if ( self.mBrush.style() != QtCore.Qt.NoBrush ):
+         self.fillCurve(painter, xMap, yMap, polyline)
 
    def drawLines(self, painter, xMap, yMap, fromItem, toItem):
       size = toItem - fromItem + 1
@@ -386,21 +410,21 @@ class BarGraph(QtGui.QWidget):
       curve = Curve()
       curve.setColor(QtCore.Qt.green)
       curve.setData(self.mTimeData, self.mData['Total'])
-      curve.setStyle(Curve.STICKS)
+      #curve.setStyle(Curve.STEPS)
       self.mCurves['Total'] = curve
 
       self.mData['System'] = [0.0 for i in xrange(HISTORY)]
       curve = Curve()
       curve.setColor(QtCore.Qt.red)
       curve.setData(self.mTimeData, self.mData['System'])
-      curve.setStyle(Curve.STICKS)
+      #curve.setStyle(Curve.STEPS)
       self.mCurves['System'] = curve
 
       self.mData['User'] = [0.0 for i in xrange(HISTORY)]
       curve = Curve()
       curve.setColor(QtCore.Qt.blue)
       curve.setData(self.mTimeData, self.mData['User'])
-      curve.setStyle(Curve.STICKS)
+      #curve.setStyle(Curve.STEPS)
       self.mCurves['User'] = curve
 
 #      self.mData['Idle'] = [0.0 for i in xrange(HISTORY)]
@@ -426,8 +450,8 @@ class BarGraph(QtGui.QWidget):
       self.mCurves['Total'].draw(painter, self.mXMap, self.mYMap)
       self.mCurves['User'].draw(painter, self.mXMap, self.mYMap)
       self.mCurves['System'].draw(painter, self.mXMap, self.mYMap)
-      for v in self.mCurves.itervalues():
-         v.draw(painter, self.mXMap, self.mYMap)
+      #for v in self.mCurves.itervalues():
+      #   v.draw(painter, self.mXMap, self.mYMap)
       painter.end()
 
    def timerEvent(self, event):
