@@ -36,13 +36,13 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = LaunchView()
       
-   @staticmethod
    def getName():
       return "Launch View"
+   getName = staticmethod(getName)
       
-   @staticmethod
    def getIcon():
       return QtGui.QIcon(":/Maestro/images/launch.png")
+   getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):
       return self.widget

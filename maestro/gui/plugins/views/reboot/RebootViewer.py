@@ -29,13 +29,13 @@ class RebootViewPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = RebootViewer()
       
-   @staticmethod
    def getName():
       return "Reboot View"
+   getName = staticmethod(getName)
 
-   @staticmethod
    def getIcon():
       return QtGui.QIcon(":/Maestro/images/reboot.png")
+   getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):
       return self.widget

@@ -27,13 +27,13 @@ class ProcessViewPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = ProcessView()
       
-   @staticmethod
    def getName():
       return "Process View"
+   getName = staticmethod(getName)
       
-   @staticmethod
    def getIcon():
       return QtGui.QIcon(":/Maestro/images/resources.png")
+   getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):
       return self.widget

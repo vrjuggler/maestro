@@ -29,13 +29,13 @@ class ResourceViewPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = ResourceView()
       
-   @staticmethod
    def getName():
       return "Reboot View"
+   getName = staticmethod(getName)
    
-   @staticmethod
    def getIcon():
       return QtGui.QIcon(":/Maestro/images/resources.png")   
+   getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):
       return self.widget

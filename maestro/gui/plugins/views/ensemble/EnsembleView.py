@@ -30,13 +30,13 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = EnsembleView()
       
-   @staticmethod
    def getName():
       return "Ensemble View"
+   getName = staticmethod(getName)
 
-   @staticmethod
    def getIcon():
       return QtGui.QIcon(":/Maestro/images/management.png")
+   getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):
       return self.widget
