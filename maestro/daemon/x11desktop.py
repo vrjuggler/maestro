@@ -41,11 +41,12 @@ def getUserXauthFile(userName):
 def addAuthority(user, xauthCmd, xauthFile):
    '''
    Pulls the X authority key from the named file and adds it to the named
-   user's .Xauthority file. The display name (suitable for use as the
-   value of the DISPLAY environment variable) is returned.
-
-   NOTE: This relies upon the user running maestrod to have write access to
-         the named user's .Xauthority file.
+   user's .Xauthority file if necessary. A tuple containing the the display
+   name (suitable for use as the value of the DISPLAY environment variable)
+   and a boolean value indicating whether the user's .Xauthority file had to
+   be updated is returned. If this boolean value is True, then it should be
+   assumed that the user is logged on to the local workstation, and the
+   authority should not be removed later using removeAuthority().
    '''
    # Pull out the system X authority key. It will be the first line of the
    # output from running 'xauth list'.
@@ -53,20 +54,44 @@ def addAuthority(user, xauthCmd, xauthFile):
       popen2.popen2('%s -f %s list' % (xauthCmd, xauthFile))
    host_str = '%s/unix' % os.environ['HOSTNAME']
    line = child_stdout.readline()
+   child_stdout.close()
+   child_stdin.close()
+
    key_str = re.sub('#ffff##', host_str, line)
-   key_match = re.match('\s*(\S+)\s+(\S+)\s+(\S+)\s*', key_str)
+   display_key_re = re.compile(r'\s*(\S+)\s+(\S+)\s+(\S+)\s*')
+   key_match = display_key_re.match(key_str)
    key = (key_match.group(1), key_match.group(2), key_match.group(3))
+   print key
 
-   pid = os.fork()
-   if pid == 0:
-      # Run the xauth(1) command as the user.
-      changeToUserName(user)
-      os.execl(xauthCmd, xauthCmd, '-f', getUserXauthFile(user), 'add',
-               key[0], key[1], key[2])
+   (child_stdout, child_stdin) = \
+      popen2.popen2('%s -f %s list' % (xauthCmd, getUserXauthFile(user)))
+   lines = child_stdout.readlines()
+   child_stdout.close()
+   child_stdin.close()
 
-   # Wait on the child to complete.
-   os.waitpid(pid, 0)
-   return key[0]
+   has_key = False
+
+   for l in lines:
+      key_match = display_key_re.match(l)
+      user_key = (key_match.group(1), key_match.group(2), key_match.group(3))
+      if user_key == key:
+         has_key = True
+         break
+
+   print "has_key =", has_key
+
+   if not has_key:
+      pid = os.fork()
+      if pid == 0:
+         # Run the xauth(1) command as the user.
+         changeToUserName(user)
+         os.execl(xauthCmd, xauthCmd, '-f', getUserXauthFile(user), 'add',
+                  key[0], key[1], key[2])
+
+      # Wait on the child to complete.
+      os.waitpid(pid, 0)
+
+   return (key[0], has_key)
 
 def removeAuthority(user, xauthCmd, displayName):
    '''
