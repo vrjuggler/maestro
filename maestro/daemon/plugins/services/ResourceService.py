@@ -58,6 +58,7 @@ class ResourceService(maestro.core.IServicePlugin):
    def registerCallbacks(self):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)
+      env.mEventManager.connect("*", "resource.set_interval", self.onSetInterval)
       #env.mEventManager.timers().createTimer(self.update, 0.5)
 
    def onGetUsage(self, nodeId, avatar):
@@ -66,7 +67,19 @@ class ResourceService(maestro.core.IServicePlugin):
       env = maestro.core.Environment()
       env.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
       env.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
-         
+
+   def onSetInterval(self, nodeId, avatar, interval):
+      """ Slot that changes the report interval.
+
+          @param nodeId: Node ID for the sender.
+          @param avatar: Avatar associated with this session.
+          @param interval: Time in seconds to wait between updates.
+      """
+      env = maestro.core.Environment()
+      env.mEventManager.timers().deleteTimer(self.update)
+      if not 0 == interval:
+         env.mEventManager.timers().createTimer(self.update, interval)
+
    def update(self):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()

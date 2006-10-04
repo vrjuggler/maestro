@@ -24,6 +24,25 @@ import os
 
 from SimpleGraph import Scale, Curve
 
+def xfrange(start, stop=None, step=None):
+   """Like range(), but returns list of floats instead
+
+      All numbers are generated on-demand using generators
+   """
+
+   if stop is None:
+      stop = float(start)
+      start = 0.0
+
+   if step is None:
+      step = 1.0
+
+   cur = float(start)
+
+   while cur < stop:
+      yield cur
+      cur += step
+
 class ResourceViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
       maestro.core.IViewPlugin.__init__(self)
@@ -57,8 +76,40 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       #delegate = PixelDelegate(self.mResourceTable)
       delegate = GraphDelegate(self.mResourceTable)
       self.mResourceTable.setItemDelegate(delegate)
+      self.mResourceTable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+      self.mResourceTable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+
+      self.mActions = []
+      self.mActionCallables = []
+      times = [0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0]
+      for i in times:
+         if 0 == i:
+            title = "Off"
+         else:
+            title = "%.1f secs" % i
+         action = QtGui.QAction(self.tr(title), self.mResourceTable)
+         callable = lambda time=i:self.onChangeReportTime(time)
+         self.connect(action, QtCore.SIGNAL("triggered()"), callable)
+         self.mResourceTable.addAction(action)
+         self.mActions.append(action)
+         self.mActionCallables.append(callable)
 
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
+
+   def onChangeReportTime(self, reportTime):
+      print "Time: ", reportTime
+      env = maestro.core.Environment()
+      for selected_index in self.mResourceTable.selectedIndexes():
+         # Only handle selected indices in the first column since we only
+         # need to terminate once for each row.
+         if 0 == selected_index.column():
+            # Get the process record for selected index.
+            node = self.mResourceModel.data(selected_index, QtCore.Qt.UserRole)
+
+            # Fire a terminate event.
+            if node is not None:
+               node_id = node.getId()
+               env.mEventManager.emit(node_id, "resource.set_interval", (reportTime,))
 
    def onRefresh(self):
       """ Called when user presses the refresh button. """
@@ -195,24 +246,27 @@ class ResourceModel(QtCore.QAbstractTableModel):
    def data(self, index, role=QtCore.Qt.DisplayRole):
       if not index.isValid():
          return QtCore.QVariant()
-      elif role != QtCore.Qt.DisplayRole:
-         return QtCore.QVariant()
 
       node = self.mEnsemble.getNode(index.row())
-      if index.column() == 0:
-         return QtCore.QVariant(str(node.getName()))
 
-      ip_addr = node.getIpAddress()
-      if not self.mNodeDataMap.has_key(ip_addr):
-         all_resources = []
-         for r in self.mDataSizes:
-            resource_history = [0 for i in xrange(r)]
-            all_resources.append(resource_history)
-         self.mNodeDataMap[ip_addr] = all_resources
+      if role == QtCore.Qt.DisplayRole:
+         if index.column() == 0:
+            return QtCore.QVariant(str(node.getName()))
+         ip_addr = node.getIpAddress()
+         if not self.mNodeDataMap.has_key(ip_addr):
+            all_resources = []
+            for r in self.mDataSizes:
+               resource_history = [0 for i in xrange(r)]
+               all_resources.append(resource_history)
+            self.mNodeDataMap[ip_addr] = all_resources
 
-      node_resources = self.mNodeDataMap[ip_addr]
-      resource_history = node_resources[index.column()-1]
-      return resource_history
+         node_resources = self.mNodeDataMap[ip_addr]
+         resource_history = node_resources[index.column()-1]
+         return resource_history
+      elif role == QtCore.Qt.UserRole:
+         return node
+
+      return QtCore.QVariant()
 
    def setData(self, ipAddr, resourceIndex, val):
       if not self.mNodeDataMap.has_key(ipAddr):
