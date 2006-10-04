@@ -41,7 +41,7 @@ PAT_MEMINFO_ACTIVE = re.compile(r"active: *([0-9]+)", re.I)
 PAT_MEMINFO_INACTIVE = re.compile(r"inactive: *([0-9]+)", re.I)
 
 if os.name == 'nt':
-    import win32api, win32event, win32serviceutil, win32service, win32security, ntsecuritycon
+   import win32pdh
 
 class ResourceService(maestro.core.IServicePlugin):
    def __init__(self):
@@ -49,14 +49,16 @@ class ResourceService(maestro.core.IServicePlugin):
       self.mQueue = Queue()
 
       if os.name == 'nt':
-         pass
-         #self.mWMIConnection = xmi.WMI()
+         self.mPdhQuery = win32pdh.OpenQuery(None, 0)
+         self.mProcPath = win32pdh.MakeCounterPath((None, "Processor", "_Total", None, 0, "% Processor Time"))
+         self.mProcCounter = win32pdh.AddCounter(self.mPdhQuery, self.mProcPath, 0)
       else:
          self.mLastCPUTime = [0,0,0,0]
 
    def registerCallbacks(self):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "settings.get_usage", self.onGetUsage)
+      #env.mEventManager.timers().createTimer(self.update, 0.5)
 
    def onGetUsage(self, nodeId, avatar):
       cpu_usage = self._getCpuUsage()
@@ -74,16 +76,11 @@ class ResourceService(maestro.core.IServicePlugin):
 
    def _getCpuUsage(self):
       if os.name == 'nt':
-         """
-         total_usage = 0.0
-         cpus = mWMIConnection.Win32_Processor()
-         for p in cpus:
-            print "%s running at %d%% load" % (p.Name, p.LoadPercentage)
-            total_usage += p.LoadPercentage
-         print "%d%% load" % (total_usage/len(cpus))
-         return total_usage/len(cpus)
-         """
-         return 0.0
+         #Collect the percient idle time
+         win32pdh.CollectQueryData(self.mPdhQuery)
+         format = win32pdh.PDH_FMT_LONG | win32pdh.PDH_FMT_NOSCALE
+         idleTime = win32pdh.GetFormattedCounterValue(self.mProcCounter,format)[1]
+         return idleTime
       else:
          statFile = file("/proc/stat", "r")
          for line in statFile.readlines():
@@ -97,7 +94,6 @@ class ResourceService(maestro.core.IServicePlugin):
                (tuser, tnice, tsys, tidle) = diff_time
                #print "User [%s] nice [%s] sys [%s] idle [%s]" % (tuser, tnice, tsys, tidle)
                cpu_usage = 100.00 - 100.00 * (float(diff_time[3]) / sum(diff_time))
-               print cpu_usage
                return cpu_usage
             else:
                return 0.0
