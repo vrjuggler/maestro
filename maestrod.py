@@ -56,16 +56,16 @@ else:
    import maestro.daemon.x11desktop as x11desktop
 
 if os.name == 'nt':
-    def AdjustPrivilege(priv, enable):
-        htoken = win32security.OpenProcessToken(
-                win32api.GetCurrentProcess(),
-                ntsecuritycon.TOKEN_ADJUST_PRIVILEGES | ntsecuritycon.TOKEN_QUERY)
-        id = win32security.LookupPrivilegeValue(None, priv)
-        if enable:
-            newPrivileges = [(id, ntsecuritycon.SE_PRIVILEGE_ENABLED)]
-        else:
-            newPrivileges = [(id, 0)]
-        win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
+   def AdjustPrivilege(priv, enable):
+      htoken = win32security.OpenProcessToken(
+                  win32api.GetCurrentProcess(),
+                  ntsecuritycon.TOKEN_ADJUST_PRIVILEGES | ntsecuritycon.TOKEN_QUERY)
+      id = win32security.LookupPrivilegeValue(None, priv)
+      if enable:
+         newPrivileges = [(id, ntsecuritycon.SE_PRIVILEGE_ENABLED)]
+      else:
+         newPrivileges = [(id, 0)]
+      win32security.AdjustTokenPrivileges(htoken, 0, newPrivileges)
 
 class ServerSettings(maestro.core.prefs.Preferences):
    pass
