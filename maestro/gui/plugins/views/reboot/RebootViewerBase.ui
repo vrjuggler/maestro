@@ -63,7 +63,7 @@
      <item>
       <widget class="QLabel" name="mRebootClusterLbl" >
        <property name="text" >
-        <string>Set Cluster Boot Target:</string>
+        <string>Cluster OS On Reboot:</string>
        </property>
       </widget>
      </item>
