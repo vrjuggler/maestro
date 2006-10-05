@@ -42,42 +42,60 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
       return self.widget
 
 class NodeSettingsModel(QtCore.QAbstractTableModel):
-   """ TableModel that represents node settings returned from
-       EnsembleService.
+   """ TableModel that represents node settings returned from EnsembleService.
+       This model contains data for all nodes in the ensemble, but only
+       displays it for the currenly selected node.
    """
    def __init__(self, parent=None):
       QtCore.QAbstractTableModel.__init__(self, parent)
 
+      # Constuct a dictonary to keep track of the node settings for all nodes.
       self.mNodeSettings = {}
-      self.mNodeId = None
+      self.mSelectedNodeId = None
 
+      # Register to receive a signal when a node reports it's settings.
       env().mEventManager.connect("*", "ensemble.report_settings", self.onReportSettings)
 
    def onReportSettings(self, nodeId, settings):
       """ Slot that gets called when a node reports it's settings. """
       self.mNodeSettings[nodeId] = settings
-      if nodeId == self.mNodeId:
+      if nodeId == self.mSelectedNodeId:
          self.emit(QtCore.SIGNAL("modelChanged()"))
 
-   def setNode(self, nodeId):
-      """ Set the node that we want to view settings for. """
-      if isinstance(nodeId, Ensemble.ClusterNode):
-         self.mNodeId = nodeId.getId()
-      elif type(nodeId) == types.StringType:
-         self.mNodeId = nodeId
-      else:
-         self.mNodeId = None
+   def setSelectedNode(self, nodeId):
+      """ Set the node that we want to view settings for.
 
+          nodeId: ID of the selected node.
+      """
+
+      # No need to do anything if we are already viewing the node.
+      if self.mSelectedNodeId == nodeId:
+         return
+
+      # If the user passes a ClusterNode, be smart about it and get the ID.
+      if isinstance(nodeId, Ensemble.ClusterNode):
+         self.mSelectedNodeId = nodeId.getId()
+      else:
+         self.mSelectedNodeId = nodeId
+
+      # Since we are trying to view information about a different node
       self.emit(QtCore.SIGNAL("modelChanged()"))
 
    def rowCount(self, parent=QtCore.QModelIndex()):
       """ Return the number of settings for node.. """
-      if not self.mNodeSettings.has_key(self.mNodeId):
+
+      # If we don't have any data for the selected node return zero rows.
+      if not self.mNodeSettings.has_key(self.mSelectedNodeId):
          return 0
-      return len(self.mNodeSettings[self.mNodeId])
+
+      # Return the number of setting (key, value) pairs that we have.
+      return len(self.mNodeSettings[self.mSelectedNodeId])
 
    def columnCount(self, parent=QtCore.QModelIndex()):
       """ Return the number of columns of data we are showing. """
+
+      # Since we are displaying a dictonary of settings, we will always
+      # have two columns. (key, value)
       return 2
 
    def headerData(self, section, orientation, role):
@@ -103,26 +121,25 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
           @param role: Data role being requested.
       """
       if not index.isValid():
-         print "Invalid index"
          return QtCore.QVariant()
 
       # Ensure that the row is valid
       row = index.row()
       if row < 0 or row >= self.rowCount():
          return QtCore.QVariant()
-      if not self.mNodeSettings.has_key(self.mNodeId):
+      if not self.mNodeSettings.has_key(self.mSelectedNodeId):
          return QtCore.QVariant()
 
       # Get the settings for the selected node.
-      node_settings = self.mNodeSettings[self.mNodeId]
+      node_settings = self.mNodeSettings[self.mSelectedNodeId]
       (name, value) = node_settings.items()[index.row()]
 
       if role == QtCore.Qt.DisplayRole:
          if index.column() == 0:
-            # Return the name of the node.
+            # Return the key of the settings.
             return QtCore.QVariant(name)
          elif index.column() == 1:
-            # Return the title of the boot target
+            # Return the value of the setting.
             return QtCore.QVariant(value)
       elif role == QtCore.Qt.UserRole:
          # Return the node settings for easy access.
@@ -149,12 +166,11 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
       self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
-      
+
+      # Connect all of the button signals.
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
       QtCore.QObject.connect(self.mAddBtn,QtCore.SIGNAL("clicked()"), self.onAdd)
       QtCore.QObject.connect(self.mRemoveBtn,QtCore.SIGNAL("clicked()"), self.onRemove)
-      # Call if you want an icon view
-      #self.mClusterListView.setViewMode(QtGui.QListView.IconMode)
       self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
 
@@ -188,6 +204,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # Set the model.
       self.mClusterListView.setModel(self.mEnsembleModel)
+      # Call if you want an icon view
+      #self.mClusterListView.setViewMode(QtGui.QListView.IconMode)
 
       # Create a settings model and pass it to the view.
       self.mNodeSettingsModel = NodeSettingsModel()
@@ -279,7 +297,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Refresh all node information.
       self.refreshNodeSettings()
       # Refresh the settings model.
-      self.mNodeSettingsModel.setNode(selected_node)
+      self.mNodeSettingsModel.setSelectedNode(selected_node)
 
    def refreshNodeSettings(self):
       """
