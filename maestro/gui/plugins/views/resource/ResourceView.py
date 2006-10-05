@@ -206,7 +206,7 @@ class GraphDelegate(QtGui.QItemDelegate):
 
          self.mXMap.setScaleInterval(0, len(data))
          self.mXMap.setPaintInterval(rect.left(), rect.right())
-         self.mYMap.setPaintInterval(rect.top(), rect.bottom())
+         self.mYMap.setPaintInterval(0.0, rect.bottom()-rect.top())
          painter.save()
          painter.setClipRect(rect)
          painter.translate(0, rect.bottom())
