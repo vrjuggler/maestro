@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 # Maestro is Copyright (C) 2006 by Infiscape
 #
@@ -54,9 +54,19 @@ print "Base gui dir:", gui_base_dir
 
 def main():
    # Set up logging to sys.stderr.
-   logging.basicConfig(level = logging.DEBUG,
-                       format = '%(name)-12s %(levelname)-8s %(message)s',
-                       datefmt = '%m-%d %H:%M')
+   # Set up logging to sys.stderr.
+   fmt_str  = '%(name)-12s %(levelname)-8s %(message)s'
+   date_fmt = '%m-%d %H:%M'
+   if sys.version_info[0] == 2 and sys.version_info[1] < 4:
+      handler = logging.StreamHandler()
+      handler.setFormatter(logging.Formatter(fmt_str, date_fmt))
+      logger = logging.getLogger('')
+      logger.setLevel(logging.DEBUG)
+      logger.addHandler(handler)
+   else:
+      logging.basicConfig(level = logging.DEBUG, format = fmt_str,
+                          datefmt = date_fmt)
+
    try:
       logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'images', 'cpu_array.png')
 
