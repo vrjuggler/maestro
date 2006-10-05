@@ -375,8 +375,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       return qApp.translate("MainWindow",s,c)
 
    def closeEvent(self, event):
-      print "Closing"
-      self.mFileLogger.close()
       env = maestro.core.Environment()
       clean = True
 
