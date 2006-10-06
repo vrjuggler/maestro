@@ -100,7 +100,7 @@ class NtLoaderPlugin(maestro.core.IBootPlugin):
          computer = self.mWMIConnection.Win32_ComputerSystem()[0]
          if computer.SystemStartupDelay != timeout:
             computer.SystemStartupDelay = timeout
-            return true
+            return True
       return False
 
    def switchPlatform(self, targetOs):
