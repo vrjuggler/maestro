@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import logging
 import elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
 from PyQt4 import QtCore, QtGui
@@ -29,6 +30,8 @@ class Ensemble(QtCore.QObject):
    """ Contains information about a cluster of nodes. """
    def __init__(self, xmlTree, parent=None):
       QtCore.QObject.__init__(self, parent)
+
+      self.mLogger = logging.getLogger("maestro.Ensemble")
 
       # Store cluster XML element
       self.mElement = xmlTree.getroot()
@@ -98,18 +101,19 @@ class Ensemble(QtCore.QObject):
             ip_address = node.getIpAddress()
             # If node is not connected, attempt to connect.
             if not env.mEventManager.isConnected(ip_address):
-               if env.mEventManager.connectToNode(ip_address):
-                  new_connections = True
-                  # Tell the new node to report it's os.
-                  env.mEventManager.emit(ip_address, "ensemble.get_os")
-                  env.mEventManager.emit(ip_address, "ensemble.get_settings")
-                  env.mEventManager.emit(ip_address, "reboot.get_info")
+               deferred = env.mEventManager.connectToNode(ip_address)
+               deferred.addCallback(self.onConnection, ip_address)
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 
-      if new_connections:
-         print "We had new connections"
-         self.emit(QtCore.SIGNAL("ensembleChanged()"))
+   def onConnection(self, result, nodeId):
+      # Tell the new node to report its os.
+      env = maestro.core.Environment()
+      self.mLogger.info("We are now connected to %s" % nodeId)
+      # Could this signal also include nodeId?
+      self.emit(QtCore.SIGNAL("ensembleChanged()"))
+
+      return result
 
    def onLostConnection(self, msgFrom, nodeId):
       """ Slot that is called when a connection is lost to a node.
