@@ -103,6 +103,7 @@ class Ensemble(QtCore.QObject):
             if not env.mEventManager.isConnected(ip_address):
                deferred = env.mEventManager.connectToNode(ip_address)
                deferred.addCallback(self.onConnection, ip_address)
+               deferred.addErrback(self.onConnectError, ip_address)
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 
@@ -114,6 +115,10 @@ class Ensemble(QtCore.QObject):
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
 
       return result
+
+   def onConnectError(self, failure, nodeId):
+      self.mLogger.error("Failed to connect to %s: %s" % \
+                            (nodeId, str(failure.value)))
 
    def onLostConnection(self, msgFrom, nodeId):
       """ Slot that is called when a connection is lost to a node.
