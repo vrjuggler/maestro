@@ -97,9 +97,14 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
 
    def onChangeReportTime(self, reportTime):
-      print "Time: ", reportTime
       env = maestro.core.Environment()
-      for selected_index in self.mResourceTable.selectedIndexes():
+      
+      selected_indices = self.mResourceTable.selectedIndexes()
+      if 0 == len(selected_indices):
+         QtGui.QMessageBox.information(None, "Node Selection",
+                                   "You must select a group of nodes before changing the report rate.")
+      
+      for selected_index in selected_indices:
          # Only handle selected indices in the first column since we only
          # need to terminate once for each row.
          if 0 == selected_index.column():
@@ -186,34 +191,44 @@ class GraphDelegate(QtGui.QItemDelegate):
       self.mYMap.setScaleInterval(0, 100)
 
    def paint(self, painter, option, index):
+      # If we are painting the first column, use default paint method.
       if index.column() == 0:
          QtGui.QItemDelegate.paint(self, painter, option, index)
       else:
-         model = index.model()
-         data = model.data(index)
+         # Get data out of the model for the curves.
+         data = index.model().data(index)
          self.mCurve.setData(self.mTimeData, data)
-         rect = option.rect
-         
+
          # Solid background
          #background_color = QtGui.QColor(QtCore.Qt.black)
-         #painter.fillRect(rect, background_color)
+         #brush = QtGui.QBrush(background_color)
 
          # Simple gradiant
-         linear_gradient = QtGui.QLinearGradient(0, 0, 0, rect.bottom())
+         linear_gradient = QtGui.QLinearGradient(0, 0, 0, option.rect.bottom())
          linear_gradient.setColorAt(0.0, QtCore.Qt.white)
          linear_gradient.setColorAt(1.0, QtCore.Qt.gray)
-         painter.fillRect(rect, QtGui.QBrush(linear_gradient))
+         brush = QtGui.QBrush(linear_gradient)
+         painter.fillRect(option.rect, brush)
 
+         # Set the intervals so the curves know how to draw themselves.
          self.mXMap.setScaleInterval(0, len(data))
-         self.mXMap.setPaintInterval(rect.left(), rect.right())
-         self.mYMap.setPaintInterval(0.0, rect.bottom()-rect.top())
+         self.mXMap.setPaintInterval(option.rect.left(), option.rect.right())
+         self.mYMap.setPaintInterval(0.0, option.rect.bottom()-option.rect.top())
+
+         # Paint the curves.
          painter.save()
-         painter.setClipRect(rect)
-         painter.translate(0, rect.bottom())
+         painter.setClipRect(option.rect)
+         painter.translate(0, option.rect.bottom())
          painter.scale(1.0, -1.0)
          self.mCurve.draw(painter, self.mXMap, self.mYMap)
          painter.restore()
 
+
+         # Draw a frame around cell if it is selected.
+         if (option.showDecorationSelected and (option.state & QtGui.QStyle.State_Selected)):
+            QtGui.qDrawPlainRect(painter, option.rect, option.palette.highlight().color(), 1)
+
+         # Draw the percentage as text.
          text_width = max(option.fontMetrics.width(''), option.fontMetrics.width("100%")) + 6;
          overlay_text = ("%.2f " % data[-1]) + "%"
          style = QtGui.QApplication.style()
