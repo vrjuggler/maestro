@@ -81,12 +81,13 @@ class RebootService(maestro.core.IServicePlugin):
       if self.mBootPlugin is not None:
          self.mLogger.debug("Using boot plugin: %s", self.mBootPlugin.getName())
 
-      env.mEventManager.connect("*", "reboot.get_targets", self.onGetTargets)
+      env.mEventManager.connect("*", "reboot.get_info", self.onGetInfo)
       env.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)
+      env.mEventManager.connect("*", "reboot.set_timeout", self.onSetTimeout)
       env.mEventManager.connect("*", "reboot.switch_os", self.onSwitchBootPlatform)
       env.mEventManager.connect("*", "reboot.reboot", self.onReboot)
 
-   def onGetTargets(self, nodeId, avatar):
+   def onGetInfo(self, nodeId, avatar):
       """ Slot that returns a process list to the calling maestro client.
 
           @param nodeId: IP address of maestro client that sent event.
@@ -98,9 +99,10 @@ class RebootService(maestro.core.IServicePlugin):
 
       targets = self.mBootPlugin.getTargets()
       default = self.mBootPlugin.getDefault()
+      timeout = self.mBootPlugin.getTimeout()
       env = maestro.core.Environment()
-      env.mEventManager.emit(nodeId, "reboot.report_targets", targets,
-                             default)
+      env.mEventManager.emit(nodeId, "reboot.report_info", targets,
+                             default, timeout)
 
    def onSetDefaultTarget(self, nodeId, avatar, index, title):
       """ Slot that sets the default target OS for reboot.
@@ -114,14 +116,27 @@ class RebootService(maestro.core.IServicePlugin):
          return
 
       if self.mBootPlugin.setDefault(index, title):
-         self.onGetTargets("*", avatar)
+         self.onGetInfo("*", avatar)
+
+   def onSetTimeout(self, nodeId, avatar, timeout):
+      """ Slot that sets the timeout for rebooting.
+
+          @param nodeId: IP address of maestro client that sent event.
+          @param avatar: System avatar that represents the remote user.
+          @param timeout: Number of seconds to wait on reboot.
+      """
+      if self.mBootPlugin is None:
+         return
+
+      if self.mBootPlugin.setTimeout(timeout):
+         self.onGetInfo("*", avatar)
 
    def onSwitchBootPlatform(self, nodeId, avatar, targetOs):
       if self.mBootPlugin is None:
          return
 
       if self.mBootPlugin.switchPlatform(targetOs):
-         self.onGetTargets("*", avatar)
+         self.onGetInfo("*", avatar)
 
    def onReboot(self, nodeId, avatar):
       """ Slot that causes the node to reboot.
@@ -141,4 +156,4 @@ class RebootService(maestro.core.IServicePlugin):
 
 if __name__ == "__main__":
    r = RebootService()
-   print r.onGetTargets()
+   print r.onGetInfo()

@@ -24,6 +24,36 @@ import maestro.core
 const = maestro.core.const
 from maestro.core import Ensemble
 
+class RebootInfo:
+   def __init__(self, targets = [], default = -1, timeout = -1):
+      self.mTargets = targets
+      self.mDefaultTargetIndex = default
+      self.mTimeout = timeout
+
+   def lostConnection(self):
+      """ Slot that is called when the connection to this node is lost. All
+          cached data should be cleared and set to it's inital state.
+      """
+      self.mTargets = []
+      self.mDefaultTargetIndex = -1
+
+   def getCurrentTarget(self):
+      return self.getTarget(self.mDefaultTargetIndex)
+
+   def getTarget(self, index):
+      if index < 0 or index >= len(self.mTargets):
+         return ("Unknown", const.ERROR, -1)
+      return self.mTargets[index]
+
+   def setTargets(self, targets):
+      self.mTargets = targets
+      self.emit(QtCore.SIGNAL("targetsChanged(QList)"), self.mTargets)
+
+   def getTargets(self):
+      return self.mTargets
+
+default_reboot_info = RebootInfo()
+
 class RebootViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
       maestro.core.IViewPlugin.__init__(self)
@@ -49,6 +79,11 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Default values that will change in init().
       self.mEnsemble = None
+
+      self.mRebootInfoMap = {}
+
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "reboot.report_info", self.onReportTargets)
 
    def setupUi(self, widget):
       """
@@ -116,7 +151,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mEnsemble = ensemble
 
       # Create a model for our NodeTableView
-      self.mRebootModel = RebootModel(self.mEnsemble)
+      self.mRebootModel = RebootModel(self.mEnsemble, self.mRebootInfoMap)
       self.connect(self.mRebootModel, QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
          self.onRebootModelChanged)
 
@@ -134,10 +169,21 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mNodeTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
+   def onReportTargets(self, nodeId, targets, defaultTargetIndex, timeout):
+      """ Slot that is called when a node reports it's possible boot targets. """
+
+      ri = RebootInfo(targets, defaultTargetIndex, timeout)
+      self.mRebootInfoMap[nodeId] = ri
+      #self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
+      self.mNodeTableView.reset()
+
    def onNodeContextMenu(self, point):
       """ Create a pop-up menu listing all valid operations for selection. """
       # Get the currently selected node.
       node = self.__getSelectedNode()
+      node_id = node.getId()
+      reboot_info = self.mRebootInfoMap.get(node_id, default_reboot_info)
+
       temp_callbacks = []
 
       # Create a menu
@@ -153,10 +199,10 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Add custom boot targets.
       if node is not None:
-         if len(node.mTargets) > 0:
+         if len(reboot_info.getTargets()) > 0:
             menu.addSeparator()
          # For each target operation system, build a TargetListItem
-         for target in node.mTargets:
+         for target in reboot_info.getTargets():
             (title, os, index) = target
             icon = const.mOsIcons[os]
             node_id = node.getId()
@@ -185,7 +231,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
    def onRefresh(self):
       """ Slot that reboots the entire cluster. """
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "reboot.get_targets")
+      env.mEventManager.emit("*", "reboot.get_info")
 
    def onRebootNode(self):
       """ Slot that reboots the selected cluster. """
@@ -256,17 +302,27 @@ class RebootDelegate(QtGui.QItemDelegate):
           @param option: Widget options.
           @param index: QModelIndex of the cell that we are editing.
       """
-      # Get current selected node.
-      node = index.model().data(index, QtCore.Qt.UserRole)
-      # Create a TargetModel for the selected node.
-      self.mTargetModel = TargetModel(node)
 
-      # Create a QComboBox and give it the TargetModel.
-      cb = QtGui.QComboBox(parent)
-      cb.setFrame(False)
-      cb.setModel(self.mTargetModel)
-      cb.setModelColumn(0)
-      return cb
+      if 1 == index.column():
+         # Get current selected node.
+         node = index.model().data(index, QtCore.Qt.UserRole)
+         reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
+         # Create a TargetModel for the selected node.
+         self.mTargetModel = TargetModel(reboot_info)
+
+         # Create a QComboBox and give it the TargetModel.
+         cb = QtGui.QComboBox(parent)
+         cb.setFrame(False)
+         cb.setModel(self.mTargetModel)
+         cb.setModelColumn(0)
+         return cb
+      elif 2 == index.column():
+         editor = QtGui.QSpinBox(parent)
+         editor.setMinimum(0)
+         editor.setMaximum(100)
+         editor.installEventFilter(self)
+         return editor
+      return QtGui.QItemDelegate.createEditor(self, parent, option, index)
 
    def setEditorData(self, widget, index):
       """ Set the state of the widget to reflect the model.
@@ -274,15 +330,25 @@ class RebootDelegate(QtGui.QItemDelegate):
           @param widget: Widget created in createEditor()
           @param index: QModelIndex for the cell that we are editing.
       """
-      # Get the node that we are editing.
-      node = index.model().data(index, QtCore.Qt.UserRole)
 
-      # Get current boot target tuple.
-      (title, os, target_index) = node.getCurrentTarget()
+      if 1 == index.column():
+         # Get the node that we are editing.
+         node = index.model().data(index, QtCore.Qt.UserRole)
+         reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
 
-      # If the target index is valid.
-      if target_index > 0:
-         widget.setCurrentIndex(target_index)
+         # Get current boot target tuple.
+         (title, os, target_index) = reboot_info.getCurrentTarget()
+
+         # If the target index is valid.
+         if target_index > 0:
+            widget.setCurrentIndex(target_index)
+      elif 2 == index.column():
+         # Get the node that we are editing.
+         node = index.model().data(index, QtCore.Qt.UserRole)
+         reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
+         widget.setValue(reboot_info.mTimeout)
+      else:
+         QtGui.QItemDelegate.setEditorData(self, widget, index)
 
    def setModelData(self, widget, model, index):
       """ Set the correct data in the model from the editor.
@@ -291,30 +357,46 @@ class RebootDelegate(QtGui.QItemDelegate):
           @param model: ItemModel that we are editing.
           @param index: QModelIndex for the cell that we are editing.
       """
-      # Get the node that we are editing.
-      node = index.model().data(index, QtCore.Qt.UserRole)
 
-      # Get both the current and new boot targets.
-      current_target = node.getCurrentTarget()
-      new_target = node.getTarget(widget.currentIndex())
+      if 1 == index.column():
+         # Get the node that we are editing.
+         node = index.model().data(index, QtCore.Qt.UserRole)
+         reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
 
-      # If the new boot target is different, emit a signal to force change.
-      if not current_target == new_target:
-         (title, os, target_index) = new_target
-         # Tell the selected node to change it's default target.
-         env = maestro.core.Environment()
-         env.mEventManager.emit(node.getId(), "reboot.set_default_target", target_index, title)
+         # Get both the current and new boot targets.
+         current_target = reboot_info.getCurrentTarget()
+         new_target = reboot_info.getTarget(widget.currentIndex())
+
+         # If the new boot target is different, emit a signal to force change.
+         if not current_target == new_target:
+            (title, os, target_index) = new_target
+            # Tell the selected node to change it's default target.
+            env = maestro.core.Environment()
+            env.mEventManager.emit(node.getId(), "reboot.set_default_target", target_index, title)
+      elif 2 == index.column():
+         # Get the node that we are editing.
+         node = index.model().data(index, QtCore.Qt.UserRole)
+         reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
+         timeout = widget.value()
+         print "TIMEOUT: ", timeout
+         if not timeout == reboot_info.mTimeout:
+            # Tell the selected node to change it's default target.
+            env = maestro.core.Environment()
+            env.mEventManager.emit(node.getId(), "reboot.set_timeout", timeout)
+      else:
+         QtGui.QItemDelegate.setModelData(self, widget, model, index)
+
 
    def updateEditorGeometry(self, editor, option, index):
       editor.setGeometry(option.rect)
 
 class TargetModel(QtCore.QAbstractListModel):
    """ ListModel that represents all possible boot targets for a given node. """
-   def __init__(self, node, parent=None):
+   def __init__(self, rebootInfo, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
       # Set the new node to show targets for.
-      self.mNode = node
+      self.mRebootInfo = rebootInfo
 
    def data(self, index, role=QtCore.Qt.DisplayRole):
       """ Returns the data representation of each boot target.
@@ -323,7 +405,7 @@ class TargetModel(QtCore.QAbstractListModel):
          return QtCore.QVariant()
 
       # Get the boot target tuple from node.
-      target = self.mNode.getTarget(index.row())
+      target = self.mRebootInfo.getTarget(index.row())
       (title, os, target_index) = target
 
       if role == QtCore.Qt.DecorationRole:
@@ -341,18 +423,19 @@ class TargetModel(QtCore.QAbstractListModel):
    def rowCount(self, parent=QtCore.QModelIndex()):
       """ Returns the number of boot targets.
       """
-      return len(self.mNode.mTargets)
+      return len(self.mRebootInfo.getTargets())
 
 
 class RebootModel(QtCore.QAbstractTableModel):
    """ TableModel that represents all nodes in the ensemble and their
        current boot target.
    """
-   def __init__(self, ensemble, parent=None):
+   def __init__(self, ensemble, rebootInfoMap, parent=None):
       QtCore.QAbstractTableModel.__init__(self, parent)
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
+      self.mRebootInfoMap = rebootInfoMap
 
       # Connect the new ensemble.
       self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
@@ -368,7 +451,7 @@ class RebootModel(QtCore.QAbstractTableModel):
       flags = QtCore.QAbstractTableModel.flags(self, index)
 
       # Allow editing of only the second column.
-      if 1 == index.column():
+      if index.column() > 0:
          flags |= QtCore.Qt.ItemIsEditable
       return flags
 
@@ -378,7 +461,7 @@ class RebootModel(QtCore.QAbstractTableModel):
 
    def columnCount(self, parent=QtCore.QModelIndex()):
       """ Return the number of columns of data we are showing. """
-      return 2
+      return 3
 
    def headerData(self, section, orientation, role):
       """ Return the header data for the given section and orientation.
@@ -394,6 +477,8 @@ class RebootModel(QtCore.QAbstractTableModel):
             return QtCore.QVariant("Node (Current OS)")
          elif section == 1:
             return QtCore.QVariant("Operating System On Reboot")
+         elif section == 2:
+            return QtCore.QVariant("Timeout")
       return QtCore.QVariant()
 
    def data(self, index, role):
@@ -411,7 +496,9 @@ class RebootModel(QtCore.QAbstractTableModel):
          return QtCore.QVariant()
 
       node = self.mEnsemble.getNode(index.row())
-      current_target = node.getCurrentTarget()
+      node_id = node.getId()
+      reboot_info = self.mRebootInfoMap.get(node_id, default_reboot_info)
+      current_target = reboot_info.getCurrentTarget()
       (title, os, target_index) = current_target
 
       if role == QtCore.Qt.DecorationRole:
@@ -427,9 +514,15 @@ class RebootModel(QtCore.QAbstractTableModel):
          elif index.column() == 1:
             # Return the title of the boot target
             return QtCore.QVariant(title)
+         elif index.column() == 2:
+            # Return the title of the boot target
+            return QtCore.QVariant(reboot_info.mTimeout)
       elif role == QtCore.Qt.UserRole:
          # Return the node for easy access.
          return node
+      elif role == QtCore.Qt.UserRole+1:
+         # Return the node for easy access.
+         return reboot_info
 
       return QtCore.QVariant()
 

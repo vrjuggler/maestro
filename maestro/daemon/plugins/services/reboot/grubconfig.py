@@ -139,6 +139,7 @@ class GrubConfig:
    sTitleRe        = re.compile(r'^title\s+(.*)\s*$')
    sDefaultRe      = re.compile(r'^default=(\d+)\s*$')
    sSavedDefaultRe = re.compile(r'^#saved_default=(\d+)\s*$')
+   sTimeoutRe      = re.compile(r'^timeout=(\d+)\s*$')
 
    def __init__(self, grubConfFile):
       self.mFile = grubConfFile
@@ -231,6 +232,32 @@ class GrubConfig:
          if targetMatch(self.mTargets[t]):
             self.mContents[self.__getDefaultLine()] = self.__makeDefault(t)
          t += 1
+
+   def getTimeout(self):
+      '''
+      getTimeout() -> int
+      Gets the current timeout to wait before booting the default target. If
+      there is no such default boot target, then None is returned.
+      '''
+      for l in self.mContents:
+         match = self.sTimeoutRe.search(l)
+         if match is not None:
+            return int(match.group(1))
+
+      return None
+
+   def setTimeout(self, timeout):
+      '''
+      setTimeout(int)
+      Sets the timeout to wait before booting the default target.
+      '''
+      i = 0
+      line_count = len(self.mContents)
+      while i < line_count:
+         line = self.mContents[i]
+         if self.sTimeoutRe.search(line) is not None:
+            self.mContents[i] = self.__makeTimeout(timeout)
+         i += 1
 
    def __getDefaultLine(self):
       '''
@@ -395,3 +422,11 @@ class GrubConfig:
       This is suitable for being injected into a GRUB configruation file.
       '''
       return '#saved_default=%d\n' % index
+
+   def __makeTimeout(self, timeout):
+      '''
+      makeTimeout(int) -> str
+      Creates a new line for the GRUB configuration that uses the given timeout
+      value. This is suitable for being injected into a GRUB configruation file.
+      '''
+      return 'timeout=%d\n' % timeout

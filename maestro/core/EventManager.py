@@ -96,7 +96,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       # As soon as we connect to a new node, we want to know what OS it is running.
       self.emit("*", "ensemble.get_os")
       self.emit("*", "ensemble.get_settings")
-      self.emit("*", "reboot.get_targets")
+      self.emit("*", "reboot.get_info")
 
    def disconnectFromNode(self, nodeId):
       """ Disconnect a given nodes remote object.

@@ -91,6 +91,12 @@ class NtLoaderPlugin(maestro.core.IBootPlugin):
 
       return False
 
+   def getTimeout(self):
+      return 30
+
+   def setTimeout(self, timeout):
+      pass
+
    def switchPlatform(self, targetOs):
       targets = self.getTargets()
       for target in targets:

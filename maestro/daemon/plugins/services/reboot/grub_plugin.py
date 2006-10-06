@@ -154,6 +154,15 @@ class GrubPlugin(maestro.core.IBootPlugin):
          return True
       return False
 
+   def getTimeout(self):
+      return self.mGrubConfig.getTimeout()
+
+   def setTimeout(self, timeout):
+      if timeout == self.getTimeout():
+         return False
+      self.mGrubConfig.setTimeout(timeout)
+      return True
+
    def switchPlatform(self, targetOs):
       def matchLinuxTarget(target):
          return target.isLinux()

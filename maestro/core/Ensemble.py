@@ -52,7 +52,6 @@ class Ensemble(QtCore.QObject):
       # Register to receive signals from all nodes about their current os.
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
-      env.mEventManager.connect("*", "reboot.report_targets", self.onReportTargets)
       env.mEventManager.connect("*", "lostConnection", self.onLostConnection)
 
    def getNode(self, index):
@@ -86,15 +85,6 @@ class Ensemble(QtCore.QObject):
       except Exception, ex:
          print "ERROR: ", ex
 
-   def onReportTargets(self, nodeId, targets, defaultTargetIndex):
-      """ Slot that is called when a node reports it's possible boot targets. """
-      print targets
-      for node in self.mNodes:
-         if node.getIpAddress() == nodeId:
-            node.setTargets(targets)
-            node.mDefaultTargetIndex = defaultTargetIndex
-            self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
-
    def refreshConnections(self):
       """Try to connect to all nodes."""
 
@@ -113,7 +103,7 @@ class Ensemble(QtCore.QObject):
                   # Tell the new node to report it's os.
                   env.mEventManager.emit(ip_address, "ensemble.get_os")
                   env.mEventManager.emit(ip_address, "ensemble.get_settings")
-                  env.mEventManager.emit(ip_address, "reboot.get_targets")
+                  env.mEventManager.emit(ip_address, "reboot.get_info")
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 
@@ -149,28 +139,12 @@ class ClusterNode(QtCore.QObject):
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("sub_class")
       self.mPlatform = const.ERROR 
-      self.mTargets = []
-      self.mDefaultTargetIndex = -1
 
    def lostConnection(self):
       """ Slot that is called when the connection to this node is lost. All
           cached data should be cleared and set to it's inital state.
       """
       self.mPlatform = const.ERROR 
-      self.mTargets = []
-      self.mDefaultTargetIndex = -1
-
-   def getCurrentTarget(self):
-      return self.getTarget(self.mDefaultTargetIndex)
-
-   def getTarget(self, index):
-      if index < 0 or index >= len(self.mTargets):
-         return ("Unknown", const.ERROR, -1)
-      return self.mTargets[index]
-
-   def setTargets(self, targets):
-      self.mTargets = targets
-      self.emit(QtCore.SIGNAL("targetsChanged(QList)"), self.mTargets)
 
    def getName(self):
       return self.mElement.get("name")
