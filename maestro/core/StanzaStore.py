@@ -36,14 +36,22 @@ class StanzaStore:
          progressCB(i/num_files, "Loading file: %s"%f)
          stanza_elm = ET.ElementTree(file=f).getroot()
          self.mStanzas.append(stanza_elm)
-         import time
-         time.sleep(0.5)
 
    def getApplications(self):
+      app_elms = []
+
+      # Look in all stanza files for any children with an application tag.
+      for stanza in self.mStanzas:
+         for item in stanza:
+           if 'application' == item.tag:
+              app_elms.append(item)
+
       apps = []
-      for s in self.mStanzas:
-         if 'application' == s.tag:
-            apps.append(s)
+      # Fully expand all applications.
+      for elm in app_elms:
+         expanded = self.expand(elm)
+         app = Stanza.Application(expanded)
+         apps.append(app)
       return apps
 
    def expand(self, elm):

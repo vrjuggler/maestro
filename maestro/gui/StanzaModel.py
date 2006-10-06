@@ -27,7 +27,7 @@ class StanzaAdapter:
       self.mObj = obj
 
    def dataCount(self):
-      if isinstance(self.mObj, Stanza.Stanza):
+      if isinstance(self.mObj, Stanza.Application):
          return 4
       if isinstance(self.mObj, Stanza.Group):
          return 1
@@ -43,7 +43,7 @@ class StanzaAdapter:
    def data(self, index, role):
       column = index.column()
       row = index.row()
-      if isinstance(self.mObj, Stanza.Stanza):
+      if isinstance(self.mObj, Stanza.Application):
          if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             if 0 == row:
                if 0 == column:
@@ -166,7 +166,7 @@ class StanzaAdapter:
 
    def setData(self, index, value, role):
       row = index.row()
-      if isinstance(self.mObj, Stanza.Stanza):
+      if isinstance(self.mObj, Stanza.Application):
          if 0 == row:
             self.mObj.mLabel = value.toString()
          elif 1 == row:

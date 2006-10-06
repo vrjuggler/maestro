@@ -47,6 +47,13 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
+   def activate(self):
+      self.widget.buildLaunchGui()
+   
+   def deactivate(self):
+      pass
+
+
 def numClassMatches(nodeClassString, subClassString):
    node_classes = nodeClassString.split(",")
    sub_classes = subClassString.split(",")
@@ -90,36 +97,15 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.actionDict          = {}   # Storage for user-defined action slots
       self.activeThread        = None
 
-   def scanForStanzas(self):
-      stanza_path = pj(const.EXEC_DIR, "stanzas")
-      assert os.path.exists(stanza_path)
-      assert os.path.isdir(stanza_path)
-      files = os.listdir(stanza_path)
-      stanza_files = []
-      for path, dirs, files in os.walk(stanza_path):
-         stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
-
-      self.mStanzas = []
-      for s in stanza_files:
-         stanza_elm = ET.ElementTree(file=s).getroot()
-         stanza = Stanza.Stanza(stanza_elm)
-         print "Adding stanza: ", stanza.getName()
-         self.mStanzas.append(stanza)
-
-
    def init(self, ensemble):
       self.mEnsemble = ensemble
       self.mElement = self.mEnsemble.mElement
-      self.scanForStanzas()
 
-      self._fillInApps()
-
-      self.mTreeModel = StanzaModel.TreeModel(self.mStanzas)
       self.mTableModel = StanzaModel.TableModel()
-      self.mTreeView.setModel(self.mTreeModel)
       self.mTableView.setModel(self.mTableModel)
-      QtCore.QObject.connect(self.mTreeView.selectionModel(),
-         QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
+      # XXX:
+      #QtCore.QObject.connect(self.mTreeView.selectionModel(),
+      #   QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
 
    def setupUi(self, widget):
       LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)
@@ -154,28 +140,33 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
    def onAppSelect(self):
      self._setApplication(self.mAppComboBox.currentIndex())
 
-   def _fillInApps(self):
+   def buildLaunchGui(self):
       """ Fills in the application panel. """
       self.mAppComboBox.clear()
 
-      for s in self.mStanzas:
+      env = maestro.core.Environment()
+      self.mApplications = env.mStanzaStore.getApplications()
+      #self.mTreeModel = StanzaModel.TreeModel(self.mApplications)
+      #self.mTreeView.setModel(self.mTreeModel)
+
+      for s in self.mApplications:
          self.mAppComboBox.addItem(s.getName())
    
-      if len(self.mStanzas) > 0:
+      if len(self.mApplications) > 0:
          self.mAppComboBox.setCurrentIndex(0)
          self._setApplication(0)
       else:
          QtGui.QMessageBox.critical(self.parentWidget(), "Fatal Error",
                                     "No applications defined!")
-         QApplication.exit(0)
+         QtCore.QApplication.exit(0)
 
    def _setApplication(self, index):
       if self.mSelectedApp != None:
          self.mSelectedApp.mSelected = False
          self._resetAppState()
 
-      assert index < len(self.mStanzas)
-      self.mSelectedApp = self.mStanzas[index]
+      assert index < len(self.mApplications)
+      self.mSelectedApp = self.mApplications[index]
       self.mSelectedApp.mSelected = True
       print "Setting application [%s] [%s]" % (index, self.mSelectedApp.getName())
       for c in self.mSelectedApp.mChildren:
@@ -285,7 +276,7 @@ CHECK_BUTTON = 2
 def _buildWidget(obj, buttonType = NO_BUTTON):
    name = obj.getName()
    widget = None
-   if isinstance(obj, Stanza.Stanza):
+   if isinstance(obj, Stanza.Application):
       pass
    #   print "Building Application Sheet... ", name
    #   sh = QtGui.QLabel(self)
