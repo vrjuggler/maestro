@@ -11,7 +11,9 @@ def not_implemented():
 #   pass
 
 class IViewPlugin(maestro.util.plugin.Plugin):
-   
+   '''
+   Base interface for view plug-ins used by the Maestro GUI.
+   '''
    def __init__(self):
       pass
    
@@ -26,6 +28,20 @@ class IViewPlugin(maestro.util.plugin.Plugin):
    def getViewWidget(self):
       not_implemented()
 
+   def activate(self):
+      '''
+      Invoked when this view plug-in is changing from the inactive to the
+      acctive state.
+      '''
+      pass
+
+   def deactivate(self):
+      '''
+      Invoked when this view plug-in is changing from the active to the
+      inacctive state.
+      '''
+      pass
+   
 class IServicePlugin(maestro.util.plugin.Plugin):
    
    def __init__(self):

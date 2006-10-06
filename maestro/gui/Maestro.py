@@ -283,20 +283,35 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 #      self.mLoggers.append(console_logger)
 
       env = maestro.core.Environment()
+      self.mCurViewPlugin = None
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
       for name, cls in self.mViewPlugins.iteritems():
          self.addView(name)
 
-      QtCore.QObject.connect(self.mToolboxButtonGroup,QtCore.SIGNAL("buttonClicked(int)"),self.mStack.setCurrentIndex)
-      # Set the default button to display
-      btn = self.mToolboxButtonGroup.buttons()[0]
-      btn.click()
-      self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
-
+      QtCore.QObject.connect(self.mToolboxButtonGroup,
+                             QtCore.SIGNAL("buttonClicked(int)"),
+                             self.mStack.setCurrentIndex)
+      QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
+                             self.viewChanged)
+      QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
+                             self.viewRemoved)
 
       # Initialize all loaded modules.
       for (view, view_widget) in self.mActiveViewPlugins.values():
          view_widget.init(self.mEnsemble)
+
+      # Set the default button to display
+      btn = self.mToolboxButtonGroup.buttons()[0]
+      btn.click()
+
+      # Set the stack widget's current width to be the one associated with
+      # the clicked button. This has to be done after the loaded views are
+      # initialized since this results in the view plug-in being activated.
+      # In other words, we do not want a view plug-in to be activated before
+      # it is initialized.
+      self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
+
+      assert(self.mCurViewPlugin is not None)
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
@@ -370,6 +385,37 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          QtGui.QMessageBox.critical(self, "Plugin Failure", err_text, 
                                     QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
                                     QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
+
+   def viewChanged(self, index):
+      if self.mCurViewPlugin is not None:
+         self.mCurViewPlugin.deactivate()
+
+      self.mCurViewPlugin = \
+         self.getCurrentViewPlugin(self.mStack.currentWidget())
+
+      if self.mCurViewPlugin is not None:
+         self.mCurViewPlugin.activate()
+
+   def viewRemoved(self, index):
+      if self.mCurViewPlugin is not None:
+         pass
+#         removed_widget = 
+
+   def getCurrentViewPlugin(self, curViewWidget):
+      '''
+      Searches self.mActiveViewPlugins looking for the one whose widget
+      instance is the same as curViewWidget. Note that this uses reference
+      equality rather than object equality to compare curViewWidget with
+      the contents of self.mActiveViewPlugins.
+      '''
+      view_plugin = None
+
+      for (plugin, widget) in self.mActiveViewPlugins.values():
+         if curViewWidget is widget:
+            view_plugin = plugin
+            break
+
+      return view_plugin
 
    def __tr(self,s,c = None):
       return qApp.translate("MainWindow",s,c)

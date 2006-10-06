@@ -41,6 +41,9 @@ class DesktopViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
+   def activate(self):
+      self.widget.refresh(self.widget.getCurrentNodeID())
+
 class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -103,8 +106,6 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       env.mEventManager.connect('*', 'desktop.report_bg_image_data',
                                 self.onReportBackgroundImageData)
 
-      self.refresh('*')
-
    def refresh(self, nodeId):
       if self.mEnsemble is not None:
          self.mEnsemble.refreshConnections()
@@ -120,7 +121,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self._setChoice(self.mNodeChooser.currentIndex())
 
    def onToggleScreenSaver(self, val):
-      node_id = self._getCurrentNodeID()
+      node_id = self.getCurrentNodeID()
       env = maestro.core.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_toggle', val)
 
@@ -151,13 +152,13 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
                                 data, debug = False)
 
    def onStopScreenSaver(self):
-      node_id = self._getCurrentNodeID()
+      node_id = self.getCurrentNodeID()
       env = maestro.core.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_stop', val)
 
    def onReportSaverUse(self, nodeId, usesSaver):
       self.mSettings[nodeId].setUsesScreenSaver(usesSaver)
-      cur_node_id = self._getCurrentNodeID()
+      cur_node_id = self.getCurrentNodeID()
 
       if nodeId == cur_node_id:
          if usesSaver:
@@ -222,7 +223,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          # First, update data's background image file name.
          data.setBackgroundImageFile(fileName)
 
-         cur_node_id = self._getCurrentNodeID()
+         cur_node_id = self.getCurrentNodeID()
          if cur_node_id == nodeId:
             self.mBgImgFileText.setText(fileName)
 
@@ -233,12 +234,12 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.mImageCache[img_digest] = img_data_str
       data.setBackgroundImageCacheKey(img_digest)
 
-      cur_node_id = self._getCurrentNodeID()
+      cur_node_id = self.getCurrentNodeID()
       if cur_node_id == nodeId:
          self._setBackgroundImage(data.getBackgroundImageFile(), img_data_str)
 
    def _setChoice(self, index):
-      node_id = self._getCurrentNodeID()
+      node_id = self.getCurrentNodeID()
       self.refresh(node_id)
 
       if node_id == '*':
@@ -312,8 +313,8 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       else:
          self.mSaverEnabledBox.setTristate(False)
 
-#         print self._getCurrentNodeID()
-#         data = self.mSettings[self._getCurrentNodeID()]
+#         print self.getCurrentNodeID()
+#         data = self.mSettings[self.getCurrentNodeID()]
 #
 #         if data.usesScreenSaver():
 #            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
@@ -345,7 +346,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          self.mBgImageLbl.setPixmap(pixmap.scaled(self.mBgImageLbl.size(),
                                                   QtCore.Qt.KeepAspectRatio))
 
-   def _getCurrentNodeID(self):
+   def getCurrentNodeID(self):
       return str(self.mNodeChooser.itemData(self.mNodeChooser.currentIndex()).toString())
 
 class DesktopSettings:
