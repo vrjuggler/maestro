@@ -192,8 +192,6 @@ class Stanza(TreeItem):
    def __init__(self, xmlElt, parent=None, row=0):
       TreeItem.__init__(self, xmlElt, parent, row)
 
-      assert xmlElt.tag == "stanza"
-
       self.mLabel = xmlElt.get("label", "Unknown")
 
       global_options = xmlElt.get("global_options", "")

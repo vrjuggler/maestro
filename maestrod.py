@@ -25,6 +25,7 @@ const = maestro.core.const
 
 const.EXEC_DIR = os.path.dirname(__file__)
 const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'daemon', 'plugins')
+const.MAESTRO_GUI = False
 
 import maestro
 import maestro.core

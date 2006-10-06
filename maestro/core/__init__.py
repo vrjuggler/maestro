@@ -28,7 +28,6 @@ class _const:
         if self.__dict__.has_key(name):
             raise self.ConstError, "Can't rebind const(%s)"%name
         self.__dict__[name]=value
-import sys
 
 const = _const()
 

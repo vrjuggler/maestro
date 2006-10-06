@@ -37,6 +37,8 @@ import maestro.core
 const = maestro.core.const
 const.EXEC_DIR = os.path.dirname(__file__)
 const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'plugins')
+const.STANZA_PATH = pj(const.EXEC_DIR, "stanzas")
+const.MAESTRO_GUI = True
 from maestro.core import Ensemble
 
 import maestro.gui as gui

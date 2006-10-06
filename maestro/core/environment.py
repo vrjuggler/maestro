@@ -22,6 +22,7 @@ import maestro.util.plugin
 import maestro.util.mixins
 import maestro.core
 import EventManager
+import StanzaStore
 
 class Environment(maestro.util.mixins.Singleton):
    """ The main environment/namespace for the Maestro.
@@ -35,6 +36,7 @@ class Environment(maestro.util.mixins.Singleton):
          self.mPluginManager = None
          self.settings = None
          self.mViewPluginsHolder = None
+         self.mStanzaStore = None
 
    def initialize(self, settings, progressCB=None):
       """ Initialize the environment. """
@@ -56,6 +58,11 @@ class Environment(maestro.util.mixins.Singleton):
       for (name,p) in plugins.iteritems():
          print "  %s : %s"%(name,p)
 
+      if maestro.core.const.MAESTRO_GUI:
+         # Create a stanza store and scan for files.
+         self.mStanzaStore = StanzaStore.StanzaStore()
+         self.mStanzaStore.scan(progressCB)
+      
       # -- Initialize the plugin holders -- #
       #self.mViewPluginsHolder = lucid.core.ViewPluginsHolder()
       #self.mViewPluginsHolder.scan()

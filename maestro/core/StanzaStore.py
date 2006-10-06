@@ -14,8 +14,15 @@ class StanzaStore:
    def __init__(self):
       self.mStanzas = []
 
-   def scan(self):
+   def scan(self, progressCB):
+      def null_progress_cb(p,s):
+         pass
+      
+      if not progressCB:
+         progressCB = null_progress_cb
+         
       stanza_path = pj(maestro.core.const.STANZA_PATH)
+      progressCB(0.0, "Scanning for plugins [%s]" % (stanza_path))
       assert os.path.exists(stanza_path)
       assert os.path.isdir(stanza_path)
       files = os.listdir(stanza_path)
@@ -24,10 +31,13 @@ class StanzaStore:
          stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
 
       self.mStanzas = []
-      for f in stanza_files:
-         print "Scanning file: ", f
+      num_files = len(stanza_files)
+      for (i, f) in zip(xrange(num_files), stanza_files):
+         progressCB(i/num_files, "Loading file: %s"%f)
          stanza_elm = ET.ElementTree(file=f).getroot()
          self.mStanzas.append(stanza_elm)
+         import time
+         time.sleep(0.5)
 
    def getApplications(self):
       apps = []
