@@ -50,7 +50,8 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
 
    def _catchFailure(self, failure):
       self.mLogger.error(str(failure.value))
-      self.mLogger.error(failure.getErrorMessage())
+#      self.mLogger.error(failure.getErrorMessage())
+      return failure
 
    def connectToNode(self, nodeId):
       """ Connect to the given nodes event manager.
@@ -84,6 +85,8 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       d = factory.login(self.mCredentials, ip_address).addCallback(
          lambda object: self.completeConnect(nodeId, factory, object)).addErrback(self._catchFailure)
 
+      return d
+
    def lostConnection(self, nodeId):
       self.mLogger.debug("EventManager.lostConnection(%s)" % (nodeId))
       self.unregisterProxy(nodeId)
@@ -97,6 +100,8 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       self.emit("*", "ensemble.get_os")
       self.emit("*", "ensemble.get_settings")
       self.emit("*", "reboot.get_info")
+
+      return object
 
    def disconnectFromNode(self, nodeId):
       """ Disconnect a given nodes remote object.
