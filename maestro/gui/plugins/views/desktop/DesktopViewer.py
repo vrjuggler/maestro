@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import os.path
+import md5
 
 from PyQt4 import QtGui, QtCore
 
@@ -48,8 +49,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.setupUi(self)
 
       # Default values that will change in init().
-      self.mEnsemble = None
-      self.mSettings = {}
+      self.mEnsemble   = None
+      self.mSettings   = {}
+      self.mImageCache = {}
 
    def setupUi(self, widget):
       '''
@@ -69,14 +71,6 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
                    self.onChooseBackgroundFile)
       self.connect(self.mStopSaverBtn, QtCore.SIGNAL("clicked()"),
                    self.onStopScreenSaver)
-
-      env = maestro.core.Environment()
-      env.mEventManager.connect('*', 'desktop.report_saver_use',
-                                self.onReportSaverUse)
-      env.mEventManager.connect('*', 'desktop.report_bg_image_file',
-                                self.onReportBackgroundImageFile)
-      env.mEventManager.connect('*', 'desktop.report_bg_image_data',
-                                self.onReportBackgroundImageData)
 
    def init(self, ensemble):
       '''
@@ -101,11 +95,26 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.connect(self.mNodeChooser, QtCore.SIGNAL("activated(int)"),
                    self.nodeSelected)
 
-      self.mReportCount = 0
       env = maestro.core.Environment()
-      env.mEventManager.emit('*', 'desktop.report_saver_use')
-      env.mEventManager.emit('*', 'desktop.report_bg_image_file')
-      env.mEventManager.emit('*', 'desktop.report_bg_image_data')
+      env.mEventManager.connect('*', 'desktop.report_saver_use',
+                                self.onReportSaverUse)
+      env.mEventManager.connect('*', 'desktop.report_bg_image_file',
+                                self.onReportBackgroundImageFile)
+      env.mEventManager.connect('*', 'desktop.report_bg_image_data',
+                                self.onReportBackgroundImageData)
+
+      self.refresh('*')
+
+   def refresh(self, nodeId):
+      if self.mEnsemble is not None:
+         self.mEnsemble.refreshConnections()
+
+      self.mReportCount = 0
+
+      env = maestro.core.Environment()
+      env.mEventManager.emit(nodeId, 'desktop.get_saver_use')
+      env.mEventManager.emit(nodeId, 'desktop.get_bg_image_file')
+      env.mEventManager.emit(nodeId, 'desktop.get_bg_image_data')
 
    def nodeSelected(self):
       self._setChoice(self.mNodeChooser.currentIndex())
@@ -139,14 +148,14 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          file_obj.close()
          env = maestro.core.Environment()
          env.mEventManager.emit(node_id, 'desktop.set_background', new_file,
-                                data)
+                                data, debug = False)
 
    def onStopScreenSaver(self):
       node_id = self._getCurrentNodeID()
       env = maestro.core.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_stop', val)
 
-   def onReportSaverUse(self, nodeId, avatar, usesSaver):
+   def onReportSaverUse(self, nodeId, usesSaver):
       self.mSettings[nodeId].setUsesScreenSaver(usesSaver)
       cur_node_id = self._getCurrentNodeID()
 
@@ -203,96 +212,118 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
          self.mReportCount += 1
 
-   def onReportBackgroundImageFile(self, nodeId, avatar, fileName):
-      self.mSettings[nodeId].setBackgroundImageFile(fileName)
+   def onReportBackgroundImageFile(self, nodeId, fileName):
+      data = self.mSettings[nodeId]
+      cur_file_name = data.getBackgroundImageFile()
 
-   def onReportBackgroundImageData(self, nodeId, avatar, imgData):
-      self.mSettings[nodeId].setBackgroundImageData(imgData)
+      # If the background image file name has changed, then we need to
+      # determine how to respond to this change.
+      if cur_file_name != fileName:
+         # First, update data's background image file name.
+         data.setBackgroundImageFile(fileName)
+
+         cur_node_id = self._getCurrentNodeID()
+         if cur_node_id == nodeId:
+            self.mBgImgFileText.setText(fileName)
+
+   def onReportBackgroundImageData(self, nodeId, imgData):
+      data = self.mSettings[nodeId]
+      img_data_str = ''.join(imgData)
+      img_digest = md5.new(img_data_str).digest()
+      self.mImageCache[img_digest] = img_data_str
+      data.setBackgroundImageCacheKey(img_digest)
+
+      cur_node_id = self._getCurrentNodeID()
+      if cur_node_id == nodeId:
+         self._setBackgroundImage(data.getBackgroundImageFile(), img_data_str)
 
    def _setChoice(self, index):
-      node_id = self.mNodeChooser.itemText(index)
+      node_id = self._getCurrentNodeID()
+      self.refresh(node_id)
 
       if node_id == '*':
          # When we are displaying the state for all the nodes, we use a
          # tri-state check box. This is more complicated.
          self.mSaverEnabledBox.setTristate(True)
 
-         img_file = ''
-         img_data = ''
-
-         # Make an initial guess at what the checked state should be for
-         # the screen saver enabled box. This is done by finding the first
-         # node ID in self.mSettings that isn't '*' and using its value.
-         for id in self.mSettings.keys():
-            if id != '*':
-               data     = self.mSettings[id]
-               img_file = data.getBackgroundImageFile()
-               img_data = data.getBackgroundImageData()
-
-               if data.usesScreenSaver():
-                  self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
-               else:
-                  self.mSaverEnabledBox.setCheckState(QtCore.Qt.Unchecked)
-               break
-
-         # Now determine if the screen saver enabled check box should be in
-         # the partially checked state by searching for the first node whose
-         # screen saver use state does not match the current state of
-         # self.mSaverEnabledBox.
-         cur_state = self.mSaverEnabledBox.checkState()
-         for id in self.mSettings.keys():
-            if id != '*':
-               uses_saver = self.mSettings[id].usesScreenSaver()
-
-               # If the current node is using a screen saver but the box is
-               # in the unchecked state, change it to the partially checked
-               # state.
-               if uses_saver and cur_state == QtCore.Qt.Unchecked:
-                  self.mSaverEnabledBox.setCheckState(
-                     QtCore.Qt.PartiallyChecked
-                  )
-                  break
-               # If the current node is not using a screen saver but the box
-               # is in the checked state, change it to the partially checked
-               # state.
-               elif not uses_saver and cur_state == QtCore.Qt.Checked:
-                  self.mSaverEnabledBox.setCheckState(
-                     QtCore.Qt.PartiallyChecked
-                  )
-                  break
-
-         # Check to see if all the nodes are using the same background image.
-         # We determine this by comparing the image file name for each node's
-         # settings with the value in img_file (as set above). If any one
-         # node is using a different background image, then we will display
-         # nothing for the background image.
-         for id in self.mSettings.keys():
-            if id != '*':
-               data = self.mSettings[id]
-               if data.getBackgroundImageFile() != img_file:
-                  img_file = ''
-                  img_data = ''
-                  break
-
-         if img_file == '':
-            self.mBgImageLbl.setText("<< Multiple >>")
-            self.mBgImageLbl.setPixmap(QtGui.QPixmap())
-            self.mBgImgFileText.setText("")
-         else:
-            self._setBackgroundImage(img_file, img_data)
+#         img_file = ''
+#         img_key  = ''
+#
+#         # Make an initial guess at what the checked state should be for
+#         # the screen saver enabled box. This is done by finding the first
+#         # node ID in self.mSettings that isn't '*' and using its value.
+#         for id in self.mSettings.keys():
+#            if id != '*':
+#               data     = self.mSettings[id]
+#               img_file = data.getBackgroundImageFile()
+#               img_key  = data.getBackgroundImageCacheKey()
+#
+#               if data.usesScreenSaver():
+#                  self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
+#               else:
+#                  self.mSaverEnabledBox.setCheckState(QtCore.Qt.Unchecked)
+#               break
+#
+#         # Now determine if the screen saver enabled check box should be in
+#         # the partially checked state by searching for the first node whose
+#         # screen saver use state does not match the current state of
+#         # self.mSaverEnabledBox.
+#         cur_state = self.mSaverEnabledBox.checkState()
+#         for id in self.mSettings.keys():
+#            if id != '*':
+#               uses_saver = self.mSettings[id].usesScreenSaver()
+#
+#               # If the current node is using a screen saver but the box is
+#               # in the unchecked state, change it to the partially checked
+#               # state.
+#               if uses_saver and cur_state == QtCore.Qt.Unchecked:
+#                  self.mSaverEnabledBox.setCheckState(
+#                     QtCore.Qt.PartiallyChecked
+#                  )
+#                  break
+#               # If the current node is not using a screen saver but the box
+#               # is in the checked state, change it to the partially checked
+#               # state.
+#               elif not uses_saver and cur_state == QtCore.Qt.Checked:
+#                  self.mSaverEnabledBox.setCheckState(
+#                     QtCore.Qt.PartiallyChecked
+#                  )
+#                  break
+#
+#         # Check to see if all the nodes are using the same background image.
+#         # We determine this by comparing the image file name for each node's
+#         # settings with the value in img_file (as set above). If any one
+#         # node is using a different background image, then we will display
+#         # nothing for the background image.
+#         for id in self.mSettings.keys():
+#            if id != '*':
+#               data = self.mSettings[id]
+#               if data.getBackgroundImageFile() != img_file:
+#                  img_file = ''
+#                  img_key  = ''
+#                  break
+#
+#         if img_file == '':
+#            self.mBgImageLbl.setText("<< Multiple >>")
+#            self.mBgImageLbl.setPixmap(QtGui.QPixmap())
+#            self.mBgImgFileText.setText("")
+#         else:
+#            self._setBackgroundImage(img_file, self.mImageCache[img_key])
       else:
          self.mSaverEnabledBox.setTristate(False)
 
-         print self._getCurrentNodeID()
-         data = self.mSettings[self._getCurrentNodeID()]
-
-         if data.usesScreenSaver():
-            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
-         else:
-            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Unchecked)
-
-         self._setBackgroundImage(data.getBackgroundImageFile(),
-                                  data.getBackgroundImageData())
+#         print self._getCurrentNodeID()
+#         data = self.mSettings[self._getCurrentNodeID()]
+#
+#         if data.usesScreenSaver():
+#            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
+#         else:
+#            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Unchecked)
+#
+#         self._setBackgroundImage(
+#            data.getBackgroundImageFile(),
+#            self.mImageCache[data.getBackgroundImageCacheKey()]
+#         )
 
    def _setBackgroundImage(self, imgFile, imgData):
       self.mBgImgFileText.setText(imgFile)
@@ -302,9 +333,17 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          self.mBgImageLbl.setPixmap(QtGui.QPixmap())
       else:
          self.mBgImageLbl.setText('')
+
+         # Convert the raw bytes of imgData into a pixmap so that it can be
+         # rendered in self.mBgImageLbl.
          byte_array = QtCore.QByteArray.fromRawData(imgData)
-         print byte_array
-         self.mBgImageLbl.setPixmap(QtGui.QPixmap(byte_array))
+         pixmap = QtGui.QPixmap()
+         pixmap.loadFromData(byte_array)
+
+         # Get a scaled version of pixmap so that it fits within the current
+         # size of self.mBgImageLbl.
+         self.mBgImageLbl.setPixmap(pixmap.scaled(self.mBgImageLbl.size(),
+                                                  QtCore.Qt.KeepAspectRatio))
 
    def _getCurrentNodeID(self):
       return str(self.mNodeChooser.itemData(self.mNodeChooser.currentIndex()).toString())
@@ -313,7 +352,7 @@ class DesktopSettings:
    def __init__(self):
       self.mUsesScreenSaver   = True
       self.mBackgroundImgFile = ''
-      self.mBackgroundImgData = ''
+      self.mBackgroundImgKey = ''
 
    def usesScreenSaver(self):
       return self.mUsesScreenSaver
@@ -327,8 +366,8 @@ class DesktopSettings:
    def setBackgroundImageFile(self, fileName):
       self.mBackgroundImgFile = fileName
 
-   def getBackgroundImageData(self):
-      return self.mBackgroundImgData
+   def getBackgroundImageCacheKey(self):
+      return self.mBackgroundImgKey
 
-   def setBackgroundImageData(self, data):
-      self.mBackgroundImgData = data
+   def setBackgroundImageCacheKey(self, key):
+      self.mBackgroundImgKey = key
