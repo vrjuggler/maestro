@@ -84,7 +84,7 @@ class DesktopService(maestro.core.IServicePlugin):
       env.mEventManager.emit(nodeId, 'desktop.report_saver_running',
                              self._getScreenSaverRunning())
 
-   def _getScreenSaverRunning():
+   def _getScreenSaverRunning(self):
       if sys.platform.startswith('win'):
          # The following is adapted from the Microsoft knowledge base entry
          # Q150785:
