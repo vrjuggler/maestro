@@ -44,9 +44,9 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       self.mLogger.debug("Register remote object: " + str(obj))
       self.registerProxy(nodeId, obj)
 
-   def remote_emit(self, nodeId, sigName, args):
+   def remote_emit(self, nodeId, sigName, args, **kwArgs):
       """ Forward incoming signals to event manager. """
-      self.localEmit(nodeId, sigName, *args)
+      self.localEmit(nodeId, sigName, *args, **kwArgs)
 
    def _catchFailure(self, failure):
       self.mLogger.error(str(failure.value))
@@ -158,7 +158,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
          try:
-            v.callRemote("emit", ip_address, sigName, args)
+            v.callRemote("emit", ip_address, sigName, args, **kwArgs)
          except banana.BananaError, ex:
             self.mLogger.error('Emitting failed: %s' % str(ex))
          except Exception, ex:

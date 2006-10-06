@@ -91,7 +91,7 @@ class EventManagerBase(object):
                del slots[i]
    
       
-   def localEmit(self, nodeId, sigName, *args):
+   def localEmit(self, nodeId, sigName, *args, **kwArgs):
       """ Emit the named signal on the given node.
           If there are no registered slots, just do nothing.
       """
@@ -100,11 +100,15 @@ class EventManagerBase(object):
       if not isinstance(sigName, types.StringType):
          raise TypeError("EventManager.connect: sigName of non-string type passed")
 
+      print_debug = kwArgs.get('debug', True) == True
+
       try:
          # Append out hostname to distinguish where messages are coming from.
          args = (nodeId,) + args
 
-         self.mLogger.debug("EventManager.localEmit([%s][%s][%s])" % (nodeId, sigName, args))
+         if print_debug:
+            self.mLogger.debug("EventManager.localEmit([%s][%s][%s])" % \
+                                  (nodeId, sigName, args))
 
          # If there are slots, loop over them and call
          if self.mConnections.has_key(nodeId):
@@ -128,8 +132,9 @@ class EventManagerBase(object):
                      # remove slot
                      pass
       except Exception, ex:
-         self.mLogger.error("EventManager.localEmit(%s, %s, %s) [%s]" % (nodeId, sigName, args, ex))
-         
+#         self.mLogger.error("EventManager.localEmit(%s, %s, %s) [%s]" % (nodeId, sigName, args, ex))
+         self.mLogger.error(str(ex))
+         traceback.print_exc()
 
    def timers(self):
       """ Return the timer handler class. """
