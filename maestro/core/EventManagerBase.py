@@ -91,7 +91,7 @@ class EventManagerBase(object):
                del slots[i]
    
       
-   def localEmit(self, nodeId, sigName, argsTuple=()):
+   def localEmit(self, nodeId, sigName, *args):
       """ Emit the named signal on the given node.
           If there are no registered slots, just do nothing.
       """
@@ -99,14 +99,12 @@ class EventManagerBase(object):
          raise TypeError("EventManager.connect: nodeId of non-string type passed")
       if not isinstance(sigName, types.StringType):
          raise TypeError("EventManager.connect: sigName of non-string type passed")
-      if not isinstance(argsTuple, types.TupleType):
-         raise TypeError("EventManager.connect: argsTuple not of tuple type passed.")
 
       try:
          # Append out hostname to distinguish where messages are coming from.
-         argsTuple = (nodeId,) + argsTuple
+         args = (nodeId,) + args
 
-         self.mLogger.debug("EventManager.localEmit([%s][%s][%s])" % (nodeId, sigName, argsTuple))
+         self.mLogger.debug("EventManager.localEmit([%s][%s][%s])" % (nodeId, sigName, args))
 
          # If there are slots, loop over them and call
          if self.mConnections.has_key(nodeId):
@@ -114,7 +112,7 @@ class EventManagerBase(object):
                for slot in self.mConnections[nodeId][sigName]:
                   assert isinstance(slot, (WeakMethodBound, WeakMethodFree))               
                   if not slot.isDead():
-                     slot(*argsTuple)
+                     slot(*args)
                   else:
                      # remove slot
                      pass
@@ -125,12 +123,12 @@ class EventManagerBase(object):
                for slot in self.mConnections["*"][sigName]:
                   assert isinstance(slot, (WeakMethodBound, WeakMethodFree))               
                   if not slot.isDead():
-                     slot(*argsTuple)
+                     slot(*args)
                   else:
                      # remove slot
                      pass
       except Exception, ex:
-         self.mLogger.error("EventManager.localEmit(%s, %s, %s) [%s]" % (nodeId, sigName, argsTuple, ex))
+         self.mLogger.error("EventManager.localEmit(%s, %s, %s) [%s]" % (nodeId, sigName, args, ex))
          
 
    def timers(self):

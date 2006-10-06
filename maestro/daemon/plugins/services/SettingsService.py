@@ -49,15 +49,15 @@ class SettingsService(maestro.core.IServicePlugin):
 
    def onGetOs(self, nodeId, avatar):
       platform = self._getPlatform()
-      Env().mEventManager.emit(nodeId, "ensemble.report_os", (platform,))
+      Env().mEventManager.emit(nodeId, "ensemble.report_os", platform)
 
    def onGetSettings(self, nodeId, avatar):
       settings = self._getSettings()
-      Env().mEventManager.emit(nodeId, "ensemble.report_settings", (settings,))
+      Env().mEventManager.emit(nodeId, "ensemble.report_settings", settings)
 
    def update(self):
       platform = self._getPlatform()
-      Env().mEventManager.emit("*", "ensemble.get_os", (platform,))
+      Env().mEventManager.emit("*", "ensemble.get_os", platform)
 
    def _getPlatform(self):
       """Returns tuple with error code and platform code.

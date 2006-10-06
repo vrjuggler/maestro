@@ -248,7 +248,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
          ip_address = node.getIpAddress()
          env = maestro.core.Environment()
-         env.mEventManager.emit(ip_address, "launch.run_command", (total_command, cwd, env_map))
+         env.mEventManager.emit(ip_address, "launch.run_command", total_command, cwd, env_map)
 
    def _resetAppState(self):
       """ Resets the information associated with the selected application. """

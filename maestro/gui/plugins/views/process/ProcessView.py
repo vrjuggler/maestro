@@ -147,7 +147,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
          self.mEnsemble.refreshConnections()
 
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "process.get_procs", ())
+      env.mEventManager.emit("*", "process.get_procs")
       self.mProcessModel.mProcs = []
       self.mProcessModel.changed()
       self.mProcessTable.resizeRowsToContents()
@@ -195,7 +195,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
 
             # Fire a terminate event.
             if proc is not None and isinstance(proc, Proc):
-               env.mEventManager.emit(proc.mNodeId, "process.terminate_proc", (proc.mPID,))
+               env.mEventManager.emit(proc.mNodeId, "process.terminate_proc", proc.mPID)
                # Add node to list of nodes to refresh.
                if nodes_to_refresh.count(proc.mNodeId) == 0:
                   nodes_to_refresh.append(proc.mNodeId)
@@ -205,7 +205,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
 
       # Refresh process list for all nodes where we terminated a process. 
       for node in nodes_to_refresh:
-         env.mEventManager.emit(node, "process.get_procs", ())
+         env.mEventManager.emit(node, "process.get_procs")
 
    def init(self, ensemble):
       """ Configure the user interface with data in cluster configuration. """

@@ -42,12 +42,12 @@ class LaunchService(maestro.core.IServicePlugin):
             #if self.mBuffer._closed:
             #   result = self.mBuffer.read()
             #   self.mLogger.debug(result)
-            #   #self.mEventManager.emit("*", "launch.output", (result,))
+            #   #self.mEventManager.emit("*", "launch.output", result)
             #   self.mProcess = None
             #elif self.mBuffer._haveNumBytes(1024):
             #   result = self.mBuffer.read()
             #   #self.mLogger.debug(result)
-            #   self.mEventManager.emit("*", "launch.output", (result,))
+            #   self.mEventManager.emit("*", "launch.output", result)
             #result = self.isProcessRunning()
             #self.mLogger.info("Testing process running: " + str(result))
             #if not result:
@@ -64,7 +64,7 @@ class LaunchService(maestro.core.IServicePlugin):
             #      if not result:
             #         self.mProcess = None
             #         return
-            #   self.mEventManager.emit("*", "launch.output", (line,))
+            #   self.mEventManager.emit("*", "launch.output", line)
             #   self.mLogger.debug("line: " + line)
 
             line = self.mProcess.stdout.read(4096)
@@ -77,7 +77,7 @@ class LaunchService(maestro.core.IServicePlugin):
                   return
             self.mLogger.debug("line: " + line)
             env = maestro.core.Environment()
-            env.mEventManager.emit("*", "launch.output", (line,))
+            env.mEventManager.emit("*", "launch.output", line)
 
       except Exception, ex:
          self.mLogger.error("I/O Error: " + str(ex))

@@ -44,9 +44,9 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       self.mLogger.debug("Register remote object: " + str(obj))
       self.registerProxy(nodeId, obj)
 
-   def remote_emit(self, nodeId, sigName, argsTuple=()):
+   def remote_emit(self, nodeId, sigName, args):
       """ Forward incoming signals to event manager. """
-      self.localEmit(nodeId, sigName, argsTuple)
+      self.localEmit(nodeId, sigName, *args)
 
    def _catchFailure(self, failure):
       self.mLogger.error(str(failure.value))
@@ -94,9 +94,9 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       factory._broker.notifyOnDisconnect(lambda n=nodeId: self.lostConnection(n))
       self.registerProxy(nodeId, object)
       # As soon as we connect to a new node, we want to know what OS it is running.
-      self.emit("*", "ensemble.get_os", ())
-      self.emit("*", "ensemble.get_settings", ())
-      self.emit("*", "reboot.get_targets", ())
+      self.emit("*", "ensemble.get_os")
+      self.emit("*", "ensemble.get_settings")
+      self.emit("*", "reboot.get_targets")
 
    def disconnectFromNode(self, nodeId):
       """ Disconnect a given nodes remote object.
@@ -122,24 +122,20 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       if self.mProxies.has_key(nodeId):
          del self.mProxies[nodeId]
 
-   def emit(self, nodeId, sigName, argsTuple=()):
+   def emit(self, nodeId, sigName, *args, **kwArgs):
       """ Emit the named signal on the given node.
           If there are no registered slots, just do nothing.
       """
 
-      if type(argsTuple) == types.ListType:
-         argsTuple = tuple(argsTuple)
       if not isinstance(nodeId, types.StringType):
          raise TypeError("EventManager.emit: nodeId of non-string type passed")
       if not isinstance(sigName, types.StringType):
          raise TypeError("EventManager.emit: sigName of non-string type passed")
-      if not isinstance(argsTuple, types.TupleType):
-         raise TypeError("EventManager.emit: argsTuple not of tuple type passed.")
-      
+
       # Get local IP address to use for nodeId mask on remote nodes.
       ip_address = socket.gethostbyname(socket.gethostname())
 
-      self.mLogger.debug("EventManager.emit([%s][%s][%s])" % (nodeId, sigName, argsTuple))
+      self.mLogger.debug("EventManager.emit([%s][%s][%s])" % (nodeId, sigName, args))
       # Build up a list of all connections to emit signal on.
       nodes = []
       if nodeId == "*":
@@ -151,7 +147,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
          try:
-            v.callRemote("emit", ip_address, sigName, argsTuple)
+            v.callRemote("emit", ip_address, sigName, args)
          except Exception, ex:
             del self.mProxies[k]
             self.mLogger.info('Removed dead connection ' + str(k))

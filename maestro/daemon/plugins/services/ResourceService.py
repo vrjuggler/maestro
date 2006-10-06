@@ -65,8 +65,8 @@ class ResourceService(maestro.core.IServicePlugin):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
-      env.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
+      env.mEventManager.emit("*", "settings.cpu_usage", cpu_usage)
+      env.mEventManager.emit("*", "settings.mem_usage", mem_usage)
 
    def onSetInterval(self, nodeId, avatar, interval):
       """ Slot that changes the report interval.
@@ -84,8 +84,8 @@ class ResourceService(maestro.core.IServicePlugin):
       cpu_usage = self._getCpuUsage()
       mem_usage = self._getMemUsage()
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "settings.cpu_usage", (cpu_usage,))
-      env.mEventManager.emit("*", "settings.mem_usage", (mem_usage,))
+      env.mEventManager.emit("*", "settings.cpu_usage", cpu_usage)
+      env.mEventManager.emit("*", "settings.mem_usage", mem_usage)
 
    def _getCpuUsage(self):
       if os.name == 'nt':

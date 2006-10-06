@@ -98,9 +98,9 @@ class RebootService(maestro.core.IServicePlugin):
 
       targets = self.mBootPlugin.getTargets()
       default = self.mBootPlugin.getDefault()
-      tuple = (targets, default)
       env = maestro.core.Environment()
-      env.mEventManager.emit(nodeId, "reboot.report_targets", tuple)
+      env.mEventManager.emit(nodeId, "reboot.report_targets", targets,
+                             default)
 
    def onSetDefaultTarget(self, nodeId, avatar, index, title):
       """ Slot that sets the default target OS for reboot.

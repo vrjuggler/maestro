@@ -88,6 +88,7 @@ class Ensemble(QtCore.QObject):
 
    def onReportTargets(self, nodeId, targets, defaultTargetIndex):
       """ Slot that is called when a node reports it's possible boot targets. """
+      print targets
       for node in self.mNodes:
          if node.getIpAddress() == nodeId:
             node.setTargets(targets)
@@ -110,9 +111,9 @@ class Ensemble(QtCore.QObject):
                if env.mEventManager.connectToNode(ip_address):
                   new_connections = True
                   # Tell the new node to report it's os.
-                  env.mEventManager.emit(ip_address, "ensemble.get_os", ())
-                  env.mEventManager.emit(ip_address, "ensemble.get_settings", ())
-                  env.mEventManager.emit(ip_address, "reboot.get_targets", ())
+                  env.mEventManager.emit(ip_address, "ensemble.get_os")
+                  env.mEventManager.emit(ip_address, "ensemble.get_settings")
+                  env.mEventManager.emit(ip_address, "reboot.get_targets")
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 

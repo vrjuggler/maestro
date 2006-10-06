@@ -208,7 +208,6 @@ class DesktopService(maestro.core.IServicePlugin):
       env.mEventManager.emit(node_id, 'desktop.report_bg_image_data',
                              self._getBackgroundImageData())
 
-
    def _getBackgroundImageData(self):
       bytes = ''
       file_name = self._getBackgroundImageFile()

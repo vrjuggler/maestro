@@ -233,8 +233,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          self.mEnsemble.refreshConnections()
 
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "ensemble.get_os", ())
-      env.mEventManager.emit("*", "ensemble.get_settings", ())
+      env.mEventManager.emit("*", "ensemble.get_os")
+      env.mEventManager.emit("*", "ensemble.get_settings")
 
    def onAdd(self):
       """ Called when user presses the add button. """

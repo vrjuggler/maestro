@@ -109,7 +109,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
             # Fire a terminate event.
             if node is not None:
                node_id = node.getId()
-               env.mEventManager.emit(node_id, "resource.set_interval", (reportTime,))
+               env.mEventManager.emit(node_id, "resource.set_interval", reportTime)
 
    def onRefresh(self):
       """ Called when user presses the refresh button. """
@@ -117,8 +117,8 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
          self.mEnsemble.refreshConnections()
 
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "settings.get_usage", ())
-      env.mEventManager.emit("*", "settings.get_mem_usage", ())
+      env.mEventManager.emit("*", "settings.get_usage")
+      env.mEventManager.emit("*", "settings.get_mem_usage")
       
    def reportCpuUsage(self, ip, val):
       print "RV CPU Usage [%s]: %s" % (ip, val)
