@@ -52,8 +52,8 @@ class TreeItem:
       if elts is not None:
          for i in xrange(len(elts)):
             obj = None
-            if elts[i].tag == "stanza":
-               obj = Stanza(elts[i], self, i)
+            if elts[i].tag == "application":
+               obj = Application(elts[i], self, i)
             elif elts[i].tag == "global_option":
                obj = GlobalOption(elts[i], self, i)
             elif elts[i].tag == "choice":
@@ -188,7 +188,7 @@ class GlobalOption(TreeItem):
       return "<Global Options: label:%s>"\
                % (self.mLabel)
 
-class Stanza(TreeItem):
+class Application(TreeItem):
    def __init__(self, xmlElt, parent=None, row=0):
       TreeItem.__init__(self, xmlElt, parent, row)
 
@@ -204,7 +204,7 @@ class Stanza(TreeItem):
       return self.mLabel
 
    def __repr__(self):
-      return "<Stanza: label:%s global_options: %s tooltip: %s helpUrl: %s>"\
+      return "<Application: label:%s global_options: %s tooltip: %s helpUrl: %s>"\
                % (self.mLabel, self.mGlobalOptions, self.mTooltip, self.mHelpUrl)
 
 class Group(TreeItem):
