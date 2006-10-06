@@ -30,6 +30,11 @@
       <remove id="Simulator"/>
     </ref>
   </application>
+  <application name="OverrideAllFlags">
+    <ref id="expand:VRJugglerBasic/*">
+      <override id="*" flag="--jconf"/>
+    </ref>
+  </application>
   <global_option name="VRJugglerBasic">
     <choice name="DisplaySystem">
       <group name="Simulator">

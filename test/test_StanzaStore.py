@@ -50,9 +50,8 @@ class StanzaStoreTest(unittest.TestCase):
       apps = self.mStanzaStore.find('expand:Include_VRJugglerByIndex')
       self.assert_(1 == len(apps))
       expanded_app = self.mStanzaStore.expand(apps[0])
-      ET.dump(expanded_app)
-      #self.assert_(1 == len(expanded_app))
-      #self.assert_(expanded_app[0].get('name') == 'SonixPlugin')
+      self.assert_(1 == len(expanded_app))
+      self.assert_(expanded_app[0].get('name') == 'SonixPlugin')
 
    def testAddOurOwn(self):
       apps = self.mStanzaStore.find('expand:AddOurOwnDisplaySystem')
@@ -90,8 +89,16 @@ class StanzaStoreTest(unittest.TestCase):
       self.assert_(display_choice.tag == 'choice')
       self.assert_(1 == len(display_choice))
       self.assert_(display_choice[0].get('name') == 'CAVE')
-      #printPointers(expanded_app)
-      #print ET.dump(expanded_app)
+
+   def testOverrideAll(self):
+      apps = self.mStanzaStore.find('expand:OverrideAllFlags')
+      self.assert_(1 == len(apps))
+      expanded_app = self.mStanzaStore.expand(apps[0])
+      found = self.mStanzaStore._find(expanded_app, 'DisplaySystem/Simulator|CAVE')
+      self.assert_(2 == len(found))
+      for group in found:
+         for arg in group:
+            self.assert_(arg.get('flag') == '--jconf')
 
 def printPointers(elm, indent=0):
    string = "   " * indent
