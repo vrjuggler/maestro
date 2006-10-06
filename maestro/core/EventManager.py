@@ -21,7 +21,7 @@ import EventManagerBase
 import socket
 import logging
 
-from twisted.spread import pb
+from twisted.spread import pb, banana
 from twisted.cred import credentials
 import maestro
 from maestro.util import pboverssl
@@ -159,6 +159,8 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       for k, v in nodes:
          try:
             v.callRemote("emit", ip_address, sigName, args)
+         except banana.BananaError, ex:
+            self.mLogger.error('Emitting failed: %s' % str(ex))
          except Exception, ex:
             del self.mProxies[k]
             self.mLogger.info('Removed dead connection ' + str(k))
