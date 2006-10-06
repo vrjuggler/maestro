@@ -113,16 +113,24 @@ class StanzaStore:
                self._removeDescendents(f, elms)
 
    def _replaceAttrib(self, roots, attribName, newValue):
+      validAttribs = {'choice':[],
+                      'group':[],
+                      'arg':['flag'],
+                      'cwd':[],
+                      'cmd':[]}
+
       for r in roots:
-         # Change r's attribute named attribName to the new value. r may not
-         # have an attribute of this value already, so this would cause it to
-         # be added.
-         r.set(attribName, newValue)
+         if validAttribs.has_key(r.tag):
+            valid = validAttribs[r.tag]
+            if valid.count(attribName) > 0:
+               # Change r's attribute named attribName to the new value. r may not
+               # have an attribute of this value already, so this would cause it to
+               # be added.
+               r.set(attribName, newValue)
 
          # Recurse into the children of r and perform the attribute value
          # replacement on them.
-         for c in r:
-            self._replaceAttrib(c, attribName, newValue)
+         self._replaceAttrib(r[:], attribName, newValue)
 
    def _replaceText(self, roots, newText):
       assert(newText is not None)
