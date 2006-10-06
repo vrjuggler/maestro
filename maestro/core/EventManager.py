@@ -123,9 +123,15 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
          del self.mProxies[nodeId]
 
    def emit(self, nodeId, sigName, *args, **kwArgs):
-      """ Emit the named signal on the given node.
-          If there are no registered slots, just do nothing.
       """
+      Emit the named signal on the given node.
+      If there are no registered slots, just do nothing.
+      
+      Keyword parameters:
+         debug: Enable or disable debug output. If not specified, the default
+                value is True.
+      """
+      print_debug = kwArgs.get('debug', True) == True
 
       if not isinstance(nodeId, types.StringType):
          raise TypeError("EventManager.emit: nodeId of non-string type passed")
@@ -135,14 +141,19 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       # Get local IP address to use for nodeId mask on remote nodes.
       ip_address = socket.gethostbyname(socket.gethostname())
 
-      self.mLogger.debug("EventManager.emit([%s][%s][%s])" % (nodeId, sigName, args))
+      if print_debug:
+         self.mLogger.debug("EventManager.emit([%s][%s][%s])" % \
+                               (nodeId, sigName, args))
+
       # Build up a list of all connections to emit signal on.
       nodes = []
       if nodeId == "*":
          nodes = self.mProxies.items()
       elif self.mProxies.has_key(nodeId):
          nodes = [(nodeId, self.mProxies[nodeId])]
-      self.mLogger.debug("   [%s][%s] " % (self.mProxies.items(), nodes))
+
+      if print_debug:
+         self.mLogger.debug("   [%s][%s] " % (self.mProxies.items(), nodes))
 
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
