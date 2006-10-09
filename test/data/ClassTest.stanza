@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<stanza namespace="class">
+  <application name="ClassApplication">
+    <command name="linux_cmd" class="Linux">runLinux</command>
+    <group name="Group1">
+    </group>
+    <group name="Group2">
+    </group>
+    <group name="Group3">
+    </group>
+  </application>
+  <global_option name="Global1">
+    <arg name="Arg0"/>
+    <group name="Group0">
+      <cwd name="Cwd0"/>
+    </group>
+  </global_option>
+</stanza>
