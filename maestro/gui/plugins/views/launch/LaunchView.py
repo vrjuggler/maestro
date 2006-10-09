@@ -367,15 +367,22 @@ class ChoiceSheetCB(Sheet):
          mSelectedFrame.setEnabled(val)
          mSavedEnableState = val
 
-   def setupUi(self):
+   def setupUi(self, buttonType = NO_BUTTON):
+      if NO_BUTTON == buttonType:
+         self.mTitleWidget = QtGui.QLabel(self)
+      else:
+         self.mButtonWidget = self._buildButton(buttonType)
+         self.mTitleWidget = QtGui.QLabel(self)
+         self.mLayout.addWidget(self.mButtonWidget)
+
       self.gridlayout = QtGui.QGridLayout(self)
       self.gridlayout.setMargin(1)
       self.gridlayout.setSpacing(1)
       self.gridlayout.setObjectName("gridlayout")
       
-      self.mLabel.setObjectName("mChoiceLabel")
-      self.mLabel.setText(self.mObj.mLabel + ": ")
-      self.gridlayout.addWidget(self.mLabel,0,0,1,2)
+      self.mTitleWidget.setObjectName("mChoiceLabel")
+      self.mTitleWidget.setText(self.mObj.mLabel + ": ")
+      self.gridlayout.addWidget(self.mTitleWidget,0,0,1,2)
       
       spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
       self.gridlayout.addItem(spacerItem,0,0,1,1)
