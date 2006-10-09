@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <stanza>
-  <application label="Directory Listing" global_options="" tooltip="List files in a directory." helpUrl="">
-    <command class="Linux">ls</command>
-    <command class="Windows XP">dir</command>
-    <cwd class="Linux">/</cwd>
-    <cwd class="Windows XP">C:\</cwd>
+  <application name="DirListing" label="Directory Listing" global_options="" tooltip="List files in a directory." helpUrl="">
+    <command name="linux_cmd" class="Linux">ls</command>
+    <command name="windows_cmd" class="Windows XP">dir</command>
+    <cwd name="linux_cwd" class="Linux">/</cwd>
+    <cwd name="windows_cwd" class="Windows XP">C:\</cwd>
   </application>
 </stanza>
