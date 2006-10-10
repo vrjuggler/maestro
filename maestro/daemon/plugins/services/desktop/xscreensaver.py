@@ -105,7 +105,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          pid = os.fork()
          if pid == 0:
             user_name = avatar.mCredentials['username']
-            self.__changeToUserName(user_name)
+            procutil.changeToUserName(user_name)
 
             # Set the screen saver mode to 'one'. This may not be what was
             # previously in use, but it will allow XScreenSaver to kick in
@@ -195,13 +195,3 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          settings_file = open(settings, 'w')
          settings_file.writelines(lines)
          settings_file.close()
-
-   def __changeToUserName(self, userName):
-      pw_entry = pwd.getpwnam(userName)
-      self.__changeToUser(pw_entry[2], pw_entry[3])
-
-   def __changeToUser(self, uid, gid):
-      # NOTE: os.setgid() must be called first or else we will get an
-      # "operation not permitted" error.
-      os.setgid(gid)
-      os.setuid(uid)

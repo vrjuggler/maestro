@@ -18,7 +18,18 @@
 
 import errno
 import os
+import pwd
 
+
+def changeToUserName(userName):
+   pw_entry = pwd.getpwnam(userName)
+   changeToUser(pw_entry[2], pw_entry[3])
+
+def changeToUser(uid, gid):
+   # NOTE: os.setgid() must be called first or else we will get an
+   # "operation not permitted" error.
+   os.setgid(gid)
+   os.setuid(uid)
 
 def waitpidRetryOnEINTR(pid, options):
    while True:

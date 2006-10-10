@@ -18,7 +18,6 @@
 
 import os
 import popen2
-import pwd
 import re
 
 import maestro.core
@@ -86,7 +85,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    def setSaverEnabled(self, avatar, enabled):
       pid = os.fork()
       if pid == 0:
-         self.__changeToUserName(avatar.mCredentials['username'])
+         procutil.changeToUserName(avatar.mCredentials['username'])
          if enabled:
             flag = 'on'
          else:
@@ -101,20 +100,10 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    def stopSaver(self, avatar):
       pid = os.fork()
       if pid == 0:
-         self.__changeToUserName(avatar.mCredentials['username'])
+         procutil.changeToUserName(avatar.mCredentials['username'])
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
          os.execle(self.mCmd, self.mCmd, 's', 'off', env)
          os.execle(self.mCmd, self.mCmd, 's', 'reset', env)
 
       (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
-
-   def __changeToUserName(self, userName):
-      pw_entry = pwd.getpwnam(userName)
-      self.__changeToUser(pw_entry[2], pw_entry[3])
-
-   def __changeToUser(self, uid, gid):
-      # NOTE: os.setgid() must be called first or else we will get an
-      # "operation not permitted" error.
-      os.setgid(gid)
-      os.setuid(uid)
