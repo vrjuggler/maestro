@@ -24,6 +24,11 @@ import sys
 
 import maestro.core
 
+if sys.platform.startswith('win'):
+   import win32con
+   import win32gui
+   import win32security
+
 
 class DesktopService(maestro.core.IServicePlugin):
    def __init__(self):

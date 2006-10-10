@@ -19,7 +19,10 @@
 import win32api
 import win32con
 import win32gui
+import win32security
 import win32service
+
+import maestro.core
 
 
 class WindowsSaverPlugin(maestro.core.ISaverPlugin):
