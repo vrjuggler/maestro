@@ -194,9 +194,9 @@ class UserPerspective(pb.Avatar):
       env = maestro.core.Environment()
       env.mEventManager.remote_registerCallback(nodeId, obj)
 
-   def perspective_emit(self, nodeId, sigName, args):
+   def perspective_emit(self, nodeId, sigName, args, **kwArgs):
       env = maestro.core.Environment()
-      env.mEventManager.remote_emit(nodeId, sigName, (self,) + args)
+      env.mEventManager.remote_emit(nodeId, sigName, (self,) + args, **kwArgs)
 
    def setCredentials(self, creds):
       self.mCredentials = creds
