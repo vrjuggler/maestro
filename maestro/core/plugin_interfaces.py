@@ -161,16 +161,51 @@ class ISaverPlugin(maestro.util.plugin.Plugin):
 
 class IDesktopWallpaperPlugin(maestro.util.plugin.Plugin):
    '''
+   The base interface for plug-ins that manage the desktop wallpaper on the
+   local computer. Such plug-ins capture platform- and configuration-specific
+   details for querying and changing the desktop wallpaper.
    '''
    def __init__(self):
       pass
 
    def getName():
+      '''
+      Returns the name of this desktop wallpaper management plug-in. Ideally,
+      this should be unique with respect to other desktop wallpaper
+      management plug-ins.
+
+      @return A human-readable string identifying this desktop wallpaper
+              management plug-in (more or less) uniquely.
+      '''
       not_implemented()
    getName = staticmethod(getName)
 
    def setBackground(self, avatar, imgFile, imgData):
+      '''
+      Changes the desktop wallpaper using the given information. The
+      information comes in the form of a file name and the raw bytes of the
+      wallpaper image.
+
+      @param avatar  The avatar representing the remote user (the client).
+      @param imgFile The path to the new background image. In general, this
+                     will be an absolute path, though it might not be a path
+                     that is valid on the local file system.
+      @param imgData The raw bytes of the wallpaper image as a single string.
+                     This can be written to a local file so that the new
+                     wallpaper can then be loaded and used.
+      '''
       not_implemented()
 
    def getBackgroundImageFile(self, avatar):
+      '''
+      Determines the absolute path to the current desktop wallpaper image
+      file. The path will be a local path that may not be valid for the
+      client, but it will be valid for the purposes of reading the image file
+      in the service so that the data can be sent to the client.
+
+      @param avatar The avatar representing the remote user (the client).
+
+      @return A string naming the full path to the local file that is used for
+              the desktop wallpaper image is returned.
+      '''
       not_implemented()

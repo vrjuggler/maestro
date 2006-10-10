@@ -126,6 +126,11 @@ class WindowsSaverPlugin(maestro.core.ISaverPlugin):
                               win32con.WM_CLOSE, 0, 0)
 
 class WindowsDesktopBackgroundPlugin(maestro.core.IDesktopWallpaperPlugin):
+   '''
+   An implementation of maestro.core.IDesktopWallpaperPlugin that uses
+   the Windows function SystemParametersInfo() to get and set the desktop
+   background image.
+   '''
    def __init__(self):
       maestro.core.IDesktopWallpaperPlugin.__init__(self)
 
@@ -134,6 +139,19 @@ class WindowsDesktopBackgroundPlugin(maestro.core.IDesktopWallpaperPlugin):
    getName = staticmethod(getName)
 
    def setBackground(self, avatar, imgFile, imgData):
+      '''
+      Changes the desktop wallpaper using the given information. The
+      information comes in the form of a file name and the raw bytes of the
+      wallpaper image.
+
+      @param avatar  The avatar representing the remote user (the client).
+      @param imgFile The path to the new background image. In general, this
+                     will be an absolute path, though it might not be a path
+                     that is valid on the local file system.
+      @param imgData The raw bytes of the wallpaper image as a single string.
+                     This can be written to a local file so that the new
+                     wallpaper can then be loaded and used.
+      '''
       win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
 
       # If the given image file name does not exist, then we create it so
@@ -149,6 +167,17 @@ class WindowsDesktopBackgroundPlugin(maestro.core.IDesktopWallpaperPlugin):
       win32security.RevertToSelf()
 
    def getBackgroundImageFile(self, avatar):
+      '''
+      Determines the absolute path to the current desktop wallpaper image
+      file. The path will be a local path that may not be valid for the
+      client, but it will be valid for the purposes of reading the image file
+      in the service so that the data can be sent to the client.
+
+      @param avatar The avatar representing the remote user (the client).
+
+      @return A string naming the full path to the local file that is used for
+              the desktop wallpaper image is returned.
+      '''
       # This returns an empty string if no desktop background image is
       # currently set.
       win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)

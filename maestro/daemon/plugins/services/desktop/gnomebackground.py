@@ -28,6 +28,13 @@ import procutil
 
 
 class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
+   '''
+   An implementation of maestro.core.IDesktopWallpaperPlugin that utilizes
+   GConf in order to figure out what the GNOME Desktop is using for the
+   desktop background image. This relies upon gconftool-2 being available
+   (the path to which is configurable using the gconftol_cmd property in
+   the maestrod settings).
+   '''
    def __init__(self):
       maestro.core.IDesktopWallpaperPlugin.__init__(self)
       env = maestro.core.Environment()
@@ -41,6 +48,19 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
    getName = staticmethod(getName)
 
    def setBackground(self, avatar, imgFile, imgData):
+      '''
+      Changes the desktop wallpaper using the given information. The
+      information comes in the form of a file name and the raw bytes of the
+      wallpaper image.
+
+      @param avatar  The avatar representing the remote user (the client).
+      @param imgFile The path to the new background image. In general, this
+                     will be an absolute path, though it might not be a path
+                     that is valid on the local file system.
+      @param imgData The raw bytes of the wallpaper image as a single string.
+                     This can be written to a local file so that the new
+                     wallpaper can then be loaded and used.
+      '''
       user_name = avatar.getCredentials()['username']
 
       # If the given image file name does not exist, then we create it so
@@ -50,10 +70,13 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
          file.write(imgData)
          file.close()
 
-         if not sys.platform.startswith('win'):
-            pw_entry = pwd.getpwnam(user_name)
-            os.chown(imgFile, pw_entry[2], pw_entry[3])
+         # Change ownership of the newly created file to the authenticated
+         # user.
+         pw_entry = pwd.getpwnam(user_name)
+         os.chown(imgFile, pw_entry[2], pw_entry[3])
 
+      # Create a process that runs as the authenticated user in order to
+      # change the user's desktop background image via GConf.
       pid = os.fork()
       if pid == 0:
          procutil.changeToUserName(user_name)
@@ -63,10 +86,23 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
       procutil.waitpidRetryOnEINTR(pid, 0)
 
    def getBackgroundImageFile(self, avatar):
-      # Create a pipe so that we can communicate with the hcild process that
+      '''
+      Determines the absolute path to the current desktop wallpaper image
+      file. The path will be a local path that may not be valid for the
+      client, but it will be valid for the purposes of reading the image file
+      in the service so that the data can be sent to the client.
+
+      @param avatar The avatar representing the remote user (the client).
+
+      @return A string naming the full path to the local file that is used for
+              the desktop wallpaper image is returned.
+      '''
+      # Create a pipe so that we can communicate with the child process that
       # we are about to create.
       child_pipe_rd, child_pipe_wr = os.pipe()
 
+      # Create a child process that runs as the authenticated user in order
+      # to query that user's desktop background image via GConf.
       pid = os.fork()
       if pid == 0:
          os.close(child_pipe_rd)
@@ -76,8 +112,10 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
             popen2.popen2([self.mCmd, '--get',
                            '/desktop/gnome/background/picture_filename'])
 
+         # Read the path returned by the GConf query.
          path = child_stdout.readline().rstrip('\n')
 
+         # We are done with these.
          child_stdout.close()
          child_stdin.close()
 
