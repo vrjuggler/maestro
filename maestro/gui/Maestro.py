@@ -221,7 +221,7 @@ class OutputFileLogger(NodeLogger):
          elif os.environ.has_key('APPDATA'):
             logdir = os.path.join(os.environ['APPDATA'], 'Maestro')
 
-      file_name = os.path.join(logdir, '%s.log' % nodeId)
+      file_name = os.path.join(logdir, '%s.log' % nodeId.getId())
 
       try:
          handler = logging.FileHandler(file_name, 'w')
