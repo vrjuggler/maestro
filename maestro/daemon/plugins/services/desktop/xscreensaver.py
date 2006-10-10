@@ -188,7 +188,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
 
       return process_line
 
-   # NOrE: This method is not currently being used, but it is still here in
+   # NOTE: This method is not currently being used, but it is still here in
    # case it should prove to be useful in the future.
    def __changeSaverMode(self, userName, mode):
       pw_entry  = pwd.getpwnam(userName)
