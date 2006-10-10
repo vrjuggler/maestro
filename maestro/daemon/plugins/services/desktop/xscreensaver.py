@@ -108,11 +108,6 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
             user_name = avatar.mCredentials['username']
             procutil.changeToUserName(user_name)
 
-            # Set the screen saver mode to 'one'. This may not be what was
-            # previously in use, but it will allow XScreenSaver to kick in
-            # later.
-            self.__changeSaverMode(user_name, 'one')
-
             # Start the xscreensaver process up if it is not currently
             # running.
             running = self.__isRunning(user_name)
@@ -193,6 +188,8 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
 
       return process_line
 
+   # NOrE: This method is not currently being used, but it is still here in
+   # case it should prove to be useful in the future.
    def __changeSaverMode(self, userName, mode):
       pw_entry  = pwd.getpwnam(userName)
       settings  = os.path.join(pw_entry[5], '.xscreensaver')
