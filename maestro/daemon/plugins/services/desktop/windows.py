@@ -92,6 +92,11 @@ class WindowsSaverPlugin(maestro.core.ISaverPlugin):
       win32security.RevertToSelf()
 
    def stopSaver(self, avatar):
+      # First, disable the use of the screen saver so that it does not start
+      # up again later.
+      if self.isSaverEnabled(avatar):
+         self.setSaverEnabled(avatar, False)
+
       # The following is adapted from the Microsoft knowledge base entry
       # Q140723:
       #

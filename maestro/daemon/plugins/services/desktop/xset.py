@@ -95,6 +95,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
          self.__changeToUserName(avatar.mCredentials['username'])
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+         os.execle(self.mCmd, self.mCmd, 's', 'off', env)
          os.execle(self.mCmd, self.mCmd, 's', 'reset', env)
 
       (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
