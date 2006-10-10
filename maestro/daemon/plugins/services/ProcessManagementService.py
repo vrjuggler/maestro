@@ -47,7 +47,7 @@ class ProcessManagementService(maestro.core.IServicePlugin):
       """
       procs = self._getProcs()
       env = maestro.core.Environment()
-      env.mEventManager.emit(nodeId, "process.procs", procs)
+      env.mEventManager.emit(nodeId, "process.procs", procs, debug = False)
 
    def onTerminateProc(self, nodeId, avatar, pid):
       """ Slot that terminates the process that has the given pid.
