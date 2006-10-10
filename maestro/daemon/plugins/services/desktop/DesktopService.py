@@ -149,9 +149,7 @@ class DesktopService(maestro.core.IServicePlugin):
       Attempts to stop the running screen saver (if there is one).
       '''
       for p in self.mSaverPlugins:
-         # Only stop the screen saver if it is currently running.
-         if p.isSaverRunning(avatar):
-            p.stopSaver(avatar)
+         p.stopSaver(avatar)
 
    def onSetBackground(self, nodeId, avatar, imgFile, imgData):
       if sys.platform.startswith('win'):

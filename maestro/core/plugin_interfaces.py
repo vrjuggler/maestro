@@ -150,8 +150,7 @@ class ISaverPlugin(maestro.util.plugin.Plugin):
 
    def stopSaver(self, avatar):
       '''
-      Stops the running screen saver. This method will only be invoked when
-      isSaverRunning() returns True. If stopping the screen saver requires a
+      Stops the running screen saver. If stopping the screen saver requires a
       password to be unlocked, then this operation will often cause a password
       entry field to be displayed before the screen saver is actually stopped.
       While this is undesirable, in most--if not all--cases, this cannot be
