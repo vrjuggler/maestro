@@ -206,6 +206,23 @@ class StanzaScene(QtGui.QGraphicsScene):
       else:
          QtGui.QGraphicsScene.dropEvent(self, event)
 
+def intersect(line, rect):
+   top_line = QtCore.QLineF(rect.topLeft(), rect.topRight())
+   bottom_line = QtCore.QLineF(rect.bottomLeft(), rect.bottomRight())
+   left_line = QtCore.QLineF(rect.topLeft(), rect.bottomLeft())
+   right_line = QtCore.QLineF(rect.topRight(), rect.bottomRight())
+
+   temp_point = QtCore.QPointF()
+   if QtCore.QLineF.BoundedIntersection == line.intersect(top_line, temp_point):
+      return temp_point
+   if QtCore.QLineF.BoundedIntersection == line.intersect(bottom_line, temp_point):
+      return temp_point
+   if QtCore.QLineF.BoundedIntersection == line.intersect(left_line, temp_point):
+      return temp_point
+   if QtCore.QLineF.BoundedIntersection == line.intersect(right_line, temp_point):
+      return temp_point
+   return None
+
 class Edge(QtGui.QGraphicsItem):
    def __init__(self, sourceNode, destNode):
       QtGui.QGraphicsItem.__init__(self)
@@ -215,7 +232,6 @@ class Edge(QtGui.QGraphicsItem):
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable)
-
 
       self.source = sourceNode
       self.dest = destNode
@@ -243,15 +259,27 @@ class Edge(QtGui.QGraphicsItem):
 
       line = QtCore.QLineF(self.mapFromItem(self.source, 0, 0),
                            self.mapFromItem(self.dest, 0, 0))
-      length = line.length()
-      if length == 0:
-         edgeOffset = QtCore.QPointF(0, 0)
-      else:
-         edgeOffset = QtCore.QPointF((line.dx() * 10) / length, (line.dy() * 10) / length)
 
       self.removeFromIndex()
-      self.sourcePoint = line.p1() + edgeOffset
-      self.destPoint = line.p2() - edgeOffset
+
+      intersect_point = intersect(line, self.source.sceneBoundingRect())
+      if intersect_point is not None:
+         #print "point: (%s, %s)" % (intersect_point.x(), intersect_point.y())
+         intersect_point = self.mapFromScene(intersect_point)
+         #print "point: (%s, %s)" % (intersect_point.x(), intersect_point.y())
+         self.sourcePoint = intersect_point
+      else:
+         self.sourcePoint = line.p1()
+
+      intersect_point = intersect(line, self.dest.sceneBoundingRect())
+      if intersect_point is not None:
+         #print "point: (%s, %s)" % (intersect_point.x(), intersect_point.y())
+         intersect_point = self.mapFromScene(intersect_point)
+         #print "point: (%s, %s)" % (intersect_point.x(), intersect_point.y())
+         self.destPoint = intersect_point
+      else:
+         self.destPoint = line.p2()
+
       self.addToIndex()
 
    Type = QtGui.QGraphicsItem.UserType + 2
@@ -265,10 +293,7 @@ class Edge(QtGui.QGraphicsItem):
           collision detection, hit tests, and for the QGraphicsScene::items()
           functions.
       """
-      path = QtGui.QPainterPath()
-      line = QtCore.QLineF(self.sourcePoint, self.destPoint)
-      path.moveTo(line.x1(), line.y1())
-      path.lineTo(line.x2(), line.y2())
+      path = self.__path(8.0)
       return path
     
    def boundingRect(self):
@@ -285,41 +310,73 @@ class Edge(QtGui.QGraphicsItem):
       if self.source is None or self.dest is None:
          return QtCore.QRectF()
 
-      line = QtCore.QLineF(self.sourcePoint, self.destPoint)
       painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine,
                                 QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+      line = QtCore.QLineF(self.sourcePoint, self.destPoint)
       painter.drawLine(line)
+      painter.setBrush(QtCore.Qt.black)
+
+      #path = self.__path(4.0)
+      #painter.drawPath(path)
+
+      arrow_size = 6.0
+      arrow_p1 = QtCore.QPointF(-arrow_size/2, -arrow_size)
+      arrow_p2 = QtCore.QPointF(0.0, 0.0)
+      arrow_p3 = QtCore.QPointF(arrow_size/2, -arrow_size)
+
+      polygon = QtGui.QPolygonF()
+      polygon.append(arrow_p1)
+      polygon.append(arrow_p2)
+      polygon.append(arrow_p3)
+
+      #angle = math.atan(line.dx()/line.dy())
+      angle = math.acos(line.dy()/line.length())
+      if line.dx() <= 0:
+         angle = 6.28 - angle
+      #print "angle: ", math.degrees(angle)
+
+      painter.save()
+      painter.translate(self.destPoint)
+      painter.rotate(math.degrees(-angle))
+      painter.drawPolygon(polygon)
+      painter.restore()
+
+   def __path(self, width):
+      line = QtCore.QLineF(self.sourcePoint, self.destPoint)
+      #print "Source: (%s, %s)" % (self.sourcePoint.x(), self.sourcePoint.y())
+      #print "Dest: (%s, %s)" % (self.destPoint.x(), self.destPoint.y())
+      #print "Delta: (%s, %s)" % (line.dx(), line.dy())
 
       if line.length() == 0:
          angle = 0.0
       else:
-         angle = math.acos(line.dx() / line.length())
-      if line.dx() >= 0:
+         angle = math.asin(line.dx() / line.length())
+
+      if line.dy() <= 0:
          angle = 6.28 - angle
 
-      sourceArrowP1 = self.sourcePoint + QtCore.QPointF(math.sin(angle + 3.14 / 3.0) * self.arrowSize,
-                                                        math.cos(angle + 3.14 / 3.0) * self.arrowSize)
-      sourceArrowP2 = self.sourcePoint + QtCore.QPointF(math.sin(angle + 3.14 - 3.14 / 3.0) * self.arrowSize,
-                                                        math.cos(angle + 3.14 - 3.14 / 3.0) * self.arrowSize)
+      #print "Angle: ", math.degrees(angle)
+      cap_angle = math.radians(90) - angle
+      #print "Cap angle: ", math.degrees(cap_angle)
 
-      destArrowP1 = self.destPoint + QtCore.QPointF(math.sin(angle - 3.14 / 3.0) * self.arrowSize,
-                                                    math.cos(angle - 3.14 / 3.0) * self.arrowSize)
-      destArrowP2 = self.destPoint + QtCore.QPointF(math.sin(angle - 3.14 + 3.14 / 3.0) * self.arrowSize,
-                                                    math.cos(angle - 3.14 + 3.14 / 3.0) * self.arrowSize)
+      cap_deltax = math.sin(cap_angle) * (width/2)
+      cap_deltay = math.cos(cap_angle) * (width/2)
 
-      painter.setBrush(QtCore.Qt.black)
+      #print "Length: ", math.pow((math.pow(cap_deltax, 2.0)+math.pow(cap_deltay, 2.0)), 0.5)
+      #print "Delta: (%f, %f)" % (cap_deltax, cap_deltay) 
 
-      polygon1 = QtGui.QPolygonF()
-      polygon1.append(line.p1())
-      polygon1.append(sourceArrowP1)
-      polygon1.append(sourceArrowP2)
-      painter.drawPolygon(polygon1)
+      sourceP1 = QtCore.QPointF(self.sourcePoint.x() - cap_deltax, self.sourcePoint.y() + cap_deltay)
+      destP1 = QtCore.QPointF(self.destPoint.x() - cap_deltax, self.destPoint.y() + cap_deltay)
+      destP2 = QtCore.QPointF(self.destPoint.x() + cap_deltax, self.destPoint.y() - cap_deltay)
+      sourceP2 = QtCore.QPointF(self.sourcePoint.x() + cap_deltax, self.sourcePoint.y() - cap_deltay)
 
-      polygon2 = QtGui.QPolygonF()
-      polygon2.append(line.p2())
-      polygon2.append(destArrowP1)
-      polygon2.append(destArrowP2)
-      painter.drawPolygon(polygon2)
+      path = QtGui.QPainterPath()
+      path.moveTo(sourceP1)
+      path.lineTo(destP1)
+      path.lineTo(destP2)
+      path.lineTo(sourceP2)
+      return path
+
 
 class Node(QtGui.QGraphicsItem):
    def __init__(self, elm=None, graphWidget=None):
@@ -670,7 +727,10 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mEditTableView.setModel(self.mItemModel)
 
    def onItemSelected(self, item):
-      self.mItemModel.setItem(item)
+      if isinstance(item, Node):
+         self.mItemModel.setItem(item)
+      else:
+         self.mItemModel.setItem(None)
 
    def eventFilter(self, obj, event):
       if event.type() == QtCore.QEvent.MouseButtonPress:
