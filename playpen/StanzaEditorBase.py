@@ -28,12 +28,22 @@ class GV(QtGui.QGraphicsView):
    def dropEvent(self, event):
       print "GV Drop: ", event
 
-   def dropEvent(self, event):
-      print "GV Enter: ", event
+#   def dragMoveEvent(self, event):
+#      event.setAccepted(True)
+#      print event.isAccepted()
+#      print "Drag Move Enter: ", event
+#      QtGui.QGraphicsView.dragMoveEvent(self, event)
+#      print event.isAccepted()
 
-   def event(self, event):
-      print "GV Event: ", event.type()
-      return QtGui.QGraphicsView.event(self, event)
+#   def dragEnterEvent(self, event):
+#      print "GV Enter: ", event
+#      QtGui.QGraphicsView.dragEnterEvent(self, event)
+#      event.acceptProposedAction()
+#      print event.isAccepted()
+
+   #def event(self, event):
+   #   print "GV Event: ", event.type()
+   #   return QtGui.QGraphicsView.event(self, event)
 
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
@@ -65,8 +75,8 @@ class Ui_StanzaEditorBase(object):
       self.vboxlayout.addItem(spacerItem)
       self.hboxlayout.addWidget(self.groupBox)
 
-      #self.graphicsView = QtGui.QGraphicsView(StanzaEditorBase)
-      self.graphicsView = GV(StanzaEditorBase)
+      self.graphicsView = QtGui.QGraphicsView(StanzaEditorBase)
+      #self.graphicsView = GV(StanzaEditorBase)
       self.graphicsView.setObjectName("graphicsView")
       self.hboxlayout.addWidget(self.graphicsView)
 
