@@ -126,16 +126,26 @@ class StanzaScene(QtGui.QGraphicsScene):
 
    def dropEvent(self, event):
       if event.mimeData().hasFormat("maestro/new-component"):
-         print "Getting new component"
          event.acceptProposedAction()
-         print event.mimeData().text()
-         pos = event.scenePos()
-         print "Scene Pos: (%s, %s)" % (pos.x(), pos.y())
 
-         choice = ChoiceItem(self)
-         self.addItem(choice)
-         self.mChoices.append(choice)
-         choice.setPos(pos)
+         itemData = event.mimeData().data("maestro/new-component")
+         dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
+         item_type = QtCore.QString()
+         dataStream >> item_type
+
+         print "Type added: ", item_type
+         item = None
+         if item_type == "Choice":
+            item = ChoiceItem(self)
+         elif item_type == "Group":
+            item = GroupItem(self)
+
+         if item is not None:
+            self.addItem(item)
+            self.mChoices.append(item)
+            pos = event.scenePos()
+            item.setPos(pos)
+
 
          self.update(self.sceneRect())
       #elif event.mimeData().hasFormat("maestro/create-link"):
@@ -265,6 +275,8 @@ class Node(QtGui.QGraphicsItem):
       self.penWidth = 1
       self.mSize = QtCore.QSizeF(100.0, 100.0)
       self.setAcceptDrops(True)
+      self.mTitle = "Node"
+      self.mColor = QtGui.QColor(0, 127, 127, 191)
 
    def addEdge(self, edge):
       self.edgeList.append(edge)
@@ -355,19 +367,28 @@ class Node(QtGui.QGraphicsItem):
       rect = QtCore.QRectF(-self.mSize.width()/2.0, -self.mSize.height()/2.0, self.mSize.width(), self.mSize.height())
       shadow_rect = rect.translated(self.dropShadowWidth, self.dropShadowWidth)
 
+      painter.setRenderHint(QtGui.QPainter.Antialiasing)
+
+      # Draw the shadow.
       color = QtGui.QColor(QtCore.Qt.darkGray)
       color.setAlpha(100)
       painter.setPen(QtCore.Qt.NoPen)
       painter.setBrush(color)
       painter.drawRoundRect(shadow_rect)
 
+      # Draw the actual node.
       painter.setPen(QtCore.Qt.NoPen)
-      color = QtGui.QColor(0, 127, 127, 191)
-      painter.setBrush(color)
+      painter.setBrush(self.mColor)
 
+      # Draw black outline.
       painter.setPen(QtGui.QPen(QtCore.Qt.black, 0))
-      painter.setRenderHint(QtGui.QPainter.Antialiasing)
       painter.drawRoundRect(rect)
+
+      # Draw the percentage as text.
+      text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.mTitle)) + 6;
+      style = QtGui.QApplication.style()
+      align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextSingleLine
+      style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.mTitle)
 
    def itemChange(self, change, value):
       if change == QtGui.QGraphicsItem.ItemPositionChange:
@@ -413,6 +434,14 @@ class Node(QtGui.QGraphicsItem):
 class ChoiceItem(Node):
    def __init__(self, graphWidget):
       Node.__init__(self, graphWidget)
+      self.mTitle = "Choice"
+      self.mColor = QtGui.QColor(76, 122, 255, 191)
+
+class GroupItem(Node):
+   def __init__(self, graphWidget):
+      Node.__init__(self, graphWidget)
+      self.mTitle = "Group"
+      self.mColor = QtGui.QColor(76, 255, 69, 191)
 
 class GraphWidget(QtGui.QGraphicsView):
    def __init__(self):
@@ -435,7 +464,7 @@ class GraphWidget(QtGui.QGraphicsView):
       self.mChoices = []
 
       for i in xrange(5):
-         choice = ChoiceItem(self)
+         choice = Node(self)
          scene.addItem(choice)
          self.mChoices.append(choice)
          choice.setPos(i*10, i*10)
@@ -533,7 +562,13 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
          itemData = QtCore.QByteArray()
          dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-         dataStream << pixmap << QtCore.QPoint(event.pos())
+
+         if obj is self.mChoiceLbl:
+            dataStream << QtCore.QString("Choice")
+         elif obj is self.mGroupLbl:
+            dataStream << QtCore.QString("Group")
+         else:
+            dataStream << QtCore.QString("Unknown")
 
          mimeData = QtCore.QMimeData()
          mimeData.setData("maestro/new-component", itemData)
