@@ -95,39 +95,6 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
       Indicates whether a screen saver is currently running on the local
       computer.
       '''
-#      pid = os.fork()
-#      if pid == 0:
-#         self.__changeToUserName(avatar.mCredentials['username'])
-#
-#         if not os.environ.has_key('XAUTHORITY'):
-#            os.environ['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-#            remove_xauth = True
-#         else:
-#            remove_xauth = False
-#
-#         handles = popen2.popen3([self.mControlCmd, '-deactivate'])
-#         stdout_lines = handles[0].readlines()
-#         stderr_lines = handles[2].readlines()
-#         for h in handles:
-#            h.close()
-#
-#         if len(stderr_lines) > 0:
-#            ...
-#         for l in stdout_lines:
-#            if re.search('not active', l) is not None:
-#               running = False
-#            else:
-#               running = True
-#               os.system('%s -activate' % self.mControlCmd)
-#
-#         if remove_xauth:
-#            del os.environ['XAUTHORITY']
-#
-#         os._exit(running)
-#
-#      (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
-#      return status
-
       return self.__isRunning(avatar.mCredentials['username'])
       # Using 'xscreensaver-command -watch' would allow us to track whether
       # the screen saver has started running, but it wouldn't tell us if it
@@ -173,59 +140,6 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          # the xscreensaver process, so running it as root ought to be just
          # as effective.
          os.kill(self.__getPID(user_name), signal.SIGTERM)
-
-#      user_name = avatar.mCredentials['username']
-#
-#      pid = os.fork()
-#      if pid == 0:
-#         self.__changeToUserName(user_name)
-#         self.__changeSaverMode(user_name, 'off')
-#
-#         env = os.environ.copy()
-#         env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-#         os.execle(self.mControlCmd, self.mControlCmd, '-deactivate', env)
-
-         # Tell the xscreensaver process to exit. If the screen saver is
-         # currently waiting on a password to be entered before deactiating,
-         # then this is likely to block for a few seconds and then fail.
-#         env = os.environ.copy()
-#         env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-#         os.execle(self.mControlCmd, self.mControlCmd, '-exit', env)
-
-#      # Wait on the child to complete.
-#      (child_pid, exit_status) = procutil.waitpidRetryOnEINTR(pid, 0)
-
-#      # If deactivating XScreenSaver using xscreensaver-command did not
-#      # succeed, then try again by killing the xscreensaver process directly.
-#      # This could happen in the case when the screen saver requires a
-#      # password to be unlocked.
-#      # XXX: If this fails, we just give up on trying to stop the screen
-#      # saver.
-#      if exit_status != 0:
-#         user_name = avatar.mCredentials['username']
-#
-#         # Send the xscreensaver process SIGTERM to shut it down. This is
-#         # sufficient to unlock a locked screen when run as the user who owns
-#         # the xscreensaver process, so running it as root ought to be just as
-#         # effective.
-#         os.kill(self.__getPID(user_name), signal.SIGTERM)
-
-#         pid = os.fork()
-#         if pid == 0:
-#            self.__changeToUserName(user_name)
-#             os.kill(self.__getPID(user_name), signal.SIGTERM)
-#            os._exit(0)
-#
-#         procutil.waitpidRetryOnEINTR(pid, 0)
-
-#         pid = os.fork()
-#         if pid == 0:
-#            self.__changeToUserName(avatar.mCredentials['username'])
-#            env = os.environ.copy()
-#            env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-#            os.execle(self.mControlCmd, self.mControlCmd, '-exit', env)
-#
-#         procutil.waitpidRetryOnEINTR(pid, 0)
 
    def __isRunning(self, userName):
       return self.__getProcessLine(userName) is not None
