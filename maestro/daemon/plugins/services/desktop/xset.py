@@ -42,7 +42,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
       return 'xset'
    getName = staticmethod(getName)
 
-   blank_re = re.compile('\s+timeout:\s+(\d)\s+.*')
+   blank_re = re.compile('\s+timeout:\s+(\d+)\s+.*')
 
    def isSaverEnabled(self, avatar):
       if not os.environ.has_key('XAUTHORITY'):
