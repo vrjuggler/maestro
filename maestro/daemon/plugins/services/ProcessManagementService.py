@@ -23,6 +23,9 @@ import maestro.core
 
 if sys.platform.startswith('win'):
    from maestro.daemon import wmi
+else:
+   import signal
+
 
 ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.+:\d+\s+\d+)\s+(\S.*)")
 
@@ -62,7 +65,7 @@ class ProcessManagementService(maestro.core.IServicePlugin):
             print "Terminating: %s %s" % (process.ProcessId, process.Name)
             process.Terminate()
       else:
-         os.system('kill ' + str(pid))
+         os.kill(int(pid), signal.SIGTERM)
 
    def _getProcs(self):
       if sys.platform.startswith('win'):
