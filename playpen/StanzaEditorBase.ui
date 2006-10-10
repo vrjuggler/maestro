@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>617</width>
+    <height>521</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -46,6 +46,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="mArgLbl" >
+        <property name="text" >
+         <string>Arg</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="mEnvVarLbl" >
+        <property name="text" >
+         <string>EnvVar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer>
         <property name="orientation" >
          <enum>Qt::Vertical</enum>
@@ -62,7 +76,53 @@
     </widget>
    </item>
    <item>
-    <widget class="QGraphicsView" name="graphicsView" />
+    <widget class="QSplitter" name="mSplitter" >
+     <property name="sizePolicy" >
+      <sizepolicy>
+       <hsizetype>3</hsizetype>
+       <vsizetype>7</vsizetype>
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QGraphicsView" name="graphicsView" >
+      <property name="sizePolicy" >
+       <sizepolicy>
+        <hsizetype>7</hsizetype>
+        <vsizetype>3</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="mEditGroupBox" >
+      <property name="sizePolicy" >
+       <sizepolicy>
+        <hsizetype>5</hsizetype>
+        <vsizetype>5</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title" >
+       <string/>
+      </property>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QTableView" name="mEditTableView" />
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>

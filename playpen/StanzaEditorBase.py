@@ -21,34 +21,10 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
-class GV(QtGui.QGraphicsView):
-   def __init__(self, parent = None):
-      QtGui.QGraphicsScene.__init__(self, parent)
-
-   def dropEvent(self, event):
-      print "GV Drop: ", event
-
-#   def dragMoveEvent(self, event):
-#      event.setAccepted(True)
-#      print event.isAccepted()
-#      print "Drag Move Enter: ", event
-#      QtGui.QGraphicsView.dragMoveEvent(self, event)
-#      print event.isAccepted()
-
-#   def dragEnterEvent(self, event):
-#      print "GV Enter: ", event
-#      QtGui.QGraphicsView.dragEnterEvent(self, event)
-#      event.acceptProposedAction()
-#      print event.isAccepted()
-
-   #def event(self, event):
-   #   print "GV Event: ", event.type()
-   #   return QtGui.QGraphicsView.event(self, event)
-
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
       StanzaEditorBase.setObjectName("StanzaEditorBase")
-      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,400,300).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
+      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,617,521).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
 
       self.hboxlayout = QtGui.QHBoxLayout(StanzaEditorBase)
       self.hboxlayout.setMargin(9)
@@ -71,14 +47,55 @@ class Ui_StanzaEditorBase(object):
       self.mGroupLbl.setObjectName("mGroupLbl")
       self.vboxlayout.addWidget(self.mGroupLbl)
 
+      self.mArgLbl = QtGui.QLabel(self.groupBox)
+      self.mArgLbl.setObjectName("mArgLbl")
+      self.vboxlayout.addWidget(self.mArgLbl)
+
+      self.mEnvVarLbl = QtGui.QLabel(self.groupBox)
+      self.mEnvVarLbl.setObjectName("mEnvVarLbl")
+      self.vboxlayout.addWidget(self.mEnvVarLbl)
+
       spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
       self.vboxlayout.addItem(spacerItem)
       self.hboxlayout.addWidget(self.groupBox)
 
-      self.graphicsView = QtGui.QGraphicsView(StanzaEditorBase)
-      #self.graphicsView = GV(StanzaEditorBase)
+      self.mSplitter = QtGui.QSplitter(StanzaEditorBase)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(3),QtGui.QSizePolicy.Policy(7))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mSplitter.sizePolicy().hasHeightForWidth())
+      self.mSplitter.setSizePolicy(sizePolicy)
+      self.mSplitter.setOrientation(QtCore.Qt.Vertical)
+      self.mSplitter.setObjectName("mSplitter")
+
+      self.graphicsView = QtGui.QGraphicsView(self.mSplitter)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(3))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
+      self.graphicsView.setSizePolicy(sizePolicy)
       self.graphicsView.setObjectName("graphicsView")
-      self.hboxlayout.addWidget(self.graphicsView)
+
+      self.mEditGroupBox = QtGui.QGroupBox(self.mSplitter)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mEditGroupBox.sizePolicy().hasHeightForWidth())
+      self.mEditGroupBox.setSizePolicy(sizePolicy)
+      self.mEditGroupBox.setObjectName("mEditGroupBox")
+
+      self.vboxlayout1 = QtGui.QVBoxLayout(self.mEditGroupBox)
+      self.vboxlayout1.setMargin(9)
+      self.vboxlayout1.setSpacing(6)
+      self.vboxlayout1.setObjectName("vboxlayout1")
+
+      self.mEditTableView = QtGui.QTableView(self.mEditGroupBox)
+      self.mEditTableView.setObjectName("mEditTableView")
+      self.vboxlayout1.addWidget(self.mEditTableView)
+      self.hboxlayout.addWidget(self.mSplitter)
 
       self.retranslateUi(StanzaEditorBase)
       QtCore.QMetaObject.connectSlotsByName(StanzaEditorBase)
@@ -87,6 +104,8 @@ class Ui_StanzaEditorBase(object):
       StanzaEditorBase.setWindowTitle(QtGui.QApplication.translate("StanzaEditorBase", "Stanza Editor", None, QtGui.QApplication.UnicodeUTF8))
       self.mChoiceLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Choice", None, QtGui.QApplication.UnicodeUTF8))
       self.mGroupLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Group", None, QtGui.QApplication.UnicodeUTF8))
+      self.mArgLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Arg", None, QtGui.QApplication.UnicodeUTF8))
+      self.mEnvVarLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "EnvVar", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

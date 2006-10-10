@@ -24,11 +24,52 @@ from PyQt4 import QtCore, QtGui
 import StanzaEditorBase
 import math
 
+import os.path
+pj = os.path.join
+
+sys.path.append( pj(os.path.dirname(__file__), ".."))
+import maestro.core
+
+import elementtree.ElementTree as ET
+
+maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
+store = maestro.core.StanzaStore.StanzaStore()
+store.scan()
+
 class StanzaScene(QtGui.QGraphicsScene):
-   def __init__(self, parent = None):
+   def __init__(self, applicationElt, parent = None):
       QtGui.QGraphicsScene.__init__(self, parent)
       self.mChoices = []
       self.mLine = None
+      self.mItems = []
+
+      self.mApplication = applicationElt
+
+      # Build all first level nodes.
+      for elm in self.mApplication:
+         self._buildNode(elm)
+
+
+   def _buildNode(self, elm, parent=None):
+      item = None
+      if elm.tag == 'group':
+         item = GroupItem(elm)
+      elif elm.tag == 'choice':
+         item = ChoiceItem(elm)
+      elif elm.tag == 'arg':
+         item = ArgItem(elm)
+      elif elm.tag == 'env_var':
+         item = EnvItem(elm)
+      else:
+         print "Not building a node for: [%s]" % (elm.tag)
+
+      if item is not None:
+         self.addItem(item)
+         self.mItems.append(item)
+         item.setPos(0,0)
+
+      for child in elm[:]:
+         self._buildNode(child, self)
 
    def clearLine(self):
       if self.mLine is not None:
@@ -100,7 +141,11 @@ class StanzaScene(QtGui.QGraphicsScene):
 
                return
       else:
+         old_focus = self.focusItem()
          QtGui.QGraphicsScene.mousePressEvent(self, event)
+         if old_focus != self.focusItem():
+            print "New focus: ", self.focusItem()
+            self.emit(QtCore.SIGNAL("itemSelected(QGraphicsItem*)"), self.focusItem())
 
    def mouseReleaseEvent(self, event):
       if event.button() == QtCore.Qt.RightButton:
@@ -136,9 +181,17 @@ class StanzaScene(QtGui.QGraphicsScene):
          print "Type added: ", item_type
          item = None
          if item_type == "Choice":
-            item = ChoiceItem(self)
+            new_elm = ET.SubElement(self.mApplication, 'choice')
+            item = ChoiceItem(new_elm)
          elif item_type == "Group":
-            item = GroupItem(self)
+            new_elm = ET.SubElement(self.mApplication, 'group')
+            item = GroupItem(new_elm)
+         elif item_type == "Arg":
+            new_elm = ET.SubElement(self.mApplication, 'arg')
+            item = ArgItem(new_elm)
+         elif item_type == "EnvVar":
+            new_elm = ET.SubElement(self.mApplication, 'env_var')
+            item = EnvItem(new_elm)
 
          if item is not None:
             self.addItem(item)
@@ -157,7 +210,13 @@ class Edge(QtGui.QGraphicsItem):
    def __init__(self, sourceNode, destNode):
       QtGui.QGraphicsItem.__init__(self)
       self.arrowSize = 10.0
-      self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
+      #self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
+
+      self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+      self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+      self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable)
+
+
       self.source = sourceNode
       self.dest = destNode
       self.source.addEdge(self)
@@ -263,20 +322,30 @@ class Edge(QtGui.QGraphicsItem):
       painter.drawPolygon(polygon2)
 
 class Node(QtGui.QGraphicsItem):
-   def __init__(self, graphWidget):
+   def __init__(self, elm=None, graphWidget=None):
       QtGui.QGraphicsItem.__init__(self)
       self.edgeList = []
       self.newPos = QtCore.QPointF()
       self.graph = graphWidget
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+      self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable)
       self.setZValue(1)
       self.dropShadowWidth = 5.0
       self.penWidth = 1
       self.mSize = QtCore.QSizeF(100.0, 100.0)
       self.setAcceptDrops(True)
-      self.mTitle = "Node"
       self.mColor = QtGui.QColor(0, 127, 127, 191)
+      self.mElement = elm
+      self.mAttribNameMap = {}
+      self.mAttribMap = {}
+      self.mTitle = "Node"
+
+   def title(self):
+      if self.mElement is not None:
+         return "%s\n[%s]" % (self.mTitle, self.mElement.get('label', ''))
+      else:
+         return self.mTitle
 
    def addEdge(self, edge):
       self.edgeList.append(edge)
@@ -380,15 +449,20 @@ class Node(QtGui.QGraphicsItem):
       painter.setPen(QtCore.Qt.NoPen)
       painter.setBrush(self.mColor)
 
+      if self.hasFocus():
+         self.penWidth = 3
+      else:
+         self.penWidth = 1
+
       # Draw black outline.
-      painter.setPen(QtGui.QPen(QtCore.Qt.black, 0))
+      painter.setPen(QtGui.QPen(QtCore.Qt.black, self.penWidth))
       painter.drawRoundRect(rect)
 
       # Draw the percentage as text.
-      text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.mTitle)) + 6;
+      text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.title())) + 6;
       style = QtGui.QApplication.style()
-      align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextSingleLine
-      style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.mTitle)
+      align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextWordWrap
+      style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.title())
 
    def itemChange(self, change, value):
       if change == QtGui.QGraphicsItem.ItemPositionChange:
@@ -431,27 +505,72 @@ class Node(QtGui.QGraphicsItem):
       else:
          QtGui.QGraphicsItem.dropEvent(self, event)
 
+   def dataCount(self):
+      return len(self.mAttribMap)
+
+   def data(self, index, role):
+      if index.isValid() and self.mElement is not None:
+         if role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
+            if 0 == index.column():
+               if self.mAttribNameMap.has_key(index.row()):
+                  return QtCore.QVariant(self.mAttribNameMap[index.row()])
+            if 1 == index.column():
+               if self.mAttribMap.has_key(index.row()):
+                  value = self.mElement.get(self.mAttribMap[index.row()], '')
+                  return QtCore.QVariant(value)
+      return QtCore.QVariant()
+
+   def setData(self, index, value, role):
+      self.mAttribMap = {0:'name', 1:'label', 2:'tooltip', 3:'type'}
+      if index.isValid() and self.mElement is not None:
+         assert role == QtCore.Qt.EditRole
+         assert 1 == index.column()
+         if self.mAttribMap.has_key(index.row()):
+            str_val = str(value.toString())
+            self.mElement.set(self.mAttribMap[index.row()], str_val)
+            self.update()
+            return True
+      return False
+
 class ChoiceItem(Node):
-   def __init__(self, graphWidget):
-      Node.__init__(self, graphWidget)
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
       self.mColor = QtGui.QColor(76, 122, 255, 191)
+      self.mAttribNameMap = {0:'Name', 1:'Label', 2:'Tool Tip', 3:'Type'}
+      self.mAttribMap = {0:'name', 1:'label', 2:'tooltip', 3:'type'}
 
 class GroupItem(Node):
-   def __init__(self, graphWidget):
-      Node.__init__(self, graphWidget)
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
       self.mTitle = "Group"
       self.mColor = QtGui.QColor(76, 255, 69, 191)
+      self.mAttribNameMap = {0:'Name', 1:'Label'}
+      self.mAttribMap = {0:'name', 1:'label'}
+
+class ArgItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Argument"
+      self.mColor = QtGui.QColor(255, 67, 67, 191)
+      self.mAttribNameMap = {0:'Name', 1:'Label', 2:'Selected', 3:'Editable', 4:'Flag'}
+      self.mAttribMap = {0:'name', 1:'label', 2:'selected', 3:'editable', 4:'flag'}
+
+class EnvItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Environment Variable"
+      self.mColor = QtGui.QColor(255, 253, 117, 191)
+      self.mAttribNameMap = {0:'Name', 1:'Label', 2:'Key'}
+      self.mAttribMap = {0:'name', 1:'label', 2:'key'}
 
 class GraphWidget(QtGui.QGraphicsView):
-   def __init__(self):
-      QtGui.QGraphicsView.__init__(self)
+   def __init__(self, parent=None):
+      QtGui.QGraphicsView.__init__(self, parent)
       #self.timerId = 0
       #scene = QtGui.QGraphicsScene(self)
-      scene = StanzaScene(self)
-      scene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
-      scene.setSceneRect(-200, -200, 400, 400)
-      self.setScene(scene)
+
+
       self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
       self.setRenderHint(QtGui.QPainter.Antialiasing)
       self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -460,38 +579,6 @@ class GraphWidget(QtGui.QGraphicsView):
       self.scale(0.8, 0.8)
       self.setMinimumSize(400, 400)
       self.setWindowTitle("Maestro Test Nodes")
-
-      self.mChoices = []
-
-      for i in xrange(5):
-         choice = Node(self)
-         scene.addItem(choice)
-         self.mChoices.append(choice)
-         choice.setPos(i*10, i*10)
-
-      self.mEdges = []
-      edge0 = Edge(self.mChoices[0], self.mChoices[1])
-      edge1 = Edge(self.mChoices[1], self.mChoices[2])
-      edge2 = Edge(self.mChoices[2], self.mChoices[3])
-      edge3 = Edge(self.mChoices[3], self.mChoices[4])
-
-      scene.addItem(edge0)
-      self.mEdges.append(edge0)
-      scene.addItem(edge1)
-      self.mEdges.append(edge1)
-      scene.addItem(edge2)
-      self.mEdges.append(edge2)
-      scene.addItem(edge3)
-      self.mEdges.append(edge3)
-
-      self.mChoices[0].setPos(0, 0)
-      self.mChoices[1].setPos(-150, 150)
-      self.mChoices[2].setPos(150, 150)
-      self.mChoices[3].setPos(-150, -150)
-      self.mChoices[4].setPos(150, -150)
-
-      for e in self.mEdges:
-         e.adjust()
 
       #choice_item.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       #choice_item.setPos(0, 0)
@@ -531,11 +618,14 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       #scene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
       #scene.setSceneRect(-200, -200, 400, 400)
 
-      self.mGraphWidget = GraphWidget()
-      self.hboxlayout.removeWidget(self.graphicsView)
-      self.hboxlayout.addWidget(self.mGraphWidget)
+
+
       self.graphicsView.setParent(None)
       del self.graphicsView
+      self.mGraphWidget = GraphWidget()
+      self.mSplitter.insertWidget(0, self.mGraphWidget)
+      self.mSplitter.refresh()
+      self.mSplitter.update()
 
       #self.mGraphWidget.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
       self.mGraphWidget.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -547,27 +637,60 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       #scene.setAcceptDrops(True)
 
 
+      found = store.find("editor:TestApplication")
+      assert(1 == len(found))
+      test_app = found[0]
+      assert 'application' == test_app.tag
+
+      self.mScene = StanzaScene(test_app, self)
+      self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
+      self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
+      self.mScene.setSceneRect(-200, -200, 400, 400)
+      self.mGraphWidget.setScene(self.mScene)
+
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
+      pixmap = QtGui.QPixmap("Choice.png")
+      self.mChoiceLbl.setPixmap(pixmap)
+      pixmap = QtGui.QPixmap("Group.png")
+      self.mGroupLbl.setPixmap(pixmap)
+      pixmap = QtGui.QPixmap("Arg.png")
+      self.mArgLbl.setPixmap(pixmap)
+      pixmap = QtGui.QPixmap("EnvVar.png")
+      self.mEnvVarLbl.setPixmap(pixmap)
+
       self.mChoiceLbl.installEventFilter(self)
       self.mGroupLbl.installEventFilter(self)
+      self.mArgLbl.installEventFilter(self)
+      self.mEnvVarLbl.installEventFilter(self)
+
+      # Set up the table.
+      self.mItemModel = ItemTableModel()
+      self.mEditTableView.setModel(self.mItemModel)
+
+   def onItemSelected(self, item):
+      self.mItemModel.setItem(item)
 
    def eventFilter(self, obj, event):
       if event.type() == QtCore.QEvent.MouseButtonPress:
-         print "Eating mouse"
-
-         #pixmap = child.pixmap()
-         pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
-
          itemData = QtCore.QByteArray()
          dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
 
          if obj is self.mChoiceLbl:
+            pixmap = QtGui.QPixmap("Choice.png")
             dataStream << QtCore.QString("Choice")
          elif obj is self.mGroupLbl:
+            pixmap = QtGui.QPixmap("Group.png")
             dataStream << QtCore.QString("Group")
+         elif obj is self.mArgLbl:
+            pixmap = QtGui.QPixmap("Arg.png")
+            dataStream << QtCore.QString("Arg")
+         elif obj is self.mEnvVarLbl:
+            pixmap = QtGui.QPixmap("EnvVar.png")
+            dataStream << QtCore.QString("EnvVar")
          else:
+            pixmap = QtGui.QPixmap("Choice.png")
             dataStream << QtCore.QString("Unknown")
 
          mimeData = QtCore.QMimeData()
@@ -578,18 +701,65 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          drag.setPixmap(pixmap)
          drag.setHotSpot(event.pos()) 
 
-         #tempPixmap = QtGui.QPixmap(pixmap)
-         #painter = QtGui.QPainter()
-         #painter.begin(tempPixmap)
-         #painter.fillRect(pixmap.rect(), QtGui.QColor(127, 127, 127, 127))
-         #painter.end()
-
-         #child.setPixmap(tempPixmap)
-
          result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
          return True
       else:
          return QtCore.QObject.eventFilter(self, obj, event)
+
+class ItemTableModel(QtCore.QAbstractTableModel):
+   def __init__(self, item=None, parent=None):
+      QtCore.QAbstractTableModel.__init__(self, parent)
+      self.mItem = item
+
+   def setItem(self, item):
+      self.mItem = item
+      self.reset()
+      begin = self.index(0, 0)
+      end = self.index(self.rowCount()-1, self.columnCount()-1)
+      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), begin, end)
+
+   def rowCount(self, parent=QtCore.QModelIndex()):
+      if self.mItem is not None:
+         return self.mItem.dataCount()
+      return 0
+
+   def columnCount(self, parent=QtCore.QModelIndex()):
+      return 2
+
+   def headerData(self, section, orientation, role = QtCore.Qt.DisplayRole):
+      if orientation == QtCore.Qt.Vertical:
+         return QtCore.QVariant()
+      elif role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
+         if 0 == section:
+            return QtCore.QVariant("Name")
+         elif 1 == section:
+            return QtCore.QVariant("Value")
+      return QtCore.QVariant()
+
+   def flags(self, index):
+      if not index.isValid():
+         return None
+      flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+      if 1 == index.column():
+         flags |= QtCore.Qt.ItemIsEditable
+      return flags
+
+   def data(self, index, role):
+      if self.mItem is not None:
+         if role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
+            return self.mItem.data(index, role)
+
+      return QtCore.QVariant()
+
+   def setData(self, index, value, role):
+      if self.mItem is not None:
+         if role == QtCore.Qt.EditRole:
+            if self.mItem.setData(index, value, role):
+               self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
+               self.emit(QtCore.SIGNAL("dataChanged(int)"), index.row())
+               return True
+      return False
+
 
 
 if __name__ == "__main__":
