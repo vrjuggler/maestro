@@ -66,14 +66,49 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
       # If the given image file name does not exist, then we create it so
       # that it can then be loaded below.
       if not os.path.exists(imgFile):
-         file = open(imgFile, "w+b")
-         file.write(imgData)
-         file.close()
+         dir_name  = os.path.dirname(imgFile)
+         file_name = os.path.basename(imgFile)
+         while not os.path.exists(dir_name) or not os.path.isdir(dir_name):
+            dir_name = os.path.dirname(dir_name)
+            if dir_name == '':
+               break
 
-         # Change ownership of the newly created file to the authenticated
-         # user.
          pw_entry = pwd.getpwnam(user_name)
-         os.chown(imgFile, pw_entry[2], pw_entry[3])
+         uid = os.geteuid()
+         gid = os.getegid()
+
+         # Set the effective group and user ID for this process so that the
+         # file that gets created is owned by the authenticated user.
+         # XXX: Can this result in the user being able to create an
+         # arbitrary file in what would otherwise be a write-protected part
+         # of the file system?
+         os.setegid(pw_entry[3])
+         os.seteuid(pw_entry[2])
+         home_dir = pw_entry[5]
+
+         if dir_name == '':
+            dir_name = home_dir
+
+         img_file = os.path.join(dir_name, file_name)
+
+         try:
+            file = open(img_file, "w+b")
+            file.write(imgData)
+            file.close()
+         # If we cannot write the file to dir_name, try again in the user's
+         # home directory--unless dir_name is already set to home_dir. In
+         # that case, we have a big problem.
+         except IOError, ex:
+            if dir_name != home_dir:
+               img_file = os.path.join(home_dir, file_name)
+               file = open(img_file, "w+b")
+               file.write(imgData)
+               file.close()
+            else:
+               raise
+
+         os.setegid(gid)
+         os.seteuid(uid)
 
       # Create a process that runs as the authenticated user in order to
       # change the user's desktop background image via GConf.
@@ -81,7 +116,7 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
       if pid == 0:
          procutil.changeToUserName(user_name)
          os.execl(self.mCmd, self.mCmd, '--type=string', '--set',
-                  '/desktop/gnome/background/picture_filename', imgFile)
+                  '/desktop/gnome/background/picture_filename', img_file)
 
       procutil.waitpidRetryOnEINTR(pid, 0)
 
