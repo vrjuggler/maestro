@@ -312,8 +312,10 @@ class UserPerspective(pb.Avatar):
 
          # We are done with these environment variables now that the user is
          # logged out.
-         del os.environ['DISPLAY']
-         del os.environ['USER_XAUTHORITY']
+         if os.environ.has_key('DISPLAY'):
+            del os.environ['DISPLAY']
+         if os.environ.has_key('USER_XAUTHORITY'):
+            del os.environ['USER_XAUTHORITY']
 
       logger = logging.getLogger('maestrod.UserPerspective')
       logger.info("Logging out client: " + str(nodeId))
