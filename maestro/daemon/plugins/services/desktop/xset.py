@@ -45,11 +45,20 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    blank_re = re.compile('\s+timeout:\s+(\d)\s+.*')
 
    def isSaverEnabled(self, avatar):
+      if not os.environ.has_key('XAUTHORITY'):
+         os.environ['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+         remove_xauth = True
+      else:
+         remove_xauh = False
+
       # Run 'xset q' and determine the setting of the screen saver timeout.
       (child_stdout, child_stdin) = popen2.popen2([self.mCmd, 'q'])
       lines = child_stdout.readlines()
       child_stdout.close()
       child_stdin.close()
+
+      if remove_xauth:
+         del os.environ['XAUTHORITY']
 
       enabled = False
 
