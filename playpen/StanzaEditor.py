@@ -273,6 +273,12 @@ class Node(QtGui.QGraphicsItem):
    def edges(self):
       return self.edgeList
 
+   def isConnectedTo(self, otherNode):
+      for edge in self.edgeList:
+         if edge.source is otherNode or edge.dest is otherNode:
+            return True
+      return False
+
    Type = QtGui.QGraphicsItem.UserType + 1
 
    def type(self):
@@ -372,60 +378,35 @@ class Node(QtGui.QGraphicsItem):
       return QtGui.QGraphicsItem.itemChange(self, change, value)
 
    def mousePressEvent(self, event):
-      """
-      if event.button() != QtCore.Qt.LeftButton:
-         #pixmap = child.pixmap()
-         pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
-
-         itemData = QtCore.QByteArray()
-         dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-         dataStream << pixmap #<< QtCore.QPoint(event.pos())
-
-         mimeData = QtCore.QMimeData()
-         mimeData.setData("maestro/create-link", itemData)
-
-         drag = QtGui.QDrag(event.widget())
-         drag.setMimeData(mimeData)
-         drag.setPixmap(pixmap)
-
-         result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
-         self.scene().clearLine()
-         event.accept()
-         return
-      """
       self.update()
       QtGui.QGraphicsItem.mousePressEvent(self, event)
 
    def mouseReleaseEvent(self, event):
-      """
-      if event.button() != QtCore.Qt.LeftButton:
-         event.accept()
-         return
-      """
       self.update()
       QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
 
    def dragEnterEvent(self, event):
       if event.mimeData().hasFormat("maestro/create-link"):
-         event.acceptProposedAction()
-         print "Drag enter"
+         source = self.scene().mSource
+         if source is not None and not self.isConnectedTo(source):
+            event.acceptProposedAction()
       else:
          QtGui.QGraphicsItem.dragEnterEvent(self, event)
 
    def dragLeaveEvent(self, event):
       if event.mimeData().hasFormat("maestro/create-link"):
-         event.acceptProposedAction()
-         print "Drag leave"
+         source = self.scene().mSource
+         if source is not None and not self.isConnectedTo(source):
+            event.acceptProposedAction()
       else:
          QtGui.QGraphicsItem.dragEnterEvent(self, event)
 
    def dropEvent(self, event):
       if event.mimeData().hasFormat("maestro/create-link"):
          source = self.scene().mSource
-         print "Source: ", source
-         if source is not None:
+         if source is not None and not self.isConnectedTo(source):
             new_edge = Edge(source, self)
-         self.scene().addItem(new_edge)
+            self.scene().addItem(new_edge)
       else:
          QtGui.QGraphicsItem.dropEvent(self, event)
 
@@ -528,8 +509,8 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       del self.graphicsView
 
       #self.mGraphWidget.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-      #self.mGraphWidget.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-      self.mGraphWidget.setDragMode(QtGui.QGraphicsView.NoDrag)
+      self.mGraphWidget.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+      #self.mGraphWidget.setDragMode(QtGui.QGraphicsView.NoDrag)
 
       #self.graphicsView.setScene(scene)
       #self.graphicsView.setInteractive(True)
