@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys
+import sys, random
 from PyQt4 import QtCore, QtGui
 
 import StanzaEditorBase
@@ -68,8 +68,17 @@ class StanzaScene(QtGui.QGraphicsScene):
          self.mItems.append(item)
          item.setPos(0,0)
 
-      for child in elm[:]:
-         self._buildNode(child, self)
+         if parent is not None:
+            edge = Edge(parent, item)
+            self.addItem(edge)
+
+         for child in elm[:]:
+            child_item = self._buildNode(child, item)
+            # Add if we want a parent/child coordinate systems.
+            #if child_item is not None:
+            #   child_item.setParentItem(item)
+            
+      return item
 
    def clearLine(self):
       if self.mLine is not None:
@@ -145,6 +154,8 @@ class StanzaScene(QtGui.QGraphicsScene):
                event.accept()
             elif isinstance(item, Edge):
                if item.inHotRect(event):
+                  item.sourceNode().removeEdge(item)
+                  item.destNode().removeEdge(item)
                   self.removeItem(item)
                   #self.mChoices.remove(item)
                   self.createLinkDrag(event, item.sourceNode())
@@ -161,6 +172,16 @@ class StanzaScene(QtGui.QGraphicsScene):
          self.clearLine()
       else:
          QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
+
+   def keyPressEvent(self, event):
+      key = event.key()
+      item = self.focusItem()
+
+      if item is not None and key == QtCore.Qt.Key_Delete:
+         print "Delete: ", item
+         
+      QtGui.QGraphicsScene.keyPressEvent(self, event)
+
 
    def mouseMoveEvent(self, event):
       if event.buttons() & QtCore.Qt.RightButton:
@@ -214,6 +235,72 @@ class StanzaScene(QtGui.QGraphicsScene):
       #   self.clearLine()
       else:
          QtGui.QGraphicsScene.dropEvent(self, event)
+
+   def randomLayout(self):
+      # Create a random layout
+      random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
+
+      nodes = []
+      for item in self.items():
+         if isinstance(item, Node):
+            nodes.append(item)
+ 
+      sceneRect = self.sceneRect()
+      for node in nodes:
+         w = random.random() * sceneRect.width()
+         h = random.random() * sceneRect.height()
+         node.setPos(w, h)
+         node.updateEdges()
+
+   #Concentric Layout Management
+   def concentricLayout(self, azimutDelta = 45.0, circleInterval = 150.0):
+      center = self.sceneRect()
+      nodesPerCircle = 360 / azimutDelta;
+
+      nodes = []
+      for item in self.items():
+         if isinstance(item, Node):
+            nodes.append(item)
+
+      n = 0
+      for node in nodes:
+         azimutIndex = n % nodesPerCircle
+         azimut = azimutIndex * azimutDelta;
+
+         circleIndex = 1 + ( n / nodesPerCircle )
+         cx = math.sin(math.radians(azimut)) * ( circleIndex * circleInterval )
+         cy = math.cos(math.radians(azimut)) * ( circleIndex * circleInterval );
+         node.setPos(center.x() + cx, center.y() + cy)
+         node.updateEdges()
+
+         n += 1
+
+   def __getNodes(self):
+      nodes = []
+      for item in self.items():
+         if isinstance(item, Node):
+            nodes.append(item)
+      return nodes
+
+
+   def colimaconLayout(self, azimutDelta = 15.0, circleInterval = 40.0):
+      center = self.sceneRect()
+      nodesPerCircle = 360 / azimutDelta;
+
+      nodes = self.__getNodes()
+
+      n = 0
+      for node in nodes:
+         azimutIndex = ( n % nodesPerCircle );
+         azimut = n * azimutDelta;
+
+         circleIndex = 1 + ( n / nodesPerCircle );
+         cx = math.sin(math.radians(azimut)) * ( math.log(1.0 + n ) * 10 * circleInterval );
+         cy = math.cos(math.radians(azimut)) * ( math.log(1.0 + n ) * 10 * circleInterval );
+         node.setPos(center.x() + cx, center.y() + cy)
+         node.updateEdges()
+
+         n += 1
 
 def intersect(line, rect):
    top_line = QtCore.QLineF(rect.topLeft(), rect.topRight())
@@ -323,7 +410,13 @@ class Edge(QtGui.QGraphicsItem):
       if self.source is None or self.dest is None:
          return QtCore.QRectF()
 
-      painter.setPen(QtGui.QPen(self.mArrowColor, 1, QtCore.Qt.SolidLine,
+      self.penWidth = 1
+      if self.hasFocus():
+         pen_width = self.penWidth * 3.0
+      else:
+         pen_width = self.penWidth
+
+      painter.setPen(QtGui.QPen(self.mArrowColor, pen_width, QtCore.Qt.SolidLine,
                                 QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
       line = QtCore.QLineF(self.sourcePoint, self.destPoint)
       painter.drawLine(line)
@@ -444,6 +537,10 @@ class Node(QtGui.QGraphicsItem):
       self.edgeList.append(edge)
       edge.adjust()
 
+   def removeEdge(self, edge):
+      if self.edgeList.count(edge):
+         self.edgeList.remove(edge)
+
    def edges(self):
       return self.edgeList
 
@@ -463,20 +560,23 @@ class Node(QtGui.QGraphicsItem):
          self.newPos = self.pos()
          return
 
+      # Sum up all forces pushing this item away
       xvel = 0.0
       yvel = 0.0
       for item in self.scene().items():
          if not isinstance(item, Node):
             continue
 
+         # Line between nodes.
          line = QtCore.QLineF(self.mapFromItem(item, 0, 0), QtCore.QPointF(0, 0))
          dx = line.dx()
          dy = line.dy()
-         l = 2.0 * (dx * dx + dy * dy)
+         l = 60.0 * (dx * dx + dy * dy)
          if l > 0:
             xvel += (dx * 150.0) / l
             yvel += (dy * 150.0) / l
 
+      # Now subtract all forces pulling items together
       weight = (len(self.edgeList) + 1) * 10.0
       for edge in self.edgeList:
          if edge.sourceNode() is self:
@@ -557,10 +657,13 @@ class Node(QtGui.QGraphicsItem):
       align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextWordWrap
       style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.title())
 
+   def updateEdges(self):
+      for edge in self.edgeList:
+         edge.adjust()
+
    def itemChange(self, change, value):
       if change == QtGui.QGraphicsItem.ItemPositionChange:
-         for edge in self.edgeList:
-            edge.adjust()
+         self.updateEdges()
          #self.graph.itemMoved()
 
       return QtGui.QGraphicsItem.itemChange(self, change, value)
@@ -660,7 +763,7 @@ class EnvItem(Node):
 class GraphWidget(QtGui.QGraphicsView):
    def __init__(self, parent=None):
       QtGui.QGraphicsView.__init__(self, parent)
-      #self.timerId = 0
+      self.timerId = 0
       #scene = QtGui.QGraphicsScene(self)
 
 
@@ -677,15 +780,69 @@ class GraphWidget(QtGui.QGraphicsView):
       #choice_item.setPos(0, 0)
       #self.setInteractive(True)
 
+   #def keyPressEvent(self, event):
+   #   key = event.key()
+   #
+   #   if key == QtCore.Qt.Key_Plus:
+   #      self.scaleView(1.2)
+   #   elif key == QtCore.Qt.Key_Minus:
+   #      self.scaleView(1 / 1.2)
+   #   else:
+   #      QtGui.QGraphicsView.keyPressEvent(self, event)
+
    def keyPressEvent(self, event):
       key = event.key()
-
-      if key == QtCore.Qt.Key_Plus:
+      if key == QtCore.Qt.Key_Up:
+         self.centerNode.moveBy(0, -20)
+      elif key == QtCore.Qt.Key_Down:
+         self.centerNode.moveBy(0, 20)
+      elif key == QtCore.Qt.Key_Left:
+         self.centerNode.moveBy(-20, 0)
+      elif key == QtCore.Qt.Key_Right:
+         self.centerNode.moveBy(20, 0)
+      elif key == QtCore.Qt.Key_Plus:
          self.scaleView(1.2)
       elif key == QtCore.Qt.Key_Minus:
          self.scaleView(1 / 1.2)
+      elif key == QtCore.Qt.Key_Space:
+      #   for item in self.scene().items():
+      #      if isinstance(item, Node):
+      #         item.setPos(-150 + random.random() % 300, -150 + random.random() % 300)
+      #elif key == QtCore.Qt.Key_Enter:
+         #self.itemMoved()
+         #self.scene().randomLayout()
+         #self.scene().concentricLayout()
+         self.scene().colimaconLayout()
       else:
          QtGui.QGraphicsView.keyPressEvent(self, event)
+
+   def itemMoved(self):
+      print "itemMoved"
+      if self.timerId == 0:
+         print "creating timer"
+         self.timerId = self.startTimer(1000 / 25)
+
+
+
+
+   def timerEvent(self, event):
+      print "Timer event"
+      nodes = []
+      for item in self.scene().items():
+         if isinstance(item, Node):
+            nodes.append(item)
+
+      for node in nodes:
+         node.calculateForces()
+
+      itemsMoved = False
+      for node in nodes:
+         if node.advance():
+            itemsMoved = True
+
+      if not itemsMoved:
+         self.killTimer(self.timerId)
+         self.timerId = 0
 
    def wheelEvent(self, event):
       self.scaleView(math.pow(2.0, -event.delta() / 240.0))
@@ -735,11 +892,26 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       test_app = found[0]
       assert 'application' == test_app.tag
 
+
       self.mScene = StanzaScene(test_app, self)
       self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
       self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
       self.mScene.setSceneRect(-200, -200, 400, 400)
       self.mGraphWidget.setScene(self.mScene)
+      self.mScene.randomLayout()
+
+      layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout']
+      layout_funcs = [self.mScene.randomLayout, self.mScene.concentricLayout, self.mScene.colimaconLayout]
+
+      self.mLayoutActions = []
+
+      for (name, func) in zip(layout_names, layout_funcs):
+         new_action = QtGui.QAction(name, self)
+         self.connect(new_action, QtCore.SIGNAL("triggered()"), func)
+         self.mLayoutBtn1.addAction(new_action)
+
+   def onRandomLayout(self):
+      self.mScene.randomLayout()
 
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
@@ -860,6 +1032,7 @@ class ItemTableModel(QtCore.QAbstractTableModel):
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
+   random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
    widget = StanzaEditor()
    widget.show()
    sys.exit(app.exec_())

@@ -6,13 +6,13 @@
     <x>0</x>
     <y>0</y>
     <width>617</width>
-    <height>521</height>
+    <height>661</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Stanza Editor</string>
   </property>
-  <layout class="QHBoxLayout" >
+  <layout class="QVBoxLayout" >
    <property name="margin" >
     <number>9</number>
    </property>
@@ -20,11 +20,11 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox" >
+    <widget class="QGroupBox" name="groupBox_2" >
      <property name="title" >
       <string/>
      </property>
-     <layout class="QVBoxLayout" >
+     <layout class="QHBoxLayout" >
       <property name="margin" >
        <number>9</number>
       </property>
@@ -32,42 +32,48 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="QLabel" name="mChoiceLbl" >
+       <widget class="QToolButton" name="mLayoutBtn1" >
         <property name="text" >
-         <string>Choice</string>
+         <string>...</string>
+        </property>
+        <property name="popupMode" >
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="toolButtonStyle" >
+         <enum>Qt::ToolButtonIconOnly</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="mGroupLbl" >
+       <widget class="QToolButton" name="mLayoutBtn2" >
         <property name="text" >
-         <string>Group</string>
+         <string>...</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="mArgLbl" >
+       <widget class="QToolButton" name="mLayoutBtn3" >
         <property name="text" >
-         <string>Arg</string>
+         <string>...</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="mEnvVarLbl" >
+       <widget class="QToolButton" name="mLayoutBtn4" >
         <property name="text" >
-         <string>EnvVar</string>
+         <string>...</string>
         </property>
        </widget>
       </item>
       <item>
        <spacer>
         <property name="orientation" >
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" >
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
@@ -76,53 +82,119 @@
     </widget>
    </item>
    <item>
-    <widget class="QSplitter" name="mSplitter" >
-     <property name="sizePolicy" >
-      <sizepolicy>
-       <hsizetype>3</hsizetype>
-       <vsizetype>7</vsizetype>
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
      </property>
-     <property name="orientation" >
-      <enum>Qt::Vertical</enum>
+     <property name="spacing" >
+      <number>6</number>
      </property>
-     <widget class="QGraphicsView" name="graphicsView" >
-      <property name="sizePolicy" >
-       <sizepolicy>
-        <hsizetype>7</hsizetype>
-        <vsizetype>3</vsizetype>
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="mEditGroupBox" >
-      <property name="sizePolicy" >
-       <sizepolicy>
-        <hsizetype>5</hsizetype>
-        <vsizetype>5</vsizetype>
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title" >
-       <string/>
-      </property>
-      <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>9</number>
+     <item>
+      <widget class="QGroupBox" name="groupBox" >
+       <property name="title" >
+        <string/>
        </property>
-       <property name="spacing" >
-        <number>6</number>
+       <layout class="QVBoxLayout" >
+        <property name="margin" >
+         <number>9</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="mChoiceLbl" >
+          <property name="text" >
+           <string>Choice</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="mGroupLbl" >
+          <property name="text" >
+           <string>Group</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="mArgLbl" >
+          <property name="text" >
+           <string>Arg</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="mEnvVarLbl" >
+          <property name="text" >
+           <string>EnvVar</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSplitter" name="mSplitter" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>3</hsizetype>
+         <vsizetype>7</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <item>
-        <widget class="QTableView" name="mEditTableView" />
-       </item>
-      </layout>
-     </widget>
-    </widget>
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QGraphicsView" name="graphicsView" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>7</hsizetype>
+          <vsizetype>3</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="mEditGroupBox" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>5</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title" >
+         <string/>
+        </property>
+        <layout class="QVBoxLayout" >
+         <property name="margin" >
+          <number>9</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QTableView" name="mEditTableView" />
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

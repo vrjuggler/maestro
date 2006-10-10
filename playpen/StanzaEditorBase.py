@@ -24,40 +24,75 @@ from PyQt4 import QtCore, QtGui
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
       StanzaEditorBase.setObjectName("StanzaEditorBase")
-      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,617,521).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
+      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,617,661).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
 
-      self.hboxlayout = QtGui.QHBoxLayout(StanzaEditorBase)
-      self.hboxlayout.setMargin(9)
-      self.hboxlayout.setSpacing(6)
-      self.hboxlayout.setObjectName("hboxlayout")
-
-      self.groupBox = QtGui.QGroupBox(StanzaEditorBase)
-      self.groupBox.setObjectName("groupBox")
-
-      self.vboxlayout = QtGui.QVBoxLayout(self.groupBox)
+      self.vboxlayout = QtGui.QVBoxLayout(StanzaEditorBase)
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
+      self.groupBox_2 = QtGui.QGroupBox(StanzaEditorBase)
+      self.groupBox_2.setObjectName("groupBox_2")
+
+      self.hboxlayout = QtGui.QHBoxLayout(self.groupBox_2)
+      self.hboxlayout.setMargin(9)
+      self.hboxlayout.setSpacing(6)
+      self.hboxlayout.setObjectName("hboxlayout")
+
+      self.mLayoutBtn1 = QtGui.QToolButton(self.groupBox_2)
+      self.mLayoutBtn1.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
+      self.mLayoutBtn1.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+      self.mLayoutBtn1.setObjectName("mLayoutBtn1")
+      self.hboxlayout.addWidget(self.mLayoutBtn1)
+
+      self.mLayoutBtn2 = QtGui.QToolButton(self.groupBox_2)
+      self.mLayoutBtn2.setObjectName("mLayoutBtn2")
+      self.hboxlayout.addWidget(self.mLayoutBtn2)
+
+      self.mLayoutBtn3 = QtGui.QToolButton(self.groupBox_2)
+      self.mLayoutBtn3.setObjectName("mLayoutBtn3")
+      self.hboxlayout.addWidget(self.mLayoutBtn3)
+
+      self.mLayoutBtn4 = QtGui.QToolButton(self.groupBox_2)
+      self.mLayoutBtn4.setObjectName("mLayoutBtn4")
+      self.hboxlayout.addWidget(self.mLayoutBtn4)
+
+      spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
+      self.hboxlayout.addItem(spacerItem)
+      self.vboxlayout.addWidget(self.groupBox_2)
+
+      self.hboxlayout1 = QtGui.QHBoxLayout()
+      self.hboxlayout1.setMargin(0)
+      self.hboxlayout1.setSpacing(6)
+      self.hboxlayout1.setObjectName("hboxlayout1")
+
+      self.groupBox = QtGui.QGroupBox(StanzaEditorBase)
+      self.groupBox.setObjectName("groupBox")
+
+      self.vboxlayout1 = QtGui.QVBoxLayout(self.groupBox)
+      self.vboxlayout1.setMargin(9)
+      self.vboxlayout1.setSpacing(6)
+      self.vboxlayout1.setObjectName("vboxlayout1")
+
       self.mChoiceLbl = QtGui.QLabel(self.groupBox)
       self.mChoiceLbl.setObjectName("mChoiceLbl")
-      self.vboxlayout.addWidget(self.mChoiceLbl)
+      self.vboxlayout1.addWidget(self.mChoiceLbl)
 
       self.mGroupLbl = QtGui.QLabel(self.groupBox)
       self.mGroupLbl.setObjectName("mGroupLbl")
-      self.vboxlayout.addWidget(self.mGroupLbl)
+      self.vboxlayout1.addWidget(self.mGroupLbl)
 
       self.mArgLbl = QtGui.QLabel(self.groupBox)
       self.mArgLbl.setObjectName("mArgLbl")
-      self.vboxlayout.addWidget(self.mArgLbl)
+      self.vboxlayout1.addWidget(self.mArgLbl)
 
       self.mEnvVarLbl = QtGui.QLabel(self.groupBox)
       self.mEnvVarLbl.setObjectName("mEnvVarLbl")
-      self.vboxlayout.addWidget(self.mEnvVarLbl)
+      self.vboxlayout1.addWidget(self.mEnvVarLbl)
 
-      spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
-      self.vboxlayout.addItem(spacerItem)
-      self.hboxlayout.addWidget(self.groupBox)
+      spacerItem1 = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
+      self.vboxlayout1.addItem(spacerItem1)
+      self.hboxlayout1.addWidget(self.groupBox)
 
       self.mSplitter = QtGui.QSplitter(StanzaEditorBase)
 
@@ -87,21 +122,26 @@ class Ui_StanzaEditorBase(object):
       self.mEditGroupBox.setSizePolicy(sizePolicy)
       self.mEditGroupBox.setObjectName("mEditGroupBox")
 
-      self.vboxlayout1 = QtGui.QVBoxLayout(self.mEditGroupBox)
-      self.vboxlayout1.setMargin(9)
-      self.vboxlayout1.setSpacing(6)
-      self.vboxlayout1.setObjectName("vboxlayout1")
+      self.vboxlayout2 = QtGui.QVBoxLayout(self.mEditGroupBox)
+      self.vboxlayout2.setMargin(9)
+      self.vboxlayout2.setSpacing(6)
+      self.vboxlayout2.setObjectName("vboxlayout2")
 
       self.mEditTableView = QtGui.QTableView(self.mEditGroupBox)
       self.mEditTableView.setObjectName("mEditTableView")
-      self.vboxlayout1.addWidget(self.mEditTableView)
-      self.hboxlayout.addWidget(self.mSplitter)
+      self.vboxlayout2.addWidget(self.mEditTableView)
+      self.hboxlayout1.addWidget(self.mSplitter)
+      self.vboxlayout.addLayout(self.hboxlayout1)
 
       self.retranslateUi(StanzaEditorBase)
       QtCore.QMetaObject.connectSlotsByName(StanzaEditorBase)
 
    def retranslateUi(self, StanzaEditorBase):
       StanzaEditorBase.setWindowTitle(QtGui.QApplication.translate("StanzaEditorBase", "Stanza Editor", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLayoutBtn1.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLayoutBtn2.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLayoutBtn3.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLayoutBtn4.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mChoiceLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Choice", None, QtGui.QApplication.UnicodeUTF8))
       self.mGroupLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Group", None, QtGui.QApplication.UnicodeUTF8))
       self.mArgLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Arg", None, QtGui.QApplication.UnicodeUTF8))
