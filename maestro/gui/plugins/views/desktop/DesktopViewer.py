@@ -43,7 +43,7 @@ class DesktopViewPlugin(maestro.core.IViewPlugin):
       return self.widget
 
    def activate(self):
-      self.widget.refresh(self.widget.getCurrentNodeID())
+      self.widget.refresh()
 
 class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
    def __init__(self, parent = None):
@@ -56,6 +56,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.mEnsemble   = None
       self.mSettings   = {}
       self.mImageCache = {}
+      self.mDirty      = False    # Flag for our node state knowledge
 
    def setupUi(self, widget):
       '''
@@ -89,6 +90,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.mSettings['*'] = DesktopSettings()
 
       if ensemble is not None:
+         self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"),
+                      self.onEnsembleChange)
+
          for i in xrange(ensemble.getNumNodes()):
             node = ensemble.getNode(i)
             id = node.getId()
@@ -107,19 +111,43 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       env.mEventManager.connect('*', 'desktop.report_bg_image_data',
                                 self.onReportBackgroundImageData)
 
-   def refresh(self, nodeId):
+   def refresh(self):
+      # Mark this view as being dirty, meaning that it needs to refresh its
+      # knowledge of node state information.
+      self.mDirty = True
+
       if self.mEnsemble is not None:
+         # If there are newly added connections, we will be informed about
+         # them through our slot connected to the ensembleChanged() signal
+         # in self.mEnsemble.
          self.mEnsemble.refreshConnections()
 
+      # We only call _queryState() if we are still in a dirty state. If
+      # _queryState() already got invoked as a side effect of calling
+      # refreshConnections() (see onEnsembleChange()), then self.mDirty will
+      # be False at this point.
+      if self.mDirty:
+         self._queryState('*')
+
+   def _queryState(self, nodeId):
       self.mReportCount = 0
 
       env = maestro.core.Environment()
       env.mEventManager.emit(nodeId, 'desktop.get_saver_use')
       env.mEventManager.emit(nodeId, 'desktop.get_bg_image_file')
       env.mEventManager.emit(nodeId, 'desktop.get_bg_image_data')
+      self.mDirty = False
 
    def nodeSelected(self):
       self._setChoice(self.mNodeChooser.currentIndex())
+
+   def onEnsembleChange(self):
+      # There was a change to our ensemble, so we update our state information
+      # for all the cluster nodes.
+      # NOTE :This method is invoked as a result of invoking the method
+      # refreshConnections() on our ensemble object, so we do not want to get
+      # into an infinite loop by invoking refreshConnections() again.
+      self._queryState('*')
 
    def onToggleScreenSaver(self, val):
       node_id = self.getCurrentNodeID()
@@ -253,7 +281,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
    def _setChoice(self, index):
       node_id = self.getCurrentNodeID()
-      self.refresh(node_id)
+      self._queryState(node_id)
 
       if node_id == '*':
          # When we are displaying the state for all the nodes, we use a
