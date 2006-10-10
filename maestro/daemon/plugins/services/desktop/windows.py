@@ -53,8 +53,19 @@ class WindowsSaverPlugin(maestro.core.ISaverPlugin):
          else:
             saver_desktop.Close()
             saver_running = True
-      except:
-         saver_running = False
+      except Exception, ex:
+         # ERROR_ACCESS_DENIED: This means that the screen saver is running,
+         # but we do not have permission to open the desktop.
+         if ex.errno == 5:
+            saver_running = True
+         # ERROR_FILE_NOT_FOUND: This means that the screen saver is not
+         # running.
+         elif ex.errno == 2:
+            saver_running = False
+         # Some other unexpected error.
+         else:
+            print "Encountered unexpected error:", ex
+            saver_running = False
 
       return saver_running
 
