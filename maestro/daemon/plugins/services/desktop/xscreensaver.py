@@ -1,0 +1,281 @@
+# Maestro is Copyright (C) 2006 by Infiscape
+#
+# Original Author: Aron Bierbaum
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+import os
+import os.path
+import pwd
+import popen2
+import re
+import signal
+import sys
+
+import maestro.core
+import procutil
+
+
+class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
+   '''
+   A screen saver management plug-in specifically for use with the
+   XScreenSaver software package. This plug-in utilizes xscreensaver-command
+   to manipulate the use of a screen saver.
+   '''
+   def __init__(self):
+      maestro.core.ISaverPlugin.__init__(self)
+      env = maestro.core.Environment()
+
+      if env.settings.has_key('xscreensaver_cmd'):
+         self.mSaverCmd = env.settings['xscreensaver_cmd']
+      else:
+         self.mSaverCmd = '/usr/X11R6/bin/xscreensaver'
+
+      if env.settings.has_key('xscreensaver_command_cmd'):
+         self.mControlCmd = env.settings['xscreensaver_command_cmd']
+      else:
+         self.mControlCmd = '/usr/X11R6/bin/xscreensaver-command'
+
+   def getName():
+      return 'xscreensaver'
+   getName = staticmethod(getName)
+
+   mode_re = re.compile('^(\s*mode:\s+)(\w+)(\W*)$')
+
+   # The intention here is to match the xscreensaver process without
+   # matching something like the xscreensaver-command process.
+   cmd_re = re.compile('(\s|/)xscreensaver(\s+.*|)$')
+
+   def isSaverEnabled(self, avatar):
+      enabled = False
+
+      user_name = avatar.mCredentials['username']
+      home_dir  = pwd.getpwnam(user_name)[5]
+      settings  = os.path.join(home_dir, '.xscreensaver')
+
+      # If the user has a .xscreensaver file, examine it to determine if
+      # XScreenSaver is currently configured to activate a screen saver at
+      # some point. This is done by looking for the "mode: ..." line in the
+      # .xscreensaver file. If its setting is not "off," then we consider
+      # XScreeSaver to be enabled.
+      if os.path.exists(settings):
+         file = open(settings, "r")
+         lines = file.readlines()
+         file.close()
+
+         for l in lines:
+            match = self.mode_re.search(l)
+            if match is not None:
+               enabled = match.group(2) != 'off'
+               break
+
+      # In addition to actually having a screen saver configured for use, we
+      # need to verify that the xscreensaver process is running for the
+      # named user.
+      running = self.__isRunning(user_name)
+
+      # XScreenSaver is considered enabled if it is both configured to run a
+      # screen saver and the xscreensaver process is running.
+      return enabled and running
+
+   def isSaverRunning(self, avatar):
+      '''
+      Indicates whether a screen saver is currently running on the local
+      computer.
+      '''
+#      pid = os.fork()
+#      if pid == 0:
+#         self.__changeToUserName(avatar.mCredentials['username'])
+#
+#         if not os.environ.has_key('XAUTHORITY'):
+#            os.environ['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+#            remove_xauth = True
+#         else:
+#            remove_xauth = False
+#
+#         handles = popen2.popen3([self.mControlCmd, '-deactivate'])
+#         stdout_lines = handles[0].readlines()
+#         stderr_lines = handles[2].readlines()
+#         for h in handles:
+#            h.close()
+#
+#         if len(stderr_lines) > 0:
+#            ...
+#         for l in stdout_lines:
+#            if re.search('not active', l) is not None:
+#               running = False
+#            else:
+#               running = True
+#               os.system('%s -activate' % self.mControlCmd)
+#
+#         if remove_xauth:
+#            del os.environ['XAUTHORITY']
+#
+#         os._exit(running)
+#
+#      (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
+#      return status
+
+      return self.__isRunning(avatar.mCredentials['username'])
+      # Using 'xscreensaver-command -watch' would allow us to track whether
+      # the screen saver has started running, but it wouldn't tell us if it
+      # is already running.
+
+   def setSaverEnabled(self, avatar, enabled):
+      if enabled:
+         pid = os.fork()
+         if pid == 0:
+            user_name = avatar.mCredentials['username']
+            self.__changeToUserName(user_name)
+
+            running = self.__isRunning(user_name)
+            if running:
+               self.__changeSaverMode(user_name, 'one')
+            else:
+               # Start the xscreensaver process back up again.
+               env = os.environ.copy()
+               env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+               os.spawnle(os.P_NOWAIT, self.mSaverCmd, self.mSaverCmd,
+                          '-no-splash', env)
+
+            # NOTE: It is absolutely necessary to call os._exit() here to
+            # avoid throwing a SystemExit exception. This forked process has
+            # to exit immediately lest things get really screwed up.
+            os._exit(0)
+
+         procutil.waitpidRetryOnEINTR(pid, 0)
+
+      # Disabling XScreenSaver means shutting down the xscreensaver process.
+      else:
+         self.stopSaver(avatar)
+
+   def stopSaver(self, avatar):
+      user_name = avatar.mCredentials['username']
+
+      pid = os.fork()
+      if pid == 0:
+         self.__changeToUserName(user_name)
+         self.__changeSaverMode(user_name, 'off')
+
+         env = os.environ.copy()
+         env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+         os.execle(self.mControlCmd, self.mControlCmd, '-deactivate', env)
+
+         # Tell the xscreensaver process to exit. If the screen saver is
+         # currently waiting on a password to be entered before deactiating,
+         # then this is likely to block for a few seconds and then fail.
+#         env = os.environ.copy()
+#         env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+#         os.execle(self.mControlCmd, self.mControlCmd, '-exit', env)
+
+      # Wait on the child to complete.
+      (child_pid, exit_status) = procutil.waitpidRetryOnEINTR(pid, 0)
+
+      # If deactivating XScreenSaver using xscreensaver-command did not
+      # succeed, then try again by killing the xscreensaver process directly.
+      # This could happen in the case when the screen saver requires a
+      # password to be unlocked.
+      # XXX: If this fails, we just give up on trying to stop the screen
+      # saver.
+      if exit_status != 0:
+         user_name = avatar.mCredentials['username']
+
+         # Send the xscreensaver process SIGTERM to shut it down. This is
+         # sufficient to unlock a locked screen when run as the user who owns
+         # the xscreensaver process, so running it as root ought to be just as
+         # effective.
+         os.kill(self.__getPID(user_name), signal.SIGTERM)
+
+#         pid = os.fork()
+#         if pid == 0:
+#            self.__changeToUserName(user_name)
+#             os.kill(self.__getPID(user_name), signal.SIGTERM)
+#            os._exit(0)
+#
+#         procutil.waitpidRetryOnEINTR(pid, 0)
+
+#         pid = os.fork()
+#         if pid == 0:
+#            self.__changeToUserName(avatar.mCredentials['username'])
+#            env = os.environ.copy()
+#            env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+#            os.execle(self.mControlCmd, self.mControlCmd, '-exit', env)
+#
+#         procutil.waitpidRetryOnEINTR(pid, 0)
+
+   def __isRunning(self, userName):
+      return self.__getProcessLine(userName) is not None
+
+   pid_re = re.compile('^\S+\s+(\d+)\s+.*')
+
+   def __getPID(self, userName):
+      process_line = self.__getProcessLine(userName)
+      match = self.pid_re.match(process_line)
+      return int(match.group(1))
+
+   def __getProcessLine(self, userName):
+      platform = sys.platform.lower()
+
+      # Set up the flags to pass to ps(1) so that we get the same formatting
+      # of the output on all platforms.
+      if platform.startswith('freebsd') or platform.startswith('darwin'):
+         args = ['-wxu', '-U', userName]
+      else:
+         args = ['-fu', userName]
+
+      (child_stdout, child_stdin) = popen2.popen2(["/bin/ps"] + args)
+      lines = child_stdout.readlines()
+      child_stdout.close()
+      child_stdin.close()
+
+      process_line = None
+      for l in lines:
+         if self.cmd_re.search(l) is not None:
+            process_line = l
+            break
+
+      return process_line
+
+   def __changeSaverMode(self, userName, mode):
+      pw_entry  = pwd.getpwnam(userName)
+      settings  = os.path.join(pw_entry[5], '.xscreensaver')
+
+      if os.path.exists(settings):
+         settings_file = open(settings, 'r')
+         lines = settings_file.readlines()
+         settings_file.close()
+
+         found = False
+         for i in xrange(len(lines)):
+            if self.mode_re.search(lines[i]) is not None:
+               lines[i] = self.mode_re.sub(r'\1%s\3' % mode, lines[i])
+               found = True
+
+         if not found:
+            lines.append('\nmode:\t\t%s\n' % mode)
+
+         settings_file = open(settings, 'w')
+         settings_file.writelines(lines)
+         settings_file.close()
+
+   def __changeToUserName(self, userName):
+      pw_entry = pwd.getpwnam(userName)
+      self.__changeToUser(pw_entry[2], pw_entry[3])
+
+   def __changeToUser(self, uid, gid):
+      # NOTE: os.setgid() must be called first or else we will get an
+      # "operation not permitted" error.
+      os.setgid(gid)
+      os.setuid(uid)

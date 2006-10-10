@@ -4,4 +4,7 @@
    <grub_conf>/boot/grub/grub.conf</grub_conf>
    <xauth_cmd>/usr/X11R6/bin/xauth</xauth_cmd>
    <xauthority_file>/var/gdm/:0.Xauth</xauthority_file>
+   <saver_types>xset,xscreensaver</saver_types>
+   <xscreensaver_cmd>/usr/X11R6/bin/xscreensaver</xscreensaver_cmd>
+   <xscreensaver_command_cmd>/usr/X11R6/bin/xscreensaver-command</xscreensaver_command_cmd>
 </maestrod>

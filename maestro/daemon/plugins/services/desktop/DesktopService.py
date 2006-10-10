@@ -22,12 +22,6 @@ import os
 import os.path
 import sys
 
-if sys.platform.startswith("win"):
-   import win32api
-   import win32con
-   import win32gui
-   import win32security
-
 import maestro.core
 
 
@@ -35,6 +29,44 @@ class DesktopService(maestro.core.IServicePlugin):
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
       self.mLogger = logging.getLogger('maestrod.DesktopService')
+      self.mSaverPlugins = []
+
+      env = maestro.core.Environment()
+
+      # Load the list of plug-ins to use for controlling the screen saver.
+      # The list is a comma-separated string of plug-in names (such as
+      # "xset,xscreensaver" to indicate the use of the xset and xscreensaver
+      # plug-ins or just "windows" to indicate the use of the Windows
+      # plug-in).
+      if env.settings.has_key('saver_types'):
+         saver_types = env.settings.get('saver_types', '').lower().split(',')
+      else:
+         # On Windows, default to using the standard screen saver management
+         # plug-in.
+         if sys.platform.startswith('win'):
+            saver_types = ['windows']
+         # On non-Windows platforms, default (blindly) to using the xset(1)
+         # screen saver management plug-in. This will usually not be
+         # sufficient since modern X desktops tend to use more sophisticated
+         # screen saver software than the basic mechanisms controlled by
+         # xset(1).
+         else:
+            saver_types = ['xset']
+
+      self.mLogger.debug('saver_types: %s' % saver_types)
+
+      saver_plugins = \
+         env.mPluginManager.getPlugins(plugInType = maestro.core.ISaverPlugin,
+                                       returnNameDict = False)
+
+      for plugin_type in saver_plugins:
+         name = plugin_type.getName()
+         if name.lower() in saver_types:
+            self.mSaverPlugins.append(plugin_type())
+
+      if len(self.mSaverPlugins) > 0:
+         self.mLogger.debug('Using saver plug-ins %s' % \
+                               [s.getName() for s in self.mSaverPlugins])
 
    def registerCallbacks(self):
       env = maestro.core.Environment()
@@ -62,16 +94,17 @@ class DesktopService(maestro.core.IServicePlugin):
       # for use.
       env = maestro.core.Environment()
       env.mEventManager.emit(nodeId, 'desktop.report_saver_use',
-                             self._getScreenSaverUse())
+                             self._getScreenSaverUse(avatar))
 
-   def _getScreenSaverUse(self):
-      # Windows.
-      if sys.platform.startswith('win'):
-         have_saver = \
-            win32gui.SystemParametersInfo(win32con.SPI_GETSCREENSAVEACTIVE)
-      # X Window System.
-      else:
-         have_saver = False
+   def _getScreenSaverUse(self, avatar):
+      have_saver = False
+
+      # If any one screen saver plug-in reports that a screen saver is
+      # enabled, then we return True. Otherwise, we return False.
+      for p in self.mSaverPlugins:
+         if p.isSaverEnabled(avatar):
+            have_saver = True
+            break
 
       return have_saver
 
@@ -82,31 +115,17 @@ class DesktopService(maestro.core.IServicePlugin):
       # Tell the requesting node whether a screen saver is currently running.
       env = maestro.core.Environment()
       env.mEventManager.emit(nodeId, 'desktop.report_saver_running',
-                             self._getScreenSaverRunning())
+                             self._getScreenSaverRunning(avatar))
 
-   def _getScreenSaverRunning(self):
-      if sys.platform.startswith('win'):
-         # The following is adapted from the Microsoft knowledge base entry
-         # Q150785:
-         #
-         #    http://support.microsoft.com/kb/q150785/
+   def _getScreenSaverRunning(self, avatar):
+      saver_running = False
 
-         # Try to open the screen saver desktop. If this succeeds, then the
-         # screen saver has to be running.
-         try:
-            saver_desktop = win32service.OpenDesktop("Screen-saver", 0, False,
-                                                     win32con.MAXIMUM_ALLOWED)
-
-            if saver_desktop is None:
-               saver_running = False
-            else:
-               saver_desktop.Close()
-               saver_running = True
-         except:
-            saver_running = False
-      # X Window System.
-      else:
-         saver_running = False
+      # If any one screen saver plug-in reports that it is running, then we
+      # return True. Otherwise, we return False.
+      for p in self.mSaverPlugins:
+         if p.isSaverRunning(avatar):
+            saver_running = True
+            break
 
       return saver_running
 
@@ -114,73 +133,20 @@ class DesktopService(maestro.core.IServicePlugin):
       '''
       Toggles the use of a screen saver in the user's profile.
       '''
-      # Only change the use of the screen saver if enabled is different
-      # than the current use state.
-      if enabled != self._getScreenSaverUse():
-         # Windows.
-         if sys.platform.startswith('win'):
-            win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
-
-            update = win32con.SPIF_UPDATEINIFILE | win32con.SPIF_SENDCHANGE
-            win32gui.SystemParametersInfo(win32con.SPI_SETSCREENSAVEACTIVE,
-                                          enabled, update)
-
-            # If we are re-enabling the use of the screen saver, then we have
-            # to take an extra step to make sure that the screen saver can
-            # actually kick back in after the desired timeout period.
-            if enabled:
-               # Simulator user input to reinitialize the timeout period. For
-               # more information on why this is necessary, see the Microsoft
-               # knowledge base entry Q140723:
-               #
-               #    http://support.microsoft.com/kb/140723/EN-US/
-               win32api.SetCursorPos(win32api.GetCursorPos())
-               #(x, y) = win32api.GetCursorPos()
-               #win32api.SetCursorPos((x + 1, y + 1))
-
-            win32security.RevertToSelf()
-
-      # X Window System.
-      else:
-         pass
+      for p in self.mSaverPlugins:
+         # Only change the use of the screen saver if enabled is different
+         # than the current use state.
+         if enabled != p.isSaverEnabled(avatar):
+            p.setSaverEnabled(avatar, enabled)
 
    def onStopScreenSaver(self, nodeId, avatar):
       '''
       Attempts to stop the running screen saver (if there is one).
       '''
-      if self._getScreenSaverRunning():
-         # Windows.
-         if sys.platform.startswith('win'):
-            # The following is adapted from the Microsoft knowledge base entry
-            # Q140723:
-            #
-            #    http://support.microsoft.com/kb/140723/EN-US/
-
-            # Try to open the screen saver desktop and close all the visible
-            # windows on it.
-            # NOTE: If the screen saver requires a password to be unlocked,
-            # then this causes the unlock dialog to be displayed.
-            try:
-               desktop_flags = win32con.DESKTOP_READOBJECTS  | \
-                               win32con.DESKTOP_WRITEOBJECTS
-               saver_desktop = win32service.OpenDesktop("Screen-saver", 0,
-                                                        False, desktop_flags)
-
-               for w in saver_desktop.EnumDesktopWindows():
-                  if win32gui.IsWindowVisible(w):
-                     win32api.PostMessage(w, win32con.WM_CLOSE, 0, 0)
-
-               saver_desktop.CloseDesktop()
-
-            # Windows 2000 and later: If there is no screen saver desktop,
-            # then the screen saver is on the default desktop. We can close
-            # it by sending a WM_CLOSE to the foreground window.
-            except:
-               win32api.PostMessage(win32gui.GetForegroundWindow(),
-                                    win32con.WM_CLOSE, 0, 0)
-         # X Window System.
-         else:
-            pass
+      for p in self.mSaverPlugins:
+         # Only stop the screen saver if it is currently running.
+         if p.isSaverRunning(avatar):
+            p.stopSaver(avatar)
 
    def onSetBackground(self, nodeId, avatar, imgFile, imgData):
       if sys.platform.startswith('win'):
@@ -286,7 +252,7 @@ class DesktopService(maestro.core.IServicePlugin):
       # If the image data string is not too big, we just put it in a list
       # directly.
       else:
-         img_data_list = [img_data]
+         img_data_list = [img_data_str]
 
       env.mEventManager.emit(nodeId, 'desktop.report_bg_image_data',
                              img_data_list, debug = False)
