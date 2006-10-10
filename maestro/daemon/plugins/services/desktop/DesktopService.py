@@ -172,7 +172,8 @@ class DesktopService(maestro.core.IServicePlugin):
          p.stopSaver(avatar)
 
    def onSetBackground(self, nodeId, avatar, imgFile, imgData):
-      self.mBackgroundPlugin.setBackground(avatar, imgFile, imgData)
+      self.mBackgroundPlugin.setBackground(avatar, imgFile,
+                                           ''.join(imgData))
 
    def onQueryBackgroundImageFile(self, nodeId, avatar):
       '''
