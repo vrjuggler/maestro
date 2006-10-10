@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import errno
 import os
 import os.path
 import popen2
@@ -37,6 +38,16 @@ def getUserXauthFile(userName):
    pw_entry = pwd.getpwnam(userName)
    user_home = pw_entry[5]
    return os.path.join(user_home, '.Xauthority')
+
+def waitpidRetryOnEINTR(pid, options):
+   while True:
+      try:
+         return os.waitpid(pid, options)
+      except OSError, ex:
+         if ex.errno == errno.EINTR:
+            continue
+         else:
+            raise
 
 def addAuthority(user, xauthCmd, xauthFile):
    '''
@@ -65,7 +76,26 @@ def addAuthority(user, xauthCmd, xauthFile):
 
    (child_stdout, child_stdin) = \
       popen2.popen2('%s -f %s list' % (xauthCmd, getUserXauthFile(user)))
-   lines = child_stdout.readlines()
+
+   # Read the contents of the user's X authority file. This is not done using
+   # readlines() because that could fail due to an interrupted system call.
+   # Instead, we read lines one at a time and handle EINTR if an when it
+   # occurs.
+   lines = []
+   done = False
+   while not done:
+      try:
+         line = child_stdout.readline()
+         if line == '':
+            done = True
+         else:
+            lines.append(line)
+      except IOError, ex:
+         if ex.errno == errno.EINTR:
+            continue
+         else:
+            raise
+
    child_stdout.close()
    child_stdin.close()
 
@@ -87,7 +117,7 @@ def addAuthority(user, xauthCmd, xauthFile):
                   key[0], key[1], key[2])
 
       # Wait on the child to complete.
-      os.waitpid(pid, 0)
+      waitpidRetryOnEINTR(pid, 0)
 
    return (key[0], has_key)
 
@@ -106,4 +136,4 @@ def removeAuthority(user, xauthCmd, displayName):
                displayName)
 
    # Wait on the child to complete.
-   os.waitpid(pid, 0)
+   waitpidRetryOnEINTR(pid, 0)
