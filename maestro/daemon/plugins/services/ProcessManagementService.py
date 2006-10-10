@@ -21,13 +21,15 @@ import sys, os, platform
 import re
 import maestro.core
 
+if sys.platform.startswith('win'):
+   from maestro.daemon import wmi
+
 ps_regex = re.compile(r"^(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S.+:\d+\s+\d+)\s+(\S.*)")
 
 class ProcessManagementService(maestro.core.IServicePlugin):
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
-      if "win32" == sys.platform:
-         from maestro.daemon import wmi
+      if sys.platform.startswith('win'):
          self.mWMIConnection = wmi.WMI()
       else:
          pass
@@ -54,8 +56,7 @@ class ProcessManagementService(maestro.core.IServicePlugin):
           @param avatar: System avatar that represents the remote user.
           @param pid: Process ID of the process to terminate.
       """
-      if "win32" == sys.platform:
-         from maestro.util import wmi
+      if sys.platform.startswith('win'):
          print "Trying to terminate process: ", pid
          for process in self.mWMIConnection.Win32_Process(ProcessId=pid):
             print "Terminating: %s %s" % (process.ProcessId, process.Name)
@@ -64,8 +65,7 @@ class ProcessManagementService(maestro.core.IServicePlugin):
          os.system('kill ' + str(pid))
 
    def _getProcs(self):
-      if "win32" == sys.platform:
-         from maestro.util import wmi
+      if sys.platform.startswith('win'):
          procs = []
          time_str = ""
          for process in self.mWMIConnection.Win32_Process():
