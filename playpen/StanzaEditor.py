@@ -41,29 +41,17 @@ class StanzaScene(QtGui.QGraphicsScene):
       if event.mimeData().hasFormat("maestro/new-component"):
          event.setAccepted(True)
       elif event.mimeData().hasFormat("maestro/create-link"):
-         event.setAccepted(True)
-         #print "Event: ", event
          sp = event.scenePos()
-         #print "down: (%s, %s)" % (dp.x(), dp.y())
-         #lp = event.lastScenePos()
-         #print "last: (%s, %s)" % (lp.x(), lp.y())
-         #sp = event.scenePos()
-         #print "current: (%s, %s)" % (sp.x(), sp.y())
          if self.mLine is not None:
-            old_line = self.mLine.line()
-            self.mLine.setLine(old_line.x1(), old_line.y1(), sp.x(), sp.y())
+            self.mLine.setLine(self.mSource.pos().x(), self.mSource.pos().y(), sp.x(), sp.y())
+         QtGui.QGraphicsScene.dragMoveEvent(self, event)
       else:
          QtGui.QGraphicsScene.dragMoveEvent(self, event)
+
 
    def dragEnterEvent(self, event):
       if event.mimeData().hasFormat("maestro/new-component"):
          event.acceptProposedAction()
-      elif event.mimeData().hasFormat("maestro/create-link"):
-         event.acceptProposedAction()
-         print "Adding line"
-         self.mLine = self.addLine(QtCore.QLineF())
-         sp = event.scenePos()
-         self.mLine.setLine(sp.x(), sp.y(), sp.x(), sp.y())
       else:
          QtGui.QGraphicsScene.dragEnterEvent(self, event)
 
@@ -74,34 +62,67 @@ class StanzaScene(QtGui.QGraphicsScene):
          print "Drag leave"
       else:
          QtGui.QGraphicsScene.dragEnterEvent(self, event)
+   """
 
    def mousePressEvent(self, event):
-      QtGui.QGraphicsScene.mousePressEvent(self, event)
-      if not event.isAccepted():
-         self.mLine = self.addLine(QtCore.QLineF())
-         #print "Adding line"
+      if event.button() == QtCore.Qt.RightButton:
+         dp = event.scenePos()
+         items = self.items(dp)
+         for item in items:
+            #if item.acceptStartEdge():
+            if item is not None:
+               print item
+               self.mSource = item
+               line = QtCore.QLineF(self.mSource.pos(), self.mSource.pos())
+               self.mLine = self.addLine(line)
+               self.mLine.setZValue(100)
+               # Start line
+               print "Adding line"
+               event.accept()
+
+               #pixmap = child.pixmap()
+               pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
+
+               itemData = QtCore.QByteArray()
+               dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+               dataStream << pixmap #<< QtCore.QPoint(event.pos())
+
+               mimeData = QtCore.QMimeData()
+               mimeData.setData("maestro/create-link", itemData)
+
+               drag = QtGui.QDrag(event.widget())
+               drag.setMimeData(mimeData)
+               drag.setPixmap(pixmap)
+
+               result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
+               self.clearLine()
+               event.accept()
+
+               return
+      else:
+         QtGui.QGraphicsScene.mousePressEvent(self, event)
 
    def mouseReleaseEvent(self, event):
-      if self.mLine is None:
-         QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
+      if event.button() == QtCore.Qt.RightButton:
+         self.clearLine()
       else:
-         self.removeItem(self.mLine)
-         self.mLine = None
+         QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
 
    def mouseMoveEvent(self, event):
-      if self.mouseGrabberItem():
-         #print self.mouseGrabberItem()
-         QtGui.QGraphicsScene.mouseMoveEvent(self, event)
-      else:
-         dp = event.buttonDownScenePos(QtCore.Qt.LeftButton)
+      if event.buttons() & QtCore.Qt.RightButton:
+         assert self.mouseGrabberItem() is None
+         dp = event.buttonDownScenePos(QtCore.Qt.RightButton)
+
          #print "down: (%s, %s)" % (dp.x(), dp.y())
          lp = event.lastScenePos()
          #print "last: (%s, %s)" % (lp.x(), lp.y())
          sp = event.scenePos()
          #print "current: (%s, %s)" % (sp.x(), sp.y())
          if self.mLine is not None:
-            self.mLine.setLine(dp.x(), dp.y(), sp.x(), sp.y())
-   """
+            self.mLine.setLine(self.mSource.pos().x(), self.mSource.pos().y(), sp.x(), sp.y())
+      else:
+         #print self.mouseGrabberItem()
+         QtGui.QGraphicsScene.mouseMoveEvent(self, event)
 
    def dropEvent(self, event):
       if event.mimeData().hasFormat("maestro/new-component"):
@@ -117,8 +138,8 @@ class StanzaScene(QtGui.QGraphicsScene):
          choice.setPos(pos)
 
          self.update(self.sceneRect())
-      elif event.mimeData().hasFormat("maestro/create-link"):
-         self.clearLine()
+      #elif event.mimeData().hasFormat("maestro/create-link"):
+      #   self.clearLine()
       else:
          QtGui.QGraphicsScene.dropEvent(self, event)
 
@@ -168,6 +189,18 @@ class Edge(QtGui.QGraphicsItem):
 
    def type(self):
       return self.Type
+
+   def shape(self):
+      """ Returns the shape of this item as a QPainterPath in local
+          coordinates. The shape is used for many things, including
+          collision detection, hit tests, and for the QGraphicsScene::items()
+          functions.
+      """
+      path = QtGui.QPainterPath()
+      line = QtCore.QLineF(self.sourcePoint, self.destPoint)
+      path.moveTo(line.x1(), line.y1())
+      path.lineTo(line.x2(), line.y2())
+      return path
     
    def boundingRect(self):
       if self.source is None or self.dest is None:
@@ -226,10 +259,12 @@ class Node(QtGui.QGraphicsItem):
       self.newPos = QtCore.QPointF()
       self.graph = graphWidget
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+      self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
       self.setZValue(1)
       self.dropShadowWidth = 5.0
       self.penWidth = 1
       self.mSize = QtCore.QSizeF(100.0, 100.0)
+      self.setAcceptDrops(True)
 
    def addEdge(self, edge):
       self.edgeList.append(edge)
@@ -337,6 +372,7 @@ class Node(QtGui.QGraphicsItem):
       return QtGui.QGraphicsItem.itemChange(self, change, value)
 
    def mousePressEvent(self, event):
+      """
       if event.button() != QtCore.Qt.LeftButton:
          #pixmap = child.pixmap()
          pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
@@ -356,15 +392,42 @@ class Node(QtGui.QGraphicsItem):
          self.scene().clearLine()
          event.accept()
          return
+      """
       self.update()
       QtGui.QGraphicsItem.mousePressEvent(self, event)
 
    def mouseReleaseEvent(self, event):
+      """
       if event.button() != QtCore.Qt.LeftButton:
          event.accept()
          return
+      """
       self.update()
       QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
+
+   def dragEnterEvent(self, event):
+      if event.mimeData().hasFormat("maestro/create-link"):
+         event.acceptProposedAction()
+         print "Drag enter"
+      else:
+         QtGui.QGraphicsItem.dragEnterEvent(self, event)
+
+   def dragLeaveEvent(self, event):
+      if event.mimeData().hasFormat("maestro/create-link"):
+         event.acceptProposedAction()
+         print "Drag leave"
+      else:
+         QtGui.QGraphicsItem.dragEnterEvent(self, event)
+
+   def dropEvent(self, event):
+      if event.mimeData().hasFormat("maestro/create-link"):
+         source = self.scene().mSource
+         print "Source: ", source
+         if source is not None:
+            new_edge = Edge(source, self)
+         self.scene().addItem(new_edge)
+      else:
+         QtGui.QGraphicsItem.dropEvent(self, event)
 
 class ChoiceItem(Node):
    def __init__(self, graphWidget):
