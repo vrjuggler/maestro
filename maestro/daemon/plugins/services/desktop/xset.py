@@ -49,7 +49,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
          os.environ['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
          remove_xauth = True
       else:
-         remove_xauh = False
+         remove_xauth = False
 
       # Run 'xset q' and determine the setting of the screen saver timeout.
       (child_stdout, child_stdin) = popen2.popen2([self.mCmd, 'q'])
