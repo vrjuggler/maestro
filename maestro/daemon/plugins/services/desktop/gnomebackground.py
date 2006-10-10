@@ -79,9 +79,6 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
 
          # Set the effective group and user ID for this process so that the
          # file that gets created is owned by the authenticated user.
-         # XXX: Can this result in the user being able to create an
-         # arbitrary file in what would otherwise be a write-protected part
-         # of the file system?
          os.setegid(pw_entry[3])
          os.seteuid(pw_entry[2])
          home_dir = pw_entry[5]
@@ -91,6 +88,8 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
 
          img_file = os.path.join(dir_name, file_name)
 
+         # If dir_name should end up being one to which the authenticated
+         # user does not have write access, this will throw an exception.
          try:
             file = open(img_file, "w+b")
             file.write(imgData)
