@@ -105,41 +105,50 @@ class StanzaScene(QtGui.QGraphicsScene):
          QtGui.QGraphicsScene.dragEnterEvent(self, event)
    """
 
+   def createLinkDrag(self, event, source):
+      self.mSource = source
+      line = QtCore.QLineF(self.mSource.pos(), self.mSource.pos())
+      self.mLine = self.addLine(line)
+      self.mLine.setZValue(100)
+      # Start line
+      print "Adding line"
+
+      #pixmap = child.pixmap()
+      pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
+
+      itemData = QtCore.QByteArray()
+      dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+      dataStream << pixmap #<< QtCore.QPoint(event.pos())
+
+      mimeData = QtCore.QMimeData()
+      mimeData.setData("maestro/create-link", itemData)
+
+      drag = QtGui.QDrag(event.widget())
+      drag.setMimeData(mimeData)
+      drag.setPixmap(pixmap)
+
+      result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
+      self.clearLine()
+
+      return
+
    def mousePressEvent(self, event):
       if event.button() == QtCore.Qt.RightButton:
          dp = event.scenePos()
          items = self.items(dp)
          for item in items:
             #if item.acceptStartEdge():
-            if item is not None:
+            assert item is not None
+            if isinstance(item, Node):
                print item
-               self.mSource = item
-               line = QtCore.QLineF(self.mSource.pos(), self.mSource.pos())
-               self.mLine = self.addLine(line)
-               self.mLine.setZValue(100)
-               # Start line
-               print "Adding line"
+               self.createLinkDrag(event, item)
                event.accept()
-
-               #pixmap = child.pixmap()
-               pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
-
-               itemData = QtCore.QByteArray()
-               dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-               dataStream << pixmap #<< QtCore.QPoint(event.pos())
-
-               mimeData = QtCore.QMimeData()
-               mimeData.setData("maestro/create-link", itemData)
-
-               drag = QtGui.QDrag(event.widget())
-               drag.setMimeData(mimeData)
-               drag.setPixmap(pixmap)
-
-               result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
-               self.clearLine()
-               event.accept()
-
-               return
+            elif isinstance(item, Edge):
+               if item.inHotRect(event):
+                  self.removeItem(item)
+                  #self.mChoices.remove(item)
+                  self.createLinkDrag(event, item.sourceNode())
+                  event.accept()
       else:
          old_focus = self.focusItem()
          QtGui.QGraphicsScene.mousePressEvent(self, event)
@@ -228,8 +237,8 @@ class Edge(QtGui.QGraphicsItem):
       QtGui.QGraphicsItem.__init__(self)
       self.arrowSize = 10.0
       #self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
-
-      self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+      self.setAcceptsHoverEvents(True)
+      #self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable)
 
@@ -238,6 +247,10 @@ class Edge(QtGui.QGraphicsItem):
       self.source.addEdge(self)
       self.dest.addEdge(self)
       self.adjust()
+
+      self.mHotRect = QtCore.QRectF()
+      self.mHotRect.setSize(QtCore.QSizeF(40.0, 40.0))
+      self.mArrowColor = QtCore.Qt.black
 
    def sourceNode(self):
       return self.source
@@ -310,19 +323,20 @@ class Edge(QtGui.QGraphicsItem):
       if self.source is None or self.dest is None:
          return QtCore.QRectF()
 
-      painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine,
+      painter.setPen(QtGui.QPen(self.mArrowColor, 1, QtCore.Qt.SolidLine,
                                 QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
       line = QtCore.QLineF(self.sourcePoint, self.destPoint)
       painter.drawLine(line)
-      painter.setBrush(QtCore.Qt.black)
+
+      #painter.setPen(QtGui.QPen(self.mArrowColor))
+      painter.setBrush(self.mArrowColor)
 
       #path = self.__path(4.0)
       #painter.drawPath(path)
 
-      arrow_size = 6.0
-      arrow_p1 = QtCore.QPointF(-arrow_size/2, -arrow_size)
+      arrow_p1 = QtCore.QPointF(-self.arrowSize/2, -self.arrowSize)
       arrow_p2 = QtCore.QPointF(0.0, 0.0)
-      arrow_p3 = QtCore.QPointF(arrow_size/2, -arrow_size)
+      arrow_p3 = QtCore.QPointF(self.arrowSize/2, -self.arrowSize)
 
       polygon = QtGui.QPolygonF()
       polygon.append(arrow_p1)
@@ -377,6 +391,28 @@ class Edge(QtGui.QGraphicsItem):
       path.lineTo(sourceP2)
       return path
 
+   def hoverEnterEvent(self, event):
+      self.mArrowColor = QtCore.Qt.red
+      self.arrowSize = 10.0
+      QtGui.QGraphicsItem.hoverEnterEvent(self, event)
+
+   def hoverMoveEvent(self, event):
+      if self.inHotRect(event):
+         self.arrowSize = 15.0
+      else:
+         self.arrowSize = 10.0
+      self.update()
+      QtGui.QGraphicsItem.hoverMoveEvent(self, event)
+
+   def hoverLeaveEvent(self, event):
+      self.mArrowColor = QtCore.Qt.black
+      self.arrowSize = 10.0
+      QtGui.QGraphicsItem.hoverLeaveEvent(self, event)
+
+   def inHotRect(self, event):
+      sp = event.scenePos()
+      self.mHotRect.moveCenter(sp)
+      return self.mHotRect.contains(self.destPoint)
 
 class Node(QtGui.QGraphicsItem):
    def __init__(self, elm=None, graphWidget=None):
