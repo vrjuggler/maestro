@@ -78,8 +78,6 @@ def addAuthority(user, xauthCmd, xauthFile):
          has_key = True
          break
 
-   print "has_key =", has_key
-
    if not has_key:
       pid = os.fork()
       if pid == 0:
