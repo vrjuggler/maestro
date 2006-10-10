@@ -106,13 +106,16 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
       if pid == 0:
          procutil.changeToUserName(avatar.mCredentials['username'])
          if enabled:
-            flag = 'on'
+            saver_flag = 'on'
+            dpms_flag  = '+dpms'
          else:
-            flag = 'off'
+            saver_flag = 'off'
+            dpms_flag  = '-dpms'
 
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-         os.execle(self.mCmd, self.mCmd, 's', flag, env)
+         os.execle(self.mCmd, self.mCmd, 's', saver_flag, env)
+         os.execle(self.mCmd, self.mCmd, dpms_flag, env)
 
       (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
 
@@ -124,5 +127,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
          os.execle(self.mCmd, self.mCmd, 's', 'off', env)
          os.execle(self.mCmd, self.mCmd, 's', 'reset', env)
+         os.execle(self.mCmd, self.mCmd, 'dpms', 'force', 'on', env)
+         os.execle(self.mCmd, self.mCmd, '-dpms', env)
 
       (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
