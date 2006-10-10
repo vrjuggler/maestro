@@ -23,6 +23,7 @@ from PyQt4 import QtGui, QtCore
 
 import DesktopViewerBase
 import maestro.core
+import maestro.util.pbhelpers as pbhelpers
 
 
 class DesktopViewPlugin(maestro.core.IViewPlugin):
@@ -130,7 +131,8 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       node_name = self.mNodeChooser.itemText(cur_index)
       node_id   = str(self.mNodeChooser.itemData(cur_index).toString())
 
-      cur_file_name = self.mSettings[node_id].getBackgroundImageFile()
+      data = self.mSettings[node_id]
+      cur_file_name = data.getBackgroundImageFile()
       start_dir = ''
 
       if os.path.exists(os.path.dirname(cur_file_name)):
@@ -145,11 +147,17 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
       if new_file != '' and new_file != cur_file_name:
          file_obj = open(new_file, 'r+b')
-         data = file_obj.readlines()
+         data_str = ''.join(file_obj.readlines())
          file_obj.close()
+         data_list = pbhelpers.string2list(data_str)
+
          env = maestro.core.Environment()
          env.mEventManager.emit(node_id, 'desktop.set_background', new_file,
-                                data, debug = False)
+                                data_list, debug = False)
+
+         img_digest = self._storeImage(data_str)
+         data.setBackgroundImageCacheKey(img_digest)
+         self._setBackgroundImage(new_file, data_str)
 
    def onStopScreenSaver(self):
       node_id = self.getCurrentNodeID()
@@ -231,13 +239,17 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
    def onReportBackgroundImageData(self, nodeId, imgData):
       data = self.mSettings[nodeId]
       img_data_str = ''.join(imgData)
-      img_digest = md5.new(img_data_str).digest()
-      self.mImageCache[img_digest] = img_data_str
+      img_digest = self._storeImage(img_data_str)
       data.setBackgroundImageCacheKey(img_digest)
 
       cur_node_id = self.getCurrentNodeID()
       if cur_node_id == nodeId:
          self._setBackgroundImage(data.getBackgroundImageFile(), img_data_str)
+
+   def _storeImage(self, imgDataStr):
+      img_digest = md5.new(imgDataStr).digest()
+      self.mImageCache[img_digest] = imgDataStr
+      return img_digest
 
    def _setChoice(self, index):
       node_id = self.getCurrentNodeID()
