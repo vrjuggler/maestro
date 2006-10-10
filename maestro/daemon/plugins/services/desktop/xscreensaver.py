@@ -135,6 +135,10 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          # sufficient to unlock a locked screen when run as the user who owns
          # the xscreensaver process, so running it as root ought to be just
          # as effective.
+         # NOTE: The xscreensaver-command(1) documentation says never to use
+         # SIGKILL when trying to stop the xscreensaver process. SIGTERM is
+         # the default when no other signal is given to kill(1), so this use
+         # should be fine.
          os.kill(self.__getPID(user_name), signal.SIGTERM)
 
    def __isRunning(self, userName):
