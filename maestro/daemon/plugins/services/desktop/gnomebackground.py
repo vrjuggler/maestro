@@ -1,0 +1,142 @@
+# Maestro is Copyright (C) 2006 by Infiscape
+#
+# Original Author: Aron Bierbaum
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+import errno
+import os
+import os.path
+import popen2
+import pwd
+import re
+
+import maestro.core
+import procutil
+
+
+class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
+   def __init__(self):
+      maestro.core.IDesktopWallpaperPlugin.__init__(self)
+      env = maestro.core.Environment()
+      if env.settings.has_key('gconftool_cmd'):
+         self.mCmd = env.settings['gconftool_cmd']
+      else:
+         self.mCmd = '/usr/bin/gconftool-2'
+
+   def getName():
+      return 'gnome'
+   getName = staticmethod(getName)
+
+   def setBackground(self, avatar, imgFile, imgData):
+      user_name = avatar.getCredentials()['username']
+
+      # If the given image file name does not exist, then we create it so
+      # that it can then be loaded below.
+      if not os.path.exists(imgFile):
+         file = open(imgFile, "w+b")
+         file.write(imgData)
+         file.close()
+
+         if not sys.platform.startswith('win'):
+            pw_entry = pwd.getpwnam(user_name)
+            os.chown(imgFile, pw_entry[2], pw_entry[3])
+
+      pid = os.fork()
+      if pid == 0:
+         procutil.changeToUserName(user_name)
+         os.execl(self.mCmd, self.mCmd, '--type=string', '--set',
+                  '/desktop/gnome/background/picture_filename', imgFile)
+
+      procutil.waitpidRetryOnEINTR(pid, 0)
+
+   def getBackgroundImageFile(self, avatar):
+      # Create a pipe so that we can communicate with the hcild process that
+      # we are about to create.
+      child_pipe_rd, child_pipe_wr = os.pipe()
+
+      pid = os.fork()
+      if pid == 0:
+         os.close(child_pipe_rd)
+
+         procutil.changeToUserName(avatar.mCredentials['username'])
+         child_stdout, child_stdin = \
+            popen2.popen2([self.mCmd, '--get',
+                           '/desktop/gnome/background/picture_filename'])
+
+         path = child_stdout.readline().rstrip('\n')
+
+         child_stdout.close()
+         child_stdin.close()
+
+         # Write the length of the path to the pipe first.
+         os.write(child_pipe_wr, str(len(path)))
+
+         # The write the path itself.
+         os.write(child_pipe_wr, path)
+
+         # Now close our end of the pipe.
+         os.close(child_pipe_wr)
+
+         # And that's it for us! It is critical that os._exit() be used
+         # here rather than sys.exit() in order to prevent a SystemExit
+         # exception from being thrown.
+         os._exit(0)
+
+      # A path length that is longer than four bytes (10,000 characters or
+      # more) seems unlikely.
+      done = False
+      path_len = ''
+      while not done:
+         try:
+            path_len = path_len + os.read(child_pipe_rd, 4 - len(path_len))
+            done = True
+         except IOError, ex:
+            if ex.errno == errno.EINTR:
+               continue
+            else:
+               raise
+
+      path = ''
+
+      # This will match the leading digits providing the path length and any
+      # additional bytes that may have come across (which would then be part
+      # of the path to return).
+      match = re.match(r'^(\d+)(\D*)$', path_len)
+      if match is not None:
+         path_len = int(match.group(1))
+         path_leader = match.group(2)
+
+         # In case we read part of the path in the process of getting the
+         # length of the path string, we need to factor that into what we
+         # will read from child_pipe_rd below.
+         if path_leader is not None:
+            already_read_bytes = len(path_leader)
+         else:
+            already_read_bytes = 0
+
+         path = os.read(child_pipe_rd, path_len - already_read_bytes)
+         os.close(child_pipe_rd)
+
+         # If we had some leader text on the path name, then we need to
+         # put that back into the full path that is being returned.
+         if path_leader is not None:
+            path = path_leader + path
+
+         assert(len(path) == path_len)
+
+      procutil.waitpidRetryOnEINTR(pid, 0)
+
+      return path

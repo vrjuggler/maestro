@@ -1,5 +1,3 @@
-#!/bin/env python
-
 # Maestro is Copyright (C) 2006 by Infiscape
 #
 # Original Author: Aron Bierbaum
@@ -19,7 +17,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from environment import Environment
-from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin, ISaverPlugin
+from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin, \
+                              ISaverPlugin, IDesktopWallpaperPlugin
 #from plugin_holder import ViewPluginsHolder
 
 class _const:

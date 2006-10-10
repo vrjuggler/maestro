@@ -24,11 +24,6 @@ import sys
 
 import maestro.core
 
-if sys.platform.startswith('win'):
-   import win32con
-   import win32gui
-   import win32security
-
 
 class DesktopService(maestro.core.IServicePlugin):
    def __init__(self):
@@ -70,8 +65,33 @@ class DesktopService(maestro.core.IServicePlugin):
             self.mSaverPlugins.append(plugin_type())
 
       if len(self.mSaverPlugins) > 0:
-         self.mLogger.debug('Using saver plug-ins %s' % \
-                               [s.getName() for s in self.mSaverPlugins])
+         self.mLogger.info('Using saver plug-ins %s' % \
+                              [s.getName() for s in self.mSaverPlugins])
+
+      if env.settings.has_key('background_image_manager'):
+         bg_type = env.settings['background_image_manager']
+      else:
+         if sys.platform.startswith('win'):
+            bg_type = 'windows'
+         else:
+            bg_type = 'gnome'
+
+      self.mLogger.debug('background_image_manager: %s' % bg_type)
+
+      bg_plugins = \
+         env.mPluginManager.getPlugins(plugInType = maestro.core.IDesktopWallpaperPlugin,
+                                       returnNameDict = False)
+
+      self.mBackgroundPlugin = None
+      for plugin_type in bg_plugins:
+         name = plugin_type.getName()
+         if name.lower() == bg_type:
+            self.mBackgroundPlugin = plugin_type()
+            break
+
+      if self.mBackgroundPlugin is not None:
+         self.mLogger.info('Using background wallpaper plug-in %s' % \
+                              self.mBackgroundPlugin.getName())
 
    def registerCallbacks(self):
       env = maestro.core.Environment()
@@ -152,28 +172,7 @@ class DesktopService(maestro.core.IServicePlugin):
          p.stopSaver(avatar)
 
    def onSetBackground(self, nodeId, avatar, imgFile, imgData):
-      if sys.platform.startswith('win'):
-         win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
-
-      # If the given image file name does not exist, then we create it so
-      # that it can then be loaded below.
-      if not os.path.exists(imgFile):
-         file = open(imgFile, "w+b")
-         file.write(imgData)
-         file.close()
-
-         if not sys.platform.startswith('win'):
-            import pwd
-            pw_entry = pwd.getpwnam(avatar.getCredentials()['username'])
-            os.chown(imgFile, pw_entry[2], pw_entry[3])
-
-      if sys.platform.startswith('win'):
-         update = win32con.SPIF_UPDATEINIFILE | win32con.SPIF_SENDCHANGE
-         win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, imgFile,
-                                       update)
-         win32security.RevertToSelf()
-      else:
-         pass
+      self.mBackgroundPlugin.setBackground(avatar, imgFile, imgData)
 
    def onQueryBackgroundImageFile(self, nodeId, avatar):
       '''
@@ -198,18 +197,7 @@ class DesktopService(maestro.core.IServicePlugin):
                              os.path.exists(fileName))
 
    def _getBackgroundFileName(self, avatar):
-      # Windows
-      if sys.platform.startswith('win'):
-         # This returns an empty string if no desktop background image is
-         # currently set.
-         win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
-         file = win32gui.SystemParametersInfo(win32con.SPI_GETDESKWALLPAPER)
-         win32security.RevertToSelf()
-      # X Window System.
-      else:
-         file = ''
-
-      return file
+      return self.mBackgroundPlugin.getBackgroundImageFile(avatar)
 
    def onQueryBackgroundImageData(self, nodeId, avatar):
       '''

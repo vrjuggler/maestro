@@ -124,3 +124,35 @@ class WindowsSaverPlugin(maestro.core.ISaverPlugin):
       except:
          win32api.PostMessage(win32gui.GetForegroundWindow(),
                               win32con.WM_CLOSE, 0, 0)
+
+class WindowsDesktopBackgroundPlugin(maestro.core.IDesktopWallpaperPlugin):
+   def __init__(self):
+      maestro.core.IDesktopWallpaperPlugin.__init__(self)
+
+   def getName():
+      return 'windows'
+   getName = staticmethod(getName)
+
+   def setBackground(self, avatar, imgFile, imgData):
+      win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
+
+      # If the given image file name does not exist, then we create it so
+      # that it can then be loaded below.
+      if not os.path.exists(imgFile):
+         file = open(imgFile, "w+b")
+         file.write(imgData)
+         file.close()
+
+      update = win32con.SPIF_UPDATEINIFILE | win32con.SPIF_SENDCHANGE
+      win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, imgFile,
+                                    update)
+      win32security.RevertToSelf()
+
+   def getBackgroundImageFile(self, avatar):
+      # This returns an empty string if no desktop background image is
+      # currently set.
+      win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
+      file = win32gui.SystemParametersInfo(win32con.SPI_GETDESKWALLPAPER)
+      win32security.RevertToSelf()
+
+      return file

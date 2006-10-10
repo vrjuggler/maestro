@@ -158,3 +158,19 @@ class ISaverPlugin(maestro.util.plugin.Plugin):
       then restore it in enableSaver().
       '''
       not_implemented()
+
+class IDesktopWallpaperPlugin(maestro.util.plugin.Plugin):
+   '''
+   '''
+   def __init__(self):
+      pass
+
+   def getName():
+      not_implemented()
+   getName = staticmethod(getName)
+
+   def setBackground(self, avatar, imgFile, imgData):
+      not_implemented()
+
+   def getBackgroundImageFile(self, avatar):
+      not_implemented()
