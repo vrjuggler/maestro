@@ -17,12 +17,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import logging
-import math
 import os
 import os.path
 import sys
 
 import maestro.core
+import maestro.util.pbhelpers as pbhelpers
 
 
 class DesktopService(maestro.core.IServicePlugin):
@@ -209,41 +209,8 @@ class DesktopService(maestro.core.IServicePlugin):
       # desktop background image.
       env = maestro.core.Environment()
       self.mLogger.debug("Emitting desktop.report_bg_image_data")
-      img_data_list = [self._getBackgroundImageData(avatar)]
-      img_data_str = self._getBackgroundImageData(avatar)
-      max_size = 512 * 1024
-      img_size = len(img_data_str)
-      
-      # If the image data string is bigger than the maximum allowed string,
-      # then we break it up into a list with elements that are no larger than
-      # max_size.
-      if img_size > max_size:
-         # Determine the final size of the list.
-         list_size = int(math.ceil(float(img_size) / max_size))
-         img_data_list = []
-         data = img_data_str
-
-         for x in xrange(list_size):
-            # Extract the first max_size bytes of data to add as the next
-            # item in img_data_list.
-            chunk = data[:max_size]
-            img_data_list.append(chunk)
-
-            # Change data so that it is now the substring following the first
-            # max_bytes of the old string.
-            data = data[max_size:]
-
-            # At this point, there should still be more items to add to
-            # img_data_list (x + 1 < list_size) or we should have run out of
-            # data (len(data) == 0).
-            assert(x + 1 < list_size or len(data) == 0)
-
-         # Sanity check.
-         assert(len(img_data_list) == list_size)
-      # If the image data string is not too big, we just put it in a list
-      # directly.
-      else:
-         img_data_list = [img_data_str]
+      img_data_list = \
+         pbhelpers.string2list(self._getBackgroundImageData(avatar))
 
       env.mEventManager.emit(nodeId, 'desktop.report_bg_image_data',
                              img_data_list, debug = False)
