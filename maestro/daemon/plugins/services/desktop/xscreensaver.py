@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import errno
 import os
 import os.path
 import pwd
@@ -162,7 +163,25 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          args = ['-fu', userName]
 
       (child_stdout, child_stdin) = popen2.popen2(["/bin/ps"] + args)
-      lines = child_stdout.readlines()
+
+      # Read the output from 'ps ...'. This is not done using readlines()
+      # because that could fail due to an interrupted system call. Instead,
+      # we read lines one at a time and handle EINTR if an when it occurs.
+      lines = []
+      done = False
+      while not done:
+         try:
+            line = child_stdout.readline()
+            if line == '':
+               done = True
+            else:
+               lines.append(line)
+         except IOError, ex:
+            if ex.errno == errno.EINTR:
+               continue
+            else:
+               raise
+
       child_stdout.close()
       child_stdin.close()
 
