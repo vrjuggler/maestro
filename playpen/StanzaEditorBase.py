@@ -96,7 +96,7 @@ class Ui_StanzaEditorBase(object):
 
       self.mSplitter = QtGui.QSplitter(StanzaEditorBase)
 
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(3),QtGui.QSizePolicy.Policy(7))
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(7))
       sizePolicy.setHorizontalStretch(0)
       sizePolicy.setVerticalStretch(0)
       sizePolicy.setHeightForWidth(self.mSplitter.sizePolicy().hasHeightForWidth())

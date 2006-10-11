@@ -149,7 +149,7 @@
       <widget class="QSplitter" name="mSplitter" >
        <property name="sizePolicy" >
         <sizepolicy>
-         <hsizetype>3</hsizetype>
+         <hsizetype>7</hsizetype>
          <vsizetype>7</vsizetype>
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
