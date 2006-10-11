@@ -35,36 +35,36 @@ import elementtree.ElementTree as ET
 import stanzaitems
 
 class Layout:
-   def __init__(self, scene):
-      self.mScene = scene
+   def __init__(self):
+      pass
 
-   def layout(self):
+   def layout(self, scene):
       assert(False and "Not implemented!")
 
-   def _getNodes(self):
+   def _getNodes(self, scene):
       nodes = []
-      for item in self.mScene.items():
+      for item in scene.items():
          if isinstance(item, stanzaitems.Node):
             nodes.append(item)
       return nodes
 
-   def resetNodesPositions(self):
-      nodes = self._getNodes()
+   def _resetNodesPositions(self, scene):
+      nodes = self._getNodes(scene)
       for node in nodes:
          node.setPos(-1.0, -1.0)
          node.updateEdges()
 
 class Random(Layout):
-   def __init__(self, scene):
-      Layout.__init__(self, scene)
+   def __init__(self):
+      Layout.__init__(self)
 
-   def layout(self):
+   def layout(self, scene):
       # Create a random layout
       random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
 
-      nodes = self._getNodes()
+      nodes = self._getNodes(scene)
  
-      sceneRect = self.mScene.sceneRect()
+      sceneRect = scene.sceneRect()
       for node in nodes:
          w = random.random() * sceneRect.width()
          h = random.random() * sceneRect.height()
@@ -73,16 +73,16 @@ class Random(Layout):
 
 #Concentric Layout Management
 class Concentric(Layout):
-   def __init__(self, scene, azimutDelta = 45.0, circleInterval = 150.0):
-      Layout.__init__(self, scene)
+   def __init__(self, azimutDelta = 45.0, circleInterval = 150.0):
+      Layout.__init__(self)
       self.azimutDelta = azimutDelta
       self.circleInterval = circleInterval
 
-   def layout(self):
-      center = self.mScene.sceneRect().center()
+   def layout(self, scene):
+      center = scene.sceneRect().center()
       nodesPerCircle = 360 / self.azimutDelta;
 
-      nodes = self._getNodes()
+      nodes = self._getNodes(scene)
 
       n = 0
       for node in nodes:
@@ -98,16 +98,16 @@ class Concentric(Layout):
          n += 1
 
 class Colimacon(Layout):
-   def __init__(self, scene, azimutDelta = 15.0, circleInterval = 40.0):
-      Layout.__init__(self, scene)
+   def __init__(self, azimutDelta = 15.0, circleInterval = 40.0):
+      Layout.__init__(self)
       self.azimutDelta = azimutDelta
       self.circleInterval = circleInterval
 
-   def layout(self):
-      center = self.mScene.sceneRect().center()
+   def layout(self, scene):
+      center = scene.sceneRect().center()
       nodesPerCircle = 360 / self.azimutDelta;
 
-      nodes = self._getNodes()
+      nodes = self._getNodes(scene)
 
       n = 0
       for node in nodes:
@@ -127,18 +127,18 @@ HORIZONTAL = 1
 VERTICAL = 2
 
 class DirectedTree(Layout):
-   #def __init__(self, scene, origin=[0.0,0.0], spacing=[150.0, 150.0], orientation=VERTICAL):
-   def __init__(self, scene, origin=[0.0,0.0], spacing=[150.0, 110.0], orientation=HORIZONTAL):
-      Layout.__init__(self, scene)
+   #def __init__(self, origin=[0.0,0.0], spacing=[150.0, 150.0], orientation=VERTICAL):
+   def __init__(self, origin=[0.0,0.0], spacing=[150.0, 110.0], orientation=HORIZONTAL):
+      Layout.__init__(self)
       self.origin = origin
       self.spacing = spacing
       self.orientation = orientation
       self.stopRecursion = False
       
-   def layout(self):
+   def layout(self, scene):
       # Reset the graph nodes positions (If position are not resetted, nodes are all considered
       # already placed
-      self.resetNodesPositions()
+      self._resetNodesPositions(scene)
       self.marked = []
 
       # Configure tree bounding box
@@ -146,14 +146,14 @@ class DirectedTree(Layout):
       bbox[0] = self.__getXOrigin()
       bbox[1] = self.__getYOrigin()
 
-      root_nodes = [self.mScene.mApplicationItem]
+      root_nodes = [scene.mApplicationItem]
       # Layout all graph subgraph
       for root in root_nodes:
          self._layout(root, bbox, 0)
 
       # Set graph oritentation
       if ( self.orientation == HORIZONTAL ):
-         self.transpose();
+         self._transpose(scene)
       del bbox
       del self.marked
 
@@ -191,8 +191,8 @@ class DirectedTree(Layout):
       node.setPos(x, y)
       node.updateEdges()
 
-   def transpose(self):
-      nodes = self._getNodes()
+   def _transpose(self, scene):
+      nodes = self._getNodes(scene)
       for node in nodes:
          node.setPos(node.pos().y(), node.pos().x())
          node.updateEdges()
