@@ -69,7 +69,7 @@ public:
     QGraphicsItemGroup *createItemGroup(const QList<QGraphicsItem *> &items);
     void destroyItemGroup(QGraphicsItemGroup *group);
 
-    void addItem(QGraphicsItem *item);
+    void addItem(QGraphicsItem *item /Transfer/);
     QGraphicsEllipseItem *addEllipse(const QRectF &rect, const QPen &pen = QPen(), const QBrush &brush = QBrush());
     QGraphicsLineItem *addLine(const QLineF &line, const QPen &pen = QPen());
     QGraphicsPathItem *addPath(const QPainterPath &path, const QPen &pen = QPen(), const QBrush &brush = QBrush());
