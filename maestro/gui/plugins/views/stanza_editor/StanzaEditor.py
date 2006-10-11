@@ -49,12 +49,13 @@ class StanzaScene(QtGui.QGraphicsScene):
       self.mApplication = applicationElt
 
       # Build all first level nodes.
-      for elm in self.mApplication:
-         self._buildNode(elm)
+      self._buildNode(self.mApplication)
 
 
    def _buildNode(self, elm, parent=None):
       item = None
+      if elm.tag == 'application':
+         item = AppItem(elm)
       if elm.tag == 'group':
          item = GroupItem(elm)
       elif elm.tag == 'choice':
@@ -78,8 +79,8 @@ class StanzaScene(QtGui.QGraphicsScene):
          for child in elm[:]:
             child_item = self._buildNode(child, item)
             # Add if we want a parent/child coordinate systems.
-            #if child_item is not None:
-            #   child_item.setParentItem(item)
+            if child_item is not None:
+               child_item.setParent(item)
             
       return item
 
@@ -156,10 +157,9 @@ class StanzaScene(QtGui.QGraphicsScene):
                event.accept()
             elif isinstance(item, Edge):
                if item.inHotRect(event):
-                  item.sourceNode().removeEdge(item)
-                  item.destNode().removeEdge(item)
-                  self.removeItem(item)
-                  #self.mChoices.remove(item)
+                  # Remove current link
+                  self.removeEdge(item)
+                  # Create a new QDrag object to create new link.
                   self.createLinkDrag(event, item.sourceNode())
                   event.accept()
       else:
@@ -168,6 +168,32 @@ class StanzaScene(QtGui.QGraphicsScene):
          if old_focus != self.focusItem():
             print "New focus: ", self.focusItem()
             self.emit(QtCore.SIGNAL("itemSelected(QGraphicsItem*)"), self.focusItem())
+
+   def removeEdge(self, edge):
+      assert isinstance(edge, Edge)
+      ET.dump(self.mApplication)
+      print "Removing edge: ", edge
+      source = edge.sourceNode()
+      dest = edge.destNode()
+      print "source.mChildren: ", source.mChildren
+      print "dest.mChildren: ", source.mChildren
+      source.removeEdge(edge)
+      dest.removeEdge(edge)
+      dest.setParent(None)
+      self.removeItem(edge)
+      print "source.mChildren: ", source.mChildren
+      print "dest.mChildren: ", source.mChildren
+      del edge
+      ET.dump(self.mApplication)
+
+   def addLink(self, source, dest):
+      assert isinstance(source, Node) and isinstance(dest, Node)
+      new_edge = Edge(source, dest)
+      print "Creating edge: ", new_edge
+      ET.dump(self.mApplication)
+      self.addItem(new_edge)
+      dest.setParent(source)
+      ET.dump(self.mApplication)
 
    def mouseReleaseEvent(self, event):
       if event.button() == QtCore.Qt.RightButton:
@@ -180,7 +206,11 @@ class StanzaScene(QtGui.QGraphicsScene):
       item = self.focusItem()
 
       if item is not None and key == QtCore.Qt.Key_Delete:
-         print "Delete: ", item
+         if isinstance(item, Edge):
+            self.removeEdge(item)
+            ET.dump(self.mApplication)
+         else:
+            print "Delete: ", item
          
       QtGui.QGraphicsScene.keyPressEvent(self, event)
 

@@ -260,8 +260,14 @@ class Node(QtGui.QGraphicsItem):
       self.mParent = None
       self.mChildren = []
 
+   def isConnectedTo(self, otherNode):
+      for edge in self.edgeList:
+         if edge.source is otherNode or edge.dest is otherNode:
+            return True
+      return False
+
    def setParent(self, parent):
-      if self.mParent = parent:
+      if self.mParent == parent:
          print "WARNING: Trying to set the same parent."
          return
       if self.mParent is not None:
@@ -276,11 +282,24 @@ class Node(QtGui.QGraphicsItem):
          return
       self.mChildren.append(child)
 
-   def addChild(self, child):
+      # Update the xml data structure.
+      if self.mElement.getchildren().count(child.mElement) > 0:
+         print "WARNING: ElementTree already has element."
+         return
+      self.mElement.append(child.mElement)
+
+   def removeChild(self, child):
       if self.mChildren.count(child) == 0:
          print "WARNING: Trying to remove a child that we don't have."
          return
       self.mChildren.remove(child)
+
+      # Update the xml data structure.
+      if self.mElement.getchildren().count(child.mElement) == 0:
+         print "WARNING: ElementTree does not have child element."
+         return
+      self.mElement.remove(child.mElement)
+
 
    def title(self):
       if self.mElement is not None:
@@ -299,11 +318,7 @@ class Node(QtGui.QGraphicsItem):
    def edges(self):
       return self.edgeList
 
-   def isConnectedTo(self, otherNode):
-      for edge in self.edgeList:
-         if edge.source is otherNode or edge.dest is otherNode:
-            return True
-      return False
+
 
    Type = QtGui.QGraphicsItem.UserType + 1
 
@@ -452,8 +467,8 @@ class Node(QtGui.QGraphicsItem):
       if event.mimeData().hasFormat("maestro/create-link"):
          source = self.scene().mSource
          if source is not None and not self.isConnectedTo(source):
-            new_edge = Edge(source, self)
-            self.scene().addItem(new_edge)
+            # Create link between nodes.
+            self.scene().addLink(source, self)
       else:
          QtGui.QGraphicsItem.dropEvent(self, event)
 
@@ -483,6 +498,14 @@ class Node(QtGui.QGraphicsItem):
             self.update()
             return True
       return False
+
+class AppItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Application"
+      self.mColor = QtGui.QColor(182, 131, 189, 191)
+      self.mAttribNameMap = {0:'Name', 1:'Label'}
+      self.mAttribMap = {0:'name', 1:'label'}
 
 class ChoiceItem(Node):
    def __init__(self, elm=None, graphWidget=None):
