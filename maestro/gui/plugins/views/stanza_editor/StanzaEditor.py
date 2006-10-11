@@ -27,8 +27,9 @@ import math
 import os.path
 pj = os.path.join
 
-sys.path.append( pj(os.path.dirname(__file__), ".."))
+sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
 import maestro.core
+import maestro.gui.MaestroResource
 
 from stanzaitems import *
 
@@ -124,8 +125,7 @@ class StanzaScene(QtGui.QGraphicsScene):
       # Start line
       print "Adding line"
 
-      #pixmap = child.pixmap()
-      pixmap = QtGui.QPixmap("../maestro/gui/images/editredo.png")
+      pixmap = QtGui.QPixmap(":/Maestro/images/editredo.png")
 
       itemData = QtCore.QByteArray()
       dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
@@ -457,13 +457,13 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
-      pixmap = QtGui.QPixmap("Choice.png")
+      pixmap = QtGui.QPixmap("images/Choice.png")
       self.mChoiceLbl.setPixmap(pixmap)
-      pixmap = QtGui.QPixmap("Group.png")
+      pixmap = QtGui.QPixmap("images/Group.png")
       self.mGroupLbl.setPixmap(pixmap)
-      pixmap = QtGui.QPixmap("Arg.png")
+      pixmap = QtGui.QPixmap("images/Arg.png")
       self.mArgLbl.setPixmap(pixmap)
-      pixmap = QtGui.QPixmap("EnvVar.png")
+      pixmap = QtGui.QPixmap("images/EnvVar.png")
       self.mEnvVarLbl.setPixmap(pixmap)
 
       self.mChoiceLbl.installEventFilter(self)
@@ -487,19 +487,19 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
 
          if obj is self.mChoiceLbl:
-            pixmap = QtGui.QPixmap("Choice.png")
+            pixmap = QtGui.QPixmap("images/Choice.png")
             dataStream << QtCore.QString("Choice")
          elif obj is self.mGroupLbl:
-            pixmap = QtGui.QPixmap("Group.png")
+            pixmap = QtGui.QPixmap("images/Group.png")
             dataStream << QtCore.QString("Group")
          elif obj is self.mArgLbl:
-            pixmap = QtGui.QPixmap("Arg.png")
+            pixmap = QtGui.QPixmap("images/Arg.png")
             dataStream << QtCore.QString("Arg")
          elif obj is self.mEnvVarLbl:
-            pixmap = QtGui.QPixmap("EnvVar.png")
+            pixmap = QtGui.QPixmap("images/EnvVar.png")
             dataStream << QtCore.QString("EnvVar")
          else:
-            pixmap = QtGui.QPixmap("Choice.png")
+            pixmap = QtGui.QPixmap("images/Choice.png")
             dataStream << QtCore.QString("Unknown")
 
          mimeData = QtCore.QMimeData()
