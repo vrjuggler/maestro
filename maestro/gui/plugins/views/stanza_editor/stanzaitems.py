@@ -257,6 +257,31 @@ class Node(QtGui.QGraphicsItem):
       self.mAttribMap = {}
       self.mTitle = "Node"
 
+      self.mParent = None
+      self.mChildren = []
+
+   def setParent(self, parent):
+      if self.mParent = parent:
+         print "WARNING: Trying to set the same parent."
+         return
+      if self.mParent is not None:
+         self.mParent.removeChild(self)
+      self.mParent = parent
+      if self.mParent is not None:
+         self.mParent.addChild(self)
+
+   def addChild(self, child):
+      if self.mChildren.count(child) > 0:
+         print "WARNING: Trying to add an existing child."
+         return
+      self.mChildren.append(child)
+
+   def addChild(self, child):
+      if self.mChildren.count(child) == 0:
+         print "WARNING: Trying to remove a child that we don't have."
+         return
+      self.mChildren.remove(child)
+
    def title(self):
       if self.mElement is not None:
          return "%s\n[%s]" % (self.mTitle, self.mElement.get('label', ''))

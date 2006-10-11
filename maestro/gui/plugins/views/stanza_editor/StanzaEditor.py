@@ -32,7 +32,7 @@ import maestro.core
 import maestro.gui.MaestroResource
 
 from stanzaitems import *
-
+import layout
 import elementtree.ElementTree as ET
 
 maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
@@ -238,72 +238,6 @@ class StanzaScene(QtGui.QGraphicsScene):
       else:
          QtGui.QGraphicsScene.dropEvent(self, event)
 
-   def randomLayout(self):
-      # Create a random layout
-      random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
-
-      nodes = []
-      for item in self.items():
-         if isinstance(item, Node):
-            nodes.append(item)
- 
-      sceneRect = self.sceneRect()
-      for node in nodes:
-         w = random.random() * sceneRect.width()
-         h = random.random() * sceneRect.height()
-         node.setPos(w, h)
-         node.updateEdges()
-
-   #Concentric Layout Management
-   def concentricLayout(self, azimutDelta = 45.0, circleInterval = 150.0):
-      center = self.sceneRect()
-      nodesPerCircle = 360 / azimutDelta;
-
-      nodes = []
-      for item in self.items():
-         if isinstance(item, Node):
-            nodes.append(item)
-
-      n = 0
-      for node in nodes:
-         azimutIndex = n % nodesPerCircle
-         azimut = azimutIndex * azimutDelta;
-
-         circleIndex = 1 + ( n / nodesPerCircle )
-         cx = math.sin(math.radians(azimut)) * ( circleIndex * circleInterval )
-         cy = math.cos(math.radians(azimut)) * ( circleIndex * circleInterval );
-         node.setPos(center.x() + cx, center.y() + cy)
-         node.updateEdges()
-
-         n += 1
-
-   def __getNodes(self):
-      nodes = []
-      for item in self.items():
-         if isinstance(item, Node):
-            nodes.append(item)
-      return nodes
-
-
-   def colimaconLayout(self, azimutDelta = 15.0, circleInterval = 40.0):
-      center = self.sceneRect()
-      nodesPerCircle = 360 / azimutDelta;
-
-      nodes = self.__getNodes()
-
-      n = 0
-      for node in nodes:
-         azimutIndex = ( n % nodesPerCircle );
-         azimut = n * azimutDelta;
-
-         circleIndex = 1 + ( n / nodesPerCircle );
-         cx = math.sin(math.radians(azimut)) * ( math.log(1.0 + n ) * 10 * circleInterval );
-         cy = math.cos(math.radians(azimut)) * ( math.log(1.0 + n ) * 10 * circleInterval );
-         node.setPos(center.x() + cx, center.y() + cy)
-         node.updateEdges()
-
-         n += 1
-
 class GraphWidget(QtGui.QGraphicsView):
    def __init__(self, parent=None):
       QtGui.QGraphicsView.__init__(self, parent)
@@ -319,6 +253,7 @@ class GraphWidget(QtGui.QGraphicsView):
       self.scale(0.8, 0.8)
       self.setMinimumSize(400, 400)
       self.setWindowTitle("Maestro Test Nodes")
+      self.mCurrentLayout = None
 
       #choice_item.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       #choice_item.setPos(0, 0)
@@ -349,14 +284,9 @@ class GraphWidget(QtGui.QGraphicsView):
       elif key == QtCore.Qt.Key_Minus:
          self.scaleView(1 / 1.2)
       elif key == QtCore.Qt.Key_Space:
-      #   for item in self.scene().items():
-      #      if isinstance(item, Node):
-      #         item.setPos(-150 + random.random() % 300, -150 + random.random() % 300)
+         self.mCurrentLayout.layout()
       #elif key == QtCore.Qt.Key_Enter:
          #self.itemMoved()
-         #self.scene().randomLayout()
-         #self.scene().concentricLayout()
-         self.scene().colimaconLayout()
       else:
          QtGui.QGraphicsView.keyPressEvent(self, event)
 
@@ -439,20 +369,22 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
       #self.mScene.setSceneRect(-200, -200, 400, 400)
       self.mGraphWidget.setScene(self.mScene)
-      self.mScene.randomLayout()
 
       layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout']
-      layout_funcs = [self.mScene.randomLayout, self.mScene.concentricLayout, self.mScene.colimaconLayout]
+      layout_classes = [layout.Random, layout.Concentric, layout.Colimacon]
 
-      self.mLayoutActions = []
+      self.mLayouts = []
 
-      for (name, func) in zip(layout_names, layout_funcs):
+      for (name, ltype) in zip(layout_names, layout_classes):
+         new_layout = ltype(self.mScene)
+         self.mLayouts.append(new_layout)
          new_action = QtGui.QAction(name, self)
-         self.connect(new_action, QtCore.SIGNAL("triggered()"), func)
+         self.connect(new_action, QtCore.SIGNAL("triggered()"), new_layout.layout)
          self.mLayoutBtn1.addAction(new_action)
 
-   def onRandomLayout(self):
-      self.mScene.randomLayout()
+      # Set Concentric as default
+      self.mGraphWidget.mCurrentLayout = self.mLayouts[1]
+      self.mGraphWidget.mCurrentLayout.layout()
 
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
