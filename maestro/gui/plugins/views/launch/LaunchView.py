@@ -47,10 +47,10 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
-   def activate(self):
+   def activate(self, mainWindow):
       self.widget.buildLaunchGui()
    
-   def deactivate(self):
+   def deactivate(self, mainWindow):
       pass
 
 

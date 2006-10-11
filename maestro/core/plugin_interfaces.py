@@ -46,17 +46,23 @@ class IViewPlugin(maestro.util.plugin.Plugin):
    def getViewWidget(self):
       not_implemented()
 
-   def activate(self):
+   def activate(self, mainWindow):
       '''
       Invoked when this view plug-in is changing from the inactive to the
       acctive state.
+
+      @param mainWindow A reference to the main Maestro GUI window, an
+                        instance of QtGui.QMainWindow.
       '''
       pass
 
-   def deactivate(self):
+   def deactivate(self, mainWindow):
       '''
       Invoked when this view plug-in is changing from the active to the
       inacctive state.
+
+      @param mainWindow A reference to the main Maestro GUI window, an
+                        instance of QtGui.QMainWindow.
       '''
       pass
    

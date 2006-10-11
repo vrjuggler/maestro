@@ -425,13 +425,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def viewChanged(self, index):
       if self.mCurViewPlugin is not None:
-         self.mCurViewPlugin.deactivate()
+         self.mCurViewPlugin.deactivate(self)
 
       self.mCurViewPlugin = \
          self.getCurrentViewPlugin(self.mStack.currentWidget())
 
       if self.mCurViewPlugin is not None:
-         self.mCurViewPlugin.activate()
+         self.mCurViewPlugin.activate(self)
 
    def viewRemoved(self, index):
       if self.mCurViewPlugin is not None:
