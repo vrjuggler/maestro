@@ -244,10 +244,10 @@ class ResourceModel(QtCore.QAbstractTableModel):
       self.mDataSizes = [HISTORY, HISTORY]
       self.mNodeDataMap = {}
 
-   def rowCount(self, parent):
+   def rowCount(self, parent=QtCore.QModelIndex()):
       return self.mEnsemble.getNumNodes()
 
-   def columnCount(self, parent):
+   def columnCount(self, parent=QtCore.QModelIndex()):
       return len(self.mDataTitles) + 1
 
    def headerData(self, section, orientation, role):
@@ -295,4 +295,10 @@ class ResourceModel(QtCore.QAbstractTableModel):
       resource_history = node_resources[resourceIndex]
       del resource_history[0]
       resource_history.append(val)
+
       self.emit(QtCore.SIGNAL("modelReset()"))
+
+      # Add extra signal that seems to be necessary to work with Qt 4.2
+      begin = self.index(0, 0)
+      end = self.index(self.rowCount()-1, self.columnCount()-1)
+      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), begin, end)

@@ -14,7 +14,7 @@ class StanzaStore:
    def __init__(self):
       self.mStanzas = []
 
-   def scan(self, progressCB):
+   def scan(self, progressCB=None):
       def null_progress_cb(p,s):
          pass
       

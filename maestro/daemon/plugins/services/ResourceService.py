@@ -23,7 +23,6 @@ import time
 import string
 import socket
 
-from Queue import Queue
 from threading import Thread
 
 import maestro.core
@@ -46,7 +45,6 @@ if os.name == 'nt':
 class ResourceService(maestro.core.IServicePlugin):
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
-      self.mQueue = Queue()
 
       if os.name == 'nt':
          self.mPdhQuery = win32pdh.OpenQuery(None, 0)
@@ -89,7 +87,7 @@ class ResourceService(maestro.core.IServicePlugin):
 
    def _getCpuUsage(self):
       if os.name == 'nt':
-         #Collect the percient idle time
+         #Collect the percent idle time
          win32pdh.CollectQueryData(self.mPdhQuery)
          format = win32pdh.PDH_FMT_LONG | win32pdh.PDH_FMT_NOSCALE
          idleTime = win32pdh.GetFormattedCounterValue(self.mProcCounter,format)[1]
