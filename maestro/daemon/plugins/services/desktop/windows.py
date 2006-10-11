@@ -18,6 +18,7 @@
 
 import win32api
 import win32con
+import winerror
 import win32gui
 import win32security
 import win32service
@@ -54,13 +55,12 @@ class WindowsSaverPlugin(maestro.core.ISaverPlugin):
             saver_desktop.Close()
             saver_running = True
       except Exception, ex:
-         # ERROR_ACCESS_DENIED: This means that the screen saver is running,
-         # but we do not have permission to open the desktop.
-         if ex.errno == 5:
+         # This means that the screen saver is running, but we do not have
+         # permission to open the desktop.
+         if ex.errno == winerror.ERROR_ACCESS_DENIED:
             saver_running = True
-         # ERROR_FILE_NOT_FOUND: This means that the screen saver is not
-         # running.
-         elif ex.errno == 2:
+         # This means that the screen saver is not running.
+         elif ex.errno == winerror.ERROR_FILE_NOT_FOUND:
             saver_running = False
          # Some other unexpected error.
          else:
