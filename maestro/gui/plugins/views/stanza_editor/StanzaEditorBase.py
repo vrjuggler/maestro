@@ -24,22 +24,22 @@ from PyQt4 import QtCore, QtGui
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
       StanzaEditorBase.setObjectName("StanzaEditorBase")
-      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,617,661).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
+      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,617,679).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
 
       self.vboxlayout = QtGui.QVBoxLayout(StanzaEditorBase)
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.groupBox_2 = QtGui.QGroupBox(StanzaEditorBase)
-      self.groupBox_2.setObjectName("groupBox_2")
+      self.mToolGroupBox = QtGui.QGroupBox(StanzaEditorBase)
+      self.mToolGroupBox.setObjectName("mToolGroupBox")
 
-      self.hboxlayout = QtGui.QHBoxLayout(self.groupBox_2)
+      self.hboxlayout = QtGui.QHBoxLayout(self.mToolGroupBox)
       self.hboxlayout.setMargin(9)
       self.hboxlayout.setSpacing(6)
       self.hboxlayout.setObjectName("hboxlayout")
 
-      self.mLayoutBtn = QtGui.QToolButton(self.groupBox_2)
+      self.mLayoutBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mLayoutBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/ksirtet.png"))
       self.mLayoutBtn.setIconSize(QtCore.QSize(24,24))
       self.mLayoutBtn.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
@@ -47,7 +47,7 @@ class Ui_StanzaEditorBase(object):
       self.mLayoutBtn.setObjectName("mLayoutBtn")
       self.hboxlayout.addWidget(self.mLayoutBtn)
 
-      self.mNoDragBtn = QtGui.QToolButton(self.groupBox_2)
+      self.mNoDragBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mNoDragBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_draw-selection.png"))
       self.mNoDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mNoDragBtn.setCheckable(True)
@@ -55,32 +55,32 @@ class Ui_StanzaEditorBase(object):
       self.mNoDragBtn.setObjectName("mNoDragBtn")
       self.hboxlayout.addWidget(self.mNoDragBtn)
 
-      self.mScrollDragBtn = QtGui.QToolButton(self.groupBox_2)
+      self.mScrollDragBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mScrollDragBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_zoom-shift.png"))
       self.mScrollDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mScrollDragBtn.setCheckable(True)
       self.mScrollDragBtn.setObjectName("mScrollDragBtn")
       self.hboxlayout.addWidget(self.mScrollDragBtn)
 
-      self.mRubberBandDragBtn = QtGui.QToolButton(self.groupBox_2)
+      self.mRubberBandDragBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mRubberBandDragBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_exit-group.png"))
       self.mRubberBandDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mRubberBandDragBtn.setCheckable(True)
       self.mRubberBandDragBtn.setObjectName("mRubberBandDragBtn")
       self.hboxlayout.addWidget(self.mRubberBandDragBtn)
 
-      self.mZoomExtentsBtn = QtGui.QToolButton(self.groupBox_2)
+      self.mZoomExtentsBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mZoomExtentsBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_zoom-page-width.png"))
       self.mZoomExtentsBtn.setIconSize(QtCore.QSize(24,24))
       self.mZoomExtentsBtn.setAutoRaise(False)
       self.mZoomExtentsBtn.setObjectName("mZoomExtentsBtn")
       self.hboxlayout.addWidget(self.mZoomExtentsBtn)
 
-      self.mApplicationLbl = QtGui.QLabel(self.groupBox_2)
+      self.mApplicationLbl = QtGui.QLabel(self.mToolGroupBox)
       self.mApplicationLbl.setObjectName("mApplicationLbl")
       self.hboxlayout.addWidget(self.mApplicationLbl)
 
-      self.mApplicationCB = QtGui.QComboBox(self.groupBox_2)
+      self.mApplicationCB = QtGui.QComboBox(self.mToolGroupBox)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(3),QtGui.QSizePolicy.Policy(0))
       sizePolicy.setHorizontalStretch(0)
@@ -90,14 +90,39 @@ class Ui_StanzaEditorBase(object):
       self.mApplicationCB.setObjectName("mApplicationCB")
       self.hboxlayout.addWidget(self.mApplicationCB)
 
-      self.mClassFilterLbl = QtGui.QLabel(self.groupBox_2)
+      self.mClassLine = QtGui.QFrame(self.mToolGroupBox)
+      self.mClassLine.setFrameShape(QtGui.QFrame.VLine)
+      self.mClassLine.setFrameShadow(QtGui.QFrame.Sunken)
+      self.mClassLine.setObjectName("mClassLine")
+      self.hboxlayout.addWidget(self.mClassLine)
+
+      self.mClassFilterLbl = QtGui.QLabel(self.mToolGroupBox)
       self.mClassFilterLbl.setPixmap(QtGui.QPixmap("../../../../../../../../../Desktop/icons/stock_goal-seek.png"))
       self.mClassFilterLbl.setObjectName("mClassFilterLbl")
       self.hboxlayout.addWidget(self.mClassFilterLbl)
 
-      self.mClassFilterCB = QtGui.QComboBox(self.groupBox_2)
+      self.mOperatingSystemCB = QtGui.QComboBox(self.mToolGroupBox)
 
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(3),QtGui.QSizePolicy.Policy(0))
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(0))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mOperatingSystemCB.sizePolicy().hasHeightForWidth())
+      self.mOperatingSystemCB.setSizePolicy(sizePolicy)
+      self.mOperatingSystemCB.setObjectName("mOperatingSystemCB")
+      self.hboxlayout.addWidget(self.mOperatingSystemCB)
+
+      self.mClassFilterComma = QtGui.QLabel(self.mToolGroupBox)
+
+      font = QtGui.QFont(self.mClassFilterComma.font())
+      font.setPointSize(20)
+      self.mClassFilterComma.setFont(font)
+      self.mClassFilterComma.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+      self.mClassFilterComma.setObjectName("mClassFilterComma")
+      self.hboxlayout.addWidget(self.mClassFilterComma)
+
+      self.mClassFilterCB = QtGui.QComboBox(self.mToolGroupBox)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(0))
       sizePolicy.setHorizontalStretch(0)
       sizePolicy.setVerticalStretch(0)
       sizePolicy.setHeightForWidth(self.mClassFilterCB.sizePolicy().hasHeightForWidth())
@@ -105,7 +130,7 @@ class Ui_StanzaEditorBase(object):
       self.mClassFilterCB.setEditable(True)
       self.mClassFilterCB.setObjectName("mClassFilterCB")
       self.hboxlayout.addWidget(self.mClassFilterCB)
-      self.vboxlayout.addWidget(self.groupBox_2)
+      self.vboxlayout.addWidget(self.mToolGroupBox)
 
       self.hboxlayout1 = QtGui.QHBoxLayout()
       self.hboxlayout1.setMargin(0)
@@ -190,6 +215,7 @@ class Ui_StanzaEditorBase(object):
       self.mRubberBandDragBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mZoomExtentsBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mClassFilterComma.setText(QtGui.QApplication.translate("StanzaEditorBase", ",", None, QtGui.QApplication.UnicodeUTF8))
       self.mChoiceLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Choice", None, QtGui.QApplication.UnicodeUTF8))
       self.mGroupLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Group", None, QtGui.QApplication.UnicodeUTF8))
       self.mArgLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Arg", None, QtGui.QApplication.UnicodeUTF8))

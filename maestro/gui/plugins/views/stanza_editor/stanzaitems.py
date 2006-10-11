@@ -261,26 +261,36 @@ HESAttrib = ['hidden', 'editable', 'selected']
 class Node(QtGui.QGraphicsItem):
    def __init__(self, elm=None, graphWidget=None):
       QtGui.QGraphicsItem.__init__(self)
-      self.inEdgeList = []
-      self.outEdgeList = []
       self.newPos = QtCore.QPointF()
       self.graph = graphWidget
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable)
       self.setZValue(1)
+      self.setAcceptDrops(True)
+
+      # Appearance
+      self.mSize = QtCore.QSizeF(100.0, 100.0)
+      self.mColor = QtGui.QColor(0, 127, 127, 191)
+      self.mEnabled = True
       self.dropShadowWidth = 5.0
       self.penWidth = 1
-      self.mSize = QtCore.QSizeF(100.0, 100.0)
-      self.setAcceptDrops(True)
-      self.mColor = QtGui.QColor(0, 127, 127, 191)
+
+      # XML data to represent.
       self.mElement = elm
+
+      # Editing attributes.
       self.mAttribNameList = {}
       self.mAttribList = {}
       self.mTitle = "Node"
 
+      # Tree structure attributes.
       self.mParent = None
       self.mChildren = []
+
+      # Edge references
+      self.inEdgeList = []
+      self.outEdgeList = []
 
    
    def acceptNewParent(self, source):
@@ -472,26 +482,36 @@ class Node(QtGui.QGraphicsItem):
       painter.setRenderHint(QtGui.QPainter.Antialiasing)
 
       # Draw the shadow.
-      color = QtGui.QColor(QtCore.Qt.darkGray)
+      if self.mEnabled:
+         color = QtGui.QColor(QtCore.Qt.darkGray)
+      else:
+         color = QtGui.QColor(QtCore.Qt.lightGray)
       color.setAlpha(100)
       painter.setPen(QtCore.Qt.NoPen)
       painter.setBrush(color)
       painter.drawRoundRect(shadow_rect)
 
-      # Draw the actual node.
-      painter.setPen(QtCore.Qt.NoPen)
-      painter.setBrush(self.mColor)
-
+      # If we are selected, then make our border and text lines thicker.
+      border_width = self.penWidth
       if self.hasFocus():
-         self.penWidth = 3
-      else:
-         self.penWidth = 1
+         border_width = 3.0 
 
-      # Draw black outline.
-      painter.setPen(QtGui.QPen(QtCore.Qt.black, self.penWidth))
+      # Set our alpha value and ben color depending on enabled status
+      if self.mEnabled:
+         self.mColor.setAlpha(191)
+         pen = QtGui.QPen(QtCore.Qt.black, border_width)
+      else:
+         self.mColor.setAlpha(50)
+         #brush = QtGui.QBrush(self.mColor, QtCore.Qt.DiagCrossPattern)
+         #brush = QtGui.QBrush(self.mColor, QtCore.Qt.LinearGradientPattern)
+         pen = QtGui.QPen(QtCore.Qt.gray, border_width)
+
+      # Draw the actual node.
+      painter.setBrush(QtGui.QBrush(self.mColor))
+      painter.setPen(pen)
       painter.drawRoundRect(rect)
 
-      # Draw the percentage as text.
+      # Draw the node label.
       text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.title())) + 6;
       style = QtGui.QApplication.style()
       align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextWordWrap

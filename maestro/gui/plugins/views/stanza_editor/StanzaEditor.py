@@ -29,6 +29,7 @@ pj = os.path.join
 
 sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
 import maestro.core
+import maestro.core.Stanza
 import maestro.gui.MaestroResource
 
 from stanzaitems import *
@@ -51,8 +52,44 @@ class StanzaScene(QtGui.QGraphicsScene):
 
       # Build all first level nodes.
       self.mApplicationItem = self._buildNode(self.mApplication)
+      self.mClassFilter = ""
+      self.mClassFilterList = [c.lstrip().rstrip() for c in self.mClassFilter.split(',') if c != ""]
+      
+   def setClassFilter(self, classFilter):
+      if isinstance(classFilter, QtCore.QString):
+         self.mClassFilter = str(classFilter)
+      else:
+         self.mClassFilter = classFilter
+      self.mClassFilterList = [c.lstrip().rstrip() for c in self.mClassFilter.split(',') if c != ""]
+      print self.mClassFilter
+      print self.mClassFilterList
+      self.__matchAllItemClasses()
 
+   def __matchAllItemClasses(self):
+      roots = []
+      for item in self.items():
+         if isinstance(item, Node) and item.mParent is None:
+            roots.append(item)
+      roots.remove(self.mApplicationItem)
+      roots.extend(self.mApplicationItem.mChildren)
 
+      for root in roots:
+         self.__matchItemClass(root)
+
+   def __matchItemClass(self, item, parentFailed=False):
+      failed = parentFailed
+      if not failed:
+         item_class_str = item.mElement.get('class', '')
+         failed = not maestro.core.Stanza.classMatch(self.mClassFilterList, item_class_str)
+
+      item.mEnabled = not failed
+
+      for child in item.mChildren:
+         self.__matchItemClass(child, failed)
+
+      # Is this needed.
+      item.update()      
+   
    def _buildNode(self, elm, parent=None):
       item = None
       if elm.tag == 'application':
@@ -381,6 +418,13 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Set DirectedTree as default
       self.mLayoutBtn.setDefaultAction(self.mLayoutBtn.actions()[3])
 
+      # Add some default filters.
+      self.mOperatingSystemCB.addItem("Linux")
+      self.mOperatingSystemCB.addItem("Windows XP")
+      self.mClassFilterCB.addItem("")
+      self.mClassFilterCB.addItem("master")
+      self.mClassFilterCB.addItem("slave")
+
       # Last step, fill in application combobox and select the first one.
       self.__fillApplicationCB()
       self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
@@ -424,6 +468,10 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Layout new scene and zoom to its extents.
       self.mLayoutBtn.click()
       self.onZoomExtents()
+
+      # Set default filter on model when starting.
+      class_filter = self.mOperatingSystemCB.currentText() + ',' + self.mClassFilterCB.currentText()
+      self.mScene.setClassFilter(class_filter)
 
    def onDoLayout(self, layout, action=None):
       """ Slot that is called when the user clicks on the layout button.
@@ -486,12 +534,21 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mDragButtonGroup.addButton(self.mNoDragBtn, 0)
       self.mDragButtonGroup.addButton(self.mScrollDragBtn, 1)
       self.mDragButtonGroup.addButton(self.mRubberBandDragBtn, 2)
-      
       self.connect(self.mDragButtonGroup,QtCore.SIGNAL("buttonClicked(QAbstractButton*)"), self.onDragButtonClicked)
+
+      # Get signaled when the user selects an existing class, or types a new one.
+      self.connect(self.mOperatingSystemCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onClassFilterChanged)
+      self.connect(self.mClassFilterCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onClassFilterChanged)
 
       # Set up the table.
       self.mItemModel = ItemTableModel()
       self.mEditTableView.setModel(self.mItemModel)
+
+   def onClassFilterChanged(self, val):
+      print "Filter: ", val
+      if self.mScene is not None:
+         class_filter = self.mOperatingSystemCB.currentText() + ',' + self.mClassFilterCB.currentText()
+         self.mScene.setClassFilter(class_filter)
 
    def onDragButtonClicked(self, btn):
       """ Slot that is called when a drag mode QToolButton is clicked. This
