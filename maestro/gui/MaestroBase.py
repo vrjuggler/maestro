@@ -116,15 +116,14 @@ class Ui_MaestroBase(object):
       self.menubar.setGeometry(QtCore.QRect(0,0,788,29))
       self.menubar.setObjectName("menubar")
 
-      self.menuFile = QtGui.QMenu(self.menubar)
-      self.menuFile.setObjectName("menuFile")
-
       self.menuHelp = QtGui.QMenu(self.menubar)
       self.menuHelp.setObjectName("menuHelp")
+
+      self.menuFile = QtGui.QMenu(self.menubar)
+      self.menuFile.setObjectName("menuFile")
       MaestroBase.setMenuBar(self.menubar)
 
       self.statusbar = QtGui.QStatusBar(MaestroBase)
-      self.statusbar.setGeometry(QtCore.QRect(0,689,788,22))
       self.statusbar.setObjectName("statusbar")
       MaestroBase.setStatusBar(self.statusbar)
 
@@ -168,14 +167,18 @@ class Ui_MaestroBase(object):
 
       self.action_About = QtGui.QAction(MaestroBase)
       self.action_About.setObjectName("action_About")
+
+      self.mActionArchiveLogs = QtGui.QAction(MaestroBase)
+      self.mActionArchiveLogs.setObjectName("mActionArchiveLogs")
+      self.menuHelp.addAction(self.action_About)
       self.menuFile.addAction(self.actionReload)
       self.menuFile.addAction(self.actionNew)
       self.menuFile.addAction(self.actionOpen)
       self.menuFile.addAction(self.actionSave)
       self.menuFile.addAction(self.actionSave_As)
+      self.menuFile.addAction(self.mActionArchiveLogs)
       self.menuFile.addSeparator()
       self.menuFile.addAction(self.action_Exit)
-      self.menuHelp.addAction(self.action_About)
       self.menubar.addAction(self.menuFile.menuAction())
       self.menubar.addAction(self.menuHelp.menuAction())
       self.toolBar.addAction(self.actionReload)
@@ -191,8 +194,8 @@ class Ui_MaestroBase(object):
       self.mOldBtn1.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
       self.mOldBtn3.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
       self.mOldBtn2.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-      self.menuFile.setTitle(QtGui.QApplication.translate("MaestroBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
       self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuFile.setTitle(QtGui.QApplication.translate("MaestroBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
       self.toolBar.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Toolbar", None, QtGui.QApplication.UnicodeUTF8))
       self.mStatusWindow.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Status Window", None, QtGui.QApplication.UnicodeUTF8))
       self.actionReload.setText(QtGui.QApplication.translate("MaestroBase", "&Reload", None, QtGui.QApplication.UnicodeUTF8))
@@ -200,8 +203,9 @@ class Ui_MaestroBase(object):
       self.actionOpen.setText(QtGui.QApplication.translate("MaestroBase", "&Open", None, QtGui.QApplication.UnicodeUTF8))
       self.actionSave.setText(QtGui.QApplication.translate("MaestroBase", "&Save", None, QtGui.QApplication.UnicodeUTF8))
       self.actionSave_As.setText(QtGui.QApplication.translate("MaestroBase", "Save &As...", None, QtGui.QApplication.UnicodeUTF8))
-      self.action_Exit.setText(QtGui.QApplication.translate("MaestroBase", "&Exit", None, QtGui.QApplication.UnicodeUTF8))
+      self.action_Exit.setText(QtGui.QApplication.translate("MaestroBase", "E&xit", None, QtGui.QApplication.UnicodeUTF8))
       self.action_About.setText(QtGui.QApplication.translate("MaestroBase", "&About", None, QtGui.QApplication.UnicodeUTF8))
+      self.mActionArchiveLogs.setText(QtGui.QApplication.translate("MaestroBase", "Archive Logs...", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":

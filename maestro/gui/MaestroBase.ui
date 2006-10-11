@@ -151,6 +151,12 @@
      <height>29</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuHelp" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_About" />
+   </widget>
    <widget class="QMenu" name="menuFile" >
     <property name="title" >
      <string>&amp;File</string>
@@ -160,28 +166,14 @@
     <addaction name="actionOpen" />
     <addaction name="actionSave" />
     <addaction name="actionSave_As" />
+    <addaction name="mActionArchiveLogs" />
     <addaction name="separator" />
     <addaction name="action_Exit" />
-   </widget>
-   <widget class="QMenu" name="menuHelp" >
-    <property name="title" >
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="action_About" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuHelp" />
   </widget>
-  <widget class="QStatusBar" name="statusbar" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>689</y>
-     <width>788</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
+  <widget class="QStatusBar" name="statusbar" />
   <widget class="QToolBar" name="toolBar" >
    <property name="windowTitle" >
     <string>Toolbar</string>
@@ -201,11 +193,11 @@
    <addaction name="actionSave" />
   </widget>
   <widget class="QDockWidget" name="mStatusWindow" >
-   <property name="windowTitle" >
-    <string>Status Window</string>
-   </property>
    <property name="allowedAreas" >
     <set>Qt::BottomDockWidgetArea</set>
+   </property>
+   <property name="windowTitle" >
+    <string>Status Window</string>
    </property>
    <attribute name="dockWidgetArea" >
     <number>8</number>
@@ -263,12 +255,17 @@
     <iconset/>
    </property>
    <property name="text" >
-    <string>&amp;Exit</string>
+    <string>E&amp;xit</string>
    </property>
   </action>
   <action name="action_About" >
    <property name="text" >
     <string>&amp;About</string>
+   </property>
+  </action>
+  <action name="mActionArchiveLogs" >
+   <property name="text" >
+    <string>Archive Logs...</string>
    </property>
   </action>
  </widget>

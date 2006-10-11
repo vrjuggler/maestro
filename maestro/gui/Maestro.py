@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, os, os.path, time, traceback
+import zipfile
 pj = os.path.join
 from PyQt4 import QtGui, QtCore
 
@@ -207,7 +208,7 @@ class OutputFileLogger(NodeLogger):
    def getLogFiles(self):
       return self.mFiles
 
-   def addLogger(self, nodeId):
+   def getLogDir():
       env = maestro.core.Environment()
       if env.settings.has_key('logdir'):
          logdir = env.settings['logdir']
@@ -220,8 +221,15 @@ class OutputFileLogger(NodeLogger):
             logdir = '%s%s' % (os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
          elif os.environ.has_key('APPDATA'):
             logdir = os.path.join(os.environ['APPDATA'], 'Maestro')
+         else:
+            logdir = '.'
 
-      file_name = os.path.join(logdir, '%s.log' % nodeId)
+      return logdir
+
+   getLogDir = staticmethod(getLogDir)
+
+   def addLogger(self, nodeId):
+      file_name = os.path.join(self.getLogDir(), '%s.log' % nodeId)
 
       try:
          handler = logging.FileHandler(file_name, 'w')
@@ -320,6 +328,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mStatusWindow)
       self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
 
+      self.connect(self.mActionArchiveLogs, QtCore.SIGNAL("triggered()"),
+                   self.onArchiveLogs)
       self.connect(self.action_Exit, QtCore.SIGNAL("triggered()"),
                    self.onExit)
 
@@ -329,6 +339,33 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
       self.mModuleButtons = []
+
+   def onArchiveLogs(self):
+      zip_file_name = \
+         QtGui.QFileDialog.getSaveFileName(
+            self, "Choose a ZIP file for the log archive",
+            os.path.join(OutputFileLogger.getLogDir(), "maestro-logs.zip"),
+            "ZIP archive (*.zip)"
+         )
+
+      if zip_file_name is not None and zip_file_name != '':
+         # Change zip_file_name from a QString to a Python string.
+         zip_file_name = str(zip_file_name)
+
+         # Try to create a zipfile.ZipFile object that uses compression. If
+         # that fails, then fall back on using an uncompressed archive.
+         try:
+            zip_file = zipfile.ZipFile(zip_file_name, 'w',
+                                       zipfile.ZIP_DEFLATED)
+         # RuntimeError is raised if the zlib module is not available.
+         except RuntimeError:
+            zip_file = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_STORED)
+
+         log_files = self.mFileLogger.getLogFiles()
+         for l in log_files:
+            zip_file.write(l)
+
+         zip_file.close()
 
    def onExit(self):
       self.close()
