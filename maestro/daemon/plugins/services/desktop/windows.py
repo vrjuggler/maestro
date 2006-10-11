@@ -16,6 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import os
+import os.path
 import win32api
 import win32con
 import winerror
@@ -154,15 +156,51 @@ class WindowsDesktopBackgroundPlugin(maestro.core.IDesktopWallpaperPlugin):
       '''
       win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
 
-      # If the given image file name does not exist, then we create it so
-      # that it can then be loaded below.
-      if not os.path.exists(imgFile):
-         file = open(imgFile, "w+b")
+      dir_name  = os.path.dirname(imgFile)
+      file_name = os.path.basename(imgFile)
+      while not os.path.exists(dir_name) or not os.path.isdir(dir_name):
+         dir_name = os.path.dirname(dir_name)
+         if dir_name == '':
+            break
+
+      if os.environ.has_key('HOME'):
+         home_dir = os.environ['HOME']
+      elif os.environ.has_key('HOMESHARE'):
+         home_dir = os.environ['HOMESHARE']
+      elif os.environ.has_key('HOMEDRIVE'):
+         home_dir = '%s%s' % (os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
+      else:
+         home_dir = r'C:\temp'
+
+      if dir_name == '':
+         dir_name = home_dir
+      # If this is a UNIX-style path, convert it to a DOS-style path just to
+      # be safe.
+      elif dir_name.startswith('/'):
+         dir_name = os.path.abspath(dir_name)
+
+      img_file = os.path.join(dir_name, file_name)
+
+      # If dir_name should end up being one to which the authenticated user
+      # does not have write access, this will throw an exception.
+      try:
+         file = open(img_file, "w+b")
          file.write(imgData)
          file.close()
+      # If we cannot write the file to dir_name, try again in the user's home
+      # directory--unless dir_name is already set to home_dir. In that case,
+      # we have a big problem.
+      except IOError, ex:
+         if dir_name != home_dir:
+            img_file = os.path.join(home_dir, file_name)
+            file = open(img_file, "w+b")
+            file.write(imgData)
+            file.close()
+         else:
+            raise
 
       update = win32con.SPIF_UPDATEINIFILE | win32con.SPIF_SENDCHANGE
-      win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, imgFile,
+      win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, img_file,
                                     update)
       win32security.RevertToSelf()
 
