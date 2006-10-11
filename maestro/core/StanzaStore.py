@@ -37,7 +37,8 @@ class StanzaStore:
          stanza_elm = ET.ElementTree(file=f).getroot()
          self.mStanzas.append(stanza_elm)
 
-   def getApplications(self):
+   def findApplications(self):
+      """ Returns all unexpanded application elements. """
       app_elms = []
 
       # Look in all stanza files for any children with an application tag.
@@ -45,6 +46,11 @@ class StanzaStore:
          for item in stanza:
            if 'application' == item.tag:
               app_elms.append(item)
+      return app_elms
+
+   def getApplications(self):
+      """ Returns expanded application objects. """
+      app_elms = self.findApplications()
 
       apps = []
       # Fully expand all applications.
