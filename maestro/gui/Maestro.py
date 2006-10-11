@@ -163,7 +163,7 @@ class NodeLogger:
    def init(self, ensemble):
       self.mLoggers = {}
       for e in ensemble.mNodes:
-         self.addLogger(e)
+         self.addLogger(e.getId())
 
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "launch.output", self.onAppOutput)
@@ -221,7 +221,7 @@ class OutputFileLogger(NodeLogger):
          elif os.environ.has_key('APPDATA'):
             logdir = os.path.join(os.environ['APPDATA'], 'Maestro')
 
-      file_name = os.path.join(logdir, '%s.log' % nodeId.getId())
+      file_name = os.path.join(logdir, '%s.log' % nodeId)
 
       try:
          handler = logging.FileHandler(file_name, 'w')
