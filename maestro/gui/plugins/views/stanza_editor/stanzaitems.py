@@ -61,8 +61,13 @@ class Edge(QtGui.QGraphicsItem):
 
       self.source = sourceNode
       self.dest = destNode
-      self.source.addEdge(self)
-      self.dest.addEdge(self)
+
+      # Add self to source node.
+      self.source.outEdgeList.append(self)
+      # Add self to dest node.
+      self.dest.inEdgeList.append(self)
+
+      # Update our current position.
       self.adjust()
 
       self.mHotRect = QtCore.QRectF()
@@ -245,7 +250,8 @@ class Edge(QtGui.QGraphicsItem):
 class Node(QtGui.QGraphicsItem):
    def __init__(self, elm=None, graphWidget=None):
       QtGui.QGraphicsItem.__init__(self)
-      self.edgeList = []
+      self.inEdgeList = []
+      self.outEdgeList = []
       self.newPos = QtCore.QPointF()
       self.graph = graphWidget
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -265,49 +271,92 @@ class Node(QtGui.QGraphicsItem):
       self.mParent = None
       self.mChildren = []
 
+   
+   def acceptNewParent(self, source):
+      if source is not None and source.mElement is not None:
+         if (isinstance(source, ChoiceItem) or
+             isinstance(source, GroupItem) or
+             isinstance(source, AppItem)):
+            return not self.isConnectedTo(source)
+
    def isConnectedTo(self, otherNode):
-      for edge in self.edgeList:
-         if edge.source is otherNode or edge.dest is otherNode:
+      for edge in self.inEdgeList:
+         assert(edge.source != self)
+         if edge.source is otherNode:
             return True
+      for edge in self.outEdgeList:
+         assert(edge.dest != self)
+         if edge.dest is otherNode:
+            return True
+
       return False
 
    def isLeaf(self):
       return 0 == len(self.mChildren)
 
+   def assertStructures(self):
+      if self.mParent is not None:
+         assert 1 == len(self.inEdgeList)
+      else:
+         assert 0 == len(self.inEdgeList)
+      assert(len(self.mChildren) == len(self.outEdgeList))
+      #assert(len(self.mChildren) == len(self.mElement.getchildren()))
+
    def setParent(self, parent):
+      self.assertStructures()
       if self.mParent == parent:
          print "WARNING: Trying to set the same parent."
          return
+      
       if self.mParent is not None:
          self.mParent.removeChild(self)
       self.mParent = parent
       if self.mParent is not None:
          self.mParent.addChild(self)
+      self.assertStructures()
 
    def addChild(self, child):
+      self.assertStructures()
       if self.mChildren.count(child) > 0:
          print "WARNING: Trying to add an existing child."
          return
       self.mChildren.append(child)
 
+      # Create an edge.
+      new_edge = Edge(self, child)
+      print "Adding [%s] -> [%s]" % (new_edge.sourceNode(), new_edge.destNode())
+      self.scene().addItem(new_edge)
+
       # Update the xml data structure.
       if self.mElement.getchildren().count(child.mElement) > 0:
          print "WARNING: ElementTree already has element."
-         return
-      self.mElement.append(child.mElement)
+      else:
+         self.mElement.append(child.mElement)
+      self.assertStructures()
 
    def removeChild(self, child):
+      self.assertStructures()
       if self.mChildren.count(child) == 0:
          print "WARNING: Trying to remove a child that we don't have."
          return
       self.mChildren.remove(child)
 
+      for edge in self.outEdgeList:
+         print "Remove [%s] -> [%s]" % (edge.sourceNode(), edge.destNode())
+         if edge.destNode() == child:
+            print "Removeing..."
+            assert self == edge.sourceNode()
+            assert child == edge.destNode()
+            self.removeOutEdge(edge)
+            child.removeInEdge(edge)
+            self.scene().removeItem(edge)
+
       # Update the xml data structure.
       if self.mElement.getchildren().count(child.mElement) == 0:
          print "WARNING: ElementTree does not have child element."
-         return
-      self.mElement.remove(child.mElement)
-
+      else:
+         self.mElement.remove(child.mElement)
+      self.assertStructures()
 
    def title(self):
       if self.mElement is not None:
@@ -315,18 +364,19 @@ class Node(QtGui.QGraphicsItem):
       else:
          return self.mTitle
 
-   def addEdge(self, edge):
-      self.edgeList.append(edge)
-      edge.adjust()
+   def removeInEdge(self, edge):
+      assert self.inEdgeList.count(edge) > 0
+      self.inEdgeList.remove(edge)
 
-   def removeEdge(self, edge):
-      if self.edgeList.count(edge):
-         self.edgeList.remove(edge)
+   def removeOutEdge(self, edge):
+      assert self.outEdgeList.count(edge) > 0
+      self.outEdgeList.remove(edge)
 
    def edges(self):
-      return self.edgeList
-
-
+      edges = []
+      edges.extend(self.inEdgeList)
+      edges.extend(self.outEdgeList)
+      return edges
 
    Type = QtGui.QGraphicsItem.UserType + 1
 
@@ -355,8 +405,9 @@ class Node(QtGui.QGraphicsItem):
             yvel += (dy * 150.0) / l
 
       # Now subtract all forces pulling items together
-      weight = (len(self.edgeList) + 1) * 10.0
-      for edge in self.edgeList:
+      edge_list = self.edges()
+      weight = (len(edge_list) + 1) * 10.0
+      for edge in edge_list:
          if edge.sourceNode() is self:
             pos = self.mapFromItem(edge.destNode(), 0, 0)
          else:
@@ -436,7 +487,9 @@ class Node(QtGui.QGraphicsItem):
       style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.title())
 
    def updateEdges(self):
-      for edge in self.edgeList:
+      for edge in self.inEdgeList:
+         edge.adjust()
+      for edge in self.outEdgeList:
          edge.adjust()
 
    def itemChange(self, change, value):
@@ -458,25 +511,20 @@ class Node(QtGui.QGraphicsItem):
    def dragEnterEvent(self, event):
       if event.mimeData().hasFormat("maestro/create-link"):
          source = self.scene().mSource
-         if source is not None and not self.isConnectedTo(source):
-            event.acceptProposedAction()
-      else:
-         QtGui.QGraphicsItem.dragEnterEvent(self, event)
-
-   def dragLeaveEvent(self, event):
-      if event.mimeData().hasFormat("maestro/create-link"):
-         source = self.scene().mSource
-         if source is not None and not self.isConnectedTo(source):
-            event.acceptProposedAction()
+         if source is not None and self.acceptNewParent(source):
+            print "accepted"
+            event.setAccepted(True)
+         else:
+            event.setAccepted(False)
       else:
          QtGui.QGraphicsItem.dragEnterEvent(self, event)
 
    def dropEvent(self, event):
       if event.mimeData().hasFormat("maestro/create-link"):
          source = self.scene().mSource
-         if source is not None and not self.isConnectedTo(source):
+         if source is not None and self.acceptNewParent(source):
             # Create link between nodes.
-            self.scene().addLink(source, self)
+            self.setParent(source)
       else:
          QtGui.QGraphicsItem.dropEvent(self, event)
 

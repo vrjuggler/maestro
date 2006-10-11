@@ -169,7 +169,6 @@ class DirectedTree(Layout):
 
       # Depth first
       laidOut = 0
-      #Node::Set outNodes; node.collectOutNodesSet( outNodes );
       outnodes = node.mChildren
       for sub_node in outnodes:
          # Detect if the node has already been placed

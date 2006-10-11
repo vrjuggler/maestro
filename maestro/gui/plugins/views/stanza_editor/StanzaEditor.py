@@ -72,9 +72,9 @@ class StanzaScene(QtGui.QGraphicsScene):
          self.mItems.append(item)
          item.setPos(0,0)
 
-         if parent is not None:
-            edge = Edge(parent, item)
-            self.addItem(edge)
+         #if parent is not None:
+         #   edge = Edge(parent, item)
+         #   self.addItem(edge)
 
          for child in elm[:]:
             child_item = self._buildNode(child, item)
@@ -124,7 +124,6 @@ class StanzaScene(QtGui.QGraphicsScene):
       self.mLine = self.addLine(line)
       self.mLine.setZValue(100)
       # Start line
-      print "Adding line"
 
       pixmap = QtGui.QPixmap(":/Maestro/images/editredo.png")
 
@@ -139,10 +138,10 @@ class StanzaScene(QtGui.QGraphicsScene):
       drag.setMimeData(mimeData)
       drag.setPixmap(pixmap)
 
-      result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
+      result = drag.start(QtCore.Qt.MoveAction)
       self.clearLine()
 
-      return
+      return result
 
    def mousePressEvent(self, event):
       if event.button() == QtCore.Qt.RightButton:
@@ -152,15 +151,15 @@ class StanzaScene(QtGui.QGraphicsScene):
             #if item.acceptStartEdge():
             assert item is not None
             if isinstance(item, Node):
-               print item
                self.createLinkDrag(event, item)
                event.accept()
             elif isinstance(item, Edge):
                if item.inHotRect(event):
-                  # Remove current link
-                  self.removeEdge(item)
+                  old_dest = item.destNode()
                   # Create a new QDrag object to create new link.
-                  self.createLinkDrag(event, item.sourceNode())
+                  if self.createLinkDrag(event, item.sourceNode()):
+                     # Remove current link
+                     old_dest.setParent(None)
                   event.accept()
       else:
          old_focus = self.focusItem()
@@ -168,32 +167,6 @@ class StanzaScene(QtGui.QGraphicsScene):
          if old_focus != self.focusItem():
             print "New focus: ", self.focusItem()
             self.emit(QtCore.SIGNAL("itemSelected(QGraphicsItem*)"), self.focusItem())
-
-   def removeEdge(self, edge):
-      assert isinstance(edge, Edge)
-      ET.dump(self.mApplication)
-      print "Removing edge: ", edge
-      source = edge.sourceNode()
-      dest = edge.destNode()
-      print "source.mChildren: ", source.mChildren
-      print "dest.mChildren: ", source.mChildren
-      source.removeEdge(edge)
-      dest.removeEdge(edge)
-      dest.setParent(None)
-      self.removeItem(edge)
-      print "source.mChildren: ", source.mChildren
-      print "dest.mChildren: ", source.mChildren
-      del edge
-      ET.dump(self.mApplication)
-
-   def addLink(self, source, dest):
-      assert isinstance(source, Node) and isinstance(dest, Node)
-      new_edge = Edge(source, dest)
-      print "Creating edge: ", new_edge
-      ET.dump(self.mApplication)
-      self.addItem(new_edge)
-      dest.setParent(source)
-      ET.dump(self.mApplication)
 
    def mouseReleaseEvent(self, event):
       if event.button() == QtCore.Qt.RightButton:
@@ -207,8 +180,8 @@ class StanzaScene(QtGui.QGraphicsScene):
 
       if item is not None and key == QtCore.Qt.Key_Delete:
          if isinstance(item, Edge):
-            self.removeEdge(item)
-            ET.dump(self.mApplication)
+            # Remote edge from graph.
+            item.destNode().setParent(None)
          else:
             print "Delete: ", item
          
@@ -272,8 +245,6 @@ class GraphWidget(QtGui.QGraphicsView):
    def __init__(self, parent=None):
       QtGui.QGraphicsView.__init__(self, parent)
       self.timerId = 0
-      #scene = QtGui.QGraphicsScene(self)
-
 
       self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
       self.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -284,20 +255,6 @@ class GraphWidget(QtGui.QGraphicsView):
       self.setMinimumSize(400, 400)
       self.setWindowTitle("Maestro Test Nodes")
       self.mCurrentLayout = None
-
-      #choice_item.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-      #choice_item.setPos(0, 0)
-      #self.setInteractive(True)
-
-   #def keyPressEvent(self, event):
-   #   key = event.key()
-   #
-   #   if key == QtCore.Qt.Key_Plus:
-   #      self.scaleView(1.2)
-   #   elif key == QtCore.Qt.Key_Minus:
-   #      self.scaleView(1 / 1.2)
-   #   else:
-   #      QtGui.QGraphicsView.keyPressEvent(self, event)
 
    def keyPressEvent(self, event):
       key = event.key()
@@ -404,17 +361,25 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       layout_classes = [layout.Random, layout.Concentric, layout.Colimacon, layout.DirectedTree]
 
       self.mLayouts = []
+      self.mLayoutCBs = []
 
       for (name, ltype) in zip(layout_names, layout_classes):
          new_layout = ltype(self.mScene)
          self.mLayouts.append(new_layout)
          new_action = QtGui.QAction(name, self)
-         self.connect(new_action, QtCore.SIGNAL("triggered()"), new_layout.layout)
+         cb = lambda l=new_layout: self.onDoLayout(l)
+         self.mLayoutCBs.append(cb)
+         self.connect(new_action, QtCore.SIGNAL("triggered()"), cb)
          self.mLayoutBtn1.addAction(new_action)
 
       # Set Concentric as default
       self.mGraphWidget.mCurrentLayout = self.mLayouts[3]
       self.mGraphWidget.mCurrentLayout.layout()
+
+   def onDoLayout(self, layout):
+      layout.layout()
+      scene_rect = self.mScene.itemsBoundingRect()
+      self.mGraphWidget.fitInView(scene_rect, QtCore.Qt.KeepAspectRatio)
 
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
