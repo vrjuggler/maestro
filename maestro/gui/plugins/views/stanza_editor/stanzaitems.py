@@ -55,8 +55,12 @@ class Edge(QtGui.QGraphicsItem):
       self.arrowSize = 10.0
       #self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
       self.setAcceptsHoverEvents(True)
+
+      # XXX: When allowing the user to create groups using
+      #      the RubberBandDrage mode an item must have the
+      #      same value for Movable and Selectable flags.
       #self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-      self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+      #self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
       self.setFlag(QtGui.QGraphicsItem.ItemIsFocusable)
 
       self.source = sourceNode

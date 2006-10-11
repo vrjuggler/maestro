@@ -42,7 +42,6 @@ store.scan()
 class StanzaScene(QtGui.QGraphicsScene):
    def __init__(self, applicationElt, parent = None):
       QtGui.QGraphicsScene.__init__(self, parent)
-      self.mChoices = []
       self.mLine = None
       self.mItems = []
 
@@ -182,6 +181,11 @@ class StanzaScene(QtGui.QGraphicsScene):
          if isinstance(item, Edge):
             # Remote edge from graph.
             item.destNode().setParent(None)
+         if isinstance(item, Node):
+            item.setParent(None)
+            for child in item.mChildren[:]:
+               child.setParent(None)
+            self.removeItem(item)
          else:
             print "Delete: ", item
          
@@ -230,7 +234,7 @@ class StanzaScene(QtGui.QGraphicsScene):
 
          if item is not None:
             self.addItem(item)
-            self.mChoices.append(item)
+            self.mItems.append(item)
             pos = event.scenePos()
             item.setPos(pos)
 
@@ -317,46 +321,46 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
-      #self.mFilter = GraphViewFilter()
-      #self.graphicsView.installEventFilter(self.mFilter)
-
-
       #self.timerId = 0
-      #scene = StanzaScene(self.graphicsView)
-      #scene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
-      #scene.setSceneRect(-200, -200, 400, 400)
 
+      # Remove old graphics view widget.
+      self.mGraphicsView.setParent(None)
+      del self.mGraphicsView
 
-
-      self.graphicsView.setParent(None)
-      del self.graphicsView
-      self.mGraphWidget = GraphWidget()
-      self.mSplitter.insertWidget(0, self.mGraphWidget)
+      # Create an instance of our custom GraphicsView.
+      self.mGraphicsView = GraphWidget()
+      self.mSplitter.insertWidget(0, self.mGraphicsView)
       self.mSplitter.refresh()
       self.mSplitter.update()
 
-      #self.mGraphWidget.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-      self.mGraphWidget.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
-      #self.mGraphWidget.setDragMode(QtGui.QGraphicsView.NoDrag)
-
-      #self.graphicsView.setScene(scene)
-      #self.graphicsView.setInteractive(True)
-      #self.graphicsView.setAcceptDrops(True)
-      #scene.setAcceptDrops(True)
+      # Set the default drag mode.
+      self.mGraphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
 
 
+      # Get a test application
       found = store.find("editor:TestApplication")
       assert(1 == len(found))
       test_app = found[0]
       assert 'application' == test_app.tag
 
 
+      # Create scene from applications.
       self.mScene = StanzaScene(test_app, self)
-      self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
-      self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
-      #self.mScene.setSceneRect(-200, -200, 400, 400)
-      self.mGraphWidget.setScene(self.mScene)
 
+      
+      self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
+
+      # Only use this for animated scenes.
+      self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
+
+      # Don't set a default scene size, let it grow automatically.
+      #self.mScene.setSceneRect(-200, -200, 400, 400)
+
+      # Hande scene off to our GraphicsView.
+      self.mGraphicsView.setScene(self.mScene)
+
+
+      # Add layouts. These should be plugins soon.
       layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout', 'DirectedTree']
       layout_classes = [layout.Random, layout.Concentric, layout.Colimacon, layout.DirectedTree]
 
@@ -370,16 +374,27 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          cb = lambda l=new_layout: self.onDoLayout(l)
          self.mLayoutCBs.append(cb)
          self.connect(new_action, QtCore.SIGNAL("triggered()"), cb)
-         self.mLayoutBtn1.addAction(new_action)
+         self.mLayoutBtn.addAction(new_action)
 
-      # Set Concentric as default
-      self.mGraphWidget.mCurrentLayout = self.mLayouts[3]
-      self.mGraphWidget.mCurrentLayout.layout()
+      # Set DirectedTree as default
+      self.mGraphicsView.mCurrentLayout = self.mLayouts[3]
+      self.mGraphicsView.mCurrentLayout.layout()
 
    def onDoLayout(self, layout):
+      """ Slot that is called when the user clicks on the layout button.
+
+          @param layout: An instance of a layout algorithm to use.
+      """
+      # Layout all items and then ensure they are all visible.
       layout.layout()
+      self.onZoomExtents()
+
+   def onZoomExtents(self):
+      """ Slot that ensures that all items in the scene are visible. """
+      # Get the area covered by the scene.
       scene_rect = self.mScene.itemsBoundingRect()
-      self.mGraphWidget.fitInView(scene_rect, QtCore.Qt.KeepAspectRatio)
+      # Force the view 
+      self.mGraphicsView.fitInView(scene_rect, QtCore.Qt.KeepAspectRatio)
 
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
@@ -398,9 +413,49 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mArgLbl.installEventFilter(self)
       self.mEnvVarLbl.installEventFilter(self)
 
+      zoom_icon = QtGui.QIcon("images/zoom-extents.png")
+      self.mZoomExtentsAction = QtGui.QAction(zoom_icon, self.tr("Zoom Extents"), self)
+      self.connect(self.mZoomExtentsAction, QtCore.SIGNAL("triggered()"), self.onZoomExtents)
+      self.mZoomExtentsBtn.setDefaultAction(self.mZoomExtentsAction)
+
+      # Create icons that can be added to a menu later.
+      icon = QtGui.QIcon()
+      self.mNoDragAction = QtGui.QAction(icon, self.tr("Selection Mode"), self)
+      self.connect(self.mNoDragAction, QtCore.SIGNAL("triggered()"), self.mNoDragBtn, QtCore.SLOT("click()"))
+
+      self.mScrollDragAction = QtGui.QAction(icon, self.tr("Scroll Mode"), self)
+      self.connect(self.mScrollDragAction, QtCore.SIGNAL("triggered()"), self.mScrollDragBtn, QtCore.SLOT("click()"))
+
+      self.mRubberDragAction = QtGui.QAction(icon, self.tr("Group Mode"), self)
+      self.connect(self.mRubberDragAction, QtCore.SIGNAL("triggered()"), self.mRubberBandDragBtn, QtCore.SLOT("click()"))
+
+      # Create a button group to ensure that we are only in one drag mode at a time.
+      self.mDragButtonGroup = QtGui.QButtonGroup()
+      self.mDragButtonGroup.addButton(self.mNoDragBtn, 0)
+      self.mDragButtonGroup.addButton(self.mScrollDragBtn, 1)
+      self.mDragButtonGroup.addButton(self.mRubberBandDragBtn, 2)
+      
+      self.connect(self.mDragButtonGroup,QtCore.SIGNAL("buttonClicked(QAbstractButton*)"), self.onDragButtonClicked)
+
       # Set up the table.
       self.mItemModel = ItemTableModel()
       self.mEditTableView.setModel(self.mItemModel)
+
+   def onDragButtonClicked(self, btn):
+      """ Slot that is called when a drag mode QToolButton is clicked. This
+          can occur either through user interaction, or by calling the
+          button's click() slot.
+
+          @parm btn: Button that was clicked.
+      """
+      if self.mNoDragBtn == btn:
+         self.mGraphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
+         self.mGraphicsView.viewport().setCursor(QtGui.QCursor())
+      elif self.mScrollDragBtn == btn:
+         self.mGraphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+      elif self.mRubberBandDragBtn == btn:
+         self.mGraphicsView.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+         self.mGraphicsView.viewport().setCursor(QtGui.QCursor())
 
    def onItemSelected(self, item):
       if isinstance(item, Node):
@@ -409,6 +464,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mItemModel.setItem(None)
 
    def eventFilter(self, obj, event):
+      """ EventFilter for the toolbox labels. This allows us to start a drag
+          when the user clicks on one of the labels.
+      """
       if event.type() == QtCore.QEvent.MouseButtonPress:
          itemData = QtCore.QByteArray()
          dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)

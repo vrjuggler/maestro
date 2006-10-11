@@ -32,9 +32,18 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="QToolButton" name="mLayoutBtn1" >
+       <widget class="QToolButton" name="mLayoutBtn" >
         <property name="text" >
-         <string>...</string>
+         <string>Layout</string>
+        </property>
+        <property name="icon" >
+         <iconset>../../../../../../../../../Desktop/icons/ksirtet.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
         </property>
         <property name="popupMode" >
          <enum>QToolButton::MenuButtonPopup</enum>
@@ -45,38 +54,127 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="mLayoutBtn2" >
+       <widget class="QToolButton" name="mNoDragBtn" >
         <property name="text" >
          <string>...</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="mLayoutBtn3" >
-        <property name="text" >
-         <string>...</string>
+        <property name="icon" >
+         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_draw-selection.png</iconset>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="mLayoutBtn4" >
-        <property name="text" >
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
+        <property name="iconSize" >
          <size>
-          <width>40</width>
-          <height>20</height>
+          <width>24</width>
+          <height>24</height>
          </size>
         </property>
-       </spacer>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mScrollDragBtn" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_zoom-shift.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mRubberBandDragBtn" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_exit-group.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mZoomExtentsBtn" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_zoom-page-width.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="autoRaise" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="mApplicationLbl" >
+        <property name="text" >
+         <string>Application:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="mApplicationCB" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>3</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="mClassFilterLbl" >
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="pixmap" >
+         <pixmap>../../../../../../../../../Desktop/icons/stock_goal-seek.png</pixmap>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="mClassFilterCB" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>3</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editable" >
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -158,7 +256,7 @@
        <property name="orientation" >
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QGraphicsView" name="graphicsView" >
+       <widget class="QGraphicsView" name="mGraphicsView" >
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>7</hsizetype>
