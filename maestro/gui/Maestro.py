@@ -469,8 +469,14 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             clean = False
 
       if clean:
+         # In order to remove the log files on Windows, they must first be
+         # closed.
+         self.mFileLogger.close()
          for f in self.mFileLogger.getLogFiles():
             os.remove(f)
+
+      # We are done with the output log file stuff now.
+      self.mFileLogger = None
 
       QtGui.QMainWindow.closeEvent(self, event)
 
