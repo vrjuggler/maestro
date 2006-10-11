@@ -48,6 +48,12 @@ class Layout:
             nodes.append(item)
       return nodes
 
+   def resetNodesPositions(self):
+      nodes = self._getNodes()
+      for node in nodes:
+         node.setPos(-1.0, -1.0)
+         node.updateEdges()
+
 class Random(Layout):
    def __init__(self, scene):
       Layout.__init__(self, scene)
@@ -115,3 +121,106 @@ class Colimacon(Layout):
          node.updateEdges()
 
          n += 1
+
+NONE = 0
+HORIZONTAL = 1
+VERTICAL = 2
+
+class DirectedTree(Layout):
+   #def __init__(self, scene, origin=[0.0,0.0], spacing=[150.0, 150.0], orientation=VERTICAL):
+   def __init__(self, scene, origin=[0.0,0.0], spacing=[150.0, 110.0], orientation=HORIZONTAL):
+      Layout.__init__(self, scene)
+      self.origin = origin
+      self.spacing = spacing
+      self.orientation = orientation
+      self.stopRecursion = False
+      
+   def layout(self):
+      # Reset the graph nodes positions (If position are not resetted, nodes are all considered
+      # already placed
+      self.resetNodesPositions()
+      self.marked = []
+
+      # Configure tree bounding box
+      bbox = [0.0, 0.0]
+      bbox[0] = self.__getXOrigin()
+      bbox[1] = self.__getYOrigin()
+
+      root_nodes = [self.mScene.mApplicationItem]
+      # Layout all graph subgraph
+      for root in root_nodes:
+         self._layout(root, bbox, 0)
+
+      # Set graph oritentation
+      if ( self.orientation == HORIZONTAL ):
+         self.transpose();
+      del bbox
+      del self.marked
+
+   def _layout(self, node, bbox, depth):
+      if self.marked.count(node) > 0:
+         return
+      self.marked.append(node)
+
+      if self.stopRecursion:
+         return
+
+      xStart = bbox[0]
+
+      # Depth first
+      laidOut = 0
+      #Node::Set outNodes; node.collectOutNodesSet( outNodes );
+      outnodes = node.mChildren
+      for sub_node in outnodes:
+         # Detect if the node has already been placed
+         if sub_node.pos().x() < 0.0 and  sub_node.pos().y() < 0.0:
+            # A leaf node must be drawn at x+dx if one or more nodes has previously been laid out (!=begin).
+            if laidOut > 0:
+               bbox[0] += self.__getXSpacing()
+            self._layout(sub_node, bbox, depth + 1)
+            laidOut += 1
+
+      xEnd = bbox[0]
+
+      # Detect leaf node
+      x = 0.0
+      y = self.__getYOrigin() + (self.__getYSpacing( ) * depth)
+      if node.isLeaf():
+         x = xStart
+      else:
+         x = xStart + ((xEnd - xStart) / 2.0)
+      node.setPos(x, y)
+      node.updateEdges()
+
+   def transpose(self):
+      nodes = self._getNodes()
+      for node in nodes:
+         node.setPos(node.pos().y(), node.pos().x())
+         node.updateEdges()
+
+   def __getXSpacing(self):
+      if self.orientation == HORIZONTAL:
+         return self.spacing[1]
+      else:
+         return self.spacing[0]
+
+   def __getYSpacing(self):
+      if self.orientation == HORIZONTAL:
+         return self.spacing[0]
+      else:
+         return self.spacing[1]
+
+   def __getXOrigin(self):
+      if self.orientation == HORIZONTAL:
+         return self.origin[1]
+      else:
+         return self.origin[0]
+
+   def __getYOrigin(self):
+      if self.orientation == HORIZONTAL:
+         return self.origin[0]
+      else:
+         return self.origin[1]
+
+   def __stopRecursion(self):
+      self.stopRecursion = True

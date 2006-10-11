@@ -167,7 +167,12 @@ class Edge(QtGui.QGraphicsItem):
       polygon.append(arrow_p3)
 
       #angle = math.atan(line.dx()/line.dy())
-      angle = math.acos(line.dy()/line.length())
+      length = line.length()
+      if 0 == length:
+         angle = 0.0
+      else:
+         angle = math.acos(line.dy()/length)
+
       if line.dx() <= 0:
          angle = 6.28 - angle
       #print "angle: ", math.degrees(angle)
@@ -265,6 +270,9 @@ class Node(QtGui.QGraphicsItem):
          if edge.source is otherNode or edge.dest is otherNode:
             return True
       return False
+
+   def isLeaf(self):
+      return 0 == len(self.mChildren)
 
    def setParent(self, parent):
       if self.mParent == parent:

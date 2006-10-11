@@ -49,7 +49,7 @@ class StanzaScene(QtGui.QGraphicsScene):
       self.mApplication = applicationElt
 
       # Build all first level nodes.
-      self._buildNode(self.mApplication)
+      self.mApplicationItem = self._buildNode(self.mApplication)
 
 
    def _buildNode(self, elm, parent=None):
@@ -400,8 +400,8 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       #self.mScene.setSceneRect(-200, -200, 400, 400)
       self.mGraphWidget.setScene(self.mScene)
 
-      layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout']
-      layout_classes = [layout.Random, layout.Concentric, layout.Colimacon]
+      layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout', 'DirectedTree']
+      layout_classes = [layout.Random, layout.Concentric, layout.Colimacon, layout.DirectedTree]
 
       self.mLayouts = []
 
@@ -413,7 +413,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mLayoutBtn1.addAction(new_action)
 
       # Set Concentric as default
-      self.mGraphWidget.mCurrentLayout = self.mLayouts[1]
+      self.mGraphWidget.mCurrentLayout = self.mLayouts[3]
       self.mGraphWidget.mCurrentLayout.layout()
 
    def setupUi(self, widget):
