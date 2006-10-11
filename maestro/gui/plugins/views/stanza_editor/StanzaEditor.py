@@ -35,15 +35,17 @@ from stanzaitems import *
 import layout
 import elementtree.ElementTree as ET
 
-maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
-store = maestro.core.StanzaStore.StanzaStore()
-store.scan()
+if __name__ == '__main__':
+   # If we want all.
+   maestro.core.const.STANZA_PATH = pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')
+   #maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
+   store = maestro.core.StanzaStore.StanzaStore()
+   store.scan()
 
 class StanzaScene(QtGui.QGraphicsScene):
    def __init__(self, applicationElt, parent = None):
       QtGui.QGraphicsScene.__init__(self, parent)
       self.mLine = None
-      self.mItems = []
 
       self.mApplication = applicationElt
 
@@ -55,7 +57,7 @@ class StanzaScene(QtGui.QGraphicsScene):
       item = None
       if elm.tag == 'application':
          item = AppItem(elm)
-      if elm.tag == 'group':
+      elif elm.tag == 'group':
          item = GroupItem(elm)
       elif elm.tag == 'choice':
          item = ChoiceItem(elm)
@@ -63,12 +65,23 @@ class StanzaScene(QtGui.QGraphicsScene):
          item = ArgItem(elm)
       elif elm.tag == 'env_var':
          item = EnvItem(elm)
+      elif elm.tag == 'command':
+         item = CommandItem(elm)
+      elif elm.tag == 'cwd':
+         item = CwdItem(elm)
+      elif elm.tag == 'ref':
+         item = RefItem(elm)
+      elif elm.tag == 'add':
+         item = AddItem(elm)
+      elif elm.tag == 'remove':
+         item = RemoveItem(elm)
+      elif elm.tag == 'override':
+         item = OverrideItem(elm)
       else:
          print "Not building a node for: [%s]" % (elm.tag)
 
       if item is not None:
          self.addItem(item)
-         self.mItems.append(item)
          item.setPos(0,0)
 
          #if parent is not None:
@@ -234,7 +247,6 @@ class StanzaScene(QtGui.QGraphicsScene):
 
          if item is not None:
             self.addItem(item)
-            self.mItems.append(item)
             pos = event.scenePos()
             item.setPos(pos)
 
@@ -320,6 +332,7 @@ class GraphWidget(QtGui.QGraphicsView):
 class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
+      self.mScene = None
       self.setupUi(self)
       #self.timerId = 0
 
@@ -336,30 +349,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Set the default drag mode.
       self.mGraphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
 
-
-      # Get a test application
-      found = store.find("editor:TestApplication")
-      assert(1 == len(found))
-      test_app = found[0]
-      assert 'application' == test_app.tag
-
-
-      # Create scene from applications.
-      self.mScene = StanzaScene(test_app, self)
-
-      
-      self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
-
-      # Only use this for animated scenes.
-      self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
-
-      # Don't set a default scene size, let it grow automatically.
-      #self.mScene.setSceneRect(-200, -200, 400, 400)
-
-      # Hande scene off to our GraphicsView.
-      self.mGraphicsView.setScene(self.mScene)
-
-
       # Add layouts. These should be plugins soon.
       layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout', 'DirectedTree']
       layout_classes = [layout.Random, layout.Concentric, layout.Colimacon, layout.DirectedTree]
@@ -368,7 +357,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mLayoutCBs = []
 
       for (name, ltype) in zip(layout_names, layout_classes):
-         new_layout = ltype(self.mScene)
+         new_layout = ltype()
          self.mLayouts.append(new_layout)
          new_action = QtGui.QAction(name, self)
          cb = lambda l=new_layout: self.onDoLayout(l)
@@ -378,23 +367,70 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
       # Set DirectedTree as default
       self.mGraphicsView.mCurrentLayout = self.mLayouts[3]
-      self.mGraphicsView.mCurrentLayout.layout()
+
+      # Last step, fill in application combobox and select the first one.
+      self.__fillApplicationCB()
+      self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
+
+   def __fillApplicationCB(self):
+      self.mApplications = store.findApplications()
+      print "Apps: ", self.mApplications
+      self.mApplicationCB.clear()
+      for app in self.mApplications:
+         label = app.get('label', None)
+         if label is None:
+            label = app.get('name', None)
+         assert(label is not None)
+         self.mApplicationCB.addItem(label)
+
+      # If we have applications, then show the first one.
+      if len(self.mApplications) > 0:
+         self.mApplicationCB.setCurrentIndex(0)
+         self.onApplicationSelected(0)
+
+   def onApplicationSelected(self, index):
+      app = self.mApplications[index]
+
+      if self.mScene is not None:
+         self.disconnect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
+
+      # Create scene from applications.
+      self.mScene = StanzaScene(app, self)
+      
+      self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
+
+      # Only use this for animated scenes.
+      #self.mScene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
+
+      # Don't set a default scene size, let it grow automatically.
+      #self.mScene.setSceneRect(-200, -200, 400, 400)
+
+      # Hande scene off to our GraphicsView.
+      self.mGraphicsView.setScene(self.mScene)
+
+      # Layout new scene and zoom to its extents.
+      self.mGraphicsView.mCurrentLayout.layout(self.mScene)
+      self.onZoomExtents()
 
    def onDoLayout(self, layout):
       """ Slot that is called when the user clicks on the layout button.
 
           @param layout: An instance of a layout algorithm to use.
       """
-      # Layout all items and then ensure they are all visible.
-      layout.layout()
-      self.onZoomExtents()
+      if self.mScene is not None:
+         # Layout all items and then ensure they are all visible.
+         layout.layout(self.mScene)
+         self.onZoomExtents()
 
    def onZoomExtents(self):
       """ Slot that ensures that all items in the scene are visible. """
-      # Get the area covered by the scene.
-      scene_rect = self.mScene.itemsBoundingRect()
-      # Force the view 
-      self.mGraphicsView.fitInView(scene_rect, QtCore.Qt.KeepAspectRatio)
+      if self.mScene is not None:
+         # Get the area covered by the scene.
+         scene_rect = self.mScene.itemsBoundingRect()
+         min_rect = QtCore.QRectF(-200, -200, 200, 200)
+         extents = scene_rect.unite(min_rect)
+         # Force the view 
+         self.mGraphicsView.fitInView(extents, QtCore.Qt.KeepAspectRatio)
 
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)

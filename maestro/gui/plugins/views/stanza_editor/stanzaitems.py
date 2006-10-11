@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, random
+import sys, random, types
 from PyQt4 import QtCore, QtGui
 
 import StanzaEditorBase
@@ -251,6 +251,13 @@ class Edge(QtGui.QGraphicsItem):
       self.mHotRect.moveCenter(sp)
       return self.mHotRect.contains(self.destPoint)
 
+AllAttribName = ['Name', 'Label']
+AllAttrib = ['name', 'label']
+HSAttribName = ['Hidden', 'Selected']
+HSAttrib = ['hidden', 'selected']
+HESAttribName = ['Hidden', 'Editable', 'Selected']
+HESAttrib = ['hidden', 'editable', 'selected']
+
 class Node(QtGui.QGraphicsItem):
    def __init__(self, elm=None, graphWidget=None):
       QtGui.QGraphicsItem.__init__(self)
@@ -268,8 +275,8 @@ class Node(QtGui.QGraphicsItem):
       self.setAcceptDrops(True)
       self.mColor = QtGui.QColor(0, 127, 127, 191)
       self.mElement = elm
-      self.mAttribNameMap = {}
-      self.mAttribMap = {}
+      self.mAttribNameList = {}
+      self.mAttribList = {}
       self.mTitle = "Node"
 
       self.mParent = None
@@ -533,28 +540,50 @@ class Node(QtGui.QGraphicsItem):
          QtGui.QGraphicsItem.dropEvent(self, event)
 
    def dataCount(self):
-      return len(self.mAttribMap)
+      return len(self.mAttribList)
+
+   def tryStrToBool(self, value):
+      assert type(value) == types.StringType
+      if value.lower() == 'true':
+         return True
+      elif value.lower() == 'false':
+         return False
+      # This limits string values.
+      elif value == '1':
+         return True
+      elif value == '0':
+         return False
+      return value
+
+   def tryBoolToStr(self, value):
+      if type(value) == types.BooleanType:
+         if value == "True":
+            return 'true'
+         return 'false'
+      assert type(value) == types.StringType
+      return value
 
    def data(self, index, role):
       if index.isValid() and self.mElement is not None:
          if role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
             if 0 == index.column():
-               if self.mAttribNameMap.has_key(index.row()):
-                  return QtCore.QVariant(self.mAttribNameMap[index.row()])
+               if len(self.mAttribNameList) > index.row():
+                  return QtCore.QVariant(self.mAttribNameList[index.row()])
             if 1 == index.column():
-               if self.mAttribMap.has_key(index.row()):
-                  value = self.mElement.get(self.mAttribMap[index.row()], '')
+               if len(self.mAttribList) > index.row():
+                  value = self.mElement.get(self.mAttribList[index.row()], '')
+                  value = self.tryStrToBool(value)
                   return QtCore.QVariant(value)
       return QtCore.QVariant()
 
    def setData(self, index, value, role):
-      self.mAttribMap = {0:'name', 1:'label', 2:'tooltip', 3:'type'}
       if index.isValid() and self.mElement is not None:
          assert role == QtCore.Qt.EditRole
          assert 1 == index.column()
-         if self.mAttribMap.has_key(index.row()):
+         if len(self.mAttribList) > index.row():
             str_val = str(value.toString())
-            self.mElement.set(self.mAttribMap[index.row()], str_val)
+            real_val = self.tryBoolToStr(str_val)
+            self.mElement.set(self.mAttribList[index.row()], real_val)
             self.update()
             return True
       return False
@@ -564,37 +593,93 @@ class AppItem(Node):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Application"
       self.mColor = QtGui.QColor(182, 131, 189, 191)
-      self.mAttribNameMap = {0:'Name', 1:'Label'}
-      self.mAttribMap = {0:'name', 1:'label'}
+      self.mAttribNameList = AllAttribName
+      self.mAttribList = AllAttrib
 
 class ChoiceItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
       self.mColor = QtGui.QColor(76, 122, 255, 191)
-      self.mAttribNameMap = {0:'Name', 1:'Label', 2:'Tool Tip', 3:'Type'}
-      self.mAttribMap = {0:'name', 1:'label', 2:'tooltip', 3:'type'}
+      self.mAttribNameList = AllAttribName + HSAttribName
+      self.mAttribList = AllAttrib + HSAttrib
 
 class GroupItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Group"
+      # Green
       self.mColor = QtGui.QColor(76, 255, 69, 191)
-      self.mAttribNameMap = {0:'Name', 1:'Label'}
-      self.mAttribMap = {0:'name', 1:'label'}
+      self.mAttribNameList = AllAttribName + HSAttribName
+      self.mAttribList = AllAttrib + HSAttrib
+
+class RefItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Reference"
+      # Cyan 
+      self.mColor = QtGui.QColor(76, 255, 235, 191)
+      self.mAttribNameList = ['ID']
+      self.mAttribList = ['id']
 
 class ArgItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Argument"
       self.mColor = QtGui.QColor(255, 67, 67, 191)
-      self.mAttribNameMap = {0:'Name', 1:'Label', 2:'Selected', 3:'Editable', 4:'Flag'}
-      self.mAttribMap = {0:'name', 1:'label', 2:'selected', 3:'editable', 4:'flag'}
+      self.mAttribNameList = AllAttribName + ['Flag'] + HESAttribName
+      self.mAttribList = AllAttrib + ['flag'] + HESAttrib
 
 class EnvItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
       self.mColor = QtGui.QColor(255, 253, 117, 191)
-      self.mAttribNameMap = {0:'Name', 1:'Label', 2:'Key'}
-      self.mAttribMap = {0:'name', 1:'label', 2:'key'}
+      self.mAttribNameList = AllAttribName + ['Key'] + HESAttribName
+      self.mAttribList = AllAttrib + ['key'] + HESAttrib
+
+class CommandItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Command"
+      # Brown
+      self.mColor = QtGui.QColor(139, 69, 19, 191)
+      self.mAttribNameList = AllAttribName + HESAttribName
+      self.mAttribList = AllAttrib + HESAttrib
+
+class CwdItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Current Working Directory"
+      # Pink
+      self.mColor = QtGui.QColor(255, 76, 190, 191)
+      self.mAttribNameList = AllAttribName + HESAttribName
+      self.mAttribList = AllAttrib + HESAttrib
+
+class OverrideItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Override"
+      # Dark Orange
+      self.mColor = QtGui.QColor(255, 110, 0, 191)
+      # This could have any number of attribs.
+      self.mAttribNameList = ['ID']
+      self.mAttribList = ['id']
+
+class AddItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Add"
+      # Tan
+      self.mColor = QtGui.QColor(255, 173, 111, 191)
+      self.mAttribNameList = []
+      self.mAttribList = []
+
+class RemoveItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Remove"
+      # Light blue
+      self.mColor = QtGui.QColor(76, 228, 255, 191)
+      self.mAttribNameList = ['ID']
+      self.mAttribList = ['id']
