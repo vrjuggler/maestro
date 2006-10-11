@@ -199,9 +199,23 @@ class WindowsDesktopBackgroundPlugin(maestro.core.IDesktopWallpaperPlugin):
          else:
             raise
 
-      update = win32con.SPIF_UPDATEINIFILE | win32con.SPIF_SENDCHANGE
-      win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, img_file,
-                                    update)
+      old_img_file = \
+         win32gui.SystemParametersInfo(win32con.SPI_GETDESKWALLPAPER)
+
+      # XXX; This currently only works if the given image file is a BMP.
+      # Is there a way for us to convert it on the fly before calling
+      # win32giu.SystemParametersInfo()?
+      try:
+         update = win32con.SPIF_UPDATEINIFILE | win32con.SPIF_SENDWININICHANGE
+         win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER,
+                                       img_file, update)
+      # If setting the new wallpaper failed, then revert back to the old
+      # wallpaper.
+      except Exception, ex:
+         print ex
+         win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER,
+                                       old_img_file, 0)
+
       win32security.RevertToSelf()
 
    def getBackgroundImageFile(self, avatar):
