@@ -283,7 +283,6 @@ class GraphWidget(QtGui.QGraphicsView):
       self.scale(0.8, 0.8)
       self.setMinimumSize(400, 400)
       self.setWindowTitle("Maestro Test Nodes")
-      self.mCurrentLayout = None
 
    def keyPressEvent(self, event):
       key = event.key()
@@ -299,8 +298,8 @@ class GraphWidget(QtGui.QGraphicsView):
          self.scaleView(1.2)
       elif key == QtCore.Qt.Key_Minus:
          self.scaleView(1 / 1.2)
-      elif key == QtCore.Qt.Key_Space:
-         self.mCurrentLayout.layout()
+      #elif key == QtCore.Qt.Key_Space:
+      #   self.mLayoutBtn.click()
       #elif key == QtCore.Qt.Key_Enter:
          #self.itemMoved()
       else:
@@ -369,17 +368,18 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mLayouts = []
       self.mLayoutCBs = []
 
+      icon = QtGui.QIcon("images/layout.png")
       for (name, ltype) in zip(layout_names, layout_classes):
          new_layout = ltype()
          self.mLayouts.append(new_layout)
-         new_action = QtGui.QAction(name, self)
-         cb = lambda l=new_layout: self.onDoLayout(l)
+         new_action = QtGui.QAction(icon, name, self)
+         cb = lambda l=new_layout, a=new_action: self.onDoLayout(l, a)
          self.mLayoutCBs.append(cb)
          self.connect(new_action, QtCore.SIGNAL("triggered()"), cb)
          self.mLayoutBtn.addAction(new_action)
 
       # Set DirectedTree as default
-      self.mGraphicsView.mCurrentLayout = self.mLayouts[3]
+      self.mLayoutBtn.setDefaultAction(self.mLayoutBtn.actions()[3])
 
       # Last step, fill in application combobox and select the first one.
       self.__fillApplicationCB()
@@ -422,14 +422,17 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mGraphicsView.setScene(self.mScene)
 
       # Layout new scene and zoom to its extents.
-      self.mGraphicsView.mCurrentLayout.layout(self.mScene)
+      self.mLayoutBtn.click()
       self.onZoomExtents()
 
-   def onDoLayout(self, layout):
+   def onDoLayout(self, layout, action=None):
       """ Slot that is called when the user clicks on the layout button.
 
           @param layout: An instance of a layout algorithm to use.
       """
+      # Set the default layout action.
+      if action is not None:
+         self.mLayoutBtn.setDefaultAction(action)
       if self.mScene is not None:
          # Layout all items and then ensure they are all visible.
          layout.layout(self.mScene)
@@ -511,6 +514,13 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mItemModel.setItem(item)
       else:
          self.mItemModel.setItem(None)
+
+   def keyPressEvent(self, event):
+      key = event.key()
+      if key == QtCore.Qt.Key_Space:
+         self.mLayoutBtn.click()
+      else:
+         QtGui.QWidget.keyPressEvent(self, event)
 
    def eventFilter(self, obj, event):
       """ EventFilter for the toolbox labels. This allows us to start a drag

@@ -136,6 +136,7 @@ class DirectedTree(Layout):
       self.stopRecursion = False
       
    def layout(self, scene):
+      center = scene.sceneRect().center()
       # Reset the graph nodes positions (If position are not resetted, nodes are all considered
       # already placed
       self._resetNodesPositions(scene)
