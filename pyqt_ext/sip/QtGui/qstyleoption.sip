@@ -906,3 +906,19 @@ public:
     QStyleOptionGroupBox();
     QStyleOptionGroupBox(const QStyleOptionGroupBox &other);
 };
+
+class QStyleOptionGraphicsItem : QStyleOption
+{
+public:
+    enum StyleOptionType { Type = SO_GraphicsItem };
+    enum StyleOptionVersion { Version = 1 };
+
+    QRectF exposedRect;
+    QMatrix matrix;
+    qreal levelOfDetail;
+
+    QStyleOptionGraphicsItem();
+    QStyleOptionGraphicsItem(const QStyleOptionGraphicsItem &other);
+protected:
+    QStyleOptionGraphicsItem(int version);
+};

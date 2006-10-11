@@ -364,7 +364,7 @@ protected:
         // We also need to take into account any proxies for Python signals.
         sipRes = sipCpp->sipProtect_receivers(a0);
         
-        const QObjectList &children = sipCpp->children();
+        const QObjectList &children = sipCpp->QObject::children();
         
         // Import the helper if it hasn't already been done.
         typedef int (*helper_func)(const QObject *, const char *);
