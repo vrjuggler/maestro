@@ -195,15 +195,25 @@ class StanzaScene(QtGui.QGraphicsScene):
             # Remote edge from graph.
             item.destNode().setParent(None)
          if isinstance(item, Node):
-            item.setParent(None)
-            for child in item.mChildren[:]:
-               child.setParent(None)
-            self.removeItem(item)
-         else:
-            print "Delete: ", item
+            # Don't let the user delete application items.
+            if item.mElement.tag == 'application':
+               QtGui.QMessageBox.warning(None, "Can't Delete Application Item",
+               "You can not delete an application item from the graph."
+               "If you want to delete an application use the toolbar at the top of the screen")
+            else:
+               # Ask the user if they are sure.
+               reply = QtGui.QMessageBox.question(None, "Delete %s" % item.mElement.get('label', item.mElement.tag),
+                  "Are you sure you want to delete %s?" % item.mElement.get('label', item.mElement.tag),
+                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                  QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+               # If they say yes, go ahead and do it.
+               if reply == QtGui.QMessageBox.Yes:
+                  item.setParent(None)
+                  for child in item.mChildren[:]:
+                     child.setParent(None)
+                  self.removeItem(item)
          
       QtGui.QGraphicsScene.keyPressEvent(self, event)
-
 
    def mouseMoveEvent(self, event):
       if event.buttons() & QtCore.Qt.RightButton:
@@ -232,17 +242,20 @@ class StanzaScene(QtGui.QGraphicsScene):
 
          print "Type added: ", item_type
          item = None
+         # Create the correct Element. We are not using SubElement because
+         # we do not want to give the element a parent right now. This means
+         # that it will disappear if we move from application to application.
          if item_type == "Choice":
-            new_elm = ET.SubElement(self.mApplication, 'choice')
+            new_elm = self.mApplication.makeelement('choice', {})
             item = ChoiceItem(new_elm)
          elif item_type == "Group":
-            new_elm = ET.SubElement(self.mApplication, 'group')
+            new_elm = self.mApplication.makeelement('group', {})
             item = GroupItem(new_elm)
          elif item_type == "Arg":
-            new_elm = ET.SubElement(self.mApplication, 'arg')
+            new_elm = self.mApplication.makeelement('arg', {})
             item = ArgItem(new_elm)
          elif item_type == "EnvVar":
-            new_elm = ET.SubElement(self.mApplication, 'env_var')
+            new_elm = self.mApplication.makeelement('env_var', {})
             item = EnvItem(new_elm)
 
          if item is not None:
