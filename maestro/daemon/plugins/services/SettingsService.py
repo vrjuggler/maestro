@@ -102,10 +102,10 @@ class SettingsService(maestro.core.IServicePlugin):
          settings['User Name'] = comp.UserName
          settings['Workgroup'] = comp.Workgroup
 
-	 # The following is based on a comment posted in response to the
-	 # following ASPN Python Cookbook recipe:
-	 #
-	 #    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/496815
+         # The following is based on a comment posted in response to the
+         # following ASPN Python Cookbook recipe:
+         #
+         #    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/496815
          path   = win32pdh.MakeCounterPath((None, 'System', None, None, 0,
                                             'System Up Time'))
          query  = win32pdh.OpenQuery()
