@@ -42,9 +42,9 @@ class DesktopService(maestro.core.IServicePlugin):
          saver_types = env.settings.get('saver_types', '').lower().split(',')
       else:
          # On Windows, default to using the standard screen saver management
-         # plug-in.
+         # plug-ins.
          if sys.platform.startswith('win'):
-            saver_types = ['windows']
+            saver_types = ['windows', 'powercfg']
          # On non-Windows platforms, default (blindly) to using the xset(1)
          # screen saver management plug-in. This will usually not be
          # sufficient since modern X desktops tend to use more sophisticated
