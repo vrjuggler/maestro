@@ -119,6 +119,10 @@ class SettingsService(maestro.core.IServicePlugin):
          settings['Up Time'] = u"%d days, %d:%02d:%02d" % \
                                    self._convertUpTime(uptime[1])
 
+         for k in settings.keys():
+            if settings[k] is None:
+               settings[k] = u''
+
       # Linux.
       elif sys.platform.startswith('linux'):
          lines = []
