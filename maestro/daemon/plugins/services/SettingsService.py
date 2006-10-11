@@ -16,11 +16,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, os, types, platform
-import popen2
+import sys, os, platform
 import re
 import time
-import string
 import socket
 
 import maestro.core
@@ -28,12 +26,10 @@ const = maestro.core.const
 Env = maestro.core.Environment
 
 from Queue import Queue
-from threading import Thread
 
 
 if os.name == 'nt':
-   import win32api, win32event, win32serviceutil, win32service, \
-          win32security, ntsecuritycon, win32pdh
+   import win32api, ntsecuritycon, win32pdh
 
 class SettingsService(maestro.core.IServicePlugin):
    def __init__(self):
