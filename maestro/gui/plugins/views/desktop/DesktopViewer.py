@@ -191,7 +191,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       node_id = self.getCurrentNodeID()
       env = maestro.core.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_stop')
-      self.refresh(node_id)
+      self.refresh()
 
    def onReportSaverUse(self, nodeId, usesSaver):
       self.mSettings[nodeId].setUsesScreenSaver(usesSaver)
