@@ -1,0 +1,1341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book>
+   <bookinfo>
+      <title>Maestro User's Guide</title>
+
+      <releaseinfo>Version 0.1</releaseinfo>
+
+      <authorgroup>
+         <corpauthor><ulink url="http://www.infiscape.com/">Infiscape
+         Corporation</ulink></corpauthor>
+      </authorgroup>
+
+      <address><street>2901 South Loop Drive, Suite 3400</street><city>Ames</city><state>Iowa</state><postcode>50010-8646</postcode><phone>+1.515.296.3787</phone><email>contact@infiscape.com</email><otheraddr>Website: <ulink
+               url="http://www.infiscape.com/">http://www.infiscape.com/</ulink></otheraddr></address>
+
+      <legalnotice>
+         <para>Permission is granted to copy, distribute and/or modify this
+         document under the terms of the GNU Free Documentation License,
+         Version 1.2 or any later version published by the Free Software
+         Foundation; with the Invariant Sections being <xref
+         linkend="appendix.gfdl" />, with no Front-Cover Texts, and with no
+         Back-Cover Texts. A copy of the license is included in <xref
+         linkend="appendix.gfdl" />.</para>
+
+         <para>Some of the designations used by manufacturers and sellers to
+         distinguish their products are claimed as trademarks. Where those
+         designations appear in this book, and Infiscape Corporation was aware
+         of the trademark claim, the designations have been printed in caps or
+         initial caps.</para>
+      </legalnotice>
+
+      <pubdate>October 16, 2006</pubdate>
+   </bookinfo>
+
+   <preface>
+      <title>Preface</title>
+
+      <para>In some places, command lines are wrapped to keep the text within
+      the margins of a page when this document is rendered to PDF. Such cases
+      should be obvious to the reader, but it is important to understand that
+      the command lines are intended to appear as a single line when
+      used.</para>
+
+      <para>Typesetting conventions used in this document are as
+      follows:</para>
+
+      <itemizedlist>
+         <listitem>
+            <para>File names and paths appear as
+            <filename>file.txt</filename></para>
+         </listitem>
+
+         <listitem>
+            <para>Commands to be entered by the user appear as
+            <command>command</command></para>
+         </listitem>
+
+         <listitem>
+            <para>Environment variables <emphasis>names</emphasis> appear as
+            <envar>ENV_VAR</envar></para>
+         </listitem>
+
+         <listitem>
+            <para>Environment variables <emphasis>values</emphasis> appear as
+            <envar>$ENV_VAR</envar></para>
+         </listitem>
+
+         <listitem>
+            <para>Command line options appear as <option>-o</option></para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface menus appear as <guimenu>Menu
+            Name</guimenu></para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface menu items appear as
+            <guimenuitem>Item Name</guimenuitem> or as <menuchoice>
+                  <shortcut>
+                     <keycap>Shortcut</keycap>
+                  </shortcut>
+
+                  <guimenu>Menu Name</guimenu>
+
+                  <guimenuitem>Item Name</guimenuitem>
+               </menuchoice> to identify the menu and menu item together—along
+            with the keyboard shortcut in parentheses if one exists</para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface labels appear as <guilabel>Label
+            Text</guilabel></para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface buttons appear as <guibutton>Button
+            Name</guibutton></para>
+         </listitem>
+      </itemizedlist>
+
+      <para>Acronyms used frequently in this document, though we have avoided
+      using abbreviations as much as possible. In a few cases, the text
+      switches back and forth between the acronym and the full spelling of the
+      acronym. The most frequently used acronyms are the following:</para>
+
+      <itemizedlist>
+         <listitem>
+            <para><acronym>GUI</acronym>: A graphical user interface</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>XML</acronym>: The <ulink
+            url="http://www.w3.org/XML/">eXtensible Markup
+            Language</ulink></para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>OS</acronym>: Operating system</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>VR</acronym>: Virtual reality</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>SSH</acronym>: Secure shell</para>
+         </listitem>
+      </itemizedlist>
+   </preface>
+
+   <chapter id="chapter.introduction">
+      <title>Introduction</title>
+
+      <para>Before we dive into explaining how to use Maestro, we first
+      explain the purpose of the software and some history about how it came
+      to be. The Maestro software is released under the terms of the GNU
+      <ulink url="http://www.gnu.org/copyleft/gpl.html">General Public
+      License</ulink>, and the first version of the source was made available
+      to the public in August 2006. As of this writing, the current version is
+      0.1, and Maestro should be considered to be in a
+      <quote>pre-alpha</quote> state. This means that the software will
+      continue to evolve and improve with time. More information, including
+      downloads, can be found at the <ulink
+      url="https://realityforge.vrsource.org/trac/maestro/">Maestro
+      website</ulink>.</para>
+
+      <section>
+         <title>What is Maestro?</title>
+
+         <para>Maestro is a software package using a simple client/server
+         model for utilizing the resources of a cluster of computers. Its
+         current intended audience is owners of grahpics clusters (also known
+         as image generator clusters) used for displaying high-quality,
+         real-time graphics on multiple projection surfaces. As with most
+         cluster-based technology, the idea is to spread the work load over
+         many low-cost machines rather than using a single, expensive
+         supercomputer. This means that distinct application processes are run
+         on each node of the cluster, and there is typically some sort of
+         communication between the processes or between the master node of the
+         cluster and all the slave nodes. This communication is used for a
+         variety of purposes including sending data and receiving
+         results.</para>
+
+         <para>Graphics clusters pose unique challenges. Most obviously, the
+         software run on graphics clusters is normally interactive. Users
+         provide live input and see immediate results, and to see the results,
+         each node normally has one or more display devices (monitor or
+         projector) connected to it. Furthermore, the processes running on
+         each node normally work in concert to produce what appears to be a
+         unified image rather than, say, each node working autonomously to
+         compute a small part of a large problem. Thus, users of a graphics
+         cluster are actively using all the nodes of the cluster
+         simultaneously. This is in contrast to a computational cluster where
+         a user sits down at the master node and starts up a computationally
+         expensive job and then leaves the computers to run until the work
+         completes.</para>
+
+         <para>Users of graphics clusters should not have to sacrifice the
+         simplicity of launching an application easily from the master node of
+         the cluster, and this is where Maestro comes in. Rather than writing
+         custom shell scripts or batch files and using remote shells to launch
+         an interactive, immersive application, Maestro allows users to launch
+         applications across all the nodes of a cluster in a simple, uniform
+         manner. Maestro goes beyond just launching applications by providing
+         extensions such as resource monitoring tools and cluster maintenance
+         features. Users can write their own cluster-aware tools that plug in
+         to Maestro in the form of a paired service and view. (More
+         information on that is provided later in <xref
+         linkend="chapter.extending.maestro" />.)</para>
+      </section>
+
+      <section>
+         <title>Features</title>
+
+         <indexterm class="startofrange" id="index.section.features">
+            <primary>features</primary>
+         </indexterm>
+
+         <para>Now that we know what Maestro is, we can explain what it does.
+         Below are some of the features of Maestro.</para>
+
+         <itemizedlist>
+            <listitem>
+               <para>Support for multiple platforms (currently Linux and
+               <productname class="registered">Microsoft Windows</productname>
+               with support for Mac OS X and others to come)</para>
+            </listitem>
+
+            <listitem>
+               <para>Support for mixed-OS clusters</para>
+            </listitem>
+
+            <listitem>
+               <para>Remote application launching without requiring local
+               logon at each cluster node (currently for Linux only)</para>
+            </listitem>
+
+            <listitem>
+               <para>Integrated graphical editor for application launch
+               files</para>
+            </listitem>
+
+            <listitem>
+               <para>Remote process viewing and management</para>
+            </listitem>
+
+            <listitem>
+               <para>Live display of CPU and memory usage statistics</para>
+            </listitem>
+
+            <listitem>
+               <para>Encrypted communication between client and servers</para>
+            </listitem>
+
+            <listitem>
+               <para>Pluggable authentication (currently supporting PAM and
+               <productname class="registered">Microsoft Windows</productname>
+               domians)</para>
+            </listitem>
+
+            <listitem>
+               <para>Remote control of scren saver and power management</para>
+            </listitem>
+
+            <listitem>
+               <para>Ability to reboot any or all nodes of a cluster</para>
+            </listitem>
+
+            <listitem>
+               <para>Ability to reboot any or all nodes of a cluster to a
+               different OS by interacting with the boot loader (currently,
+               GRUB and the NT loader are supported)</para>
+            </listitem>
+
+            <listitem>
+               <para>Graceful handling of disconnections and
+               reconnections</para>
+            </listitem>
+         </itemizedlist>
+
+         <indexterm class="endofrange" startref="index.section.features"></indexterm>
+      </section>
+
+      <section>
+         <title>History</title>
+
+         <para>Maestro was originally written by Aron Bierbaum at <ulink
+         url="http://www.infiscape.com/">Infiscape Corporation</ulink> in
+         January 2006 and was known simply as the <quote>Cluster Control
+         Tool.</quote> It was born out of a need for improving the launching
+         of <ulink url="http://www.vrjuggler.org/">VR Juggler</ulink>
+         applications on clusters—especially those running <productname
+         class="registered">Microsoft Windows</productname> where remote
+         application execution is atypical. Existing techniques for launching
+         such applications involved writing custom shell scripts or batch
+         files for each application. Through varying means (SSH, <ulink
+         url="http://www.sysinternals.com/Utilities/PsExec.html">PsExec</ulink>,
+         etc.), these scripts would get access to the nodes of the cluster and
+         start the application process on each. To see the output from all the
+         cluster nodes usually required having a console window open for each
+         node (which was usually already open as a side effect of running the
+         remote logon and launch commands). All in all, these techniques
+         suffered from many limitations and complexities.</para>
+
+         <para>Maestro has been designed from the start to address the
+         limitations associated with more brute force approaches to launching
+         immersive software applications on graphics clusters. Its
+         client/server architecture eliminates the need for scripts that rely
+         on remote logon in order to launch processes on the cluster nodes.
+         Application-specific details are captured in XML files that can
+         reference site-wide configuration information in order to avoid
+         duplicating common information for every application. These XML files
+         are processed in order to create a graphical launching interface on
+         the fly that is (roughly) tailored to the application. The processes
+         launched on the remote nodes are run as an authenticated user in
+         order to provide controlled access to data files and to prevent
+         security issues associated with remote code execution.</para>
+      </section>
+
+      <section>
+         <title>Getting Help</title>
+
+         <para>Members of the Maestro community can post questions, feature
+         suggestions, bug reports, etc. using the Maestro mailing lists. There
+         are four lists, each with a different focus. The lists are managed by
+         the <ulink url="http://www.gnu.org/software/mailman/index.html">GNU
+         Mailman</ulink> software, and subscribing and unsubscribing is done
+         through an easy-to-use web interface. For each of the lists below, a
+         link is provided to the page where users can subscribe or view the
+         list archive to search old posts.</para>
+
+         <indexterm class="startofrange" id="index.section.help.lists">
+            <primary>support</primary>
+
+            <secondary>mailing lists</secondary>
+         </indexterm>
+
+         <orderedlist>
+            <listitem>
+               <para><ulink
+               url="https://realityforge.vrsource.org/mailman/listinfo/maestro-announce">maestro-announce</ulink>:
+               Release announcements only—no discussion. All Maestro users
+               should subscribe to this list to keep up with releases as well
+               as security notices. Since Maestro is designed to run as a
+               service/daemon with elevated privileges, security is an
+               important aspect of the software. Should a security problem be
+               discovered, an announcement will be made on this list
+               explaining the problem and providing a solution or workaround
+               so that users are informed and can get the appropriate
+               patches.</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="https://realityforge.vrsource.org/mailman/listinfo/maestro-announce">maestro-users</ulink>:
+               Discussion and question &amp; answer forum for users. This is
+               the best place to go for help with Maestro. Given a large
+               enough community of users, this is the list that would have the
+               most traffic as users discuss the software as well as ask and
+               answer questions.</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="https://realityforge.vrsource.org/mailman/listinfo/maestro-devel">maestro-devel</ulink>:
+               Discussion for Maestro developers and contributors. The focus
+               of this list is the development of the software itself. Topics
+               would include low-level details about the software architecture
+               and the overall design. Formal bug reports should be directed
+               here to get the attention of the developers and to avoid
+               cluttering the maestro-users list. Informal bug reports often
+               come in the form of user questions, however, and those would
+               normally go to the maestro-users list.</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="https://realityforge.vrsource.org/mailman/listinfo/maestro-commits">maestro-commits</ulink>:
+               Subversion commit messages. The traffic on this list is solely
+               from commits being made to the Subversion repository.
+               Subscribers are strongly discouraged from making direct posts
+               to this list and should instead direct comments pertaining to
+               changes to the maestro-devel list.</para>
+            </listitem>
+         </orderedlist>
+
+         <indexterm class="endofrange" startref="index.section.help.lists"></indexterm>
+
+         <para>For support beyond the mailing lists, <ulink
+         url="http://www.infiscape.com/contact.php">contact Infiscape
+         Corporation</ulink>.</para>
+      </section>
+   </chapter>
+
+   <chapter id="chapter.installation">
+      <title>Installation</title>
+
+      <para>Maestro is a tool built on top of other tools. In order to install
+      Maestro, its dependencies must be installed first. Since it is broken up
+      into a client application and a server application, some nodes will not
+      need all the dependencies. For example, a node that only runs the server
+      application will not need the widget set (<ulink
+      url="http://www.trolltech.com/products/qt">Qt</ulink>) used by the GUI.
+      Similarly, a node that only runs the client GUI and not the server will
+      not need the authentication modules.</para>
+
+      <sidebar>
+         <para>Much of the information here is provided for people who are
+         working with an unpackaged version of Maestro. Due to the number of
+         dependencies and the usual complexities involved with acquiring,
+         building, and installing software, most users should get a
+         pre-packaged version of Maestro and install it. A packaged version
+         will include the dependencies in one form or another in order to ease
+         the installation process.</para>
+      </sidebar>
+
+      <section>
+         <title>Getting Dependencies</title>
+
+         <para>Below, we list the current dependencies of Maestro and provide
+         links to each package's download site. This list comes from the
+         Maestro website page describing <ulink
+         url="https://realityforge.vrsource.org/trac/maestro/wiki/Dev/GettingTheCode">how
+         to get Maestro</ulink>. That page will always provide up-to-date
+         information, and it should be consulted in case this rendering of the
+         documentation is out of date with respect to the current state of the
+         dependencies.</para>
+
+         <itemizedlist>
+            <listitem>
+               <para><ulink
+               url="http://www.python.org/download/">Python</ulink> 2.3 or
+               newer</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://www.trolltech.com/products/qt/downloads">Qt</ulink>
+               4.2.0 (client GUI only)</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://www.riverbankcomputing.com/Downloads/Snapshots/sip4/">SIP
+               4 snapshot</ulink> from October 8, 2006 (client GUI
+               only)</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://www.riverbankcomputing.com/Downloads/Snapshots/PyQt4/">PyQt
+               4 snapshot</ulink> from October 8, 2006, with patches included
+               in Maestro source tree (client GUI only)</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://effbot.org/downloads/#elementtree">ElementTree</ulink>
+               1.2.6-20050316</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink url="http://twistedmatrix.com/">Twisted</ulink>
+               2.4.0</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://pyopenssl.sourceforge.net/">pyOpenSSL</ulink> 0.6.1
+               (<ulink
+               url="http://twisted.sourceforge.net/contrib/pyOpenSSL-0.6.win32-py2.3.exe">Windows
+               installer</ulink>)</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://sourceforge.net/project/showfiles.php?group_id=78018">pywin32</ulink>
+               (Windows only)</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
+               url="http://www.pangalactic.org/PyPAM/">PyPAM</ulink> 0.4.2
+               (Linux server only; <ulink
+               url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Dev/GettingTheCode/python-pam_0.4.2-10.4.tar.gz">known
+               working source</ulink>)</para>
+            </listitem>
+         </itemizedlist>
+      </section>
+
+      <section>
+         <title>Getting Maestro</title>
+
+         <para>Maestro is open source software, and it can be obtained
+         directly from its <ulink
+         url="http://subversion.tigris.org/">Subversion</ulink> repository.
+         This is done using the following command:</para>
+
+         <screen>svn co https://realityforge.vrsource.org/svn/maestro/trunk maestro</screen>
+
+         <para>As of this writing, there are no branches or tags to retrieve,
+         so the trunk is the only path to get source.</para>
+
+         <sidebar>
+            <para>The certificate used for Subversion access on <ulink
+            url="https://realityforge.vrsource.org/">RealityForge</ulink> is
+            not signed by a certificate authority. As a result, users must
+            accept the certificate manually the first time they connect. A
+            message similar to the following will be displayed:</para>
+
+            <screen>Error validating server certificate for 'https://realityforge.vrsource.org:443':
+ - The certificate is not issued by a trusted authority. Use the
+   fingerprint to validate the certificate manually!
+Certificate information:
+ - Hostname: *.vrsource.org
+ - Valid: from Sep 26 22:15:16 2006 GMT until Sep 25 22:15:16 2008 GMT
+ - Issuer: IT, vrsource, Ames, IA, US
+ - Fingerprint: 43:86:70:52:50:b2:ef:17:93:fa:e2:c7:ee:ed:09:d5:fe:c3:ca:b8
+(R)eject, accept (t)emporarily or accept (p)ermanently?</screen>
+
+            <para>Simply accept the certificate permanently, and this message
+            will not appear again (until 2008 when the certificate expires and
+            is reissued).</para>
+         </sidebar>
+
+         <section>
+            <title><command>maestrod</command> Installation</title>
+
+            <para></para>
+         </section>
+
+         <section>
+            <title>Maestro GUI Installation</title>
+
+            <para></para>
+         </section>
+      </section>
+   </chapter>
+
+   <chapter id="chapter.using.maestrod">
+      <title>Using Maestro</title>
+
+      <section>
+         <title>Server</title>
+
+         <para>The server side of the Maestro software is an application
+         called <command>maestrod</command> (pronounced
+         <quote>maestro-dee</quote>). On <productname
+         class="registered">Microsoft Windows</productname>, it runs as a
+         service as the SYSTEM user; on other platforms, it runs as a daemon
+         as root.</para>
+
+         <section id="section.running.maestrod">
+            <title>Running <command>maestrod</command></title>
+
+            <para></para>
+         </section>
+
+         <section>
+            <title>Configuring <command>maestrod</command></title>
+
+            <para></para>
+         </section>
+      </section>
+
+      <section>
+         <title>Client</title>
+
+         <para></para>
+
+         <section id="section.running.maestro.gui">
+            <title>Running the Maestro GUI</title>
+
+            <para></para>
+
+            <section id="section.viewer.launch">
+               <title>Launch Viewer</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.viewer.launch">
+                  <primary>viewers</primary>
+
+                  <secondary>launch</secondary>
+               </indexterm>
+
+               <para>The Launch Viewer is likely to be the one seen most
+               frequently by Maestro users. This module provides the end user
+               interface to remote application launching. The interface itself
+               is composed dynamically based on the configuration file (known
+               as a <firstterm>stanza</firstterm>) for each application. This
+               means that every application is likely to have a different
+               launching interface in terms of options and parameters, and it
+               is entirely up to each application author to devise a stanza
+               that results in a clear, simple interface to launching an
+               application. The interface for choosing which application to
+               launch and the actual launch controls, however, will always be
+               the same. In this section, we explain these
+               application-agnostic controls as well as the basic controls
+               that are available for stanza authors to utilize.</para>
+
+               <section>
+                  <title>Basic Launch Controls</title>
+
+                  <para></para>
+               </section>
+
+               <section>
+                  <title>Application Option Controls</title>
+
+                  <para></para>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.launch"></indexterm>
+               </section>
+            </section>
+
+            <section id="section.viewer.reboot">
+               <title>Reboot Viewer</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.viewer.reboot">
+                  <primary>viewers</primary>
+
+                  <secondary>reboot</secondary>
+               </indexterm>
+
+               <para>The Reboot Viewer allows the GUI user to reboot
+               individual nodes of the cluster or all the nodes of the cluster
+               with the click of a button. When possible, the Reboot Viewer
+               allows the GUI user to change the target operating system when
+               rebooting so that it is not necessary to have direct access to
+               the remote computer in order to change which OS it loads upon
+               booting.</para>
+
+               <important>
+                  <para>Being able to change the target OS for rebooting
+                  relies upon two things: knowledge of the boot loader on the
+                  server side and access to the boot loader configuration from
+                  all installed operating systems. Without both of these, it
+                  is not possible to change the target OS. For example, if the
+                  GRUB configuration file cannot be accessed from <productname
+                  class="registered">Microsoft Windows</productname>, then it
+                  is not possible to change the default OS that GRUB boots
+                  when the computer is currently booted into <productname
+                  class="registered">Microsoft Windows</productname>.
+                  Similarly, if an unsupported boot loader is being used (such
+                  as <productname class="trade">BootMagic</productname>), then
+                  it is not possible to change the target OS at all. Support
+                  for different boot loaders can be added as a plug-in to the
+                  Maestro Reboot Service<indexterm>
+                        <primary>services</primary>
+
+                        <secondary>reboot</secondary>
+                     </indexterm>. See for <xref
+                  linkend="section.plugins.boot.loader" /> more
+                  information.</para>
+               </important>
+
+               <indexterm class="endofrange"
+                          startref="index.section.viewer.reboot"></indexterm>
+            </section>
+
+            <section id="section.viewer.process">
+               <title>Process Viewer</title>
+
+               <para></para>
+            </section>
+
+            <section id="section.viewer.resource">
+               <title>Resource Viewer</title>
+
+               <para></para>
+            </section>
+
+            <section id="section.viewer.desktop">
+               <title>Desktop Viewer</title>
+
+               <para></para>
+            </section>
+
+            <section id="section.viewer.settings">
+               <title>Settings Viewer</title>
+
+               <para></para>
+            </section>
+         </section>
+
+         <section>
+            <title>Configuring the Maestro GUI</title>
+
+            <para></para>
+         </section>
+      </section>
+   </chapter>
+
+   <chapter id="chapter.maestro.files">
+      <title>Maestro Files</title>
+
+      <para></para>
+
+      <section id="section.files.ensemble">
+         <title>Ensembles</title>
+
+         <para></para>
+      </section>
+
+      <section id="section.files.stanza">
+         <title>Stanzas</title>
+
+         <para>The other type of file utilized by the Maestro GUI is known as
+         a stanza. Every application that can be launched by Maestro must be
+         described using a stanza.</para>
+      </section>
+   </chapter>
+
+   <chapter id="chapter.extending.maestro">
+      <title>Extending Maestro</title>
+
+      <section>
+         <title>Services</title>
+
+         <indexterm class="startofrange" id="index.section.services">
+            <primary>services</primary>
+         </indexterm>
+
+         <para></para>
+
+         <indexterm startref="index.section.services"></indexterm>
+      </section>
+
+      <section>
+         <title>Service Plug-ins</title>
+
+         <indexterm class="startofrange" id="index.section.services.plugins">
+            <primary>services</primary>
+
+            <secondary>plug-ins</secondary>
+         </indexterm>
+
+         <para>On a smaller scope, individual services may use plug-ins to
+         capture variability among different computer and/or operating system
+         configurations.</para>
+
+         <section id="section.plugins.boot.loader">
+            <title>Boot Loader Plug-ins</title>
+
+            <para></para>
+         </section>
+
+         <section>
+            <title>Screen Saver Plug-ins</title>
+
+            <para>The Desktop Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>desktop</secondary>
+               </indexterm> relies on plug-ins to handle controlling the
+            screen saver and power management on the local compuer. Since
+            these are usually two separate features of the operating system or
+            desktop interface, multiple screen saver plug-ins can be used
+            together. The job of the plug-in is to enable and disable the
+            screen saver and to handle killing a running screen saver. This is
+            done by implementing the interface
+            <interface>maestro.core.ISaverPlugin</interface><indexterm>
+                  <primary>plugins</primary>
+
+                  <secondary>interfaces</secondary>
+
+                  <tertiary>maestro.core.ISaverPlugin</tertiary>
+               </indexterm>, as defined in
+            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+            The current list of supported screen saver plug-ins is as follows
+            (each identified by its name used in the
+            <command>maestrod</command> configuration):</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>windows</literal> (using the regular
+                  <productname class="registered">Microsoft
+                  Windows</productname> Desktop screen saver)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>powercfg</literal> (using the <productname
+                  class="registered">Microsoft Windows</productname> utility
+                  program <command>powercfg.exe</command> to control monitor
+                  power off)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>xset</literal> (blanking and DPMS through the
+                  X server)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>xscreensaver</literal> (controls XScreenSaver
+                  using <command>xscreensaver-command</command>)</para>
+               </listitem>
+            </itemizedlist>
+         </section>
+
+         <section>
+            <title>Desktop Wallpaper Plug-ins</title>
+
+            <para>To query and change the desktop background image (commonly
+            referred to as <quote>desktop wallpaper</quote>), the Desktop
+            Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>desktop</secondary>
+               </indexterm> uses a plug-in. The job of the plug-in is to
+            return the name of the wallpaper image file and to handle changing
+            the wallpaper to a new image. This is done by implementing the
+            interface
+            <interface>maestro.core.IDesktopWallpaperPlugin</interface><indexterm>
+                  <primary>plugins</primary>
+
+                  <secondary>interfaces</secondary>
+
+                  <tertiary>maestro.core.IDesktopWallpaperPlugin</tertiary>
+               </indexterm>, as defined in
+            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+            The current list of supported desktop wallpaper management
+            plug-ins is as follows (each identified by its name used in the
+            <command>maestrod</command> configuration):</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>windows</literal> (using the regular
+                  <productname class="registered">Microsoft
+                  Windows</productname> Desktop—currently supports BMP images
+                  only)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>gnome</literal> (using GConf via
+                  <command>gconftool-2</command>)</para>
+               </listitem>
+            </itemizedlist>
+
+            <indexterm class="endofrange"
+                       startref="index.section.services.plugins"></indexterm>
+         </section>
+      </section>
+
+      <section>
+         <title>Views</title>
+
+         <para>In order for a service to be utilized, there must be a
+         corresponding view in the Maestro GUI. Views provide a visual
+         interface to the remote service.</para>
+      </section>
+   </chapter>
+
+   <appendix id="appendix.gfdl">
+      <title>GNU Free Documentation License</title>
+
+      <subtitle>Version 1.2, November 2002</subtitle>
+
+      <blockquote id="fsf-copyright">
+         <title>FSF Copyright note</title>
+
+         <para>Copyright (C) 2000,2001,2002 Free Software Foundation, Inc. 59
+         Temple Place, Suite 330, Boston, MA 02111-1307 USA Everyone is
+         permitted to copy and distribute verbatim copies of this license
+         document, but changing it is not allowed.</para>
+      </blockquote>
+
+      <section id="gfdl-0">
+         <title>PREAMBLE</title>
+
+         <para>The purpose of this License is to make a manual, textbook, or
+         other functional and useful document "free" in the sense of freedom:
+         to assure everyone the effective freedom to copy and redistribute it,
+         with or without modifying it, either commercially or noncommercially.
+         Secondarily, this License preserves for the author and publisher a
+         way to get credit for their work, while not being considered
+         responsible for modifications made by others.</para>
+
+         <para>This License is a kind of "copyleft", which means that
+         derivative works of the document must themselves be free in the same
+         sense. It complements the GNU General Public License, which is a
+         copyleft license designed for free software.</para>
+
+         <para>We have designed this License in order to use it for manuals
+         for free software, because free software needs free documentation: a
+         free program should come with manuals providing the same freedoms
+         that the software does. But this License is not limited to software
+         manuals; it can be used for any textual work, regardless of subject
+         matter or whether it is published as a printed book. We recommend
+         this License principally for works whose purpose is instruction or
+         reference.</para>
+      </section>
+
+      <section id="gfdl-1">
+         <title>APPLICABILITY AND DEFINITIONS</title>
+
+         <para id="gfdl-doc">This License applies to any manual or other work,
+         in any medium, that contains a notice placed by the copyright holder
+         saying it can be distributed under the terms of this License. Such a
+         notice grants a world-wide, royalty-free license, unlimited in
+         duration, to use that work under the conditions stated herein. The
+         "Document", below, refers to any such manual or work. Any member of
+         the public is a licensee, and is addressed as "you". You accept the
+         license if you copy, modify or distribute the work in a way requiring
+         permission under copyright law.</para>
+
+         <para id="gfdl-mod-ver">A "Modified Version" of the Document means
+         any work containing the Document or a portion of it, either copied
+         verbatim, or with modifications and/or translated into another
+         language.</para>
+
+         <para id="gfdl-secnd-sect">A "Secondary Section" is a named appendix
+         or a front-matter section of the Document that deals exclusively with
+         the relationship of the publishers or authors of the Document to the
+         Document's overall subject (or to related matters) and contains
+         nothing that could fall directly within that overall subject. (Thus,
+         if the Document is in part a textbook of mathematics, a Secondary
+         Section may not explain any mathematics.) The relationship could be a
+         matter of historical connection with the subject or with related
+         matters, or of legal, commercial, philosophical, ethical or political
+         position regarding them.</para>
+
+         <para id="gfdl-inv-sect">The "Invariant Sections" are certain
+         Secondary Sections whose titles are designated, as being those of
+         Invariant Sections, in the notice that says that the Document is
+         released under this License. If a section does not fit the above
+         definition of Secondary then it is not allowed to be designated as
+         Invariant. The Document may contain zero Invariant Sections. If the
+         Document does not identify any Invariant Sections then there are
+         none.</para>
+
+         <para id="gfdl-cov-text">The "Cover Texts" are certain short passages
+         of text that are listed, as Front-Cover Texts or Back-Cover Texts, in
+         the notice that says that the Document is released under this
+         License. A Front-Cover Text may be at most 5 words, and a Back-Cover
+         Text may be at most 25 words.</para>
+
+         <para id="gfdl-transparent">A "Transparent" copy of the Document
+         means a machine-readable copy, represented in a format whose
+         specification is available to the general public, that is suitable
+         for revising the document straightforwardly with generic text editors
+         or (for images composed of pixels) generic paint programs or (for
+         drawings) some widely available drawing editor, and that is suitable
+         for input to text formatters or for automatic translation to a
+         variety of formats suitable for input to text formatters. A copy made
+         in an otherwise Transparent file format whose markup, or absence of
+         markup, has been arranged to thwart or discourage subsequent
+         modification by readers is not Transparent. An image format is not
+         Transparent if used for any substantial amount of text. A copy that
+         is not "Transparent" is called "Opaque".</para>
+
+         <para>Examples of suitable formats for Transparent copies include
+         plain ASCII without markup, Texinfo input format, LaTeX input format,
+         SGML or XML using a publicly available DTD, and standard-conforming
+         simple HTML, PostScript or PDF designed for human modification.
+         Examples of transparent image formats include PNG, XCF and JPG.
+         Opaque formats include proprietary formats that can be read and
+         edited only by proprietary word processors, SGML or XML for which the
+         DTD and/or processing tools are not generally available, and the
+         machine-generated HTML, PostScript or PDF produced by some word
+         processors for output purposes only.</para>
+
+         <para id="gfdl-title-page">The "Title Page" means, for a printed
+         book, the title page itself, plus such following pages as are needed
+         to hold, legibly, the material this License requires to appear in the
+         title page. For works in formats which do not have any title page as
+         such, "Title Page" means the text near the most prominent appearance
+         of the work's title, preceding the beginning of the body of the
+         text.</para>
+
+         <para id="gfdl-entitled">A section "Entitled XYZ" means a named
+         subunit of the Document whose title either is precisely XYZ or
+         contains XYZ in parentheses following text that translates XYZ in
+         another language. (Here XYZ stands for a specific section name
+         mentioned below, such as "Acknowledgements", "Dedications",
+         "Endorsements", or "History".) To "Preserve the Title" of such a
+         section when you modify the Document means that it remains a section
+         "Entitled XYZ" according to this definition.</para>
+
+         <para>The Document may include Warranty Disclaimers next to the
+         notice which states that this License applies to the Document. These
+         Warranty Disclaimers are considered to be included by reference in
+         this License, but only as regards disclaiming warranties: any other
+         implication that these Warranty Disclaimers may have is void and has
+         no effect on the meaning of this License.</para>
+      </section>
+
+      <section id="gfdl-2">
+         <title>VERBATIM COPYING</title>
+
+         <para>You may copy and distribute the Document in any medium, either
+         commercially or noncommercially, provided that this License, the
+         copyright notices, and the license notice saying this License applies
+         to the Document are reproduced in all copies, and that you add no
+         other conditions whatsoever to those of this License. You may not use
+         technical measures to obstruct or control the reading or further
+         copying of the copies you make or distribute. However, you may accept
+         compensation in exchange for copies. If you distribute a large enough
+         number of copies you must also follow the conditions in section
+         3.</para>
+
+         <para>You may also lend copies, under the same conditions stated
+         above, and you may publicly display copies.</para>
+      </section>
+
+      <section id="gfdl-3">
+         <title>COPYING IN QUANTITY</title>
+
+         <para>If you publish printed copies (or copies in media that commonly
+         have printed covers) of the Document, numbering more than 100, and
+         the Document's license notice requires Cover Texts, you must enclose
+         the copies in covers that carry, clearly and legibly, all these Cover
+         Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+         the back cover. Both covers must also clearly and legibly identify
+         you as the publisher of these copies. The front cover must present
+         the full title with all words of the title equally prominent and
+         visible. You may add other material on the covers in addition.
+         Copying with changes limited to the covers, as long as they preserve
+         the title of the Document and satisfy these conditions, can be
+         treated as verbatim copying in other respects.</para>
+
+         <para>If the required texts for either cover are too voluminous to
+         fit legibly, you should put the first ones listed (as many as fit
+         reasonably) on the actual cover, and continue the rest onto adjacent
+         pages.</para>
+
+         <para>If you publish or distribute Opaque copies of the Document
+         numbering more than 100, you must either include a machine-readable
+         Transparent copy along with each Opaque copy, or state in or with
+         each Opaque copy a computer-network location from which the general
+         network-using public has access to download using public-standard
+         network protocols a complete Transparent copy of the Document, free
+         of added material. If you use the latter option, you must take
+         reasonably prudent steps, when you begin distribution of Opaque
+         copies in quantity, to ensure that this Transparent copy will remain
+         thus accessible at the stated location until at least one year after
+         the last time you distribute an Opaque copy (directly or through your
+         agents or retailers) of that edition to the public.</para>
+
+         <para>It is requested, but not required, that you contact the authors
+         of the Document well before redistributing any large number of
+         copies, to give them a chance to provide you with an updated version
+         of the Document.</para>
+      </section>
+
+      <section id="gfdl-4">
+         <title>MODIFICATIONS</title>
+
+         <para>You may copy and distribute a Modified Version of the Document
+         under the conditions of sections 2 and 3 above, provided that you
+         release the Modified Version under precisely this License, with the
+         Modified Version filling the role of the Document, thus licensing
+         distribution and modification of the Modified Version to whoever
+         possesses a copy of it. In addition, you must do these things in the
+         Modified Version:</para>
+
+         <orderedlist id="gfdl-modif-cond" numeration="upperalpha">
+            <title>GNU FDL Modification Conditions</title>
+
+            <listitem>
+               <simpara>Use in the Title Page (and on the covers, if any) a
+               title distinct from that of the Document, and from those of
+               previous versions (which should, if there were any, be listed
+               in the History section of the Document). You may use the same
+               title as a previous version if the original publisher of that
+               version gives permission.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>List on the Title Page, as authors, one or more
+               persons or entities responsible for authorship of the
+               modifications in the Modified Version, together with at least
+               five of the principal authors of the Document (all of its
+               principal authors, if it has fewer than five), unless they
+               release you from this requirement.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>State on the Title page the name of the publisher of
+               the Modified Version, as the publisher.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve all the copyright notices of the
+               Document.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Add an appropriate copyright notice for your
+               modifications adjacent to the other copyright
+               notices.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Include, immediately after the copyright notices, a
+               license notice giving the public permission to use the Modified
+               Version under the terms of this License, in the form shown in
+               the <link linkend="gfdl-addendum">Addendum</link>
+               below.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve in that license notice the full lists of
+               Invariant Sections and required Cover Texts given in the
+               Document's license notice.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Include an unaltered copy of this License.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve the section Entitled "History", Preserve its
+               Title, and add to it an item stating at least the title, year,
+               new authors, and publisher of the Modified Version as given on
+               the Title Page. If there is no section Entitled "History" in
+               the Document, create one stating the title, year, authors, and
+               publisher of the Document as given on its Title Page, then add
+               an item describing the Modified Version as stated in the
+               previous sentence.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve the network location, if any, given in the
+               Document for public access to a Transparent copy of the
+               Document, and likewise the network locations given in the
+               Document for previous versions it was based on. These may be
+               placed in the "History" section. You may omit a network
+               location for a work that was published at least four years
+               before the Document itself, or if the original publisher of the
+               version it refers to gives permission.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>For any section Entitled "Acknowledgements" or
+               "Dedications", Preserve the Title of the section, and preserve
+               in the section all the substance and tone of each of the
+               contributor acknowledgements and/or dedications given
+               therein.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve all the Invariant Sections of the Document,
+               unaltered in their text and in their titles. Section numbers or
+               the equivalent are not considered part of the section
+               titles.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Delete any section Entitled "Endorsements". Such a
+               section may not be included in the Modified Version.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Do not retitle any existing section to be Entitled
+               "Endorsements" or to conflict in title with any Invariant
+               Section.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve any Warranty Disclaimers.</simpara>
+            </listitem>
+         </orderedlist>
+
+         <para>If the Modified Version includes new front-matter sections or
+         appendices that qualify as Secondary Sections and contain no material
+         copied from the Document, you may at your option designate some or
+         all of these sections as invariant. To do this, add their titles to
+         the list of Invariant Sections in the Modified Version's license
+         notice. These titles must be distinct from any other section
+         titles.</para>
+
+         <para>You may add a section Entitled "Endorsements", provided it
+         contains nothing but endorsements of your Modified Version by various
+         parties--for example, statements of peer review or that the text has
+         been approved by an organization as the authoritative definition of a
+         standard.</para>
+
+         <para>You may add a passage of up to five words as a Front-Cover
+         Text, and a passage of up to 25 words as a Back-Cover Text, to the
+         end of the list of Cover Texts in the Modified Version. Only one
+         passage of Front-Cover Text and one of Back-Cover Text may be added
+         by (or through arrangements made by) any one entity. If the Document
+         already includes a cover text for the same cover, previously added by
+         you or by arrangement made by the same entity you are acting on
+         behalf of, you may not add another; but you may replace the old one,
+         on explicit permission from the previous publisher that added the old
+         one.</para>
+
+         <para>The author(s) and publisher(s) of the Document do not by this
+         License give permission to use their names for publicity for or to
+         assert or imply endorsement of any Modified Version.</para>
+      </section>
+
+      <section id="gfdl-5">
+         <title>COMBINING DOCUMENTS</title>
+
+         <para>You may combine the Document with other documents released
+         under this License, under the terms defined in <link
+         linkend="gfdl-4">section 4</link> above for modified versions,
+         provided that you include in the combination all of the Invariant
+         Sections of all of the original documents, unmodified, and list them
+         all as Invariant Sections of your combined work in its license
+         notice, and that you preserve all their Warranty Disclaimers.</para>
+
+         <para>The combined work need only contain one copy of this License,
+         and multiple identical Invariant Sections may be replaced with a
+         single copy. If there are multiple Invariant Sections with the same
+         name but different contents, make the title of each such section
+         unique by adding at the end of it, in parentheses, the name of the
+         original author or publisher of that section if known, or else a
+         unique number. Make the same adjustment to the section titles in the
+         list of Invariant Sections in the license notice of the combined
+         work.</para>
+
+         <para>In the combination, you must combine any sections Entitled
+         "History" in the various original documents, forming one section
+         Entitled "History"; likewise combine any sections Entitled
+         "Acknowledgements", and any sections Entitled "Dedications". You must
+         delete all sections Entitled "Endorsements".</para>
+      </section>
+
+      <section id="gfdl-6">
+         <title>COLLECTIONS OF DOCUMENTS</title>
+
+         <para>You may make a collection consisting of the Document and other
+         documents released under this License, and replace the individual
+         copies of this License in the various documents with a single copy
+         that is included in the collection, provided that you follow the
+         rules of this License for verbatim copying of each of the documents
+         in all other respects.</para>
+
+         <para>You may extract a single document from such a collection, and
+         distribute it individually under this License, provided you insert a
+         copy of this License into the extracted document, and follow this
+         License in all other respects regarding verbatim copying of that
+         document.</para>
+      </section>
+
+      <section id="gfdl-7">
+         <title>AGGREGATION WITH INDEPENDENT WORKS</title>
+
+         <para>A compilation of the Document or its derivatives with other
+         separate and independent documents or works, in or on a volume of a
+         storage or distribution medium, is called an "aggregate" if the
+         copyright resulting from the compilation is not used to limit the
+         legal rights of the compilation's users beyond what the individual
+         works permit. When the Document is included in an aggregate, this
+         License does not apply to the other works in the aggregate which are
+         not themselves derivative works of the Document.</para>
+
+         <para>If the Cover Text requirement of section 3 is applicable to
+         these copies of the Document, then if the Document is less than one
+         half of the entire aggregate, the Document's Cover Texts may be
+         placed on covers that bracket the Document within the aggregate, or
+         the electronic equivalent of covers if the Document is in electronic
+         form. Otherwise they must appear on printed covers that bracket the
+         whole aggregate.</para>
+      </section>
+
+      <section id="gfdl-8">
+         <title>TRANSLATION</title>
+
+         <para>Translation is considered a kind of modification, so you may
+         distribute translations of the Document under the terms of section 4.
+         Replacing Invariant Sections with translations requires special
+         permission from their copyright holders, but you may include
+         translations of some or all Invariant Sections in addition to the
+         original versions of these Invariant Sections. You may include a
+         translation of this License, and all the license notices in the
+         Document, and any Warranty Disclaimers, provided that you also
+         include the original English version of this License and the original
+         versions of those notices and disclaimers. In case of a disagreement
+         between the translation and the original version of this License or a
+         notice or disclaimer, the original version will prevail.</para>
+
+         <para>If a section in the Document is Entitled "Acknowledgements",
+         "Dedications", or "History", the requirement (section 4) to Preserve
+         its Title (section 1) will typically require changing the actual
+         title.</para>
+      </section>
+
+      <section id="gfdl-9">
+         <title>TERMINATION</title>
+
+         <para>You may not copy, modify, sublicense, or distribute the
+         Document except as expressly provided for under this License. Any
+         other attempt to copy, modify, sublicense or distribute the Document
+         is void, and will automatically terminate your rights under this
+         License. However, parties who have received copies, or rights, from
+         you under this License will not have their licenses terminated so
+         long as such parties remain in full compliance.</para>
+      </section>
+
+      <section id="gfdl-10">
+         <title>FUTURE REVISIONS OF THIS LICENSE</title>
+
+         <para>The Free Software Foundation may publish new, revised versions
+         of the GNU Free Documentation License from time to time. Such new
+         versions will be similar in spirit to the present version, but may
+         differ in detail to address new problems or concerns. See
+         http://www.gnu.org/copyleft/.</para>
+
+         <para>Each version of the License is given a distinguishing version
+         number. If the Document specifies that a particular numbered version
+         of this License "or any later version" applies to it, you have the
+         option of following the terms and conditions either of that specified
+         version or of any later version that has been published (not as a
+         draft) by the Free Software Foundation. If the Document does not
+         specify a version number of this License, you may choose any version
+         ever published (not as a draft) by the Free Software
+         Foundation.</para>
+      </section>
+
+      <section id="gfdl-addendum">
+         <title>ADDENDUM: How to use this License for your documents</title>
+
+         <para>To use this License in a document you have written, include a
+         copy of the License in the document and put the following copyright
+         and license notices just after the title page:</para>
+
+         <blockquote id="copyright-sample">
+            <title>Sample Invariant Sections list</title>
+
+            <para>Copyright (c) YEAR YOUR NAME. Permission is granted to copy,
+            distribute and/or modify this document under the terms of the GNU
+            Free Documentation License, Version 1.2 or any later version
+            published by the Free Software Foundation; with no Invariant
+            Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of
+            the license is included in the section entitled "GNU Free
+            Documentation License".</para>
+         </blockquote>
+
+         <para>If you have Invariant Sections, Front-Cover Texts and
+         Back-Cover Texts, replace the "with...Texts." line with this:</para>
+
+         <blockquote id="inv-cover-sample">
+            <title>Sample Invariant Sections list</title>
+
+            <para>with the Invariant Sections being LIST THEIR TITLES, with
+            the Front-Cover Texts being LIST, and with the Back-Cover Texts
+            being LIST.</para>
+         </blockquote>
+
+         <para>If you have Invariant Sections without Cover Texts, or some
+         other combination of the three, merge those two alternatives to suit
+         the situation.</para>
+
+         <para>If your document contains nontrivial examples of program code,
+         we recommend releasing these examples in parallel under your choice
+         of free software license, such as the GNU General Public License, to
+         permit their use in free software.</para>
+      </section>
+   </appendix>
+
+   <index></index>
+</book>
