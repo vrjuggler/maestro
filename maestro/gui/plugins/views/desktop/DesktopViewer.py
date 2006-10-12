@@ -36,7 +36,7 @@ class DesktopViewPlugin(maestro.core.IViewPlugin):
    getName = staticmethod(getName)
 
    def getIcon():
-      return QtGui.QIcon(":/Maestro/images/dekstop.png")
+      return QtGui.QIcon(":/Maestro/images/desktop.png")
    getIcon = staticmethod(getIcon)
 
    def getViewWidget(self):
