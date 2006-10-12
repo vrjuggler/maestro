@@ -109,7 +109,7 @@
      <x>0</x>
      <y>0</y>
      <width>557</width>
-     <height>29</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp" >
@@ -135,9 +135,9 @@
    <addaction name="menuHelp" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
-  <widget class="QToolBar" name="toolBar" >
+  <widget class="QToolBar" name="mToolbar" >
    <property name="windowTitle" >
-    <string>Toolbar</string>
+    <string>Maestro Toolbar</string>
    </property>
    <property name="movable" >
     <bool>true</bool>
@@ -153,12 +153,12 @@
    <addaction name="actionOpen" />
    <addaction name="actionSave" />
   </widget>
-  <widget class="QDockWidget" name="mStatusWindow" >
+  <widget class="QDockWidget" name="mLogWindow" >
    <property name="allowedAreas" >
     <set>Qt::BottomDockWidgetArea</set>
    </property>
    <property name="windowTitle" >
-    <string>Status Window</string>
+    <string>Log Window</string>
    </property>
    <attribute name="dockWidgetArea" >
     <number>8</number>

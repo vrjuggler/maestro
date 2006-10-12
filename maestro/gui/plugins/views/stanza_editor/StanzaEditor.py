@@ -52,8 +52,8 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = StanzaEditor()
       self.mToolbar = None
-      self.mToolbar2 = None
-      self.mToolbar3 = None
+      self.mStanzaSearchToolbar = None
+      self.mStanzaToolbox = None
       self.mMenu = None
       
    def getName():
@@ -74,38 +74,38 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       # Build toolbar by taking buttons from stanza editor. We onlyt do this
       # the first time that the view is activated.
       if self.mToolbar is None:
-         self.mToolbar = QtGui.QToolBar("Stanza Editor Toolbar", mainWindow)
+         self.mToolbar = QtGui.QToolBar("Stanza Toolbar", mainWindow)
          self.mToolbar.addWidget(self.widget.mLayoutBtn)
          self.mToolbar.addWidget(self.widget.mNoDragBtn)
          self.mToolbar.addWidget(self.widget.mScrollDragBtn)
          self.mToolbar.addWidget(self.widget.mRubberBandDragBtn)
          self.mToolbar.addWidget(self.widget.mZoomExtentsBtn)
-      if self.mToolbar2 is None:
-         self.mToolbar2 = QtGui.QToolBar("Application/Filter Toolbar", mainWindow)
-         self.mToolbar2.addWidget(self.widget.mApplicationLbl)
-         self.mToolbar2.addWidget(self.widget.mApplicationCB)
-         self.mToolbar2.addWidget(self.widget.mClassLine)
-         self.mToolbar2.addWidget(self.widget.mClassFilterLbl)
-         self.mToolbar2.addWidget(self.widget.mOperatingSystemCB)
-         self.mToolbar2.addWidget(self.widget.mClassFilterComma)
-         self.mToolbar2.addWidget(self.widget.mClassFilterCB)
+      if self.mStanzaSearchToolbar is None:
+         self.mStanzaSearchToolbar = QtGui.QToolBar("Stanza Search Toolbar", mainWindow)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationLbl)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationCB)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mClassLine)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterLbl)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mOperatingSystemCB)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterComma)
+         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterCB)
          self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
          self.widget.mToolGroupBox.setParent(None)
-      if self.mToolbar3 is None:
-         self.mToolbar3 = QtGui.QToolBar("Application/Filter Toolbar", mainWindow)
-         self.mToolbar3.addWidget(self.widget.mChoiceLbl)
-         self.mToolbar3.addWidget(self.widget.mGroupLbl)
-         self.mToolbar3.addWidget(self.widget.mArgLbl)
-         self.mToolbar3.addWidget(self.widget.mEnvVarLbl)
+      if self.mStanzaToolbox is None:
+         self.mStanzaToolbox = QtGui.QToolBar("Stanza Toolbox", mainWindow)
+         self.mStanzaToolbox.addWidget(self.widget.mChoiceLbl)
+         self.mStanzaToolbox.addWidget(self.widget.mGroupLbl)
+         self.mStanzaToolbox.addWidget(self.widget.mArgLbl)
+         self.mStanzaToolbox.addWidget(self.widget.mEnvVarLbl)
          #self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
          self.widget.mToolboxFrame.setParent(None)
       mainWindow.addToolBar(self.mToolbar)
       mainWindow.addToolBarBreak()
       self.mToolbar.show()
-      mainWindow.addToolBar(self.mToolbar2)
-      self.mToolbar2.show()
-      mainWindow.addToolBar(QtCore.Qt.RightToolBarArea, self.mToolbar3)
-      self.mToolbar3.show()
+      mainWindow.addToolBar(self.mStanzaSearchToolbar)
+      self.mStanzaSearchToolbar.show()
+      mainWindow.addToolBar(QtCore.Qt.RightToolBarArea, self.mStanzaToolbox)
+      self.mStanzaToolbox.show()
 
       # Add menu.
       if self.mMenu is None:
@@ -122,11 +122,11 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
    
    def deactivate(self, mainWindow):
       mainWindow.removeToolBar(self.mToolbar)
-      mainWindow.removeToolBar(self.mToolbar2)
-      mainWindow.removeToolBar(self.mToolbar3)
+      mainWindow.removeToolBar(self.mStanzaSearchToolbar)
+      mainWindow.removeToolBar(self.mStanzaToolbox)
       self.mToolbar.hide()
-      self.mToolbar2.hide()
-      self.mToolbar3.hide()
+      self.mStanzaSearchToolbar.hide()
+      self.mStanzaToolbox.hide()
       self.mMenu.hide()
       mainWindow.menuBar().removeAction(self.mMenu.menuAction())
 

@@ -335,7 +335,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
       self.mToolboxButtonGroup = QtGui.QButtonGroup()
-      widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mStatusWindow)
+      widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mLogWindow)
       self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
 
       self.connect(self.mActionArchiveLogs, QtCore.SIGNAL("triggered()"),
