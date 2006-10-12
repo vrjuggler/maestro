@@ -87,10 +87,8 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
          self.widget.mToolGroupBox.setParent(None)
       if self.mStanzaToolbox is None:
          self.mStanzaToolbox = QtGui.QToolBar("Stanza Toolbox", mainWindow)
-         self.mStanzaToolbox.addWidget(self.widget.mChoiceLbl)
-         self.mStanzaToolbox.addWidget(self.widget.mGroupLbl)
-         self.mStanzaToolbox.addWidget(self.widget.mArgLbl)
-         self.mStanzaToolbox.addWidget(self.widget.mEnvVarLbl)
+         for btn in self.widget.mItemToolButtons:
+            self.mStanzaToolbox.addWidget(btn)
          #self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
          self.widget.mToolboxFrame.setParent(None)
       mainWindow.addToolBar(self.mToolbar)
@@ -183,7 +181,7 @@ class StanzaScene(QtGui.QGraphicsScene):
       elif elm.tag == 'arg':
          item = ArgItem(elm)
       elif elm.tag == 'env_var':
-         item = EnvItem(elm)
+         item = EnvVarItem(elm)
       elif elm.tag == 'command':
          item = CommandItem(elm)
       elif elm.tag == 'cwd':
@@ -368,7 +366,28 @@ class StanzaScene(QtGui.QGraphicsScene):
             item = ArgItem(new_elm)
          elif item_type == "EnvVar":
             new_elm = self.mApplication.makeelement('env_var', {})
-            item = EnvItem(new_elm)
+            item = EnvVarItem(new_elm)
+         elif item_type == "EnvVar":
+            new_elm = self.mApplication.makeelement('env_var', {})
+            item = EnvVarItem(new_elm)
+         elif item_type == 'Command':
+            new_elm = self.mApplication.makeelement('command', {})
+            item = CommandItem(new_elm)
+         elif item_type == 'Cwd':
+            new_elm = self.mApplication.makeelement('cwd', {})
+            item = CwdItem(new_elm)
+         elif item_type == 'Ref':
+            new_elm = self.mApplication.makeelement('ref', {})
+            item = RefItem(new_elm)
+         elif item_type == 'Override':
+            new_elm = self.mApplication.makeelement('override', {})
+            item = OverrideItem(new_elm)
+         elif item_type == 'AddItem':
+            new_elm = self.mApplication.makeelement('add', {})
+            item = AddItem(new_elm)
+         elif item_type == 'RemoveItem':
+            new_elm = self.mApplication.makeelement('remove', {})
+            item = RemoveItem(new_elm)
 
          if item is not None:
             self.addItem(item)
@@ -633,10 +652,10 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mEditorLayout.addWidget(self.mOptionEditor)
       self.mOptionEditor.setParent(self.mEditorArea)
 
-      self.mChoiceLbl.installEventFilter(self)
-      self.mGroupLbl.installEventFilter(self)
-      self.mArgLbl.installEventFilter(self)
-      self.mEnvVarLbl.installEventFilter(self)
+      #self.mChoiceLbl.installEventFilter(self)
+      #self.mGroupLbl.installEventFilter(self)
+      #self.mArgLbl.installEventFilter(self)
+      #self.mEnvVarLbl.installEventFilter(self)
 
       zoom_icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/zoom-extents.png")
       self.mZoomExtentsAction = QtGui.QAction(zoom_icon, self.tr("Zoom Extents"), self)
@@ -672,6 +691,46 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mEditTableView.setModel(self.mItemModel)
       self.mEditTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mEditTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+
+      # Generate icons.
+      klasses = [ChoiceItem, GroupItem, ArgItem, EnvVarItem, CommandItem, CwdItem, RefItem, OverrideItem, AddItem, RemoveItem]
+      btn_labels = ['Choice', 'Group', 'Argument', 'Env Variable', 'Command', 'Cwd', 'Reference', 'Override', 'Add Options', 'Remove Option']
+      types = ['Choice', 'Group', 'Arg', 'EnvVar', 'Command', 'Cwd', 'Ref', 'Override', 'AddItem', 'RemoveItem']
+      self.mItemBtnCBs = []
+      self.mItemToolButtons = []
+
+      icon_size = QtCore.QSize(20, 20)
+
+      for (k, l, t) in zip(klasses, btn_labels, types):
+         btn = QtGui.QPushButton(self.mToolboxFrame)
+         self.mItemToolButtons.append(btn)
+         layout = self.mToolboxFrame.layout()
+         layout.insertWidget(layout.count()-1, btn)
+         pixmap = self.generateItemPixmap(k, icon_size)
+         icon = QtGui.QIcon(pixmap)
+         btn.setIcon(icon)
+         btn.setIconSize(icon_size)
+         btn.setText(l)
+         cb = lambda p=pixmap, t=t, b=btn: self.onItemBtnClicked(p, t, b)
+         self.mItemBtnCBs.append(cb)
+         self.connect(btn, QtCore.SIGNAL("pressed()"), cb)
+
+   def generateItemPixmap(self, itemClass, size=QtCore.QSize(20, 20)):
+      pixmap = QtGui.QPixmap(size)
+      pixmap.fill(QtGui.QColor(0, 0, 0, 0))
+      painter = QtGui.QPainter()
+      painter.begin(pixmap)
+
+      item = itemClass()
+      item.dropShadowWidth = 2.0
+      item.penWidth = 0.5
+      sizef = QtCore.QSizeF(size)
+      sizef *= 0.95
+      rect = QtCore.QRectF(QtCore.QPointF(), sizef)
+      item.paint(painter, None, None, rect)
+
+      painter.end()
+      return pixmap
 
    def onClassFilterChanged(self, text):
       """ Slot that is called when either the operating system or class
@@ -753,42 +812,27 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       else:
          QtGui.QWidget.keyPressEvent(self, event)
 
-   def eventFilter(self, obj, event):
+   def onItemBtnClicked(self, pixmap, type, b):
       """ EventFilter for the toolbox labels. This allows us to start a drag
           when the user clicks on one of the labels.
       """
-      if event.type() == QtCore.QEvent.MouseButtonPress:
-         itemData = QtCore.QByteArray()
-         dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+      itemData = QtCore.QByteArray()
+      dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+      dataStream << QtCore.QString(type)
+      mimeData = QtCore.QMimeData()
+      mimeData.setData("maestro/new-component", itemData)
 
-         if obj is self.mChoiceLbl:
-            pixmap = obj.pixmap()
-            dataStream << QtCore.QString("Choice")
-         elif obj is self.mGroupLbl:
-            pixmap = obj.pixmap()
-            dataStream << QtCore.QString("Group")
-         elif obj is self.mArgLbl:
-            pixmap = obj.pixmap()
-            dataStream << QtCore.QString("Arg")
-         elif obj is self.mEnvVarLbl:
-            pixmap = obj.pixmap()
-            dataStream << QtCore.QString("EnvVar")
-         else:
-            pixmap = QtGui.QPixmap(":/Maestro/StanzaEditor/images/Choice.png")
-            dataStream << QtCore.QString("Unknown")
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mimeData)
+      drag.setPixmap(pixmap)
+      #drag.setHotSpot(event.pos()) 
 
-         mimeData = QtCore.QMimeData()
-         mimeData.setData("maestro/new-component", itemData)
+      result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
 
-         drag = QtGui.QDrag(self)
-         drag.setMimeData(mimeData)
-         drag.setPixmap(pixmap)
-         drag.setHotSpot(event.pos()) 
-
-         result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
-         return True
-      else:
-         return QtCore.QObject.eventFilter(self, obj, event)
+      # XXX Force the button back up. We have to do this as a result of
+      #     the drag behavior. Don't really know why though.
+      b.setDown(False)
+      b.update()
 
 class ItemTableModel(QtCore.QAbstractTableModel):
    def __init__(self, item=None, parent=None):

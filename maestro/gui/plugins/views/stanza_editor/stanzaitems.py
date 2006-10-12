@@ -478,8 +478,9 @@ class Node(QtGui.QGraphicsItem):
       path.addRect(rect)
       return path
 
-   def paint(self, painter, option, widget):
-      rect = QtCore.QRectF(-self.mSize.width()/2.0, -self.mSize.height()/2.0, self.mSize.width(), self.mSize.height())
+   def paint(self, painter, option, widget, rect=None):
+      if rect is None:
+         rect = QtCore.QRectF(-self.mSize.width()/2.0, -self.mSize.height()/2.0, self.mSize.width(), self.mSize.height())
       shadow_rect = rect.translated(self.dropShadowWidth, self.dropShadowWidth)
 
       painter.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -515,10 +516,11 @@ class Node(QtGui.QGraphicsItem):
       painter.drawRoundRect(rect)
 
       # Draw the node label.
-      text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.title())) + 6;
-      style = QtGui.QApplication.style()
-      align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextWordWrap
-      style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.title())
+      if option is not None:
+         text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.title())) + 6;
+         style = QtGui.QApplication.style()
+         align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextWordWrap
+         style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.title())
 
    def updateEdges(self):
       for edge in self.inEdgeList:
@@ -653,7 +655,7 @@ class ArgItem(Node):
       self.mAttribNameList = AllAttribName + ['Flag'] + HESAttribName
       self.mAttribList = AllAttrib + ['flag'] + HESAttrib
 
-class EnvItem(Node):
+class EnvVarItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"

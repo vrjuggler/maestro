@@ -41,43 +41,6 @@ class Ui_StanzaEditorBase(object):
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mChoiceLbl = QtGui.QLabel(self.mToolboxFrame)
-
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(1))
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mChoiceLbl.sizePolicy().hasHeightForWidth())
-      self.mChoiceLbl.setSizePolicy(sizePolicy)
-      self.mChoiceLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mChoiceLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Choice.png"))
-      self.mChoiceLbl.setScaledContents(False)
-      self.mChoiceLbl.setObjectName("mChoiceLbl")
-      self.vboxlayout.addWidget(self.mChoiceLbl)
-
-      self.mGroupLbl = QtGui.QLabel(self.mToolboxFrame)
-
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(1))
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mGroupLbl.sizePolicy().hasHeightForWidth())
-      self.mGroupLbl.setSizePolicy(sizePolicy)
-      self.mGroupLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mGroupLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Group.png"))
-      self.mGroupLbl.setObjectName("mGroupLbl")
-      self.vboxlayout.addWidget(self.mGroupLbl)
-
-      self.mArgLbl = QtGui.QLabel(self.mToolboxFrame)
-      self.mArgLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mArgLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Arg.png"))
-      self.mArgLbl.setObjectName("mArgLbl")
-      self.vboxlayout.addWidget(self.mArgLbl)
-
-      self.mEnvVarLbl = QtGui.QLabel(self.mToolboxFrame)
-      self.mEnvVarLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mEnvVarLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/EnvVar.png"))
-      self.mEnvVarLbl.setObjectName("mEnvVarLbl")
-      self.vboxlayout.addWidget(self.mEnvVarLbl)
-
       spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
       self.vboxlayout.addItem(spacerItem)
       self.gridlayout.addWidget(self.mToolboxFrame,1,0,1,1)
