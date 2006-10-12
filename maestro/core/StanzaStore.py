@@ -124,12 +124,17 @@ class StanzaStore:
                   self._replaceText(elms, command.text)
 
          elif 'add' == command.tag:
+            id_path = command.get('id', '')
             for child in command:
                for f in found:
-                  if 'group' == f.tag or 'choice' == f.tag:
-                     new_child = copy.deepcopy(child)
-                     f.append(new_child)
-                     self._expand(new_child, f)
+                  elms = self._find(f, id_path)
+                  if len(elms) > 1:
+                     print "WARNING: Expanding found more than one parent for add."
+                  for elm in elms:
+                     if 'group' == elm.tag or 'choice' == elm.tag:
+                        new_child = copy.deepcopy(child)
+                        elm.append(new_child)
+                        self._expand(new_child, elm)
          elif 'remove' == command.tag:
             id_path = command.get('id')
             for f in found:
@@ -137,11 +142,12 @@ class StanzaStore:
                self._removeDescendents(f, elms)
 
    def _replaceAttrib(self, roots, attribName, newValue):
-      validAttribs = {'choice':[],
-                      'group':[],
-                      'arg':['flag'],
-                      'cwd':[],
-                      'cmd':[]}
+      commonAttribs = ['label', 'class',' hidden', 'selected']
+      validAttribs = {'choice':commonAttribs[:],
+                      'group':commonAttribs[:],
+                      'arg':commonAttribs[:] + ['flag'],
+                      'cwd':commonAttribs[:],
+                      'cmd':commonAttribs[:]}
 
       for r in roots:
          if validAttribs.has_key(r.tag):
@@ -232,10 +238,17 @@ class StanzaStore:
 
       return all_elements
 
-
    def _find(self, root, path):
+      # Handle extra cases where we are referencing local element.
+      if path == '.':
+         path = ''
+      elif path.startswith('./'):
+         path = path[2:]
+      path = path.lstrip('/')
+
       # Tokenize the entire path.
       tokens = xpath_tokenizer.findall(path)
+      print "tokens:", tokens
 
       cur_elts = [root]
 

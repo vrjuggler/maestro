@@ -56,15 +56,26 @@ class StanzaStoreTest(unittest.TestCase):
    def testAddOurOwn(self):
       apps = self.mStanzaStore.find('expand:AddOurOwnDisplaySystem')
       self.assert_(1 == len(apps))
+      print "START"
       expanded_app = self.mStanzaStore.expand(apps[0])
+      print "STOP"
       found = self.mStanzaStore._find(expanded_app, "DisplaySystem")
       self.assert_(1 == len(found))
       display_choice = found[0]
       self.assert_(display_choice.tag == 'choice')
-      self.assert_(3 == len(display_choice))
+      self.assert_(5 == len(display_choice))
       self.assert_(display_choice[0].get('name') == 'Simulator')
+      simulator_group = display_choice[0]
       self.assert_(display_choice[1].get('name') == 'CAVE')
-      self.assert_(display_choice[2].get('name') == 'Powerwall')
+      self.assert_(display_choice[2].get('name') == 'add0')
+      self.assert_(display_choice[3].get('name') == 'add1')
+      self.assert_(display_choice[4].get('name') == 'add2')
+      self.assert_(5 == len(simulator_group))
+      self.assert_(simulator_group[0].get('name') == 'base')
+      self.assert_(simulator_group[1].get('name') == 'wand')
+      self.assert_(simulator_group[2].get('name') == 'add3')
+      self.assert_(simulator_group[3].get('name') == 'add4')
+      self.assert_(simulator_group[4].get('name') == 'add5')
 
    def testAddByReference(self):
       apps = self.mStanzaStore.find('expand:AddDisplaySystemReference')

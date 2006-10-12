@@ -11,10 +11,23 @@
   </application>
   <application name="AddOurOwnDisplaySystem">
     <ref id="expand:VRJugglerBasic/DisplaySystem">
+      <add id="./">
+        <arg name="add0" flag="-j"/>
+      </add>
+      <add id=".">
+        <arg name="add1" flag="-j"/>
+      </add>
       <add>
-        <group name="Powerwall">
-          <arg name="base" flag="-j">powerwall.jconf</arg>
-        </group>
+        <arg name="add2" flag="-j"/>
+      </add>
+      <add id="Simulator">
+        <arg name="add3" flag="-j"/>
+      </add>
+      <add id="./Simulator">
+        <arg name="add4" flag="-j"/>
+      </add>
+      <add id="/Simulator">
+        <arg name="add5" flag="-j"/>
       </add>
     </ref>
   </application>
