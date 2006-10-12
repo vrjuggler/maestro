@@ -556,15 +556,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
-      pixmap = QtGui.QPixmap("images/Choice.png")
-      self.mChoiceLbl.setPixmap(pixmap)
-      pixmap = QtGui.QPixmap("images/Group.png")
-      self.mGroupLbl.setPixmap(pixmap)
-      pixmap = QtGui.QPixmap("images/Arg.png")
-      self.mArgLbl.setPixmap(pixmap)
-      pixmap = QtGui.QPixmap("images/EnvVar.png")
-      self.mEnvVarLbl.setPixmap(pixmap)
-
       self.mChoiceLbl.installEventFilter(self)
       self.mGroupLbl.installEventFilter(self)
       self.mArgLbl.installEventFilter(self)
@@ -668,19 +659,19 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
 
          if obj is self.mChoiceLbl:
-            pixmap = QtGui.QPixmap("images/Choice.png")
+            pixmap = obj.pixmap()
             dataStream << QtCore.QString("Choice")
          elif obj is self.mGroupLbl:
-            pixmap = QtGui.QPixmap("images/Group.png")
+            pixmap = obj.pixmap()
             dataStream << QtCore.QString("Group")
          elif obj is self.mArgLbl:
-            pixmap = QtGui.QPixmap("images/Arg.png")
+            pixmap = obj.pixmap()
             dataStream << QtCore.QString("Arg")
          elif obj is self.mEnvVarLbl:
-            pixmap = QtGui.QPixmap("images/EnvVar.png")
+            pixmap = obj.pixmap()
             dataStream << QtCore.QString("EnvVar")
          else:
-            pixmap = QtGui.QPixmap("images/Choice.png")
+            pixmap = QtGui.QPixmap(":/Maestro/StanzaEditor/images/Choice.png")
             dataStream << QtCore.QString("Unknown")
 
          mimeData = QtCore.QMimeData()
