@@ -248,7 +248,6 @@ class StanzaStore:
 
       # Tokenize the entire path.
       tokens = xpath_tokenizer.findall(path)
-      print "tokens:", tokens
 
       cur_elts = [root]
 
