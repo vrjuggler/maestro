@@ -105,61 +105,66 @@ class TreeItem:
    def __repr__(self):
       assert "You must implement this method"
 
+def classMatch(nodeClassList, optionClassString):
+   """
+   Determine if a value should be used for the given node.
+   Values are only used for a given node it that node contains
+   all classes listed in the value.
+   """
+   # Eliminate all empty string classes
+   option_classes = [c.lstrip().rstrip() for c in optionClassString.split(",") if c != ""]
+   #print "classMatch: node %s option %s" % (nodeClassList, value_classes)
+   for c in option_classes:
+      if nodeClassList.count(c) == 0:
+         return False
+   return True
+
+
 CONTINUE = 0
 SKIP = 1
 QUIT = 2
 
-def traverse(node, visitor):
-   result = visitor.visit(node)
+def traverse(option, visitor):
+   result = visitor.visit(option)
    if CONTINUE == result:
-      for c in node.mChildren:
+      for c in option.mChildren:
          traverse(c, visitor)
    elif SKIP == result:
       return CONTINUE
    return QUIT
 
 class OptionVisitor:
-   def __init__(self, nodeClass=""):
+   def __init__(self, nodeClassString=""):
       self.mArgs = []
       self.mCommands = []
       self.mCwds = []
       self.mEnvVars = {}
-      self.mNodeClasses = nodeClass.split(",")
+      self.mNodeClassList = [c.lstrip().rstrip() for c in nodeClassString.split(",") if c != ""]
 
-   def classMatch(self, valueClass):
-      """
-      Determine if a value should be used for the given node.
-      Values are only used for a given node it that node contains
-      all classes listed in the value.
-      """
-      # Eliminate all empty string classes
-      value_classes = [c for c in valueClass.split(",") if c != ""]
-      #print "%s %s" % (self.mNodeClasses, value_classes)
-      for c in value_classes:
-         if self.mNodeClasses.count(c) == 0:
-            return False
-      return True
-
-   def visit(self, node):
-      if not node.mSelected:
+   def visit(self, option):
+      if not option.mSelected:
          return SKIP
 
-      if isinstance(node, Arg) and self.classMatch(node.mClass):
-         arg_string = node.mFlag
-         if node.mValue != "":
-            arg_string += ' "' + node.mValue + '"'
-         # Remove starting and trailing whitespaces.
-         self.mArgs.append(arg_string.strip())
-      elif isinstance(node, Command) and self.classMatch(node.mClass):
-         self.mCommands.append(node.mValue)
-      elif isinstance(node, Cwd) and self.classMatch(node.mClass):
-         self.mCwds.append(node.mValue)
-      elif isinstance(node, EnvVar) and self.classMatch(node.mClass):
-         if self.mEnvVars.has_key(node.mKey):
-            print "WARNING: Multiple values for [%s] selected." % (node.mKey)
-            self.mEnvVars[node.mKey] = self.mEnvVars[node.mKey] + ":" + node.mValue
-         else:
-            self.mEnvVars[node.mKey] = node.mValue
+      if isinstance(option, Group) or isinstance(option, Choice) or not hasattr(option.mClass):
+         return CONTINUE
+
+      if classMatch(self.mNodeClassList, option.mClass):
+         if isinstance(option, Arg):
+            arg_string = option.mFlag
+            if option.mValue != "":
+               arg_string += ' "' + option.mValue + '"'
+            # Remove starting and trailing whitespaces.
+            self.mArgs.append(arg_string.strip())
+         elif isinstance(option, Command):
+            self.mCommands.append(option.mValue)
+         elif isinstance(option, Cwd):
+            self.mCwds.append(option.mValue)
+         elif isinstance(option, EnvVar):
+            if self.mEnvVars.has_key(option.mKey):
+               print "WARNING: Multiple values for [%s] selected." % (option.mKey)
+               self.mEnvVars[option.mKey] = self.mEnvVars[option.mKey] + ":" + option.mValue
+            else:
+               self.mEnvVars[option.mKey] = option.mValue
 
       return CONTINUE
 
