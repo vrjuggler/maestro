@@ -145,7 +145,8 @@ class OptionVisitor:
       if not option.mSelected:
          return SKIP
 
-      if isinstance(option, Group) or isinstance(option, Choice) or not hasattr(option.mClass):
+      if isinstance(option, Group) or isinstance(option, Choice) or \
+         not hasattr(option, 'mClass'):
          return CONTINUE
 
       if classMatch(self.mNodeClassList, option.mClass):
