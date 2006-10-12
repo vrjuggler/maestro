@@ -24,12 +24,105 @@ from PyQt4 import QtCore, QtGui
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
       StanzaEditorBase.setObjectName("StanzaEditorBase")
-      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,617,679).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
+      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,642,662).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
 
-      self.vboxlayout = QtGui.QVBoxLayout(StanzaEditorBase)
+      self.gridlayout = QtGui.QGridLayout(StanzaEditorBase)
+      self.gridlayout.setMargin(9)
+      self.gridlayout.setSpacing(6)
+      self.gridlayout.setObjectName("gridlayout")
+
+      self.mToolboxFrame = QtGui.QFrame(StanzaEditorBase)
+      self.mToolboxFrame.setFrameShape(QtGui.QFrame.StyledPanel)
+      self.mToolboxFrame.setFrameShadow(QtGui.QFrame.Raised)
+      self.mToolboxFrame.setObjectName("mToolboxFrame")
+
+      self.vboxlayout = QtGui.QVBoxLayout(self.mToolboxFrame)
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
+
+      self.mChoiceLbl = QtGui.QLabel(self.mToolboxFrame)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(1))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mChoiceLbl.sizePolicy().hasHeightForWidth())
+      self.mChoiceLbl.setSizePolicy(sizePolicy)
+      self.mChoiceLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mChoiceLbl.setPixmap(QtGui.QPixmap("images/Choice.png"))
+      self.mChoiceLbl.setScaledContents(False)
+      self.mChoiceLbl.setObjectName("mChoiceLbl")
+      self.vboxlayout.addWidget(self.mChoiceLbl)
+
+      self.mGroupLbl = QtGui.QLabel(self.mToolboxFrame)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(1))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mGroupLbl.sizePolicy().hasHeightForWidth())
+      self.mGroupLbl.setSizePolicy(sizePolicy)
+      self.mGroupLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mGroupLbl.setPixmap(QtGui.QPixmap("images/Group.png"))
+      self.mGroupLbl.setObjectName("mGroupLbl")
+      self.vboxlayout.addWidget(self.mGroupLbl)
+
+      self.mArgLbl = QtGui.QLabel(self.mToolboxFrame)
+      self.mArgLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mArgLbl.setPixmap(QtGui.QPixmap("images/Arg.png"))
+      self.mArgLbl.setObjectName("mArgLbl")
+      self.vboxlayout.addWidget(self.mArgLbl)
+
+      self.mEnvVarLbl = QtGui.QLabel(self.mToolboxFrame)
+      self.mEnvVarLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mEnvVarLbl.setPixmap(QtGui.QPixmap("images/EnvVar.png"))
+      self.mEnvVarLbl.setObjectName("mEnvVarLbl")
+      self.vboxlayout.addWidget(self.mEnvVarLbl)
+
+      spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
+      self.vboxlayout.addItem(spacerItem)
+      self.gridlayout.addWidget(self.mToolboxFrame,1,0,1,1)
+
+      self.mSplitter1 = QtGui.QSplitter(StanzaEditorBase)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(7))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mSplitter1.sizePolicy().hasHeightForWidth())
+      self.mSplitter1.setSizePolicy(sizePolicy)
+      self.mSplitter1.setOrientation(QtCore.Qt.Vertical)
+      self.mSplitter1.setObjectName("mSplitter1")
+
+      self.mGraphicsView = QtGui.QGraphicsView(self.mSplitter1)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(3))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mGraphicsView.sizePolicy().hasHeightForWidth())
+      self.mGraphicsView.setSizePolicy(sizePolicy)
+      self.mGraphicsView.setObjectName("mGraphicsView")
+
+      self.mEditFrame = QtGui.QFrame(self.mSplitter1)
+      self.mEditFrame.setFrameShape(QtGui.QFrame.StyledPanel)
+      self.mEditFrame.setFrameShadow(QtGui.QFrame.Raised)
+      self.mEditFrame.setObjectName("mEditFrame")
+
+      self.vboxlayout1 = QtGui.QVBoxLayout(self.mEditFrame)
+      self.vboxlayout1.setMargin(9)
+      self.vboxlayout1.setSpacing(6)
+      self.vboxlayout1.setObjectName("vboxlayout1")
+
+      self.mSplitter2 = QtGui.QSplitter(self.mEditFrame)
+      self.mSplitter2.setOrientation(QtCore.Qt.Horizontal)
+      self.mSplitter2.setObjectName("mSplitter2")
+
+      self.mEditTableView = QtGui.QTableView(self.mSplitter2)
+      self.mEditTableView.setObjectName("mEditTableView")
+
+      self.mHelpWidget = QtGui.QTextEdit(self.mSplitter2)
+      self.mHelpWidget.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
+      self.mHelpWidget.setObjectName("mHelpWidget")
+      self.vboxlayout1.addWidget(self.mSplitter2)
+      self.gridlayout.addWidget(self.mSplitter1,1,1,1,1)
 
       self.mToolGroupBox = QtGui.QGroupBox(StanzaEditorBase)
       self.mToolGroupBox.setObjectName("mToolGroupBox")
@@ -130,79 +223,7 @@ class Ui_StanzaEditorBase(object):
       self.mClassFilterCB.setEditable(True)
       self.mClassFilterCB.setObjectName("mClassFilterCB")
       self.hboxlayout.addWidget(self.mClassFilterCB)
-      self.vboxlayout.addWidget(self.mToolGroupBox)
-
-      self.hboxlayout1 = QtGui.QHBoxLayout()
-      self.hboxlayout1.setMargin(0)
-      self.hboxlayout1.setSpacing(6)
-      self.hboxlayout1.setObjectName("hboxlayout1")
-
-      self.groupBox = QtGui.QGroupBox(StanzaEditorBase)
-      self.groupBox.setObjectName("groupBox")
-
-      self.vboxlayout1 = QtGui.QVBoxLayout(self.groupBox)
-      self.vboxlayout1.setMargin(9)
-      self.vboxlayout1.setSpacing(6)
-      self.vboxlayout1.setObjectName("vboxlayout1")
-
-      self.mChoiceLbl = QtGui.QLabel(self.groupBox)
-      self.mChoiceLbl.setObjectName("mChoiceLbl")
-      self.vboxlayout1.addWidget(self.mChoiceLbl)
-
-      self.mGroupLbl = QtGui.QLabel(self.groupBox)
-      self.mGroupLbl.setObjectName("mGroupLbl")
-      self.vboxlayout1.addWidget(self.mGroupLbl)
-
-      self.mArgLbl = QtGui.QLabel(self.groupBox)
-      self.mArgLbl.setObjectName("mArgLbl")
-      self.vboxlayout1.addWidget(self.mArgLbl)
-
-      self.mEnvVarLbl = QtGui.QLabel(self.groupBox)
-      self.mEnvVarLbl.setObjectName("mEnvVarLbl")
-      self.vboxlayout1.addWidget(self.mEnvVarLbl)
-
-      spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
-      self.vboxlayout1.addItem(spacerItem)
-      self.hboxlayout1.addWidget(self.groupBox)
-
-      self.mSplitter = QtGui.QSplitter(StanzaEditorBase)
-
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(7))
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mSplitter.sizePolicy().hasHeightForWidth())
-      self.mSplitter.setSizePolicy(sizePolicy)
-      self.mSplitter.setOrientation(QtCore.Qt.Vertical)
-      self.mSplitter.setObjectName("mSplitter")
-
-      self.mGraphicsView = QtGui.QGraphicsView(self.mSplitter)
-
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(3))
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mGraphicsView.sizePolicy().hasHeightForWidth())
-      self.mGraphicsView.setSizePolicy(sizePolicy)
-      self.mGraphicsView.setObjectName("mGraphicsView")
-
-      self.mEditGroupBox = QtGui.QGroupBox(self.mSplitter)
-
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mEditGroupBox.sizePolicy().hasHeightForWidth())
-      self.mEditGroupBox.setSizePolicy(sizePolicy)
-      self.mEditGroupBox.setObjectName("mEditGroupBox")
-
-      self.vboxlayout2 = QtGui.QVBoxLayout(self.mEditGroupBox)
-      self.vboxlayout2.setMargin(9)
-      self.vboxlayout2.setSpacing(6)
-      self.vboxlayout2.setObjectName("vboxlayout2")
-
-      self.mEditTableView = QtGui.QTableView(self.mEditGroupBox)
-      self.mEditTableView.setObjectName("mEditTableView")
-      self.vboxlayout2.addWidget(self.mEditTableView)
-      self.hboxlayout1.addWidget(self.mSplitter)
-      self.vboxlayout.addLayout(self.hboxlayout1)
+      self.gridlayout.addWidget(self.mToolGroupBox,0,0,1,2)
 
       self.retranslateUi(StanzaEditorBase)
       QtCore.QMetaObject.connectSlotsByName(StanzaEditorBase)
@@ -215,11 +236,6 @@ class Ui_StanzaEditorBase(object):
       self.mRubberBandDragBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mZoomExtentsBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mClassFilterComma.setText(QtGui.QApplication.translate("StanzaEditorBase", ",", None, QtGui.QApplication.UnicodeUTF8))
-      self.mChoiceLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Choice", None, QtGui.QApplication.UnicodeUTF8))
-      self.mGroupLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Group", None, QtGui.QApplication.UnicodeUTF8))
-      self.mArgLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Arg", None, QtGui.QApplication.UnicodeUTF8))
-      self.mEnvVarLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "EnvVar", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

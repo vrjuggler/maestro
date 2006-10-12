@@ -391,9 +391,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
       # Create an instance of our custom GraphicsView.
       self.mGraphicsView = GraphWidget()
-      self.mSplitter.insertWidget(0, self.mGraphicsView)
-      self.mSplitter.refresh()
-      self.mSplitter.update()
+      self.mSplitter1.insertWidget(0, self.mGraphicsView)
+      self.mSplitter1.refresh()
+      self.mSplitter1.update()
 
       # Set the default drag mode.
       self.mGraphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
@@ -543,6 +543,8 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Set up the table.
       self.mItemModel = ItemTableModel()
       self.mEditTableView.setModel(self.mItemModel)
+      self.mEditTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mEditTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
    def onClassFilterChanged(self, val):
       print "Filter: ", val
@@ -569,8 +571,22 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def onItemSelected(self, item):
       if isinstance(item, Node):
          self.mItemModel.setItem(item)
+         self.mHelpWidget.clear()
+
+         # Load help HTML data.
+         file_name = "help/" + item.mElement.tag + ".html"
+         file = QtCore.QFile(file_name)
+         if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+            print "Cannot read file %s:\n%s." % (file_name, file.errorString())
+         else:
+            stream = QtCore.QTextStream(file)
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.mHelpWidget.setHtml(stream.readAll())
+            QtGui.QApplication.restoreOverrideCursor()
+         file.close()
       else:
          self.mItemModel.setItem(None)
+         self.mHelpWidget.clear()
 
    def keyPressEvent(self, event):
       key = event.key()
