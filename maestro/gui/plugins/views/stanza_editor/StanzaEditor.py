@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, random
+import sys, random, traceback
 from PyQt4 import QtCore, QtGui
 
 import StanzaEditorBase
@@ -479,27 +479,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Set the default drag mode.
       self.mGraphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
 
-      # Add layouts. These should be plugins soon.
-      layout_names = ['Random Layout', 'Concentric Layout', 'Colimacon Layout', 'DirectedTree']
-      layout_classes = [layout.Random, layout.Concentric, layout.Colimacon, layout.DirectedTree]
-
-      self.mLayouts = []
-      self.mLayoutCBs = []
-      self.mLayoutActions = []
-
-      icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png")
-      for (name, ltype) in zip(layout_names, layout_classes):
-         new_layout = ltype()
-         self.mLayouts.append(new_layout)
-         new_action = QtGui.QAction(icon, name, self)
-         cb = lambda l=new_layout, a=new_action: self.onDoLayout(l, a)
-         self.mLayoutCBs.append(cb)
-         self.connect(new_action, QtCore.SIGNAL("triggered()"), cb)
-         self.mLayoutBtn.addAction(new_action)
-         self.mLayoutActions.append(new_action)
-
-      # Set DirectedTree as default
-      self.mLayoutBtn.setDefaultAction(self.mLayoutBtn.actions()[3])
 
       # Add some default filters.
       self.mOperatingSystemCB.addItem("Linux")
@@ -509,7 +488,43 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mClassFilterCB.addItem("slave")
 
    def init(self, ensemble):
-      pass
+      env = maestro.core.Environment()
+      self.mLayoutPlugins = env.mPluginManager.getPlugins(
+         plugInType=maestro.core.IGraphicsSceneLayout, returnNameDict=True)
+
+      self.mLayouts = []
+      self.mLayoutCBs = []
+      self.mLayoutActions = []
+
+      layout_icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png")
+      for name, cls in self.mLayoutPlugins.iteritems():
+         # Try to load layout
+         try:
+            print "Adding new layout: %s %s"%(name, cls.__name__)
+            layout_name = cls.getName()
+            new_layout = cls()
+            self.mLayouts.append(new_layout)
+            new_action = QtGui.QAction(layout_icon, layout_name, self)
+            cb = lambda l=new_layout, a=new_action: self.onDoLayout(l, a)
+            self.mLayoutCBs.append(cb)
+            self.connect(new_action, QtCore.SIGNAL("triggered()"), cb)
+            self.mLayoutBtn.addAction(new_action)
+            self.mLayoutActions.append(new_action)
+            # Set DirectedTree as default
+            if layout_name == 'Directed Tree Layout':
+               self.mLayoutBtn.setDefaultAction(new_action)
+         except Exception, ex:
+            layout_name = "Unknown"
+            if cls is not None and cls.getName() is not None:
+               layout_name = cls.getName()
+               
+            err_text = "Error loading view:" + layout_name + "\n  exception:" + str(ex)
+            print err_text
+            traceback.print_exc()
+            
+            QtGui.QMessageBox.critical(self, "Layout Failure", err_text, 
+                                       QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
+                                       QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
 
    def updateGui(self):
       # Last step, fill in application combobox and select the first one.

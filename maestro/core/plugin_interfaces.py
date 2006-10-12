@@ -215,3 +215,29 @@ class IDesktopWallpaperPlugin(maestro.util.plugin.Plugin):
               the desktop wallpaper image is returned.
       '''
       not_implemented()
+
+class IGraphicsSceneLayout(maestro.util.plugin.Plugin):
+   '''
+   The base interface for plug-ins that layout QGraphicsItems
+   in a QGraphicsScene.
+   '''
+   def __init__(self):
+      pass
+
+   def getName():
+      '''
+      Returns the name of this graphics scene layout plugin.
+
+      @return A human-readable string identifying this graphics scene
+              layout management plug-in (more or less) uniquely.
+      '''
+      not_implemented()
+   getName = staticmethod(getName)
+
+   def layout(self, scene):
+      '''
+      Layout all GraphicsItems in the given GraphicsScene.
+
+      @param scene QGraphicsScene containing items to layout.
+      '''
+      not_implemented()

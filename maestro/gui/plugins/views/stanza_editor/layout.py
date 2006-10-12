@@ -18,51 +18,38 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, random
-from PyQt4 import QtCore, QtGui
+import sys, math, random
+from PyQt4 import QtCore
 
-import StanzaEditorBase
-import math
-
-import os.path
-pj = os.path.join
-
-sys.path.append( pj(os.path.dirname(__file__), ".."))
 import maestro.core
-
-import elementtree.ElementTree as ET
-
 import stanzaitems
 
-class Layout:
+def _getNodes(scene):
+   nodes = []
+   for item in scene.items():
+      if isinstance(item, stanzaitems.Node):
+         nodes.append(item)
+   return nodes
+
+def _resetNodesPositions(scene):
+   nodes = _getNodes(scene)
+   for node in nodes:
+      node.setPos(-1.0, -1.0)
+      node.updateEdges()
+
+class RandomLayout(maestro.core.IGraphicsSceneLayout):
    def __init__(self):
-      pass
+      maestro.core.IGraphicsSceneLayout.__init__(self)
 
-   def layout(self, scene):
-      assert(False and "Not implemented!")
-
-   def _getNodes(self, scene):
-      nodes = []
-      for item in scene.items():
-         if isinstance(item, stanzaitems.Node):
-            nodes.append(item)
-      return nodes
-
-   def _resetNodesPositions(self, scene):
-      nodes = self._getNodes(scene)
-      for node in nodes:
-         node.setPos(-1.0, -1.0)
-         node.updateEdges()
-
-class Random(Layout):
-   def __init__(self):
-      Layout.__init__(self)
+   def getName():
+      return "Random Layout"
+   getName = staticmethod(getName)
 
    def layout(self, scene):
       # Create a random layout
       random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
 
-      nodes = self._getNodes(scene)
+      nodes = _getNodes(scene)
  
       sceneRect = scene.sceneRect()
       for node in nodes:
@@ -72,17 +59,21 @@ class Random(Layout):
          node.updateEdges()
 
 #Concentric Layout Management
-class Concentric(Layout):
-   def __init__(self, azimutDelta = 45.0, circleInterval = 150.0):
-      Layout.__init__(self)
-      self.azimutDelta = azimutDelta
-      self.circleInterval = circleInterval
+class ConcentricLayout(maestro.core.IGraphicsSceneLayout):
+   def __init__(self):
+      maestro.core.IGraphicsSceneLayout.__init__(self)
+      self.azimutDelta = 45.0
+      self.circleInterval = 150.0
+
+   def getName():
+      return "Concentric Layout"
+   getName = staticmethod(getName)
 
    def layout(self, scene):
       center = scene.sceneRect().center()
       nodesPerCircle = 360 / self.azimutDelta;
 
-      nodes = self._getNodes(scene)
+      nodes = _getNodes(scene)
 
       n = 0
       for node in nodes:
@@ -97,17 +88,21 @@ class Concentric(Layout):
 
          n += 1
 
-class Colimacon(Layout):
-   def __init__(self, azimutDelta = 15.0, circleInterval = 40.0):
-      Layout.__init__(self)
-      self.azimutDelta = azimutDelta
-      self.circleInterval = circleInterval
+class ColimaconLayout(maestro.core.IGraphicsSceneLayout):
+   def __init__(self):
+      maestro.core.IGraphicsSceneLayout.__init__(self)
+      self.azimutDelta = 15.0
+      self.circleInterval = 40.0
+
+   def getName():
+      return "Colimacon Layout"
+   getName = staticmethod(getName)
 
    def layout(self, scene):
       center = scene.sceneRect().center()
       nodesPerCircle = 360 / self.azimutDelta;
 
-      nodes = self._getNodes(scene)
+      nodes = _getNodes(scene)
 
       n = 0
       for node in nodes:
@@ -126,20 +121,23 @@ NONE = 0
 HORIZONTAL = 1
 VERTICAL = 2
 
-class DirectedTree(Layout):
-   #def __init__(self, origin=[0.0,0.0], spacing=[150.0, 150.0], orientation=VERTICAL):
-   def __init__(self, origin=[0.0,0.0], spacing=[150.0, 110.0], orientation=HORIZONTAL):
-      Layout.__init__(self)
-      self.origin = origin
-      self.spacing = spacing
-      self.orientation = orientation
+class DirectedTreeLayout(maestro.core.IGraphicsSceneLayout):
+   def __init__(self):
+      maestro.core.IGraphicsSceneLayout.__init__(self)
+      self.origin=[0.0,0.0]
+      self.spacing=[150.0, 110.0]
+      self.orientation=HORIZONTAL
       self.stopRecursion = False
+
+   def getName():
+      return "Directed Tree Layout"
+   getName = staticmethod(getName)
       
    def layout(self, scene):
       center = scene.sceneRect().center()
       # Reset the graph nodes positions (If position are not resetted, nodes are all considered
       # already placed
-      self._resetNodesPositions(scene)
+      _resetNodesPositions(scene)
       self.marked = []
 
       # Configure tree bounding box
@@ -193,7 +191,7 @@ class DirectedTree(Layout):
       node.updateEdges()
 
    def _transpose(self, scene):
-      nodes = self._getNodes(scene)
+      nodes = _getNodes(scene)
       for node in nodes:
          node.setPos(node.pos().y(), node.pos().x())
          node.updateEdges()

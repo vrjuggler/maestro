@@ -18,7 +18,8 @@
 
 from environment import Environment
 from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin, \
-                              ISaverPlugin, IDesktopWallpaperPlugin
+                              ISaverPlugin, IDesktopWallpaperPlugin,    \
+                              IGraphicsSceneLayout
 #from plugin_holder import ViewPluginsHolder
 
 class _const:
