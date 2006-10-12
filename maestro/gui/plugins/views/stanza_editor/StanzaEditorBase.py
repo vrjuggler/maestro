@@ -49,7 +49,7 @@ class Ui_StanzaEditorBase(object):
       sizePolicy.setHeightForWidth(self.mChoiceLbl.sizePolicy().hasHeightForWidth())
       self.mChoiceLbl.setSizePolicy(sizePolicy)
       self.mChoiceLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mChoiceLbl.setPixmap(QtGui.QPixmap("images/Choice.png"))
+      self.mChoiceLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Choice.png"))
       self.mChoiceLbl.setScaledContents(False)
       self.mChoiceLbl.setObjectName("mChoiceLbl")
       self.vboxlayout.addWidget(self.mChoiceLbl)
@@ -62,19 +62,19 @@ class Ui_StanzaEditorBase(object):
       sizePolicy.setHeightForWidth(self.mGroupLbl.sizePolicy().hasHeightForWidth())
       self.mGroupLbl.setSizePolicy(sizePolicy)
       self.mGroupLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mGroupLbl.setPixmap(QtGui.QPixmap("images/Group.png"))
+      self.mGroupLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Group.png"))
       self.mGroupLbl.setObjectName("mGroupLbl")
       self.vboxlayout.addWidget(self.mGroupLbl)
 
       self.mArgLbl = QtGui.QLabel(self.mToolboxFrame)
       self.mArgLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mArgLbl.setPixmap(QtGui.QPixmap("images/Arg.png"))
+      self.mArgLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Arg.png"))
       self.mArgLbl.setObjectName("mArgLbl")
       self.vboxlayout.addWidget(self.mArgLbl)
 
       self.mEnvVarLbl = QtGui.QLabel(self.mToolboxFrame)
       self.mEnvVarLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mEnvVarLbl.setPixmap(QtGui.QPixmap("images/EnvVar.png"))
+      self.mEnvVarLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/EnvVar.png"))
       self.mEnvVarLbl.setObjectName("mEnvVarLbl")
       self.vboxlayout.addWidget(self.mEnvVarLbl)
 
@@ -133,7 +133,7 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.setObjectName("hboxlayout")
 
       self.mLayoutBtn = QtGui.QToolButton(self.mToolGroupBox)
-      self.mLayoutBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/ksirtet.png"))
+      self.mLayoutBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png"))
       self.mLayoutBtn.setIconSize(QtCore.QSize(24,24))
       self.mLayoutBtn.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
       self.mLayoutBtn.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
@@ -141,7 +141,7 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mLayoutBtn)
 
       self.mNoDragBtn = QtGui.QToolButton(self.mToolGroupBox)
-      self.mNoDragBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_draw-selection.png"))
+      self.mNoDragBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/no_drag.png"))
       self.mNoDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mNoDragBtn.setCheckable(True)
       self.mNoDragBtn.setChecked(True)
@@ -149,21 +149,21 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mNoDragBtn)
 
       self.mScrollDragBtn = QtGui.QToolButton(self.mToolGroupBox)
-      self.mScrollDragBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_zoom-shift.png"))
+      self.mScrollDragBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/scroll_drag.png"))
       self.mScrollDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mScrollDragBtn.setCheckable(True)
       self.mScrollDragBtn.setObjectName("mScrollDragBtn")
       self.hboxlayout.addWidget(self.mScrollDragBtn)
 
       self.mRubberBandDragBtn = QtGui.QToolButton(self.mToolGroupBox)
-      self.mRubberBandDragBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_exit-group.png"))
+      self.mRubberBandDragBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/rubber_drag.png"))
       self.mRubberBandDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mRubberBandDragBtn.setCheckable(True)
       self.mRubberBandDragBtn.setObjectName("mRubberBandDragBtn")
       self.hboxlayout.addWidget(self.mRubberBandDragBtn)
 
       self.mZoomExtentsBtn = QtGui.QToolButton(self.mToolGroupBox)
-      self.mZoomExtentsBtn.setIcon(QtGui.QIcon("../../../../../../../../../Desktop/icons/24x24/stock_zoom-page-width.png"))
+      self.mZoomExtentsBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/zoom-extents.png"))
       self.mZoomExtentsBtn.setIconSize(QtCore.QSize(24,24))
       self.mZoomExtentsBtn.setAutoRaise(False)
       self.mZoomExtentsBtn.setObjectName("mZoomExtentsBtn")
@@ -190,7 +190,7 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mClassLine)
 
       self.mClassFilterLbl = QtGui.QLabel(self.mToolGroupBox)
-      self.mClassFilterLbl.setPixmap(QtGui.QPixmap("../../../../../../../../../Desktop/icons/stock_goal-seek.png"))
+      self.mClassFilterLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/filter.png"))
       self.mClassFilterLbl.setObjectName("mClassFilterLbl")
       self.hboxlayout.addWidget(self.mClassFilterLbl)
 

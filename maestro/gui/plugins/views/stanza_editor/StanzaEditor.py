@@ -36,12 +36,69 @@ from stanzaitems import *
 import layout
 import elementtree.ElementTree as ET
 
+import StanzaEditorResource
+
 if __name__ == '__main__':
    # If we want all.
    maestro.core.const.STANZA_PATH = pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')
    #maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
-   store = maestro.core.StanzaStore.StanzaStore()
-   store.scan()
+   env = maestro.core.Environment()
+   env.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
+   env.mStanzaStore.scan()
+
+
+class StanzaEditorPlugin(maestro.core.IViewPlugin):
+   def __init__(self):
+      maestro.core.IViewPlugin.__init__(self)
+      self.widget = StanzaEditor()
+      self.mToolbar = None
+      self.mMenu = None
+      
+   def getName():
+      return "Stanza Editor"
+   getName = staticmethod(getName)
+      
+   def getIcon():
+      return QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png")
+   getIcon = staticmethod(getIcon)
+      
+   def getViewWidget(self):
+      return self.widget
+
+   def activate(self, mainWindow):
+      # Build toolbar by taking buttons from stanza editor. We onlyt do this
+      # the first time that the view is activated.
+      if self.mToolbar is None:
+         self.mToolbar = QtGui.QToolBar("Stanza Editor Toolbar", mainWindow)
+         self.mToolbar.addWidget(self.widget.mLayoutBtn)
+         self.mToolbar.addWidget(self.widget.mNoDragBtn)
+         self.mToolbar.addWidget(self.widget.mScrollDragBtn)
+         self.mToolbar.addWidget(self.widget.mRubberBandDragBtn)
+         self.mToolbar.addWidget(self.widget.mZoomExtentsBtn)
+      mainWindow.addToolBar(self.mToolbar)
+      self.mToolbar.show()
+
+      # Add menu.
+      if self.mMenu is None:
+         self.mMenu = QtGui.QMenu("Stanza Editor")
+         self.mMenu.addAction(self.widget.mNoDragAction)
+         self.mMenu.addAction(self.widget.mScrollDragAction)
+         self.mMenu.addAction(self.widget.mRubberBandDragAction)
+         self.mMenu.addSeparator()
+         for la in self.widget.mLayoutActions:
+            self.mMenu.addAction(la)
+         self.mMenu.addSeparator()
+         self.mMenu.addAction(self.widget.mZoomExtentsAction)
+      mainWindow.menuBar().addAction(self.mMenu.menuAction())
+      
+      # Update the Stanza Editor
+      self.widget.updateGui()
+   
+   def deactivate(self, mainWindow):
+      mainWindow.removeToolBar(self.mToolbar)
+      self.mToolbar.hide()
+      self.mMenu.hide()
+      mainWindow.menuBar().removeAction(self.mMenu.menuAction())
 
 class StanzaScene(QtGui.QGraphicsScene):
    def __init__(self, applicationElt, parent = None):
@@ -398,8 +455,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
       self.mLayouts = []
       self.mLayoutCBs = []
+      self.mLayoutActions = []
 
-      icon = QtGui.QIcon("images/layout.png")
+      icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png")
       for (name, ltype) in zip(layout_names, layout_classes):
          new_layout = ltype()
          self.mLayouts.append(new_layout)
@@ -408,6 +466,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mLayoutCBs.append(cb)
          self.connect(new_action, QtCore.SIGNAL("triggered()"), cb)
          self.mLayoutBtn.addAction(new_action)
+         self.mLayoutActions.append(new_action)
 
       # Set DirectedTree as default
       self.mLayoutBtn.setDefaultAction(self.mLayoutBtn.actions()[3])
@@ -419,12 +478,17 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mClassFilterCB.addItem("master")
       self.mClassFilterCB.addItem("slave")
 
+   def init(self, ensemble):
+      pass
+
+   def updateGui(self):
       # Last step, fill in application combobox and select the first one.
       self.__fillApplicationCB()
       self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
 
    def __fillApplicationCB(self):
-      self.mApplications = store.findApplications()
+      env = maestro.core.Environment()
+      self.mApplications = env.mStanzaStore.findApplications()
       self.mApplicationCB.clear()
       for app in self.mApplications:
          label = app.get('label', None)
@@ -506,21 +570,23 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mArgLbl.installEventFilter(self)
       self.mEnvVarLbl.installEventFilter(self)
 
-      zoom_icon = QtGui.QIcon("images/zoom-extents.png")
+      zoom_icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/zoom-extents.png")
       self.mZoomExtentsAction = QtGui.QAction(zoom_icon, self.tr("Zoom Extents"), self)
       self.connect(self.mZoomExtentsAction, QtCore.SIGNAL("triggered()"), self.onZoomExtents)
       self.mZoomExtentsBtn.setDefaultAction(self.mZoomExtentsAction)
 
       # Create icons that can be added to a menu later.
-      icon = QtGui.QIcon()
+      icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/no_drag.png")
       self.mNoDragAction = QtGui.QAction(icon, self.tr("Selection Mode"), self)
       self.connect(self.mNoDragAction, QtCore.SIGNAL("triggered()"), self.mNoDragBtn, QtCore.SLOT("click()"))
 
+      icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/scroll_drag.png")
       self.mScrollDragAction = QtGui.QAction(icon, self.tr("Scroll Mode"), self)
       self.connect(self.mScrollDragAction, QtCore.SIGNAL("triggered()"), self.mScrollDragBtn, QtCore.SLOT("click()"))
 
-      self.mRubberDragAction = QtGui.QAction(icon, self.tr("Group Mode"), self)
-      self.connect(self.mRubberDragAction, QtCore.SIGNAL("triggered()"), self.mRubberBandDragBtn, QtCore.SLOT("click()"))
+      icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/rubber_drag.png")
+      self.mRubberBandDragAction = QtGui.QAction(icon, self.tr("Group Mode"), self)
+      self.connect(self.mRubberBandDragAction, QtCore.SIGNAL("triggered()"), self.mRubberBandDragBtn, QtCore.SLOT("click()"))
 
       # Create a button group to ensure that we are only in one drag mode at a time.
       self.mDragButtonGroup = QtGui.QButtonGroup()
@@ -690,5 +756,6 @@ if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
    random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
    widget = StanzaEditor()
+   widget.updateGui()
    widget.show()
    sys.exit(app.exec_())

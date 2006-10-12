@@ -54,7 +54,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap>images/Choice.png</pixmap>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Choice.png</pixmap>
         </property>
         <property name="scaledContents" >
          <bool>false</bool>
@@ -81,7 +81,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap>images/Group.png</pixmap>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Group.png</pixmap>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap>images/Arg.png</pixmap>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Arg.png</pixmap>
         </property>
        </widget>
       </item>
@@ -113,7 +113,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap>images/EnvVar.png</pixmap>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/EnvVar.png</pixmap>
         </property>
        </widget>
       </item>
@@ -205,7 +205,7 @@
          <string>Layout</string>
         </property>
         <property name="icon" >
-         <iconset>../../../../../../../../../Desktop/icons/ksirtet.png</iconset>
+         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/layout.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -227,7 +227,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_draw-selection.png</iconset>
+         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/no_drag.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -249,7 +249,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_zoom-shift.png</iconset>
+         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/scroll_drag.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -268,7 +268,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_exit-group.png</iconset>
+         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/rubber_drag.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -287,7 +287,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset>../../../../../../../../../Desktop/icons/24x24/stock_zoom-page-width.png</iconset>
+         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/zoom-extents.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -332,7 +332,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap>../../../../../../../../../Desktop/icons/stock_goal-seek.png</pixmap>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/filter.png</pixmap>
         </property>
        </widget>
       </item>
@@ -386,6 +386,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="StanzaEditorResource.qrc" />
+ </resources>
  <connections/>
 </ui>

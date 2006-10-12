@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/Maestro/StanzaEditor" >
+        <file>images/Arg.png</file>
+        <file>images/Choice.png</file>
+        <file>images/EnvVar.png</file>
+        <file>images/Group.png</file>
+        <file>images/filter.png</file>
+        <file>images/layout.png</file>
+        <file>images/no_drag.png</file>
+        <file>images/rubber_drag.png</file>
+        <file>images/scroll_drag.png</file>
+        <file>images/zoom-extents.png</file>
+    </qresource>
+</RCC>
