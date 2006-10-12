@@ -200,8 +200,18 @@ class OutputFileLogger(NodeLogger):
    def close(self):
       for key in self.mHandlers.keys():
          handler = self.mHandlers[key]
+         handler.flush()
          handler.close()
          self.mLoggers[key].removeHandler(handler)
+
+         # In Python 2.3, invoking close() on a handler object doesn't remove
+         # it from the global dictionary of handlers in the logging module.
+         # We have do to it manually here or else an exception will get thrown
+         # on exit when logging.shutdown() is invoked #because the handler's
+         # file object is closed.
+         if sys.version_info[0] == 2 and sys.version_info[1] < 4:
+            del logging._handlers[handler]
+
       self.mHandlers = None
       self.mLoggers  = None
 
