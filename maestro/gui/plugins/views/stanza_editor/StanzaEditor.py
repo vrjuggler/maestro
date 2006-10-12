@@ -38,13 +38,7 @@ import elementtree.ElementTree as ET
 
 import StanzaEditorResource
 
-if __name__ == '__main__':
-   # If we want all.
-   maestro.core.const.STANZA_PATH = pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')
-   #maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
-   env = maestro.core.Environment()
-   env.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
-   env.mStanzaStore.scan()
+
 
 
 class StanzaEditorPlugin(maestro.core.IViewPlugin):
@@ -487,7 +481,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mClassFilterCB.addItem("master")
       self.mClassFilterCB.addItem("slave")
 
-   def init(self, ensemble):
+   def init(self, ensemble=None):
       env = maestro.core.Environment()
       self.mLayoutPlugins = env.mPluginManager.getPlugins(
          plugInType=maestro.core.IGraphicsSceneLayout, returnNameDict=True)
@@ -792,7 +786,23 @@ class ItemTableModel(QtCore.QAbstractTableModel):
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
    random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
+
+   # If we want all.
+   maestro.core.const.STANZA_PATH = pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')
+   maestro.core.const.PLUGIN_DIR = pj(os.path.dirname(__file__), '.')
+   #maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
+   env = maestro.core.Environment()
+   env.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
+   env.mStanzaStore.scan()
+   # -- Plugin manager -- #
+   env.mPluginManager = maestro.util.plugin.PluginManager()
+   print maestro.core.const.PLUGIN_DIR
+   def dumpProgressCb(p,s):
+      print "%s [%s]" % (p,s)
+   env.mPluginManager.scan(pj(maestro.core.const.PLUGIN_DIR), dumpProgressCb)
+
    widget = StanzaEditor()
+   widget.init()
    widget.updateGui()
    widget.show()
    sys.exit(app.exec_())
