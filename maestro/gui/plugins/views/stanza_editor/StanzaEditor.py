@@ -52,6 +52,8 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = StanzaEditor()
       self.mToolbar = None
+      self.mToolbar2 = None
+      self.mToolbar3 = None
       self.mMenu = None
       
    def getName():
@@ -66,6 +68,9 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       return self.widget
 
    def activate(self, mainWindow):
+      # Update the Stanza Editor
+      self.widget.updateGui()
+
       # Build toolbar by taking buttons from stanza editor. We onlyt do this
       # the first time that the view is activated.
       if self.mToolbar is None:
@@ -75,8 +80,32 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
          self.mToolbar.addWidget(self.widget.mScrollDragBtn)
          self.mToolbar.addWidget(self.widget.mRubberBandDragBtn)
          self.mToolbar.addWidget(self.widget.mZoomExtentsBtn)
+      if self.mToolbar2 is None:
+         self.mToolbar2 = QtGui.QToolBar("Application/Filter Toolbar", mainWindow)
+         self.mToolbar2.addWidget(self.widget.mApplicationLbl)
+         self.mToolbar2.addWidget(self.widget.mApplicationCB)
+         self.mToolbar2.addWidget(self.widget.mClassLine)
+         self.mToolbar2.addWidget(self.widget.mClassFilterLbl)
+         self.mToolbar2.addWidget(self.widget.mOperatingSystemCB)
+         self.mToolbar2.addWidget(self.widget.mClassFilterComma)
+         self.mToolbar2.addWidget(self.widget.mClassFilterCB)
+         self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
+         self.widget.mToolGroupBox.setParent(None)
+      if self.mToolbar3 is None:
+         self.mToolbar3 = QtGui.QToolBar("Application/Filter Toolbar", mainWindow)
+         self.mToolbar3.addWidget(self.widget.mChoiceLbl)
+         self.mToolbar3.addWidget(self.widget.mGroupLbl)
+         self.mToolbar3.addWidget(self.widget.mArgLbl)
+         self.mToolbar3.addWidget(self.widget.mEnvVarLbl)
+         #self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
+         self.widget.mToolboxFrame.setParent(None)
       mainWindow.addToolBar(self.mToolbar)
+      mainWindow.addToolBarBreak()
       self.mToolbar.show()
+      mainWindow.addToolBar(self.mToolbar2)
+      self.mToolbar2.show()
+      mainWindow.addToolBar(QtCore.Qt.RightToolBarArea, self.mToolbar3)
+      self.mToolbar3.show()
 
       # Add menu.
       if self.mMenu is None:
@@ -90,13 +119,14 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
          self.mMenu.addSeparator()
          self.mMenu.addAction(self.widget.mZoomExtentsAction)
       mainWindow.menuBar().addAction(self.mMenu.menuAction())
-      
-      # Update the Stanza Editor
-      self.widget.updateGui()
    
    def deactivate(self, mainWindow):
       mainWindow.removeToolBar(self.mToolbar)
+      mainWindow.removeToolBar(self.mToolbar2)
+      mainWindow.removeToolBar(self.mToolbar3)
       self.mToolbar.hide()
+      self.mToolbar2.hide()
+      self.mToolbar3.hide()
       self.mMenu.hide()
       mainWindow.menuBar().removeAction(self.mMenu.menuAction())
 
@@ -629,10 +659,11 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mHelpWidget.clear()
 
          # Load help HTML data.
-         file_name = "help/" + item.mElement.tag + ".html"
-         file = QtCore.QFile(file_name)
+         file_name = item.mElement.tag + ".html"
+         file_path = pj(os.path.dirname(__file__), 'help', file_name)
+         file = QtCore.QFile(file_path)
          if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
-            print "Cannot read file %s:\n%s." % (file_name, file.errorString())
+            print "Cannot read file %s:\n%s." % (file_path, file.errorString())
          else:
             stream = QtCore.QTextStream(file)
             QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
