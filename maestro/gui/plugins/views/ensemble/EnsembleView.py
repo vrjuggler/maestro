@@ -60,7 +60,8 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
       """ Slot that gets called when a node reports it's settings. """
       self.mNodeSettings[nodeId] = settings
       if nodeId == self.mSelectedNodeId:
-         self.emit(QtCore.SIGNAL("modelChanged()"))
+         # Signal that all data was updated.
+         self.emit(QtCore.SIGNAL("modelReset()"))
 
    def setSelectedNode(self, nodeId):
       """ Set the node that we want to view settings for.
@@ -79,7 +80,7 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
          self.mSelectedNodeId = nodeId
 
       # Since we are trying to view information about a different node
-      self.emit(QtCore.SIGNAL("modelChanged()"))
+      self.emit(QtCore.SIGNAL("modelReset()"))
 
    def rowCount(self, parent=QtCore.QModelIndex()):
       """ Return the number of settings for node.. """
@@ -218,14 +219,6 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Connect new selection model
       QtCore.QObject.connect(self.mClusterListView.selectionModel(),
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
-
-      # Connect node settings model to update view when it changes.
-      QtCore.QObject.connect(self.mNodeSettingsModel,
-         QtCore.SIGNAL("modelChanged()"), self.onNodeModelChanged)
-
-   def onNodeModelChanged(self):
-      """ Slot that is called when the node settings model changes. """
-      self.mSettingsTableView.reset()
 
    def onRefresh(self):
       """ Slot that requests information about all nodes in the Ensemble. """
