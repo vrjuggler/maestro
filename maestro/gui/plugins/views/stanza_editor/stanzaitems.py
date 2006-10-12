@@ -461,7 +461,13 @@ class Node(QtGui.QGraphicsItem):
       """
 
       rect = QtCore.QRectF(-self.mSize.width()/2.0, -self.mSize.height()/2.0, self.mSize.width(), self.mSize.height())
-      rect.adjust(-(self.penWidth/2), -(self.penWidth/2),
+
+      # If we are selected, then make our border and text lines thicker.
+      border_width = self.penWidth
+      if self.hasFocus():
+         border_width = 3.0 
+
+      rect.adjust(-(border_width/2), -(border_width/2),
                   self.dropShadowWidth, self.dropShadowWidth)
       return rect
 
