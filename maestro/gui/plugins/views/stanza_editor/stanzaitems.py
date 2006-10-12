@@ -244,6 +244,7 @@ class Edge(QtGui.QGraphicsItem):
    def hoverLeaveEvent(self, event):
       self.mArrowColor = QtCore.Qt.black
       self.arrowSize = 10.0
+      self.update()
       QtGui.QGraphicsItem.hoverLeaveEvent(self, event)
 
    def inHotRect(self, event):

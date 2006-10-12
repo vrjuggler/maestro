@@ -52,17 +52,18 @@ class StanzaScene(QtGui.QGraphicsScene):
 
       # Build all first level nodes.
       self.mApplicationItem = self._buildNode(self.mApplication)
-      self.mClassFilter = ""
-      self.mClassFilterList = [c.lstrip().rstrip() for c in self.mClassFilter.split(',') if c != ""]
+      self.mClassFilterList = []
       
-   def setClassFilter(self, classFilter):
-      if isinstance(classFilter, QtCore.QString):
-         self.mClassFilter = str(classFilter)
+   def setClassFilter(self, classFilterString):
+      """ Called when we want to filter all items depending on their class.
+
+          @param classFilterString: The new class string that we want to filter with.
+      """
+      if isinstance(classFilterString, QtCore.QString):
+         class_filter_string = str(classFilterString)
       else:
-         self.mClassFilter = classFilter
-      self.mClassFilterList = [c.lstrip().rstrip() for c in self.mClassFilter.split(',') if c != ""]
-      print self.mClassFilter
-      print self.mClassFilterList
+         class_filter_string = classFilterString
+      self.mClassFilterList = [c.lstrip().rstrip() for c in class_filter_string.split(',') if c != ""]
       self.__matchAllItemClasses()
 
    def __matchAllItemClasses(self):
@@ -138,7 +139,6 @@ class StanzaScene(QtGui.QGraphicsScene):
          self.removeItem(self.mLine)
          del self.mLine
          self.mLine = None
-         print "Clearing line"
 
    def dragMoveEvent(self, event):
       if event.mimeData().hasFormat("maestro/new-component"):
@@ -157,15 +157,6 @@ class StanzaScene(QtGui.QGraphicsScene):
          event.acceptProposedAction()
       else:
          QtGui.QGraphicsScene.dragEnterEvent(self, event)
-
-   """
-   def dragLeaveEvent(self, event):
-      print "DragLeave Event"
-      if event.mimeData().hasFormat("maestro/create-link"):
-         print "Drag leave"
-      else:
-         QtGui.QGraphicsScene.dragEnterEvent(self, event)
-   """
 
    def createLinkDrag(self, event, source):
       self.mSource = source
@@ -211,11 +202,18 @@ class StanzaScene(QtGui.QGraphicsScene):
                      old_dest.setParent(None)
                   event.accept()
       else:
+         # Record the old focus so that we can decide it focus has changed.
          old_focus = self.focusItem()
          QtGui.QGraphicsScene.mousePressEvent(self, event)
-         if old_focus != self.focusItem():
-            print "New focus: ", self.focusItem()
-            self.emit(QtCore.SIGNAL("itemSelected(QGraphicsItem*)"), self.focusItem())
+         new_focus = self.focusItem()
+         if old_focus != new_focus:
+            # Emit a signal that the editor can get.
+            self.emit(QtCore.SIGNAL("itemSelected(QGraphicsItem*)"), new_focus)
+            # Ensure that items get updated after their focus changes.
+            if old_focus is not None:
+               old_focus.update()
+            if new_focus is not None:
+               self.focusItem().update()
 
    def mouseReleaseEvent(self, event):
       if event.button() == QtCore.Qt.RightButton:
@@ -253,19 +251,15 @@ class StanzaScene(QtGui.QGraphicsScene):
       QtGui.QGraphicsScene.keyPressEvent(self, event)
 
    def mouseMoveEvent(self, event):
+      """ Override the default behavior so that we can update the
+          position of our new edge.
+      """
       if event.buttons() & QtCore.Qt.RightButton:
          assert self.mouseGrabberItem() is None
-         dp = event.buttonDownScenePos(QtCore.Qt.RightButton)
-
-         #print "down: (%s, %s)" % (dp.x(), dp.y())
-         lp = event.lastScenePos()
-         #print "last: (%s, %s)" % (lp.x(), lp.y())
          sp = event.scenePos()
-         #print "current: (%s, %s)" % (sp.x(), sp.y())
          if self.mLine is not None:
             self.mLine.setLine(self.mSource.pos().x(), self.mSource.pos().y(), sp.x(), sp.y())
       else:
-         #print self.mouseGrabberItem()
          QtGui.QGraphicsScene.mouseMoveEvent(self, event)
 
    def dropEvent(self, event):
@@ -431,7 +425,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
    def __fillApplicationCB(self):
       self.mApplications = store.findApplications()
-      print "Apps: ", self.mApplications
       self.mApplicationCB.clear()
       for app in self.mApplications:
          label = app.get('label', None)
@@ -546,8 +539,13 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mEditTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mEditTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
-   def onClassFilterChanged(self, val):
-      print "Filter: ", val
+   def onClassFilterChanged(self, text):
+      """ Slot that is called when either the operating system or class
+          filter comboboxes change.
+
+          @param text: New text for the signaling combobox. This is not
+                       used since we don't know which one it came from.
+      """
       if self.mScene is not None:
          class_filter = self.mOperatingSystemCB.currentText() + ',' + self.mClassFilterCB.currentText()
          self.mScene.setClassFilter(class_filter)
