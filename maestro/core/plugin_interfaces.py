@@ -268,7 +268,7 @@ class IOptionEditorPlugin(maestro.util.plugin.Plugin):
       not_implemented()
    getOptionType = staticmethod(getOptionType)
 
-   def getEditorWidget(self, scene):
+   def getEditorWidget(self, option):
       '''
       Returns an editor for the given stanza option.
 

@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
       StanzaEditorBase.setObjectName("StanzaEditorBase")
-      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,611,428).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
+      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,640,455).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
 
       self.gridlayout = QtGui.QGridLayout(StanzaEditorBase)
       self.gridlayout.setMargin(9)
@@ -49,7 +49,6 @@ class Ui_StanzaEditorBase(object):
       sizePolicy.setHeightForWidth(self.mChoiceLbl.sizePolicy().hasHeightForWidth())
       self.mChoiceLbl.setSizePolicy(sizePolicy)
       self.mChoiceLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mChoiceLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Choice.png"))
       self.mChoiceLbl.setScaledContents(False)
       self.mChoiceLbl.setObjectName("mChoiceLbl")
       self.vboxlayout.addWidget(self.mChoiceLbl)
@@ -62,19 +61,16 @@ class Ui_StanzaEditorBase(object):
       sizePolicy.setHeightForWidth(self.mGroupLbl.sizePolicy().hasHeightForWidth())
       self.mGroupLbl.setSizePolicy(sizePolicy)
       self.mGroupLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mGroupLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Group.png"))
       self.mGroupLbl.setObjectName("mGroupLbl")
       self.vboxlayout.addWidget(self.mGroupLbl)
 
       self.mArgLbl = QtGui.QLabel(self.mToolboxFrame)
       self.mArgLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mArgLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Arg.png"))
       self.mArgLbl.setObjectName("mArgLbl")
       self.vboxlayout.addWidget(self.mArgLbl)
 
       self.mEnvVarLbl = QtGui.QLabel(self.mToolboxFrame)
       self.mEnvVarLbl.setMaximumSize(QtCore.QSize(50,50))
-      self.mEnvVarLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/EnvVar.png"))
       self.mEnvVarLbl.setObjectName("mEnvVarLbl")
       self.vboxlayout.addWidget(self.mEnvVarLbl)
 
@@ -115,8 +111,8 @@ class Ui_StanzaEditorBase(object):
       self.mSplitter2.setOrientation(QtCore.Qt.Horizontal)
       self.mSplitter2.setObjectName("mSplitter2")
 
-      self.mEditTableView = QtGui.QTableView(self.mSplitter2)
-      self.mEditTableView.setObjectName("mEditTableView")
+      self.mEditorArea = QtGui.QWidget(self.mSplitter2)
+      self.mEditorArea.setObjectName("mEditorArea")
 
       self.mHelpWidget = QtGui.QTextEdit(self.mSplitter2)
       self.mHelpWidget.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
@@ -190,7 +186,6 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mClassLine)
 
       self.mClassFilterLbl = QtGui.QLabel(self.mToolGroupBox)
-      self.mClassFilterLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/filter.png"))
       self.mClassFilterLbl.setObjectName("mClassFilterLbl")
       self.hboxlayout.addWidget(self.mClassFilterLbl)
 

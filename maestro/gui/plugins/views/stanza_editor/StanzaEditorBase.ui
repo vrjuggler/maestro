@@ -54,7 +54,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Choice.png</pixmap>
+         <pixmap/>
         </property>
         <property name="scaledContents" >
          <bool>false</bool>
@@ -81,7 +81,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Group.png</pixmap>
+         <pixmap/>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Arg.png</pixmap>
+         <pixmap/>
         </property>
        </widget>
       </item>
@@ -113,7 +113,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/EnvVar.png</pixmap>
+         <pixmap/>
         </property>
        </widget>
       </item>
@@ -175,7 +175,7 @@
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QTableView" name="mEditTableView" />
+         <widget class="QWidget" native="1" name="mEditorArea" />
          <widget class="QTextEdit" name="mHelpWidget" >
           <property name="textInteractionFlags" >
            <enum>Qt::TextBrowserInteraction</enum>
@@ -332,7 +332,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/filter.png</pixmap>
+         <pixmap/>
         </property>
        </widget>
       </item>

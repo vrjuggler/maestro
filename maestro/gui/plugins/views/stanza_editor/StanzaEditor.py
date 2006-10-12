@@ -459,6 +459,8 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mScene = None
       self.setupUi(self)
       #self.timerId = 0
+      self.mOptionEditors = {}
+      self.mOptionEditor = None
 
       # Remove old graphics view widget.
       self.mGraphicsView.setParent(None)
@@ -483,6 +485,31 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
    def init(self, ensemble=None):
       env = maestro.core.Environment()
+      self.mOptionEditorPlugins = env.mPluginManager.getPlugins(
+         plugInType=maestro.core.IOptionEditorPlugin, returnNameDict=True)
+
+      for name, cls in self.mOptionEditorPlugins.iteritems():
+         # Try to load option editors
+         try:
+            print "Adding new option editor: %s %s"%(name, cls.__name__)
+            editor_name = cls.getName()
+            option_type = cls.getOptionType()
+            new_plugin = cls()
+            self.mOptionEditors[option_type] = new_plugin
+         except Exception, ex:
+            editor_name = "Unknown"
+            if cls is not None and cls.getName() is not None:
+               editor_name = cls.getName()
+               
+            err_text = "Error loading editor:" + editor_name + "\n  exception:" + str(ex)
+            print err_text
+            traceback.print_exc()
+            
+            QtGui.QMessageBox.critical(self, "Option Editor Failure", err_text, 
+                                       QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
+                                       QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
+
+
       self.mLayoutPlugins = env.mPluginManager.getPlugins(
          plugInType=maestro.core.IGraphicsSceneLayout, returnNameDict=True)
 
@@ -512,7 +539,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             if cls is not None and cls.getName() is not None:
                layout_name = cls.getName()
                
-            err_text = "Error loading view:" + layout_name + "\n  exception:" + str(ex)
+            err_text = "Error loading layout:" + layout_name + "\n  exception:" + str(ex)
             print err_text
             traceback.print_exc()
             
@@ -595,6 +622,17 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
+      # Create a simple layout for our container widget
+      self.mEditorLayout = QtGui.QVBoxLayout(self.mEditorArea)
+      self.mEditorLayout.setMargin(0)
+      self.mEditorLayout.setSpacing(0)
+
+      # Set the default editor first.
+      self.mEditTableView = QtGui.QTableView()
+      self.mOptionEditor = self.mEditTableView
+      self.mEditorLayout.addWidget(self.mOptionEditor)
+      self.mOptionEditor.setParent(self.mEditorArea)
+
       self.mChoiceLbl.installEventFilter(self)
       self.mGroupLbl.installEventFilter(self)
       self.mArgLbl.installEventFilter(self)
@@ -662,10 +700,28 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mGraphicsView.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
          self.mGraphicsView.viewport().setCursor(QtGui.QCursor())
 
+#   def __buildOptionEditor(self, item):
+#      assert isinstance(item, Node) and item.mElement is not None
+#
+#      editor_class = None
+#      for name, cls in self.mOptionEditorPlugins.iteritems():
+#         if cls.getOptionType() == item.mElement.tag:
+#            editor_class = cls
+#            editor_name = name
+#            break
+
    def onItemSelected(self, item):
+      self.mHelpWidget.clear()
+      old_editor = self.mOptionEditor
+
+      self.mOptionEditor = None
       if isinstance(item, Node):
-         self.mItemModel.setItem(item)
-         self.mHelpWidget.clear()
+         if self.mOptionEditors.has_key(item.mElement.tag):
+            editor = self.mOptionEditors[item.mElement.tag]
+            self.mOptionEditor = editor.getEditorWidget(item)
+         else:
+            self.mItemModel.setItem(item)
+            self.mOptionEditor = self.mEditTableView
 
          # Load help HTML data.
          file_name = item.mElement.tag + ".html"
@@ -679,9 +735,16 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             self.mHelpWidget.setHtml(stream.readAll())
             QtGui.QApplication.restoreOverrideCursor()
          file.close()
-      else:
-         self.mItemModel.setItem(None)
-         self.mHelpWidget.clear()
+
+      if self.mOptionEditor != old_editor:
+         if old_editor is not None:
+            self.mEditorLayout.removeWidget(old_editor)
+            old_editor.setParent(None)
+
+         if self.mOptionEditor is not None:
+            self.mEditorLayout.addWidget(self.mOptionEditor)
+            self.mOptionEditor.setParent(self.mEditorArea)
+
 
    def keyPressEvent(self, event):
       key = event.key()
