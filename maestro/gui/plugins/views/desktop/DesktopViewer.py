@@ -42,7 +42,7 @@ class DesktopViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
-   def activate(self):
+   def activate(self, mainWindow):
       self.widget.refresh()
 
 class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
