@@ -19,7 +19,7 @@
 from environment import Environment
 from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin, \
                               ISaverPlugin, IDesktopWallpaperPlugin,    \
-                              IGraphicsSceneLayout
+                              IGraphicsSceneLayout, IOptionEditorPlugin
 #from plugin_holder import ViewPluginsHolder
 
 class _const:

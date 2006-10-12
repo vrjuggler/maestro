@@ -229,7 +229,7 @@ class IGraphicsSceneLayout(maestro.util.plugin.Plugin):
       Returns the name of this graphics scene layout plugin.
 
       @return A human-readable string identifying this graphics scene
-              layout management plug-in (more or less) uniquely.
+              layout plug-in (more or less) uniquely.
       '''
       not_implemented()
    getName = staticmethod(getName)
@@ -239,5 +239,39 @@ class IGraphicsSceneLayout(maestro.util.plugin.Plugin):
       Layout all GraphicsItems in the given GraphicsScene.
 
       @param scene QGraphicsScene containing items to layout.
+      '''
+      not_implemented()
+
+class IOptionEditorPlugin(maestro.util.plugin.Plugin):
+   '''
+   The base interface for plug-ins that edit a given stanza option.
+   '''
+   def __init__(self):
+      pass
+
+   def getName():
+      '''
+      Returns the name of this option editor plugin.
+
+      @return A human-readable string identifying this option editor
+              plug-in (more or less) uniquely.
+      '''
+      not_implemented()
+   getName = staticmethod(getName)
+
+   def getOptionType():
+      '''
+      Returns the option type that this editor supports.
+
+      @return A XML element tag that this editor supports.
+      '''
+      not_implemented()
+   getOptionType = staticmethod(getOptionType)
+
+   def getEditorWidget(self, scene):
+      '''
+      Returns an editor for the given stanza option.
+
+      @param option The stanza option that we want to edit.
       '''
       not_implemented()
