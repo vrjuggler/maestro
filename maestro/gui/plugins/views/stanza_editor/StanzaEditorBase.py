@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_StanzaEditorBase(object):
    def setupUi(self, StanzaEditorBase):
       StanzaEditorBase.setObjectName("StanzaEditorBase")
-      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,642,662).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
+      StanzaEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,611,428).size()).expandedTo(StanzaEditorBase.minimumSizeHint()))
 
       self.gridlayout = QtGui.QGridLayout(StanzaEditorBase)
       self.gridlayout.setMargin(9)

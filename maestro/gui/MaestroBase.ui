@@ -1,15 +1,12 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>MaestroBase</class>
  <widget class="QMainWindow" name="MaestroBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
-    <height>711</height>
+    <width>557</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -76,8 +73,8 @@
        <widget class="QStackedWidget" name="mStack" >
         <property name="sizePolicy" >
          <sizepolicy>
-          <hsizetype>1</hsizetype>
-          <vsizetype>1</vsizetype>
+          <hsizetype>5</hsizetype>
+          <vsizetype>5</vsizetype>
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -98,42 +95,6 @@
           <property name="spacing" >
            <number>6</number>
           </property>
-          <item>
-           <widget class="QSplitter" name="mOldSplitter" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <widget class="QPushButton" name="mOldBtn1" >
-             <property name="text" >
-              <string>PushButton</string>
-             </property>
-            </widget>
-            <widget class="QWidget" name="mOldFrame" >
-             <layout class="QVBoxLayout" >
-              <property name="margin" >
-               <number>0</number>
-              </property>
-              <property name="spacing" >
-               <number>6</number>
-              </property>
-              <item>
-               <widget class="QPushButton" name="mOldBtn3" >
-                <property name="text" >
-                 <string>PushButton</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="mOldBtn2" >
-                <property name="text" >
-                 <string>PushButton</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </item>
          </layout>
         </widget>
        </widget>
@@ -147,7 +108,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>788</width>
+     <width>557</width>
      <height>29</height>
     </rect>
    </property>
@@ -269,7 +230,6 @@
    </property>
   </action>
  </widget>
- <pixmapfunction></pixmapfunction>
  <resources>
   <include location="MaestroResource.qrc" />
  </resources>

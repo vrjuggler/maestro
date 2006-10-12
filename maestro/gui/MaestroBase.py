@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_MaestroBase(object):
    def setupUi(self, MaestroBase):
       MaestroBase.setObjectName("MaestroBase")
-      MaestroBase.resize(QtCore.QSize(QtCore.QRect(0,0,788,711).size()).expandedTo(MaestroBase.minimumSizeHint()))
+      MaestroBase.resize(QtCore.QSize(QtCore.QRect(0,0,557,523).size()).expandedTo(MaestroBase.minimumSizeHint()))
       MaestroBase.setWindowIcon(QtGui.QIcon(":/Maestro/images/maestro_icon.png"))
       MaestroBase.setAutoFillBackground(True)
       MaestroBase.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
@@ -63,7 +63,7 @@ class Ui_MaestroBase(object):
 
       self.mStack = QtGui.QStackedWidget(self.centralwidget)
 
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(1),QtGui.QSizePolicy.Policy(1))
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
       sizePolicy.setHorizontalStretch(0)
       sizePolicy.setVerticalStretch(0)
       sizePolicy.setHeightForWidth(self.mStack.sizePolicy().hasHeightForWidth())
@@ -83,37 +83,13 @@ class Ui_MaestroBase(object):
       self.vboxlayout1.setMargin(9)
       self.vboxlayout1.setSpacing(6)
       self.vboxlayout1.setObjectName("vboxlayout1")
-
-      self.mOldSplitter = QtGui.QSplitter(self.mOldPage)
-      self.mOldSplitter.setOrientation(QtCore.Qt.Horizontal)
-      self.mOldSplitter.setObjectName("mOldSplitter")
-
-      self.mOldBtn1 = QtGui.QPushButton(self.mOldSplitter)
-      self.mOldBtn1.setObjectName("mOldBtn1")
-
-      self.mOldFrame = QtGui.QWidget(self.mOldSplitter)
-      self.mOldFrame.setObjectName("mOldFrame")
-
-      self.vboxlayout2 = QtGui.QVBoxLayout(self.mOldFrame)
-      self.vboxlayout2.setMargin(0)
-      self.vboxlayout2.setSpacing(6)
-      self.vboxlayout2.setObjectName("vboxlayout2")
-
-      self.mOldBtn3 = QtGui.QPushButton(self.mOldFrame)
-      self.mOldBtn3.setObjectName("mOldBtn3")
-      self.vboxlayout2.addWidget(self.mOldBtn3)
-
-      self.mOldBtn2 = QtGui.QPushButton(self.mOldFrame)
-      self.mOldBtn2.setObjectName("mOldBtn2")
-      self.vboxlayout2.addWidget(self.mOldBtn2)
-      self.vboxlayout1.addWidget(self.mOldSplitter)
       self.mStack.addWidget(self.mOldPage)
       self.hboxlayout1.addWidget(self.mStack)
       self.hboxlayout.addLayout(self.hboxlayout1)
       MaestroBase.setCentralWidget(self.centralwidget)
 
       self.menubar = QtGui.QMenuBar(MaestroBase)
-      self.menubar.setGeometry(QtCore.QRect(0,0,788,29))
+      self.menubar.setGeometry(QtCore.QRect(0,0,557,29))
       self.menubar.setObjectName("menubar")
 
       self.menuHelp = QtGui.QMenu(self.menubar)
@@ -140,10 +116,10 @@ class Ui_MaestroBase(object):
       self.mDockWidgetContents = QtGui.QWidget(self.mStatusWindow)
       self.mDockWidgetContents.setObjectName("mDockWidgetContents")
 
-      self.vboxlayout3 = QtGui.QVBoxLayout(self.mDockWidgetContents)
-      self.vboxlayout3.setMargin(9)
-      self.vboxlayout3.setSpacing(6)
-      self.vboxlayout3.setObjectName("vboxlayout3")
+      self.vboxlayout2 = QtGui.QVBoxLayout(self.mDockWidgetContents)
+      self.vboxlayout2.setMargin(9)
+      self.vboxlayout2.setSpacing(6)
+      self.vboxlayout2.setObjectName("vboxlayout2")
       self.mStatusWindow.setWidget(self.mDockWidgetContents)
       MaestroBase.addDockWidget(QtCore.Qt.DockWidgetArea(8),self.mStatusWindow)
 
@@ -191,9 +167,6 @@ class Ui_MaestroBase(object):
 
    def retranslateUi(self, MaestroBase):
       MaestroBase.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Maestro Client by Infiscape", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOldBtn1.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOldBtn3.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOldBtn2.setText(QtGui.QApplication.translate("MaestroBase", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
       self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
       self.menuFile.setTitle(QtGui.QApplication.translate("MaestroBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
       self.toolBar.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Toolbar", None, QtGui.QApplication.UnicodeUTF8))
@@ -206,6 +179,7 @@ class Ui_MaestroBase(object):
       self.action_Exit.setText(QtGui.QApplication.translate("MaestroBase", "E&xit", None, QtGui.QApplication.UnicodeUTF8))
       self.action_About.setText(QtGui.QApplication.translate("MaestroBase", "&About", None, QtGui.QApplication.UnicodeUTF8))
       self.mActionArchiveLogs.setText(QtGui.QApplication.translate("MaestroBase", "Archive Logs...", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

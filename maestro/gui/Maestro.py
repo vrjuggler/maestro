@@ -344,7 +344,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onExit)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
-      self.vboxlayout3.addWidget(self.mOutputTab)
+      self.vboxlayout2.addWidget(self.mOutputTab)
 
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
