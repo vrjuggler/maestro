@@ -17,9 +17,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import errno
-import os
-import pwd
-
+import sys, os
+if not sys.platform.startswith("win"):
+   import pwd
 
 def changeToUserName(userName):
    pw_entry = pwd.getpwnam(userName)

@@ -17,9 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import errno
-import os
+import os, sys
 import os.path
-import pwd
+if not sys.platform.startswith("win"):
+   import pwd
 import popen2
 import re
 import signal

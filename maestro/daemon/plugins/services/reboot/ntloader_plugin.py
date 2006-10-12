@@ -22,10 +22,8 @@ import maestro.core
 const = maestro.core.const
 import re
 
-try:
-   import wmi
-except:
-   wmi = None
+if sys.platform.startswith('win'):
+   from maestro.daemon import wmi
 
 sWindowsRe = re.compile(r'Windows', re.IGNORECASE)
 
@@ -38,7 +36,7 @@ class NtLoaderPlugin(maestro.core.IBootPlugin):
    """
    def __init__(self):
       maestro.core.IBootPlugin.__init__(self)
-      if wmi is not None:
+      if sys.platform.startswith('win'):
          self.mWMIConnection = wmi.WMI()
 
    def getName():
