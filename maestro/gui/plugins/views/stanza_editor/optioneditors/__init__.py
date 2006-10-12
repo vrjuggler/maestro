@@ -18,24 +18,4 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, random, types
-from PyQt4 import QtCore, QtGui
-
-import maestro.core
-import elementtree.ElementTree as ET
-
-class OverrideEditor(maestro.core.IOptionEditorPlugin):
-   def __init__(self):
-      maestro.core.IOptionEditorPlugin.__init__(self)
-      self.mEditor = QtGui.QLabel("Override Editor")
-
-   def getName():
-      return "Override Editor"
-   getName = staticmethod(getName)
-
-   def getOptionType():
-      return "override"
-   getOptionType = staticmethod(getOptionType)
-
-   def getEditorWidget(self, option):
-      return self.mEditor
+# Module file.

@@ -54,7 +54,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap/>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Choice.png</pixmap>
         </property>
         <property name="scaledContents" >
          <bool>false</bool>
@@ -81,7 +81,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap/>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Group.png</pixmap>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap/>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/Arg.png</pixmap>
         </property>
        </widget>
       </item>
@@ -113,7 +113,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap/>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/EnvVar.png</pixmap>
         </property>
        </widget>
       </item>

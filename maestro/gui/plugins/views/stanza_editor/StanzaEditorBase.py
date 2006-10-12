@@ -49,6 +49,7 @@ class Ui_StanzaEditorBase(object):
       sizePolicy.setHeightForWidth(self.mChoiceLbl.sizePolicy().hasHeightForWidth())
       self.mChoiceLbl.setSizePolicy(sizePolicy)
       self.mChoiceLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mChoiceLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Choice.png"))
       self.mChoiceLbl.setScaledContents(False)
       self.mChoiceLbl.setObjectName("mChoiceLbl")
       self.vboxlayout.addWidget(self.mChoiceLbl)
@@ -61,16 +62,19 @@ class Ui_StanzaEditorBase(object):
       sizePolicy.setHeightForWidth(self.mGroupLbl.sizePolicy().hasHeightForWidth())
       self.mGroupLbl.setSizePolicy(sizePolicy)
       self.mGroupLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mGroupLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Group.png"))
       self.mGroupLbl.setObjectName("mGroupLbl")
       self.vboxlayout.addWidget(self.mGroupLbl)
 
       self.mArgLbl = QtGui.QLabel(self.mToolboxFrame)
       self.mArgLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mArgLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/Arg.png"))
       self.mArgLbl.setObjectName("mArgLbl")
       self.vboxlayout.addWidget(self.mArgLbl)
 
       self.mEnvVarLbl = QtGui.QLabel(self.mToolboxFrame)
       self.mEnvVarLbl.setMaximumSize(QtCore.QSize(50,50))
+      self.mEnvVarLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/EnvVar.png"))
       self.mEnvVarLbl.setObjectName("mEnvVarLbl")
       self.vboxlayout.addWidget(self.mEnvVarLbl)
 
