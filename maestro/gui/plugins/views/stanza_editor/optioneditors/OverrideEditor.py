@@ -81,7 +81,8 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
 
       self.mOverrideModel = OverrideTableModel(option)
       self.mOverrideTableView.setModel(self.mOverrideModel)
-
+      self.mOverrideTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mOverrideTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
    def onPathSelected(self, text):
       env = maestro.core.Environment()
