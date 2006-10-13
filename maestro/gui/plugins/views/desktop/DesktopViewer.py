@@ -68,6 +68,8 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
       self.connect(self.mSaverEnabledBox, QtCore.SIGNAL("toggled(bool)"),
                    self.onToggleScreenSaver)
+      self.connect(self.mBgImgFileText, QtCore.SIGNAL("editingFinished()"),
+                   self.onBackgroundEdited)
       self.connect(self.mBgChooserBtn, QtCore.SIGNAL("clicked()"),
                    self.onChooseBackgroundFile)
       self.connect(self.mStopSaverBtn, QtCore.SIGNAL("clicked()"),
@@ -163,6 +165,22 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       env = maestro.core.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_toggle', val)
 
+   def onBackgroundEdited(self):
+      cur_index = self.mNodeChooser.currentIndex()
+      node_name = self.mNodeChooser.itemText(cur_index)
+      node_id   = str(self.mNodeChooser.itemData(cur_index).toString())
+
+      data = self.mSettings[node_id]
+      cur_file_name = data.getBackgroundImageFile()
+
+      new_file = str(self.mBgImgFileText.text())
+
+      if new_file != '' and new_file != cur_file_name:
+         if os.path.exists(new_file):
+            self._changeBackgroundFile(new_file, node_id)
+         else:
+            self.mBgImgFileText.undo()
+
    def onChooseBackgroundFile(self):
       cur_index = self.mNodeChooser.currentIndex()
       node_name = self.mNodeChooser.itemText(cur_index)
@@ -183,18 +201,22 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       new_file = str(new_file)
 
       if new_file != '' and new_file != cur_file_name:
-         file_obj = open(new_file, 'r+b')
-         data_str = ''.join(file_obj.readlines())
-         file_obj.close()
-         data_list = pbhelpers.string2list(data_str)
+         self._changeBackgroundFile(new_file, node_id)
 
-         env = maestro.core.Environment()
-         env.mEventManager.emit(node_id, 'desktop.set_background', new_file,
-                                data_list, debug = False)
+   def _changeBackgroundFile(self, fileName, nodeId):
+      file_obj = open(fileName, 'r+b')
+      data_str = ''.join(file_obj.readlines())
+      file_obj.close()
+      data_list = pbhelpers.string2list(data_str)
 
-         img_digest = self._storeImage(data_str)
-         data.setBackgroundImageCacheKey(img_digest)
-         self._setBackgroundImage(new_file, data_str)
+      env = maestro.core.Environment()
+      env.mEventManager.emit(nodeId, 'desktop.set_background', fileName,
+                             data_list, debug = False)
+
+      img_digest = self._storeImage(data_str)
+      self.mSettings[nodeId].setBackgroundImageFile(fileName)
+      self.mSettings[nodeId].setBackgroundImageCacheKey(img_digest)
+      self._setBackgroundImage(fileName, data_str)
 
    def onStopScreenSaver(self):
       node_id = self.getCurrentNodeID()
@@ -365,7 +387,6 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 #
 #         if img_file == '':
 #            self.mBgImageLbl.setText("<< Multiple >>")
-#            self.mBgImageLbl.setPixmap(QtGui.QPixmap())
 #            self.mBgImgFileText.setText("")
 #         else:
 #            self._setBackgroundImage(img_file, self.mImageCache[img_key])
@@ -390,10 +411,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
       if imgData == '' or imgData is None:
          self.mBgImageLbl.setText("<< No data >>")
-         self.mBgImageLbl.setPixmap(QtGui.QPixmap())
       else:
-         self.mBgImageLbl.setText('')
-
          # Convert the raw bytes of imgData into a pixmap so that it can be
          # rendered in self.mBgImageLbl.
          byte_array = QtCore.QByteArray.fromRawData(imgData)
