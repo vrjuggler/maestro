@@ -166,7 +166,7 @@ class Ui_MaestroBase(object):
       self.mSaveStanzasAction.setObjectName("mSaveStanzasAction")
 
       self.mArchiveLogsAction = QtGui.QAction(MaestroBase)
-      self.mArchiveLogsAction.setIcon(QtGui.QIcon(":/Maestro/images/paste.png"))
+      self.mArchiveLogsAction.setIcon(QtGui.QIcon(":/Maestro/images/archive.png"))
       self.mArchiveLogsAction.setObjectName("mArchiveLogsAction")
 
       self.mExitAction = QtGui.QAction(MaestroBase)

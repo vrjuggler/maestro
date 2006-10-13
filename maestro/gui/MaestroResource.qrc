@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/Maestro" >
+        <file>images/archive.png</file>
         <file>images/construction.png</file>
         <file>images/copy.png</file>
         <file>images/cut.png</file>
