@@ -107,7 +107,7 @@ class Preferences:
       not a child, then default is returned.
       '''
       element = self.mRoot.find(item)
-      if element is None:
+      if element is None or element.text is None:
          return default
       else:
          return element.text
