@@ -21,17 +21,9 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
+import maestro.core
+
 import BasicEditorBase
-#import math
-
-import os.path
-pj = os.path.join
-sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', '..'))
-#import maestro.core
-#import maestro.core.Stanza
-import maestro.gui.MaestroResource
-
-import elementtree.ElementTree as ET
 
 class BasicEditorPlugin(maestro.core.IOptionEditorPlugin):
    def __init__(self):

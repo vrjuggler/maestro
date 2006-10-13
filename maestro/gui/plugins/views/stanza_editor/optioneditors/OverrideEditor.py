@@ -21,17 +21,10 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
+import maestro.core
+
 import OverrideEditorBase
-#import math
-
-import os.path
-pj = os.path.join
-sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', '..'))
-#import maestro.core
-#import maestro.core.Stanza
-import maestro.gui.MaestroResource
-
-import elementtree.ElementTree as ET
+import helpers
 
 class OverrideEditorPlugin(maestro.core.IOptionEditorPlugin):
    def __init__(self):
@@ -63,6 +56,10 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
       self.mOverrideTableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
    def setOption(self, option):
+      """ Updates the current state of the application with the given option.
+
+          @param option: Option that we are operating on.
+      """
       env = maestro.core.Environment()
       assert(option is not None)
       self.mOption = option
@@ -74,34 +71,84 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
          if ref_path is not None:
             self.mReferencedElements = env.mStanzaStore.find(ref_path)
 
-      self.mPathCB.clear()
-      paths = self.__getAllPaths()
-      for path in paths:
-         self.mPathCB.addItem(path)
+      # Ensure that signals are not connected while filling the combo box.
+      #self.mPathCB.blockSignals(True)
+      self.__fillComboBox()
+      self.__fillMatchList()
+      #self.mPathCB.blockSignals(False)
 
+      # Create an override model and give it to the view.
       self.mOverrideModel = OverrideTableModel(option)
       self.mOverrideTableView.setModel(self.mOverrideModel)
       self.mOverrideTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mOverrideTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
+   def __fillComboBox(self):
+      """ Helper method that fills the combobox with all possible sub-options.
+      """
+      # Clear the current combobox.
+      self.mPathCB.clear()
+
+      # Add current filter.
+      current_path = self.mOption.mElement.get('id', '')
+      if current_path != '':
+         self.mPathCB.addItem(current_path)
+
+      # Add a reasonable default.
+      if current_path != '*':
+         self.mPathCB.addItem('*')
+
+      # Get all options paths under our referenced elements.
+      paths = helpers.getPathsUnderOptions(self.mReferencedElements)
+
+      # Add each path to the combobox.
+      for path in paths:
+         self.mPathCB.addItem(path)
+
    def onPathSelected(self, text):
+      """ Slot that is called when the user either selects a value from the
+          combobox or types their own.
+
+          @param text: Text that was selected.
+      """
       env = maestro.core.Environment()
-      search_path = str(text)
+
+      # Convert the path from a QString into a python string.
+      new_path = str(text)
+      old_path = self.mOption.mElement.get('id', '')
+
+      # If the path has changed, update the element and match lists.
+      if new_path != old_path:
+         self.mOption.mElement.set('id', new_path)
+         self.__fillMatchList()
+
+   def __fillMatchList(self):
+      """ Helper method that fills the match list with all options
+          that match the current filter.
+      """
+      env = maestro.core.Environment()
+
+      # Clear the current match list.
       self.mMatchesList.clear()
 
+      # Get current search filter path.
+      current_path = self.mOption.mElement.get('id', '')
+
+      # Find all matching elements using the stanza store.
       all_matches = []
       for elm in self.mReferencedElements:
-         matches = env.mStanzaStore._find(elm, search_path)
+         matches = env.mStanzaStore._find(elm, current_path)
          all_matches.extend(matches)
 
+      # For each match, get a list of all decendents.
       for match in all_matches:
          name_list = []
-         self.__getAllChildrenNames(match, '', name_list)
+         helpers.makeOptionNameList(match, '', name_list)
+         # Add names of descendents to list.
          for name in name_list:
             self.mMatchesList.addItem(name)
 
    def onAddClicked(self, checked=False):
-      ET.dump(self.mOption.mElement)
       (text, ok) = QtGui.QInputDialog.getText(self, "Override Name",
          "What is the name of the attribute you want to override?")
 
@@ -114,14 +161,12 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
          else:
             attrib[key] = ""
             self.mOverrideModel.emit(QtCore.SIGNAL("modelReset()"))
-      ET.dump(self.mOption.mElement)
 
    def onRemoveClicked(self, checked=False):
-      ET.dump(self.mOption.mElement)
       selected_indices = self.mOverrideTableView.selectedIndexes()
       if 0 == len(selected_indices):
          QtGui.QMessageBox.information(None, "Override Delete",
-                                   "You must select a group of overrides before you can delete them.")
+            "You must select a group of overrides before you can delete them.")
       
       for selected_index in selected_indices:
          # Only handle selected indices in the first column since we only
@@ -132,31 +177,6 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
             if attrib.has_key(key):
                del attrib[key]
       self.mOverrideModel.emit(QtCore.SIGNAL("modelReset()"))
-      ET.dump(self.mOption.mElement)
-
-   def __getAllChildrenNames(self, elm, currentName, nameList):
-      elm_name = currentName + elm.get('name', '<unknown name>')
-      nameList.append(elm_name)
-      for child in elm[:]:
-         self.__getAllChildrenNames(child, elm_name + '/', nameList)
-      return nameList
-
-   def __getAllPaths(self):
-      path_list = ['*']
-      current_path = ''
-      for elm in self.mReferencedElements:
-         for child in elm[:]:
-            self.__buildPathList(path_list, current_path, child)
-      return path_list
-
-   def __buildPathList(self, currentList, currentPath, elm):
-      my_path = currentPath + elm.get('name')
-      currentList.append(my_path)
-      children = elm[:]
-      if len(children) > 0:
-         currentList.append(my_path + '/*')
-         for c in children:
-            self.__buildPathList(currentList, my_path + '/', c)
 
 class OverrideTableModel(QtCore.QAbstractTableModel):
    def __init__(self, option, parent=None):

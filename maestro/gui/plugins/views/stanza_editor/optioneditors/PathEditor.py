@@ -21,17 +21,9 @@
 import sys
 from PyQt4 import QtCore, QtGui
 
+import maestro.core
+
 import PathEditorBase
-#import math
-
-import os.path
-pj = os.path.join
-sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', '..'))
-#import maestro.core
-#import maestro.core.Stanza
-import maestro.gui.MaestroResource
-
-import elementtree.ElementTree as ET
 import helpers
 
 class PathEditorPlugin(maestro.core.IOptionEditorPlugin):
@@ -64,6 +56,7 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
    def setupUi(self, widget):
       PathEditorBase.Ui_PathEditorBase.setupUi(self, widget)
+      self.connect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
 
    def setOption(self, option):
       """ Updates the current state of the application with the given option.
@@ -82,16 +75,14 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
             self.mReferencedElements = env.mStanzaStore.find(ref_path)
 
       # Ensure that signals are not connected while filling the combo box.
-      self.disconnect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
+      self.mPathCB.blockSignals(True)
       self.__fillComboBox()
       self.__fillMatchList()
-      self.connect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
+      self.mPathCB.blockSignals(False)
 
    def __fillComboBox(self):
       """ Helper method that fills the combobox with all possible sub-options.
       """
-      env = maestro.core.Environment()
-
       # Clear the current combobox.
       self.mPathCB.clear()
 
@@ -101,9 +92,9 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
          self.mPathCB.addItem(current_path)
 
       # Add a reasonable default.
-      if 'add' == self.mOption.mElement.tag:
+      if 'add' == self.mOption.mElement.tag and current_path != './':
          self.mPathCB.addItem('./')
-      elif 'remove' == self.mOption.mElement.tag:
+      elif 'remove' == self.mOption.mElement.tag and current_path != '*':
          self.mPathCB.addItem('*')
 
       # Get all options paths under our referenced elements.
@@ -125,14 +116,9 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       new_path = str(text)
       old_path = self.mOption.mElement.get('id', '')
 
-      print "onPathSelected"
       # If the path has changed, update the element and match lists.
       if new_path != old_path:
-         print self.mOption.mElement
-         ET.dump(self.mOption.mElement)
          self.mOption.mElement.set('id', new_path)
-         print self.mOption.mElement
-         ET.dump(self.mOption.mElement)
          self.__fillMatchList()
 
    def __fillMatchList(self):
@@ -165,6 +151,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
    def setupUi(self, widget):
       PathEditorBase.Ui_PathEditorBase.setupUi(self, widget)
+      self.connect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
 
    def setOption(self, option):
       """ Updates the current state of the application with the given option.
@@ -174,10 +161,10 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       assert(option is not None)
       self.mOption = option
       # Ensure that signals are not connected while filling the combo box.
-      self.disconnect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
+      self.mPathCB.blockSignals(True)
       self.__fillComboBox()
       self.__fillMatchList()
-      self.connect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
+      self.mPathCB.blockSignals(False)
 
    def __fillComboBox(self):
       """ Helper method that fills the combobox with all current applications
@@ -190,7 +177,13 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       # Add current filter and a default '*' filter.
       current_path = self.mOption.mElement.get('id', '*')
       self.mPathCB.addItem(current_path)
-      self.mPathCB.addItem('*')
+
+      # Add a reasonable default.
+      if current_path is not '*':
+         self.mPathCB.addItem('*')
+
+      # Keep a list of namespaces around so we don't add duplicates.
+      filled_namespaces = []
 
       # Get all applications and global options.
       for stanza in env.mStanzaStore.mStanzas:
@@ -198,6 +191,11 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
          namespace = stanza.get('namespace', '')
          if namespace != '':
             namespace += ':'
+            # If we don't have one yet, add an item for selecting
+            # an entire namspace.
+            if 0 == filled_namespaces.count(namespace):
+               self.mPathCB.addItem(namespace + '*')
+               filled_namespaces.append(namespace)
 
          # For all applications and global options.
          for child in stanza[:]:
@@ -235,7 +233,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       self.mMatchesList.clear()
 
       # Find all matching elements using the stanza store.
-      match_path = self.mOption.mElement.get('id', '')
+      match_path = self.mOption.mElement.get('id', '*')
       matches = env.mStanzaStore.find(match_path)
 
       # Add the name of each matched application/global_option

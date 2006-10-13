@@ -31,9 +31,9 @@ class Ui_OverrideEditorBase(object):
       self.gridlayout.setSpacing(6)
       self.gridlayout.setObjectName("gridlayout")
 
-      self.mAttributeLbl = QtGui.QLabel(OverrideEditorBase)
-      self.mAttributeLbl.setObjectName("mAttributeLbl")
-      self.gridlayout.addWidget(self.mAttributeLbl,0,2,1,1)
+      self.mOverrideLbl = QtGui.QLabel(OverrideEditorBase)
+      self.mOverrideLbl.setObjectName("mOverrideLbl")
+      self.gridlayout.addWidget(self.mOverrideLbl,0,2,1,1)
 
       self.mPathLbl = QtGui.QLabel(OverrideEditorBase)
       self.mPathLbl.setObjectName("mPathLbl")
@@ -74,7 +74,7 @@ class Ui_OverrideEditorBase(object):
 
    def retranslateUi(self, OverrideEditorBase):
       OverrideEditorBase.setWindowTitle(QtGui.QApplication.translate("OverrideEditorBase", "Override Editor", None, QtGui.QApplication.UnicodeUTF8))
-      self.mAttributeLbl.setText(QtGui.QApplication.translate("OverrideEditorBase", "Attributes:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mOverrideLbl.setText(QtGui.QApplication.translate("OverrideEditorBase", "Overrides:", None, QtGui.QApplication.UnicodeUTF8))
       self.mPathLbl.setText(QtGui.QApplication.translate("OverrideEditorBase", "Path:", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveBtn.setText(QtGui.QApplication.translate("OverrideEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddBtn.setText(QtGui.QApplication.translate("OverrideEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
