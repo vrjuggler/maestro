@@ -203,8 +203,8 @@ class Application(TreeItem):
       global_options = xmlElt.get("global_options", "")
       self.mGlobalOptions = [opt.rstrip().lstrip() for opt in global_options.split(',')]
 
-      self.mTooltip = xmlElt.get("tooltip", "Unknown")
-      self.mHelpUrl = xmlElt.get("helpUrl", "Unknown")
+      self.mTooltip = xmlElt.get("tooltip", '')
+      self.mHelpUrl = xmlElt.get("helpUrl", '')
 
    def getName(self):
       return self.mLabel

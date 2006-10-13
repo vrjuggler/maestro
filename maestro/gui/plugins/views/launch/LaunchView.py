@@ -19,6 +19,7 @@
 import sys
 from PyQt4 import QtGui, QtCore
 import LaunchViewBase
+import HelpDialogBase
 import elementtree.ElementTree as ET
 
 import maestro.core
@@ -51,6 +52,11 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
    def deactivate(self, mainWindow):
       pass
 
+class HelpDialog(QtGui.QDialog, HelpDialogBase.Ui_HelpDialogBase):
+   def __init__(self, parent = None):
+      QtGui.QDialog.__init__(self, parent)
+      self.setupUi(self)
+
 class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -74,7 +80,9 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.connect(self.mLaunchBtn,QtCore.SIGNAL("clicked()"),self.onLaunchApp)
       self.connect(self.mKillBtn,QtCore.SIGNAL("clicked()"),self.onKillApp)
       self.connect(self.mAppComboBox,QtCore.SIGNAL("activated(int)"),self.onAppSelect)
-      #self.connect(self.mAddBtn, QtCore.SIGNAL("clicked()"), self.onClicked)
+      self.connect(self.mHelpBtn, QtCore.SIGNAL("clicked()"), self.onHelpClicked)
+      # Disable help button by default. Only enable it if application has valid help url.
+      self.mHelpBtn.setEnabled(False)
 
       # Make the AppFrame be inside a ScrollArea.
       index = self.layout().indexOf(self.mAppFrame)
@@ -85,6 +93,34 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.mScrollArea.setWidgetResizable(True)
       self.mScrollArea.setFrameShape(QtGui.QFrame.StyledPanel)
       self.mScrollArea.setFrameShadow(QtGui.QFrame.Raised)
+
+   def onHelpClicked(self, checked=False):
+      if self.mSelectedApp.mHelpUrl is not None and \
+         self.mSelectedApp.mHelpUrl is not '':
+         # Load help HTML data.
+         # XXX: This only searched the two directories for the file. This
+         #      should be fixed at some point.
+         file_path = pj(maestro.core.const.EXEC_DIR, self.mSelectedApp.mHelpUrl)
+         if not os.path.exists(file_path):
+            file_path = pj(maestro.core.const.STANZA_PATH, self.mSelectedApp.mHelpUrl)
+            
+         if os.path.exists(file_path):
+            file = QtCore.QFile(file_path)
+            if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+               print "Cannot read file %s:\n%s." % (file_path, file.errorString())
+            else:
+               stream = QtCore.QTextStream(file)
+               QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+               dialog = HelpDialog(self)
+               dialog.mHelpBrowser.setHtml(stream.readAll())
+               QtGui.QApplication.restoreOverrideCursor()
+               file.close()
+               dialog.exec_()
+         else:
+            print "Cannot read file %s or %s." % (                              \
+               pj(maestro.core.const.EXEC_DIR, self.mSelectedApp.mHelpUrl),     \
+               pj(maestro.core.const.STANZA_PATH, self.mSelectedApp.mHelpUrl))
+
 
    def onAppSelect(self):
      self._setApplication(self.mAppComboBox.currentIndex())
@@ -112,9 +148,13 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          self.mSelectedApp.mSelected = False
          self._resetAppState()
 
+
       assert index < len(self.mApplications)
       self.mSelectedApp = self.mApplications[index]
       self.mSelectedApp.mSelected = True
+      # Enable help button only if there is a valid help url.
+      self.mHelpBtn.setEnabled(self.mSelectedApp.mHelpUrl != '')
+
       print "Setting application [%s] [%s]" % (index, self.mSelectedApp.getName())
       for c in self.mSelectedApp.mChildren:
          # All top level objects are selected by default.

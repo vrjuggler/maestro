@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<stanza namespace="editor">
+  <application name="TestApplication" label="Test Application" helpUrl="help.html">
+    <command name="linux_cmd" class="Linux">runLinux</command>
+    <choice name="Stereo" label="Stereo" tooltip="" type="one">
+      <arg name="Arg0" label="Active Stereo" selected="true" editable="true" flag="-j">sim.active.jconf</arg>
+    </choice>
+    <env_var name="Env0" label="Path" key="PATH">/some/path</env_var>
+    <choice name="VRJConfig" label="VR Juggler Configuration" tooltip="" type="one">
+      <group name="Sim" label="Simulator" selected="true">
+        <arg name="SimConfig0" label="Simulator Config" editable="true" flag="-j">sim.base.jconf</arg>
+        <arg name="SimConfig1" label="Simulator Config" editable="true" flag="-j">sim.wand.mixin.jconf</arg>
+      </group>
+      <choice name="CAVE" label="CAVE Configuration" type="one">
+        <arg name="Open" label="Open" editable="true" flag="-j">open.displays.jconf</arg>
+        <arg name="Closed" label="Closed" editable="true" flag="-j">closed.displays.jconf</arg>
+      </choice>
+    </choice>
+    <ref id="editor:Global1">
+      <add id="">
+        <group name="Powerwall">
+          <arg name="base" flag="-j">powerwall.jconf</arg>
+        </group>
+      </add>
+      <remove id="Arg0"/>
+      <override id="*" flag="--jconf"/>
+    </ref>
+    <!--
+    <choice label="Debug Output Level" parent_path="" tooltip="" type="one_cb">
+      <env_var name="0" selected="true" label="Critical Messages" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
+      <env_var name="1" label="Warning Messages" key="VPR_DEBUG_NFY_LEVEL">1</env_var>
+      <env_var name="2" label="System Configuration Results" key="VPR_DEBUG_NFY_LEVEL">2</env_var>
+      <env_var name="3" label="System Configuration Details" key="VPR_DEBUG_NFY_LEVEL">3</env_var>
+      <env_var name="4" label="State Changes" key="VPR_DEBUG_NFY_LEVEL">4</env_var>
+      <env_var name="5" label="Verbose" key="VPR_DEBUG_NFY_LEVEL">5</env_var>
+      <env_var name="6" label="Highly Verbose" key="VPR_DEBUG_NFY_LEVEL">6</env_var>
+      <env_var name="7" label="Detailed" key="VPR_DEBUG_NFY_LEVEL">7</env_var>
+      <env_var name="8" label="Hexidecimal" key="VPR_DEBUG_NFY_LEVEL">8</env_var>
+      <env_var name="9" editable="true" label="Other" key="VPR_DEBUG_NFY_LEVEL">0</env_var>
+    </choice>
+    -->
+  </application>
+  <global_option name="Global1">
+    <arg name="Arg0"/>
+    <group name="Group0">
+      <cwd name="Cwd0"/>
+      <choice name="Choice0">
+        <arg name="SubArg0"/>
+        <arg name="SubArg1"/>
+      </choice>
+    </group>
+  </global_option>
+</stanza>
