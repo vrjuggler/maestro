@@ -19,5 +19,7 @@
         <file>images/resources.png</file>
         <file>images/save.png</file>
         <file>images/win_xp.png</file>
+        <file>images/edit_add.png</file>
+        <file>images/edit_remove.png</file>
     </qresource>
 </RCC>
