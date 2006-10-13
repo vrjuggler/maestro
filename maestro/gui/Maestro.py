@@ -41,14 +41,6 @@ import LoginDialog
 
 import logging, socket, time
 
-gui_base_dir = ""
-try:
-   gui_base_dir = os.path.dirname(os.path.abspath(__file__))
-except:
-   gui_base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
-print "Base gui dir:", gui_base_dir
-
 # Only load the OS icons once.
 const.mOsIcons = {}
 const.mOsIcons[const.ERROR] = QtGui.QIcon(":/Maestro/images/error2.png")

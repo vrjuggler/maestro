@@ -53,15 +53,6 @@ import maestro.core.EventManager
 
 import logging, socket, time
 
-gui_base_dir = ""
-try:
-   gui_base_dir = os.path.dirname(os.path.abspath(__file__))
-except:
-   gui_base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
-print "Base gui dir:", gui_base_dir
-
-
 def process_command_line():
    """ Parse and process the command line options.
        @returns Dictionary of the found options.
@@ -179,9 +170,10 @@ def main():
 
       if opts.ensemble is not None:
          try:
+            print "Trying to load file: ", opts.ensemble
             # Parse XML ensemble file. This provides the initial set of cluster
             # nodes.
-            tree = ET.ElementTree(opts.ensemble)
+            tree = ET.ElementTree(file=opts.ensemble)
             ensemble = Ensemble.Ensemble(tree)
             m.setEnsemble(ensemble)
          except IOError, ex:
@@ -196,8 +188,8 @@ def main():
       logging.shutdown()
       sys.exit()
    except Exception, ex:
-      QtGui.QMessageBox.critical(None, "Error",
-                                 "Error: %s" % ex)
+      print "ERROR: ", ex
+      #QtGui.QMessageBox.critical(None, "Error", "Error: %s" % ex)
 
 if __name__ == '__main__':
    main()
