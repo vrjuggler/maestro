@@ -46,7 +46,7 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = StanzaEditor()
       self.mToolbar = None
-      self.mStanzaSearchToolbar = None
+      #self.mStanzaSearchToolbar = None
       self.mStanzaToolbox = None
       self.mMenu = None
       
@@ -74,17 +74,17 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
          self.mToolbar.addWidget(self.widget.mScrollDragBtn)
          self.mToolbar.addWidget(self.widget.mRubberBandDragBtn)
          self.mToolbar.addWidget(self.widget.mZoomExtentsBtn)
-      if self.mStanzaSearchToolbar is None:
-         self.mStanzaSearchToolbar = QtGui.QToolBar("Stanza Search Toolbar", mainWindow)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationLbl)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationCB)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mClassLine)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterLbl)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mOperatingSystemCB)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterComma)
-         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterCB)
-         self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
-         self.widget.mToolGroupBox.setParent(None)
+#      if self.mStanzaSearchToolbar is None:
+#         self.mStanzaSearchToolbar = QtGui.QToolBar("Stanza Search Toolbar", mainWindow)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationLbl)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationCB)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mClassLine)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterLbl)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mOperatingSystemCB)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterComma)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterCB)
+#         self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
+#         self.widget.mToolGroupBox.setParent(None)
       if self.mStanzaToolbox is None:
          self.mStanzaToolbox = QtGui.QToolBar("Stanza Toolbox", mainWindow)
          for btn in self.widget.mItemToolButtons:
@@ -92,10 +92,10 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
          #self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
          self.widget.mToolboxFrame.setParent(None)
       mainWindow.addToolBar(self.mToolbar)
-      mainWindow.addToolBarBreak()
+#      mainWindow.addToolBarBreak()
       self.mToolbar.show()
-      mainWindow.addToolBar(self.mStanzaSearchToolbar)
-      self.mStanzaSearchToolbar.show()
+#      mainWindow.addToolBar(self.mStanzaSearchToolbar)
+#      self.mStanzaSearchToolbar.show()
       mainWindow.addToolBar(QtCore.Qt.RightToolBarArea, self.mStanzaToolbox)
       self.mStanzaToolbox.show()
 
@@ -114,10 +114,10 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
    
    def deactivate(self, mainWindow):
       mainWindow.removeToolBar(self.mToolbar)
-      mainWindow.removeToolBar(self.mStanzaSearchToolbar)
+#      mainWindow.removeToolBar(self.mStanzaSearchToolbar)
       mainWindow.removeToolBar(self.mStanzaToolbox)
       self.mToolbar.hide()
-      self.mStanzaSearchToolbar.hide()
+#      self.mStanzaSearchToolbar.hide()
       self.mStanzaToolbox.hide()
       self.mMenu.hide()
       mainWindow.menuBar().removeAction(self.mMenu.menuAction())

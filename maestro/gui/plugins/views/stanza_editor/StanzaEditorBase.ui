@@ -111,10 +111,10 @@
      </property>
      <layout class="QHBoxLayout" >
       <property name="margin" >
-       <number>9</number>
+       <number>0</number>
       </property>
       <property name="spacing" >
-       <number>6</number>
+       <number>3</number>
       </property>
       <item>
        <widget class="QToolButton" name="mLayoutBtn" >
@@ -249,7 +249,7 @@
          <string/>
         </property>
         <property name="pixmap" >
-         <pixmap/>
+         <pixmap resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/filter.png</pixmap>
         </property>
        </widget>
       </item>
@@ -273,7 +273,7 @@
          </font>
         </property>
         <property name="text" >
-         <string/>
+         <string>,</string>
         </property>
         <property name="pixmap" >
          <pixmap/>

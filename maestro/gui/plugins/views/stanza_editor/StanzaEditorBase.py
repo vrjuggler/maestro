@@ -91,8 +91,8 @@ class Ui_StanzaEditorBase(object):
       self.mToolGroupBox.setObjectName("mToolGroupBox")
 
       self.hboxlayout = QtGui.QHBoxLayout(self.mToolGroupBox)
-      self.hboxlayout.setMargin(9)
-      self.hboxlayout.setSpacing(6)
+      self.hboxlayout.setMargin(0)
+      self.hboxlayout.setSpacing(3)
       self.hboxlayout.setObjectName("hboxlayout")
 
       self.mLayoutBtn = QtGui.QToolButton(self.mToolGroupBox)
@@ -153,6 +153,7 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mClassLine)
 
       self.mClassFilterLbl = QtGui.QLabel(self.mToolGroupBox)
+      self.mClassFilterLbl.setPixmap(QtGui.QPixmap(":/Maestro/StanzaEditor/images/filter.png"))
       self.mClassFilterLbl.setObjectName("mClassFilterLbl")
       self.hboxlayout.addWidget(self.mClassFilterLbl)
 
@@ -198,6 +199,7 @@ class Ui_StanzaEditorBase(object):
       self.mRubberBandDragBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mZoomExtentsBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mClassFilterComma.setText(QtGui.QApplication.translate("StanzaEditorBase", ",", None, QtGui.QApplication.UnicodeUTF8))
 
 
 
