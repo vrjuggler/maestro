@@ -118,10 +118,10 @@ class StanzaStore:
             for f in found:
                elms = self._find(f, id_path)
                for (k, v) in command.items():
+                  if k == 'cdata':
+                     self._replaceText(elms, v)
                   if k != 'id':
                      self._replaceAttrib(elms, k, v)
-               if command.text is not None:
-                  self._replaceText(elms, command.text)
 
          elif 'add' == command.tag:
             id_path = command.get('id', '')
@@ -195,7 +195,7 @@ class StanzaStore:
       #    2 -> root node name (name of application or global_option
       #         element) which may be '*'
       #    3 -> Everything after the root (or nothing)
-      root_re = re.compile(r'(\w+:|:|)([^/]+)(/?.*)')
+      root_re = re.compile(r'(\w+:|:|)([^/]*)(/?.*)')
 
       # Extract the namespace (which may be empty) and the root ID name.
       root_match = root_re.match(path)
@@ -218,7 +218,8 @@ class StanzaStore:
       roots = []
       for s in self.mStanzas:
          ns = s.get('namespace', '')
-         if ns == root_ns:
+         # If the namespaces match, or the search did not specify one.
+         if ns == root_ns or root_ns == '':
             children = self.getChildrenWithName(s, root_name)
 
             # If there was a '@' operator on the root name, then we need
