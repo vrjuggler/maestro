@@ -111,6 +111,8 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
 
          os.setegid(gid)
          os.seteuid(uid)
+      else:
+         img_file = imgFile
 
       # Create a process that runs as the authenticated user in order to
       # change the user's desktop background image via GConf.
