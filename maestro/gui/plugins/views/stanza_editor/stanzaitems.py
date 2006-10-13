@@ -290,12 +290,17 @@ class Node(QtGui.QGraphicsItem):
       self.outEdgeList = []
 
    
-   def acceptNewParent(self, source):
-      if source is not None and source.mElement is not None:
-         if (isinstance(source, ChoiceItem) or
-             isinstance(source, GroupItem) or
-             isinstance(source, AppItem)):
-            return not self.isConnectedTo(source)
+   def acceptNewParent(self, newParent):
+      """ Returns true if the given parent is valid for ourself and
+          we are not already connected.
+      """
+      if newParent is None or newParent.mElement is None:
+         return False
+
+      return ((isinstance(newParent, ChoiceItem) or
+               isinstance(newParent, GroupItem) or
+               isinstance(newParent, AppItem)) and
+               not self.isConnectedTo(newParent))
 
    def isConnectedTo(self, otherNode):
       for edge in self.inEdgeList:
@@ -697,6 +702,14 @@ class OverrideItem(Node):
       self.mAttribNameList = ['ID']
       self.mAttribList = ['id']
 
+   def acceptNewParent(self, newParent):
+      """ Returns true if the given parent is valid for ourself and
+          we are not already connected.
+      """
+      if newParent is None or newParent.mElement is None:
+         return False
+      return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
+
 class AddItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -706,6 +719,14 @@ class AddItem(Node):
       self.mAttribNameList = []
       self.mAttribList = []
 
+   def acceptNewParent(self, newParent):
+      """ Returns true if the given parent is valid for ourself and
+          we are not already connected.
+      """
+      if newParent is None or newParent.mElement is None:
+         return False
+      return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
+
 class RemoveItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -714,3 +735,12 @@ class RemoveItem(Node):
       self.mColor = QtGui.QColor(76, 228, 255, 191)
       self.mAttribNameList = ['ID']
       self.mAttribList = ['id']
+
+   def acceptNewParent(self, newParent):
+      """ Returns true if the given parent is valid for ourself and
+          we are not already connected.
+      """
+      if newParent is None or newParent.mElement is None:
+         return False
+      return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
+
