@@ -22,7 +22,7 @@ class StanzaStore:
          progressCB = null_progress_cb
          
       stanza_path = pj(maestro.core.const.STANZA_PATH)
-      progressCB(0.0, "Scanning for plugins [%s]" % (stanza_path))
+      progressCB(0.0, "Scanning for stanzas [%s]" % (stanza_path))
       assert os.path.exists(stanza_path)
       assert os.path.isdir(stanza_path)
       files = os.listdir(stanza_path)

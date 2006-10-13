@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_LaunchViewBase(object):
    def setupUi(self, LaunchViewBase):
       LaunchViewBase.setObjectName("LaunchViewBase")
-      LaunchViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,671,596).size()).expandedTo(LaunchViewBase.minimumSizeHint()))
+      LaunchViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,505,393).size()).expandedTo(LaunchViewBase.minimumSizeHint()))
 
       self.vboxlayout = QtGui.QVBoxLayout(LaunchViewBase)
       self.vboxlayout.setMargin(9)
@@ -49,22 +49,27 @@ class Ui_LaunchViewBase(object):
       self.mTitleLbl.setObjectName("mTitleLbl")
       self.vboxlayout.addWidget(self.mTitleLbl)
 
-      self.mTabWidget = QtGui.QTabWidget(LaunchViewBase)
-      self.mTabWidget.setObjectName("mTabWidget")
+      self.hboxlayout = QtGui.QHBoxLayout()
+      self.hboxlayout.setMargin(0)
+      self.hboxlayout.setSpacing(6)
+      self.hboxlayout.setObjectName("hboxlayout")
 
-      self.mLaunchTab = QtGui.QWidget()
-      self.mLaunchTab.setObjectName("mLaunchTab")
+      self.mApplicationLbl = QtGui.QLabel(LaunchViewBase)
+      self.mApplicationLbl.setObjectName("mApplicationLbl")
+      self.hboxlayout.addWidget(self.mApplicationLbl)
 
-      self.vboxlayout1 = QtGui.QVBoxLayout(self.mLaunchTab)
-      self.vboxlayout1.setMargin(9)
-      self.vboxlayout1.setSpacing(6)
-      self.vboxlayout1.setObjectName("vboxlayout1")
+      self.mAppComboBox = QtGui.QComboBox(LaunchViewBase)
 
-      self.mAppComboBox = QtGui.QComboBox(self.mLaunchTab)
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(0))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mAppComboBox.sizePolicy().hasHeightForWidth())
+      self.mAppComboBox.setSizePolicy(sizePolicy)
       self.mAppComboBox.setObjectName("mAppComboBox")
-      self.vboxlayout1.addWidget(self.mAppComboBox)
+      self.hboxlayout.addWidget(self.mAppComboBox)
+      self.vboxlayout.addLayout(self.hboxlayout)
 
-      self.mAppFrame = QtGui.QFrame(self.mLaunchTab)
+      self.mAppFrame = QtGui.QFrame(LaunchViewBase)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
       sizePolicy.setHorizontalStretch(0)
@@ -73,35 +78,33 @@ class Ui_LaunchViewBase(object):
       self.mAppFrame.setSizePolicy(sizePolicy)
       self.mAppFrame.setObjectName("mAppFrame")
 
-      self.vboxlayout2 = QtGui.QVBoxLayout(self.mAppFrame)
-      self.vboxlayout2.setMargin(9)
-      self.vboxlayout2.setSpacing(6)
-      self.vboxlayout2.setObjectName("vboxlayout2")
+      self.vboxlayout1 = QtGui.QVBoxLayout(self.mAppFrame)
+      self.vboxlayout1.setMargin(9)
+      self.vboxlayout1.setSpacing(6)
+      self.vboxlayout1.setObjectName("vboxlayout1")
 
       spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
-      self.vboxlayout2.addItem(spacerItem)
-      self.vboxlayout1.addWidget(self.mAppFrame)
+      self.vboxlayout1.addItem(spacerItem)
+      self.vboxlayout.addWidget(self.mAppFrame)
 
-      self.mLaunchFrame = QtGui.QFrame(self.mLaunchTab)
-      self.mLaunchFrame.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mLaunchFrame.setFrameShadow(QtGui.QFrame.Raised)
-      self.mLaunchFrame.setObjectName("mLaunchFrame")
+      self.hboxlayout1 = QtGui.QHBoxLayout()
+      self.hboxlayout1.setMargin(0)
+      self.hboxlayout1.setSpacing(6)
+      self.hboxlayout1.setObjectName("hboxlayout1")
 
-      self.hboxlayout = QtGui.QHBoxLayout(self.mLaunchFrame)
-      self.hboxlayout.setMargin(9)
-      self.hboxlayout.setSpacing(6)
-      self.hboxlayout.setObjectName("hboxlayout")
+      spacerItem1 = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
+      self.hboxlayout1.addItem(spacerItem1)
 
-      self.mLaunchBtn = QtGui.QPushButton(self.mLaunchFrame)
+      self.mLaunchBtn = QtGui.QPushButton(LaunchViewBase)
       self.mLaunchBtn.setObjectName("mLaunchBtn")
-      self.hboxlayout.addWidget(self.mLaunchBtn)
+      self.hboxlayout1.addWidget(self.mLaunchBtn)
 
-      self.mKillBtn = QtGui.QPushButton(self.mLaunchFrame)
+      self.mKillBtn = QtGui.QPushButton(LaunchViewBase)
       self.mKillBtn.setEnabled(True)
       self.mKillBtn.setObjectName("mKillBtn")
-      self.hboxlayout.addWidget(self.mKillBtn)
+      self.hboxlayout1.addWidget(self.mKillBtn)
 
-      self.mHelpBtn = QtGui.QPushButton(self.mLaunchFrame)
+      self.mHelpBtn = QtGui.QPushButton(LaunchViewBase)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(1),QtGui.QSizePolicy.Policy(0))
       sizePolicy.setHorizontalStretch(0)
@@ -109,76 +112,8 @@ class Ui_LaunchViewBase(object):
       sizePolicy.setHeightForWidth(self.mHelpBtn.sizePolicy().hasHeightForWidth())
       self.mHelpBtn.setSizePolicy(sizePolicy)
       self.mHelpBtn.setObjectName("mHelpBtn")
-      self.hboxlayout.addWidget(self.mHelpBtn)
-
-      spacerItem1 = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
-      self.hboxlayout.addItem(spacerItem1)
-      self.vboxlayout1.addWidget(self.mLaunchFrame)
-      self.mTabWidget.addTab(self.mLaunchTab, "")
-
-      self.mEditTab = QtGui.QWidget()
-      self.mEditTab.setObjectName("mEditTab")
-
-      self.vboxlayout3 = QtGui.QVBoxLayout(self.mEditTab)
-      self.vboxlayout3.setMargin(9)
-      self.vboxlayout3.setSpacing(6)
-      self.vboxlayout3.setObjectName("vboxlayout3")
-
-      self.mEditFrame = QtGui.QFrame(self.mEditTab)
-
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(3))
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mEditFrame.sizePolicy().hasHeightForWidth())
-      self.mEditFrame.setSizePolicy(sizePolicy)
-      self.mEditFrame.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mEditFrame.setFrameShadow(QtGui.QFrame.Raised)
-      self.mEditFrame.setObjectName("mEditFrame")
-
-      self.hboxlayout1 = QtGui.QHBoxLayout(self.mEditFrame)
-      self.hboxlayout1.setMargin(9)
-      self.hboxlayout1.setSpacing(6)
-      self.hboxlayout1.setObjectName("hboxlayout1")
-
-      self.splitter = QtGui.QSplitter(self.mEditFrame)
-      self.splitter.setOrientation(QtCore.Qt.Horizontal)
-      self.splitter.setObjectName("splitter")
-
-      self.mTreeView = QtGui.QTreeView(self.splitter)
-      self.mTreeView.setObjectName("mTreeView")
-
-      self.mTableView = QtGui.QTableView(self.splitter)
-      self.mTableView.setObjectName("mTableView")
-      self.hboxlayout1.addWidget(self.splitter)
-      self.vboxlayout3.addWidget(self.mEditFrame)
-
-      self.mEditCmdFrame = QtGui.QFrame(self.mEditTab)
-      self.mEditCmdFrame.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mEditCmdFrame.setFrameShadow(QtGui.QFrame.Raised)
-      self.mEditCmdFrame.setObjectName("mEditCmdFrame")
-
-      self.hboxlayout2 = QtGui.QHBoxLayout(self.mEditCmdFrame)
-      self.hboxlayout2.setMargin(9)
-      self.hboxlayout2.setSpacing(6)
-      self.hboxlayout2.setObjectName("hboxlayout2")
-
-      self.mAddBtn = QtGui.QPushButton(self.mEditCmdFrame)
-      self.mAddBtn.setObjectName("mAddBtn")
-      self.hboxlayout2.addWidget(self.mAddBtn)
-
-      self.mRemoveBtn = QtGui.QPushButton(self.mEditCmdFrame)
-      self.mRemoveBtn.setObjectName("mRemoveBtn")
-      self.hboxlayout2.addWidget(self.mRemoveBtn)
-
-      self.mSaveBtn = QtGui.QPushButton(self.mEditCmdFrame)
-      self.mSaveBtn.setObjectName("mSaveBtn")
-      self.hboxlayout2.addWidget(self.mSaveBtn)
-
-      spacerItem2 = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
-      self.hboxlayout2.addItem(spacerItem2)
-      self.vboxlayout3.addWidget(self.mEditCmdFrame)
-      self.mTabWidget.addTab(self.mEditTab, "")
-      self.vboxlayout.addWidget(self.mTabWidget)
+      self.hboxlayout1.addWidget(self.mHelpBtn)
+      self.vboxlayout.addLayout(self.hboxlayout1)
 
       self.retranslateUi(LaunchViewBase)
       QtCore.QMetaObject.connectSlotsByName(LaunchViewBase)
@@ -186,14 +121,11 @@ class Ui_LaunchViewBase(object):
    def retranslateUi(self, LaunchViewBase):
       LaunchViewBase.setWindowTitle(QtGui.QApplication.translate("LaunchViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
       self.mTitleLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application Launcher", None, QtGui.QApplication.UnicodeUTF8))
+      self.mApplicationLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
       self.mLaunchBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Launch", None, QtGui.QApplication.UnicodeUTF8))
-      self.mKillBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Kill Application", None, QtGui.QApplication.UnicodeUTF8))
+      self.mKillBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
       self.mHelpBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTabWidget.setTabText(self.mTabWidget.indexOf(self.mLaunchTab), QtGui.QApplication.translate("LaunchViewBase", "Launch", None, QtGui.QApplication.UnicodeUTF8))
-      self.mAddBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Add", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Remove", None, QtGui.QApplication.UnicodeUTF8))
-      self.mSaveBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Save", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTabWidget.setTabText(self.mTabWidget.indexOf(self.mEditTab), QtGui.QApplication.translate("LaunchViewBase", "Edit", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

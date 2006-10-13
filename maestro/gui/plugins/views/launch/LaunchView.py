@@ -26,8 +26,6 @@ const = maestro.core.const
 from maestro.core import Stanza
 import maestro.core.environment as env
 
-from maestro.gui import StanzaModel
-
 import os.path
 pj = os.path.join
 
@@ -101,12 +99,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.mEnsemble = ensemble
       self.mElement = self.mEnsemble.mElement
 
-      self.mTableModel = StanzaModel.TableModel()
-      self.mTableView.setModel(self.mTableModel)
-      # XXX:
-      #QtCore.QObject.connect(self.mTreeView.selectionModel(),
-      #   QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onElementSelected)
-
    def setupUi(self, widget):
       LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)
       self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
@@ -118,24 +110,14 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       #self.connect(self.mAddBtn, QtCore.SIGNAL("clicked()"), self.onClicked)
 
       # Make the AppFrame be inside a ScrollArea.
+      index = self.layout().indexOf(self.mAppFrame)
       self.mAppFrame.setParent(None)
-      self.mScrollArea = QtGui.QScrollArea(self.mLaunchTab)
-      self.vboxlayout1.insertWidget(1, self.mScrollArea)
+      self.mScrollArea = QtGui.QScrollArea(self)
+      self.layout().insertWidget(index, self.mScrollArea)
       self.mScrollArea.setWidget(self.mAppFrame)
       self.mScrollArea.setWidgetResizable(True)
       self.mScrollArea.setFrameShape(QtGui.QFrame.StyledPanel)
       self.mScrollArea.setFrameShadow(QtGui.QFrame.Raised)
-
-   def onElementSelected(self, newSelection, oldSelection):
-      #print "Current row: %s" % (self.mTreeView.currentIndex().row())
-      if len(newSelection.indexes()) > 0:
-         selected_element = self.mTreeView.model().data(newSelection.indexes()[0], QtCore.Qt.UserRole)
-      else:
-         selected_element = None
-      print "Selected: %s" % (selected_element)
-      self.mTableModel.setElement(selected_element)
-      self.mTableView.reset()
-      self.mTableView.resizeColumnsToContents()
 
    def onAppSelect(self):
      self._setApplication(self.mAppComboBox.currentIndex())
@@ -146,8 +128,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
       env = maestro.core.Environment()
       self.mApplications = env.mStanzaStore.getApplications()
-      #self.mTreeModel = StanzaModel.TreeModel(self.mApplications)
-      #self.mTreeView.setModel(self.mTreeModel)
 
       for s in self.mApplications:
          self.mAppComboBox.addItem(s.getName())
