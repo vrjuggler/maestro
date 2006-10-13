@@ -189,6 +189,7 @@ def main():
       sys.exit()
    except Exception, ex:
       print "ERROR: ", ex
+      raise
       #QtGui.QMessageBox.critical(None, "Error", "Error: %s" % ex)
 
 if __name__ == '__main__':

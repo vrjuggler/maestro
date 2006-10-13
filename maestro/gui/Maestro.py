@@ -57,7 +57,7 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
       self.mTabMap = {}
       self.mEditMap = {}
 
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       #if not None == self.mClusterModel:
          #self.disconnect(self.mClusterModel, QtCore.SIGNAL(dataChanged(QModelIndex,QModelIndex)),
          #          self, QtCore.SLOT(dataChanged(QModelIndex,QModelIndex)));
@@ -154,14 +154,13 @@ class OutputTabWidget(QtGui.QTabWidget, QtGui.QAbstractItemView):
 class NodeLogger:
    def __init__(self):
       self.mLoggers = {}
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "launch.output", self.onAppOutput)
 
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       self.mLoggers = {}
       for e in ensemble.mNodes:
          self.addLogger(e.getId())
-
-      env = maestro.core.Environment()
-      env.mEventManager.connect("*", "launch.output", self.onAppOutput)
 
    def setLevel(self, level):
       for k, v in self.mLoggers:
@@ -332,13 +331,17 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          view_widget.setEnsemble(self.mEnsemble)
 
       # Set the new cluster configuration
-      self.mOutputTab.init(self.mEnsemble)
+      self.mOutputTab.setEnsemble(self.mEnsemble)
 
-      self.mFileLogger = OutputFileLogger(logging.DEBUG)
-      self.mFileLogger.init(self.mEnsemble)
+      if self.mFileLogger is not None:
+         self.__closeLoggers()
+
+      if self.mEnsemble is not None:
+         self.mFileLogger = OutputFileLogger(logging.DEBUG)
+         self.mFileLogger.setEnsemble(self.mEnsemble)
 
 #      console_logger = ConsoleLogger(logging.DEBUG)
-#      console_logger.init(self.mEnsemble)
+#      console_logger.setEnsemble(self.mEnsemble)
 #      self.mLoggers.append(console_logger)
 
    def onRefreshEnsemble(self):
@@ -535,11 +538,14 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       return qApp.translate("MainWindow",s,c)
 
    def closeEvent(self, event):
+      self.__closeLoggers()
+      QtGui.QMainWindow.closeEvent(self, event)
+
+   def __closeLoggers(self):
       env = maestro.core.Environment()
       clean = True
-
       if env.settings.has_key('clean_logfiles'):
-         cleanup_str = env.settings['clean_logfiles'].lower()
+         cleanup_str = env.settings.get('clean_logfiles','true').lower()
          if cleanup_str == 'true' or cleanup_str == '1':
             clean = True
          else:
@@ -555,7 +561,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       # We are done with the output log file stuff now.
       self.mFileLogger = None
 
-      QtGui.QMainWindow.closeEvent(self, event)
 
    #def onDebugOutput(self, message):
    #   #self.mTextEdit.append(str(message))

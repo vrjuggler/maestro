@@ -157,7 +157,7 @@ class Ensemble(QtCore.QObject):
       # Refresh all views of the Ensemble.
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
 
-   def addNode(self, name="NewNode", hostname="NewNode", node_class=""):
+   def createNode(self, name="NewNode", hostname="NewNode", node_class=""):
       new_element = ET.SubElement(self.mElement, "cluster_node", name=name, hostname=hostname)
       new_element.set('class', node_class)
 
@@ -165,16 +165,27 @@ class Ensemble(QtCore.QObject):
       self.mNodes.append(new_node)
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
 
+   def addNode(self, node, index=-1):
+      if -1 == index:
+         index = len(self.mNodes)
+      self.mNodes.insert(index, node)
+      self.mElement.insert(index, node.mElement)
+      self.emit(QtCore.SIGNAL("ensembleChanged()"))
+
    def removeNode(self, node):
       if isinstance(node, ClusterNode):
-         self.mEnsemble.mNodes.remove(node)
+         self.mNodes.remove(node)
+         self.mElement.remove(node.mElement)
          self.emit(QtCore.SIGNAL("ensembleChanged()"))
       elif types.IntType == type(node):
+         node_elm = self.mNodes[node].mElement
          del self.mNodes[node]
+         self.mElement.remove(node_elm)
          self.emit(QtCore.SIGNAL("ensembleChanged()"))
       else:
          for n in self.mNodes[:]:
             if n.getId() == node.getId():
+               self.mElement.remove(n.mElement)
                self.mNodes.remove(n)
                self.emit(QtCore.SIGNAL("ensembleChanged()"))
                return

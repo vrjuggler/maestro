@@ -16,9 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-
-import elementtree.ElementTree as ET
-
 from PyQt4 import QtCore, QtGui
 
 import maestro.core
@@ -27,6 +24,8 @@ const = maestro.core.const
 from maestro.core import Ensemble
 
 class EnsembleModel(QtCore.QAbstractListModel):
+   ensemble_mime_type = 'application/maestro-cluster-nodes'
+
    def __init__(self, ensemble, parent=None):
       QtCore.QAbstractListModel.__init__(self, parent)
 
@@ -68,7 +67,6 @@ class EnsembleModel(QtCore.QAbstractListModel):
 
    def onReportOs(self, nodeId, os):
       try:
-         print "onReportOs [%s] [%s]" % (nodeId, os)
          changed = False
          for node in self.mEnsemble.mNodes:
             if node.getIpAddress() == nodeId:
@@ -82,6 +80,15 @@ class EnsembleModel(QtCore.QAbstractListModel):
             self.emit(QtCore.SIGNAL("modelReset()"))
       except Exception, ex:
          print "ERROR: ", ex
+
+   def flags(self, index):
+      default_flags = QtCore.QAbstractListModel.flags(self, index)
+
+      default_flags |= QtCore.Qt.ItemIsEditable
+      if index.isValid():
+         return QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | default_flags
+      else:
+         return QtCore.Qt.ItemIsDropEnabled | default_flags
 
    def data(self, index, role=QtCore.Qt.DisplayRole):
       """ Returns the data representation of each node in the cluster.
@@ -102,6 +109,69 @@ class EnsembleModel(QtCore.QAbstractListModel):
          return cluster_node
        
       return QtCore.QVariant()
+
+   def setData(self, index, value, role):
+      if not index.isValid():
+         return False
+      if role == QtCore.Qt.EditRole and index.row() < self.rowCount():
+         cluster_node = self.mEnsemble.getNode(index.row())
+         if cluster_node is not None:
+            new_name = str(value.toString())
+            cluster_node.setName(new_name)
+            self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
+            self.emit(QtCore.SIGNAL("dataChanged(int)"), index.row())
+            return True
+      return False
+
+   def supportedDropActions(self):
+      # Hold shift when copying to change drag modes.
+      return (QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
+
+   def mimeTypes(self):
+      """ List of types we can represent. """
+      types = QtCore.QStringList()
+      types.append(EnsembleModel.ensemble_mime_type)
+      return types
+
+   def mimeData(self, indexes):
+      node_list_str = ''
+
+      for index in indexes:
+         if index.isValid():
+            node = self.mEnsemble.getNode(index.row())
+            node_list_str += str(index.row()) + ','
+      node_list_str = node_list_str.rstrip(',')
+
+      mime_data = QtCore.QMimeData()
+      text = "maestro-node-ids:%s" % node_list_str
+      mime_data.setData(EnsembleModel.ensemble_mime_type, text)
+      return mime_data
+
+   def dropMimeData(self, mimeData, action, row, column, parent):
+      """ Called when we drop a node.
+      if row and col == (-1,-1) then just need to parent the node.
+      Otherwise, the row is saying which child number we would like to be.
+      """
+      if not parent.isValid():
+         return False
+      if not mimeData.hasFormat(EnsembleModel.ensemble_mime_type):
+         return False
+      if action == QtCore.Qt.IgnoreAction:
+         return True
+      if column > 0:
+         return False
+
+      # Get node index list out of mime data.
+      data = str(mimeData.data(EnsembleModel.ensemble_mime_type))
+      (data_type, node_rows) = data.split(":")
+
+      for row_str in node_rows.split(','):
+         row = int(row_str)
+         node = self.mEnsemble.getNode(row)
+         new_index = parent.row()
+         self.mEnsemble.removeNode(node)
+         self.mEnsemble.addNode(node, new_index)
+      return True
 
    def rowCount(self, parent=QtCore.QModelIndex()):
       """ Returns the number of nodes in the current cluster configuration.

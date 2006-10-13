@@ -175,7 +175,12 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       QtCore.QObject.connect(self.mRemoveBtn,QtCore.SIGNAL("clicked()"), self.onRemove)
       self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
-
+      
+      self.mClusterListView.setAlternatingRowColors(True)
+      self.mClusterListView.setDragEnabled(True)
+      self.mClusterListView.setAcceptDrops(True)
+      self.mClusterListView.setDropIndicatorShown(True)
+      #self.treeView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
    def setEnsemble(self, ensemble):
       """ Configure the user interface.
@@ -234,7 +239,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
    def onAdd(self):
       """ Called when user presses the add button. """
-      self.mEnsemble.addNode()
+      self.mEnsemble.createNode()
 
    def onRemove(self):
       """ Called when user presses the remove button. """
