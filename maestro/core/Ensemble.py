@@ -26,16 +26,26 @@ import maestro.core
 const = maestro.core.const
 import socket, types
 
+def makeEnsemble(file):
+   tree = ET.ElementTree(file=file)
+   ensemble = Ensemble.Ensemble(tree)
+
 class Ensemble(QtCore.QObject):
    """ Contains information about a cluster of nodes. """
-   def __init__(self, xmlTree, parent=None):
+   def __init__(self, file, parent=None):
       QtCore.QObject.__init__(self, parent)
 
-      self.mLogger = logging.getLogger("maestro.Ensemble")
+      # Store filename to save to later.
+      self.mFilename = file
+
+      # Parse XML file.
+      self.mElementTree = ET.ElementTree(file=file)
 
       # Store cluster XML element
-      self.mElement = xmlTree.getroot()
+      self.mElement = self.mElementTree.getroot()
       assert self.mElement.tag == "ensemble"
+
+      self.mLogger = logging.getLogger("maestro.Ensemble")
 
       # Parse all node settings
       self.mNodes = []
@@ -51,6 +61,10 @@ class Ensemble(QtCore.QObject):
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.connect("*", "lostConnection", self.onLostConnection)
 
+   def save(self, file=None):
+      if file is None:
+         file = self.mFilename
+
    def disconnectFromEventManager(self):
       # Unregister to receive signals from all nodes about their current os.
       env = maestro.core.Environment()
@@ -65,6 +79,16 @@ class Ensemble(QtCore.QObject):
       if index < 0 or index >= len(self.mNodes):
          return None
       return self.mNodes[index]
+
+   def getNodeById(self, id):
+      """ Return the node with the given ID.
+
+          @param id: ID of the requested node.
+      """
+      for node in self.mNodes:
+         if node.getId() == id:
+            return node
+      return None
 
    def getNumNodes(self):
       """ Returns the number of nodes in Ensemble. """
@@ -132,6 +156,28 @@ class Ensemble(QtCore.QObject):
 
       # Refresh all views of the Ensemble.
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
+
+   def addNode(self, name="NewNode", hostname="NewNode", node_class=""):
+      new_element = ET.SubElement(self.mElement, "cluster_node", name=name, hostname=hostname)
+      new_element.set('class', node_class)
+
+      new_node = ClusterNode(new_element)
+      self.mNodes.append(new_node)
+      self.emit(QtCore.SIGNAL("ensembleChanged()"))
+
+   def removeNode(self, node):
+      if isinstance(node, ClusterNode):
+         self.mEnsemble.mNodes.remove(node)
+         self.emit(QtCore.SIGNAL("ensembleChanged()"))
+      elif types.IntType == type(node):
+         del self.mNodes[node]
+         self.emit(QtCore.SIGNAL("ensembleChanged()"))
+      else:
+         for n in self.mNodes[:]:
+            if n.getId() == node.getId():
+               self.mNodes.remove(n)
+               self.emit(QtCore.SIGNAL("ensembleChanged()"))
+               return
  
 class ClusterNode(QtCore.QObject):
    """ Represents a node in the active cluster configuration. Most of this

@@ -234,14 +234,15 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
    def onAdd(self):
       """ Called when user presses the add button. """
-      if not None == self.mEnsembleModel:
-         self.mEnsembleModel.insertRow(self.mEnsembleModel.rowCount())
+      self.mEnsemble.addNode()
 
    def onRemove(self):
       """ Called when user presses the remove button. """
-      row = self.mClusterListView.currentIndex().row()
-      if (not None == self.mEnsembleModel) and row >= 0:
-         self.mEnsembleModel.removeRow(row)
+      current_index = self.mClusterListView.currentIndex()
+      if self.mEnsembleModel is not None:
+         node = self.mEnsembleModel.data(current_index, QtCore.Qt.UserRole)
+         if isinstance(node, Ensemble.ClusterNode):
+            self.mEnsemble.removeNode(node)
 
    def onNodeSettingsChanged(self):
       """ Slot that is called when the user has finished editing a
@@ -285,7 +286,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       if modified:
          self.refreshNodeSettings()
          # Force the cluster model to generate a dataChanged signal.
-         self.mClusterListView.model().setData(self.mClusterListView.currentIndex(), QtCore.QVariant(), QtCore.Qt.DisplayRole)
+         self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
+         self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
    
    def onNodeSelected(self, selected, deselected):
       """ Slot that is called when a cluster node is selected. """
@@ -332,10 +334,13 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
           @param nodeId: The id of the node that changed.
       """
       if self.mSelectedNode is not None and nodeId == self.mSelectedNode.getId():
-         self.mClusterListView.model().setData(self.mClusterListView.currentIndex(), QtCore.QVariant(), QtCore.Qt.DisplayRole)
+         self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
+         self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
+         self.refreshNodeSettings()
 
    def onEnsembleChanged(self):
       """ Called when the cluster control has connected to another node. """
-      self.mClusterListView.reset()
+      self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
+      self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
       # Refresh the information about the node.
       self.refreshNodeSettings()

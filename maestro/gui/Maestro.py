@@ -36,6 +36,8 @@ const = maestro.core.const
 from maestro.core import Ensemble
 
 import elementtree.ElementTree as ET
+import xml.dom.minidom
+
 import LogWidget
 import LoginDialog
 
@@ -354,11 +356,32 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       new_file = str(new_file)
       print "New file: ", new_file
       if os.path.exists(new_file):
-         # Parse XML ensemble file. This provides the initial set of cluster
-         # nodes.
-         tree = ET.ElementTree(file=new_file)
-         ensemble = Ensemble.Ensemble(tree)
-         self.setEnsemble(ensemble)
+         try:
+            # Parse XML ensemble file. This provides the initial set of cluster
+            # nodes.
+            ensemble = Ensemble.Ensemble(new_file)
+            self.setEnsemble(ensemble)
+         except IOError, ex:
+            QtGui.QMessageBox.critical(None, "Error",
+               "Failed to read ensemble file %s: %s" % \
+               (new_file, ex.strerror))
+
+   def onSaveEnsemble(self):
+      if self.mEnsemble is None:
+         QtGui.QMessageBox.information(None, "Save Ensemble",
+            "There is currently no Ensemble open.")
+      file_name = self.mEnsemble.mFilename
+
+      try:
+         ensemble_str = ET.tostring(self.mEnsemble.mElement)
+         dom = xml.dom.minidom.parseString(ensemble_str)
+         output_file = file(file_name, 'w')
+         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+         output_file.close()
+      except IOError, ex:
+         QtGui.QMessageBox.critical(None, "Error",
+            "Failed to save ensemble file %s: %s" % \
+            (file_name, ex.strerror))
       
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
@@ -373,6 +396,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onExit)
       self.connect(self.mLoadEnsembleAction, QtCore.SIGNAL("triggered()"),
                    self.onOpenEnsemble)
+      self.connect(self.mSaveEnsembleAction, QtCore.SIGNAL("triggered()"),
+                   self.onSaveEnsemble)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout2.addWidget(self.mOutputTab)

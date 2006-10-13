@@ -64,7 +64,7 @@ class EnsembleModel(QtCore.QAbstractListModel):
       """ Slot that is called when the ensemble has changed. This will
           force all views to be updated.
       """
-      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
+      self.emit(QtCore.SIGNAL("modelReset()"))
 
    def onReportOs(self, nodeId, os):
       try:
@@ -78,40 +78,10 @@ class EnsembleModel(QtCore.QAbstractListModel):
 
          if changed:
             # TODO: Only send changed signal when nodes really changed os.
-            self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
+            #self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
+            self.emit(QtCore.SIGNAL("modelReset()"))
       except Exception, ex:
          print "ERROR: ", ex
-
-   def insertRows(self, row, count, parent):
-      self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
-      for i in xrange(count):
-         new_element = ET.SubElement(self.mEnsemble.mElement, "cluster_node", name="NewNode", hostname="NewNode")
-         new_node = Ensemble.ClusterNode(new_element)
-         self.mEnsemble.mNodes.insert(row, new_node);
-      self.endInsertRows()
-      self.emit(QtCore.SIGNAL("rowsInserted(int, int)"), row, count)
-      return True
-
-   def removeRows(self, row, count, parent):
-      self.beginRemoveRows(QtCore.QModelIndex(), row, row + count - 1)
-      self.emit(QtCore.SIGNAL("rowsAboutToBeRemoved(int, int)"), row, count)
-      for i in xrange(count):
-         node = self.mEnsemble.mNodes[row]
-
-         # Remove node's element from XML tree.
-         self.mEnsemble.mElement.remove(node.mElement)
-         # Remove node data structure
-         self.mEnsemble.mNodes.remove(node)
-      self.endRemoveRows()
-      return True
-
-   def removeNode(self, node):
-      assert not None == node
-      index = self.mEnsemble.mNodes.index(node)
-      self.removeRow(index, QtCore.QModelIndex())
-
-   def addNode(self):
-      self.insertRow(self.rowCount())
 
    def data(self, index, role=QtCore.Qt.DisplayRole):
       """ Returns the data representation of each node in the cluster.
@@ -141,11 +111,3 @@ class EnsembleModel(QtCore.QAbstractListModel):
          return 0
       else:
          return self.mEnsemble.getNumNodes()
-
-   def setData(self, index, value, role):
-      """ Doesn't do anything but provide a way to fire a dataChanged event
-          for a given model index.
-      """
-      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
-      self.emit(QtCore.SIGNAL("dataChanged(int)"), index.row())
-      return True

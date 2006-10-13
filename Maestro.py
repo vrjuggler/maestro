@@ -48,7 +48,6 @@ import maestro.gui.Maestro
 import maestro.gui.LoginDialog
 import maestro.gui.guiprefs
 
-import elementtree.ElementTree as ET
 import maestro.core.EventManager
 
 import logging, socket, time
@@ -61,7 +60,7 @@ def process_command_line():
    Maestro by Infiscape
    """
 
-   parser = OptionParser(version="0.1", description=prog_desc)
+   parser = OptionParser(usage="%prog [options] [ensemble]", version="0.1", description=prog_desc)
    parser.add_option("-e","--ensemble", type="string",
                      help="Ensemble file to load")
    parser.add_option("-s","--stanza", type="string",
@@ -175,10 +174,7 @@ def main():
       if opts.ensemble is not None:
          try:
             print "Trying to load file: ", opts.ensemble
-            # Parse XML ensemble file. This provides the initial set of cluster
-            # nodes.
-            tree = ET.ElementTree(file=opts.ensemble)
-            ensemble = Ensemble.Ensemble(tree)
+            ensemble = Ensemble.Ensemble(opts.ensemble)
             m.setEnsemble(ensemble)
          except IOError, ex:
             QtGui.QMessageBox.critical(None, "Error",
