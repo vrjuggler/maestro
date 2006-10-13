@@ -53,7 +53,7 @@ class ResourceViewPlugin(maestro.core.IViewPlugin):
    getName = staticmethod(getName)
    
    def getIcon():
-      return QtGui.QIcon(":/Maestro/images/resources.png")   
+      return QtGui.QIcon(":/Maestro/images/resourcesView.png")
    getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):

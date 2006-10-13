@@ -40,7 +40,7 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
    getName = staticmethod(getName)
       
    def getIcon():
-      return QtGui.QIcon(":/Maestro/images/launch.png")
+      return QtGui.QIcon(":/Maestro/images/launchView.png")
    getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):

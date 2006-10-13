@@ -35,7 +35,7 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
    getName = staticmethod(getName)
 
    def getIcon():
-      return QtGui.QIcon(":/Maestro/images/management.png")
+      return QtGui.QIcon(":/Maestro/images/ensembleView.png")
    getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):

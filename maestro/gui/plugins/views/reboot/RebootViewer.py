@@ -64,7 +64,7 @@ class RebootViewPlugin(maestro.core.IViewPlugin):
    getName = staticmethod(getName)
 
    def getIcon():
-      return QtGui.QIcon(":/Maestro/images/reboot.png")
+      return QtGui.QIcon(":/Maestro/images/rebootView.png")
    getIcon = staticmethod(getIcon)
       
    def getViewWidget(self):

@@ -54,54 +54,6 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="1" >
-     <widget class="QFrame" name="mViewTitleFrame" >
-      <property name="frameShape" >
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow" >
-       <enum>QFrame::Sunken</enum>
-      </property>
-      <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="mViewTitleLbl" >
-         <property name="font" >
-          <font>
-           <family>Sans Serif</family>
-           <pointsize>12</pointsize>
-           <weight>50</weight>
-           <italic>false</italic>
-           <bold>false</bold>
-           <underline>false</underline>
-           <strikeout>false</strikeout>
-          </font>
-         </property>
-         <property name="autoFillBackground" >
-          <bool>true</bool>
-         </property>
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Sunken</enum>
-         </property>
-         <property name="lineWidth" >
-          <number>2</number>
-         </property>
-         <property name="text" >
-          <string/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
     <item rowspan="2" row="0" column="0" >
      <widget class="QFrame" name="mToolbox" >
       <property name="sizePolicy" >
@@ -145,6 +97,36 @@
         </spacer>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item row="0" column="1" >
+     <widget class="QLabel" name="mViewTitleLbl" >
+      <property name="font" >
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>12</pointsize>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+        <underline>false</underline>
+        <strikeout>false</strikeout>
+       </font>
+      </property>
+      <property name="autoFillBackground" >
+       <bool>true</bool>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="lineWidth" >
+       <number>2</number>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
      </widget>
     </item>
    </layout>

@@ -392,8 +392,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mToolboxButtonGroup = QtGui.QButtonGroup()
       widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mLogWindow)
       self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mViewTitleFrame.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mViewTitleFrame.setForegroundRole(QtGui.QPalette.Shadow)
+
+      # Force the toolbox to be while
+      new_palette = QtGui.QPalette(self.palette())
+      new_palette.setColor(QtGui.QPalette.Mid, QtGui.QColor(QtCore.Qt.white))
+      self.mToolbox.setPalette(new_palette)
 
       self.connect(self.mArchiveLogsAction, QtCore.SIGNAL("triggered()"),
                    self.onArchiveLogs)
@@ -405,7 +408,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onSaveEnsemble)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
-      self.vboxlayout2.addWidget(self.mOutputTab)
+      self.vboxlayout1.addWidget(self.mOutputTab)
 
       # Make the toolbox a scroll area.
       self.mToolboxScrollArea = QtGui.QScrollArea()

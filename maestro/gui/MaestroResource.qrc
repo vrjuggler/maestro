@@ -8,19 +8,24 @@
         <file>images/edit_add.png</file>
         <file>images/edit_remove.png</file>
         <file>images/editredo.png</file>
+        <file>images/ensembleView.png</file>
         <file>images/error2.png</file>
         <file>images/exit.png</file>
         <file>images/infiscape.png</file>
         <file>images/launch.png</file>
+        <file>images/launchView.png</file>
         <file>images/linux2.png</file>
         <file>images/maestro_icon.png</file>
         <file>images/management.png</file>
         <file>images/new.png</file>
         <file>images/open.png</file>
         <file>images/paste.png</file>
+        <file>images/processView.png</file>
         <file>images/reboot.png</file>
+        <file>images/rebootView.png</file>
         <file>images/reload.png</file>
         <file>images/resources.png</file>
+        <file>images/resourcesView.png</file>
         <file>images/save.png</file>
         <file>images/win_xp.png</file>
     </qresource>
