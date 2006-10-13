@@ -47,7 +47,12 @@ class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
                domain_user_list = computer.UserName.split("\\")
                if len(domain_user_list) > 1:
                   self.mUserEdit.setText(domain_user_list[1])
-                  #self.mPasswordEdit.setFocus()
+                  self.mUserEdit.setFocus()
+         else:
+            if os.environ.has_key('USER'):
+               username = os.environ["USER"]
+               self.mUserEdit.setText(username)
+               self.mUserEdit.setFocus()
       except:
          # Do nothing if we fail to get domain/username.
          pass
