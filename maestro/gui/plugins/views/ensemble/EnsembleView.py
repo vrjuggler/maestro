@@ -176,7 +176,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
 
 
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       """ Configure the user interface.
 
           @param ensemble: The current Ensemble configuration.

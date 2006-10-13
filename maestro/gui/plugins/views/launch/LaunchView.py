@@ -95,7 +95,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.actionDict          = {}   # Storage for user-defined action slots
       self.activeThread        = None
 
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       self.mEnsemble = ensemble
       self.mElement = self.mEnsemble.mElement
 

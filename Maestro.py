@@ -158,9 +158,9 @@ def main():
 
       # Create and display GUI
       m = gui.Maestro.Maestro()
-      m.init(ensemble)
+      m.init()
+      m.setEnsemble(ensemble)
       m.show()
-#      splash.finish(m)
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()

@@ -207,7 +207,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       for node in nodes_to_refresh:
          env.mEventManager.emit(node, "process.get_procs")
 
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       """ Configure the user interface with data in cluster configuration. """
       self.mEnsemble = ensemble
 

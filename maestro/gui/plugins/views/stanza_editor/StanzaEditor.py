@@ -501,7 +501,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mClassFilterCB.addItem("master")
       self.mClassFilterCB.addItem("slave")
 
-   def init(self, ensemble=None):
       env = maestro.core.Environment()
       self.mOptionEditorPlugins = env.mPluginManager.getPlugins(
          plugInType=maestro.core.IOptionEditorPlugin, returnNameDict=True)
@@ -583,6 +582,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Last step, fill in application combobox and select the first one.
       self.__fillApplicationCB()
       self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
+
+   def setEnsemble(self, ensemble=None):
+      pass
 
    def __fillApplicationCB(self):
       env = maestro.core.Environment()

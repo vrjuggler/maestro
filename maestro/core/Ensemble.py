@@ -43,12 +43,6 @@ class Ensemble(QtCore.QObject):
          self.mNodes.append(ClusterNode(nodeElt))
          print "Cluster Node: ", ClusterNode(nodeElt).getName()
 
-      # Timer to refresh pyro connections to nodes.
-      self.refreshTimer = QtCore.QTimer()
-      self.refreshTimer.setInterval(2000)
-      self.refreshTimer.start()
-      QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"), self.refreshConnections)
-
       # XXX: Should we manage this signal on a per node basis? We would have
       #      to make each node generate a signal when it's OS changed and
       #      listen for it here anyway.
@@ -56,6 +50,12 @@ class Ensemble(QtCore.QObject):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.connect("*", "lostConnection", self.onLostConnection)
+
+   def disconnectFromEventManager(self):
+      # Unregister to receive signals from all nodes about their current os.
+      env = maestro.core.Environment()
+      env.mEventManager.disconnect("*", "ensemble.report_os", self.onReportOs)
+      env.mEventManager.disconnect("*", "lostConnection", self.onLostConnection)
 
    def getNode(self, index):
       """ Return the node at the given index. Returns None if index is out of range.

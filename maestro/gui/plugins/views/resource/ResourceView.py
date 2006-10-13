@@ -134,7 +134,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       (mem_usage, swap_usage) = val
       self.mResourceModel.setData(ip, 1, mem_usage)
 
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       """ Configure the user interface with data in cluster configuration. """
       self.mEnsemble = ensemble
 

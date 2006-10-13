@@ -79,8 +79,8 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Default values that will change in init().
       self.mEnsemble = None
-
       self.mRebootInfoMap = {}
+      self.mRebootModel = None
 
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "reboot.report_info", self.onReportTargets)
@@ -140,8 +140,12 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mSelectLinuxBtn.setDefaultAction(self.mSetAllTargetsToLinuxAction)
       self.mRebootBtn.setDefaultAction(self.mRebootClusterAction)
       self.mRefreshBtn.setDefaultAction(self.mRefreshAction)
+
+      # Create ItemDelegate to allow editing boot target with a combo box.
+      self.mRebootDelegate = RebootDelegate(self.mNodeTableView)
+      self.mNodeTableView.setItemDelegate(self.mRebootDelegate)
    
-   def init(self, ensemble):
+   def setEnsemble(self, ensemble):
       """ Configure the user interface.
 
           @param ensemble: The current Ensemble configuration.
@@ -149,15 +153,19 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
+      self.mRebootInfoMap = {}
 
-      # Create a model for our NodeTableView
-      self.mRebootModel = RebootModel(self.mEnsemble, self.mRebootInfoMap)
-      self.connect(self.mRebootModel, QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-         self.onRebootModelChanged)
+      if self.mRebootModel is not None:
+         self.disconnect(self.mRebootModel, QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
+            self.onRebootModelChanged)
+      self.mRebootModel = None
 
-      # Create ItemDelegate to allow editing boot target with a combo box.
-      self.mRebootDelegate = RebootDelegate(self.mNodeTableView)
-      self.mNodeTableView.setItemDelegate(self.mRebootDelegate)
+      if self.mEnsemble is not None:
+         # Create a model for our NodeTableView
+         self.mRebootModel = RebootModel(self.mEnsemble, self.mRebootInfoMap)
+         self.connect(self.mRebootModel, QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
+            self.onRebootModelChanged)
+
 
       # Set the model.
       self.mNodeTableView.setModel(self.mRebootModel)

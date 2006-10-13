@@ -288,18 +288,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mActiveViewPlugins = {}
       self.mLoggers = []
 
-   def init(self, clusterModel):
-      # Set the new cluster configuration
-      self.mEnsemble = clusterModel
-      self.mOutputTab.init(self.mEnsemble)
-
-      self.mFileLogger = OutputFileLogger(logging.DEBUG)
-      self.mFileLogger.init(self.mEnsemble)
-
-#      console_logger = ConsoleLogger(logging.DEBUG)
-#      console_logger.init(self.mEnsemble)
-#      self.mLoggers.append(console_logger)
-
+   def init(self):
       env = maestro.core.Environment()
       self.mCurViewPlugin = None
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
@@ -314,9 +303,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
                              self.viewRemoved)
 
-      # Initialize all loaded modules.
-      for (view, view_widget) in self.mActiveViewPlugins.values():
-         view_widget.init(self.mEnsemble)
 
       # Set the default button to display
       btn = self.mToolboxButtonGroup.buttons()[0]
@@ -331,6 +317,56 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       assert(self.mCurViewPlugin is not None)
 
+      # Timer to refresh pyro connections to nodes.
+      self.refreshTimer = QtCore.QTimer()
+      self.refreshTimer.setInterval(2000)
+      self.refreshTimer.start()
+      QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"), self.onRefreshEnsemble)
+
+   def setEnsemble(self, ensemble):
+      if self.mEnsemble is not None:
+         env = maestro.core.Environment()
+         # Close all connections.
+         # NOTE: This will cause events to be fired before we disconnect
+         # from the event manager on the next line.
+         env.mEventManager.closeAllConnections()
+         self.mEnsemble.disconnectFromEventManager()
+      self.mEnsemble = ensemble
+      # Initialize all loaded modules.
+      for (view, view_widget) in self.mActiveViewPlugins.values():
+         view_widget.setEnsemble(self.mEnsemble)
+
+      # Set the new cluster configuration
+      self.mOutputTab.init(self.mEnsemble)
+
+      self.mFileLogger = OutputFileLogger(logging.DEBUG)
+      self.mFileLogger.init(self.mEnsemble)
+
+#      console_logger = ConsoleLogger(logging.DEBUG)
+#      console_logger.init(self.mEnsemble)
+#      self.mLoggers.append(console_logger)
+
+   def onRefreshEnsemble(self):
+      """Try to connect to all nodes."""
+
+      if self.mEnsemble is not None:
+         self.mEnsemble.refreshConnections()
+
+   def onOpenEnsemble(self):
+      new_file = \
+         QtGui.QFileDialog.getOpenFileName(
+            self, "Choose a Ensemble file",
+            "Ensemble (*.ensem)"
+         )
+      new_file = str(new_file)
+      print "New file: ", new_file
+      if os.path.exists(new_file):
+         # Parse XML ensemble file. This provides the initial set of cluster
+         # nodes.
+         tree = ET.ElementTree(file=new_file)
+         ensemble = Ensemble.Ensemble(tree)
+         self.setEnsemble(ensemble)
+      
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
@@ -342,6 +378,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onArchiveLogs)
       self.connect(self.mExitAction, QtCore.SIGNAL("triggered()"),
                    self.onExit)
+      self.connect(self.mLoadEnsembleAction, QtCore.SIGNAL("triggered()"),
+                   self.onOpenEnsemble)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout2.addWidget(self.mOutputTab)

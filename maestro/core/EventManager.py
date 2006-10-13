@@ -36,6 +36,13 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       self.mIpAddress = ipAddress
       self.mLogger = logging.getLogger('maestrod.EventManager')
 
+   def closeAllConnections(self):
+      for (ip, proxy) in self.mProxies.iteritems():
+         remote_addr = proxy.broker.transport.getHost()
+         print "Closing connection to: ", remote_addr
+         proxy.broker.transport.loseConnection()
+      self.mProxies = {}
+
    def setCredentials(self, creds):
       self.mCredentials = creds
 
