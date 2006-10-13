@@ -92,10 +92,6 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       # Call out base class constructor.
       RebootViewerBase.Ui_RebootViewerBase.setupUi(self, widget)
 
-      # Set the title's palette correctly.
-      self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
-
       # We only want to be able to select rows, not cells.
       self.mNodeTableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
       self.mNodeTableView.setAlternatingRowColors(True)

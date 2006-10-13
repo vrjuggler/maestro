@@ -74,8 +74,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
    def setupUi(self, widget):
       LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)
-      self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
       
       self.connect(self.mLaunchBtn,QtCore.SIGNAL("clicked()"),self.onLaunchApp)
       self.connect(self.mKillBtn,QtCore.SIGNAL("clicked()"),self.onKillApp)

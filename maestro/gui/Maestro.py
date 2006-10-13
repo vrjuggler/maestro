@@ -291,7 +291,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       QtCore.QObject.connect(self.mToolboxButtonGroup,
                              QtCore.SIGNAL("buttonClicked(int)"),
-                             self.mStack.setCurrentIndex)
+                             self.mStack, QtCore.SLOT("setCurrentIndex(int)"))
       QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
                              self.viewChanged)
       QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
@@ -392,6 +392,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mToolboxButtonGroup = QtGui.QButtonGroup()
       widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mLogWindow)
       self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
+      self.mViewTitleFrame.setBackgroundRole(QtGui.QPalette.Mid)
+      self.mViewTitleFrame.setForegroundRole(QtGui.QPalette.Shadow)
 
       self.connect(self.mArchiveLogsAction, QtCore.SIGNAL("triggered()"),
                    self.onArchiveLogs)
@@ -407,7 +409,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       # Make the toolbox a scroll area.
       self.mToolboxScrollArea = QtGui.QScrollArea()
-      self.hboxlayout1.insertWidget(0, self.mToolboxScrollArea)
+      self.gridlayout.addWidget(self.mToolboxScrollArea, 0,0,2,1)
       self.mToolboxScrollArea.setWidget(self.mToolbox)
       self.mToolboxScrollArea.setWidgetResizable(True)
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
@@ -511,7 +513,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          self.getCurrentViewPlugin(self.mStack.currentWidget())
 
       if self.mCurViewPlugin is not None:
+         self.mViewTitleLbl.setText(self.mCurViewPlugin.getName())
          self.mCurViewPlugin.activate(self)
+
 
    def viewRemoved(self, index):
       if self.mCurViewPlugin is not None:

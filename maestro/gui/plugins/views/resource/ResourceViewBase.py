@@ -31,24 +31,6 @@ class Ui_ResourceViewBase(object):
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(ResourceViewBase)
-
-      font = QtGui.QFont(self.mTitleLbl.font())
-      font.setFamily("Sans Serif")
-      font.setPointSize(12)
-      font.setWeight(50)
-      font.setItalic(False)
-      font.setUnderline(False)
-      font.setStrikeOut(False)
-      font.setBold(False)
-      self.mTitleLbl.setFont(font)
-      self.mTitleLbl.setAutoFillBackground(True)
-      self.mTitleLbl.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mTitleLbl.setFrameShadow(QtGui.QFrame.Sunken)
-      self.mTitleLbl.setLineWidth(3)
-      self.mTitleLbl.setObjectName("mTitleLbl")
-      self.vboxlayout.addWidget(self.mTitleLbl)
-
       self.mResourceTable = QtGui.QTableView(ResourceViewBase)
       self.mResourceTable.setObjectName("mResourceTable")
       self.vboxlayout.addWidget(self.mResourceTable)
@@ -71,8 +53,8 @@ class Ui_ResourceViewBase(object):
 
    def retranslateUi(self, ResourceViewBase):
       ResourceViewBase.setWindowTitle(QtGui.QApplication.translate("ResourceViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("ResourceViewBase", "Resource Viewer", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("ResourceViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

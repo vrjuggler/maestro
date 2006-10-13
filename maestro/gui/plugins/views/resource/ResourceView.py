@@ -70,10 +70,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       Setup all initial gui settings that don't need to know about the cluster configuration.
       """
       ResourceViewBase.Ui_ResourceViewBase.setupUi(self, widget)
-      self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
       
-      #delegate = PixelDelegate(self.mResourceTable)
       delegate = GraphDelegate(self.mResourceTable)
       self.mResourceTable.setItemDelegate(delegate)
       self.mResourceTable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -149,29 +146,6 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
       env.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)
-
-class PixelDelegate(QtGui.QItemDelegate):
-    def __init__(self, parent=None):
-        QtGui.QAbstractItemDelegate.__init__(self,parent)
-        self.pixelSize = 12
-
-    def paint(self, painter, option, index):
-      if index.column() == 0:
-         QtGui.QItemDelegate.paint(self, painter, option, index)
-      elif True:
-         style = QtGui.QApplication.style()
-         pb_opts = QtGui.QStyleOptionProgressBarV2()
-         pb_opts.palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(0, 0, 255))
-         value, ok = index.model().data(index, QtCore.Qt.DisplayRole).toDouble()
-         pb_opts.minimum = 0
-         pb_opts.maximum = 100
-         pb_opts.progress = value
-         pb_opts.rect = option.rect
-         pb_opts.textVisible = True
-         pb_opts.textAlignment = QtCore.Qt.AlignCenter
-         pb_opts.orientation = QtCore.Qt.Horizontal
-         pb_opts.text = ("%.2f " % value) + "%"
-         style.drawControl(QtGui.QStyle.CE_ProgressBar, pb_opts, painter)
 
 HISTORY = 60
 

@@ -31,23 +31,6 @@ class Ui_DesktopViewerBase(object):
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(DesktopViewerBase)
-
-      font = QtGui.QFont(self.mTitleLbl.font())
-      font.setFamily("Sans Serif")
-      font.setPointSize(12)
-      font.setWeight(50)
-      font.setItalic(False)
-      font.setUnderline(False)
-      font.setStrikeOut(False)
-      font.setBold(False)
-      self.mTitleLbl.setFont(font)
-      self.mTitleLbl.setAutoFillBackground(True)
-      self.mTitleLbl.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mTitleLbl.setFrameShadow(QtGui.QFrame.Sunken)
-      self.mTitleLbl.setObjectName("mTitleLbl")
-      self.vboxlayout.addWidget(self.mTitleLbl)
-
       self.mNodeChooser = QtGui.QComboBox(DesktopViewerBase)
       self.mNodeChooser.setObjectName("mNodeChooser")
       self.vboxlayout.addWidget(self.mNodeChooser)
@@ -119,11 +102,11 @@ class Ui_DesktopViewerBase(object):
 
    def retranslateUi(self, DesktopViewerBase):
       DesktopViewerBase.setWindowTitle(QtGui.QApplication.translate("DesktopViewerBase", "Desktop Management", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("DesktopViewerBase", "Desktop Management", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaverEnabledBox.setText(QtGui.QApplication.translate("DesktopViewerBase", "Screen Saver Enabled", None, QtGui.QApplication.UnicodeUTF8))
       self.mBgFileLbl.setText(QtGui.QApplication.translate("DesktopViewerBase", "Background Image:", None, QtGui.QApplication.UnicodeUTF8))
       self.mBgChooserBtn.setText(QtGui.QApplication.translate("DesktopViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mStopSaverBtn.setText(QtGui.QApplication.translate("DesktopViewerBase", "Stop Screen Saver", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

@@ -31,24 +31,6 @@ class Ui_LaunchViewBase(object):
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(LaunchViewBase)
-
-      font = QtGui.QFont(self.mTitleLbl.font())
-      font.setFamily("Sans Serif")
-      font.setPointSize(12)
-      font.setWeight(50)
-      font.setItalic(False)
-      font.setUnderline(False)
-      font.setStrikeOut(False)
-      font.setBold(False)
-      self.mTitleLbl.setFont(font)
-      self.mTitleLbl.setAutoFillBackground(True)
-      self.mTitleLbl.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mTitleLbl.setFrameShadow(QtGui.QFrame.Sunken)
-      self.mTitleLbl.setLineWidth(2)
-      self.mTitleLbl.setObjectName("mTitleLbl")
-      self.vboxlayout.addWidget(self.mTitleLbl)
-
       self.hboxlayout = QtGui.QHBoxLayout()
       self.hboxlayout.setMargin(0)
       self.hboxlayout.setSpacing(6)
@@ -120,7 +102,6 @@ class Ui_LaunchViewBase(object):
 
    def retranslateUi(self, LaunchViewBase):
       LaunchViewBase.setWindowTitle(QtGui.QApplication.translate("LaunchViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application Launcher", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
       self.mLaunchBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Launch", None, QtGui.QApplication.UnicodeUTF8))
       self.mKillBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))

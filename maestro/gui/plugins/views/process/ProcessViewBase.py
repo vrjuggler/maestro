@@ -31,24 +31,6 @@ class Ui_ProcessViewBase(object):
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(ProcessViewBase)
-
-      font = QtGui.QFont(self.mTitleLbl.font())
-      font.setFamily("Sans Serif")
-      font.setPointSize(12)
-      font.setWeight(50)
-      font.setItalic(False)
-      font.setUnderline(False)
-      font.setStrikeOut(False)
-      font.setBold(False)
-      self.mTitleLbl.setFont(font)
-      self.mTitleLbl.setAutoFillBackground(True)
-      self.mTitleLbl.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mTitleLbl.setFrameShadow(QtGui.QFrame.Sunken)
-      self.mTitleLbl.setLineWidth(3)
-      self.mTitleLbl.setObjectName("mTitleLbl")
-      self.vboxlayout.addWidget(self.mTitleLbl)
-
       self.mProcessTable = QtGui.QTableView(ProcessViewBase)
       self.mProcessTable.setObjectName("mProcessTable")
       self.vboxlayout.addWidget(self.mProcessTable)
@@ -75,9 +57,9 @@ class Ui_ProcessViewBase(object):
 
    def retranslateUi(self, ProcessViewBase):
       ProcessViewBase.setWindowTitle(QtGui.QApplication.translate("ProcessViewBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("ProcessViewBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("ProcessViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
       self.mTerminateBtn.setText(QtGui.QApplication.translate("ProcessViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

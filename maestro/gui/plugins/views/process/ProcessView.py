@@ -118,10 +118,8 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       Setup all initial gui settings that don't need to know about the ensemble.
       """
       ProcessViewBase.Ui_ProcessViewBase.setupUi(self, widget)
-      self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
-      self.mTerminateBtn.setEnabled(False)
       
+      self.mTerminateBtn.setEnabled(False)
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
       QtCore.QObject.disconnect(self.mProcessTable.horizontalHeader(), QtCore.SIGNAL("sectionPressed(int)"),
          self.mProcessTable, QtCore.SLOT("selectColumn(int)"))

@@ -66,10 +66,6 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       # Call the base class constructor.
       DesktopViewerBase.Ui_DesktopViewerBase.setupUi(self, widget)
 
-      # Set the title's palette correctly.
-      self.mTitleLbl.setBackgroundRole(QtGui.QPalette.Mid)
-      self.mTitleLbl.setForegroundRole(QtGui.QPalette.Shadow)
-
       self.connect(self.mSaverEnabledBox, QtCore.SIGNAL("toggled(bool)"),
                    self.onToggleScreenSaver)
       self.connect(self.mBgChooserBtn, QtCore.SIGNAL("clicked()"),

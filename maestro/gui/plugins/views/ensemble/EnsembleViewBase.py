@@ -31,24 +31,6 @@ class Ui_EnsembleViewBase(object):
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mTitleLbl = QtGui.QLabel(EnsembleViewBase)
-
-      font = QtGui.QFont(self.mTitleLbl.font())
-      font.setFamily("Sans Serif")
-      font.setPointSize(12)
-      font.setWeight(50)
-      font.setItalic(False)
-      font.setUnderline(False)
-      font.setStrikeOut(False)
-      font.setBold(False)
-      self.mTitleLbl.setFont(font)
-      self.mTitleLbl.setAutoFillBackground(True)
-      self.mTitleLbl.setFrameShape(QtGui.QFrame.StyledPanel)
-      self.mTitleLbl.setFrameShadow(QtGui.QFrame.Sunken)
-      self.mTitleLbl.setLineWidth(3)
-      self.mTitleLbl.setObjectName("mTitleLbl")
-      self.vboxlayout.addWidget(self.mTitleLbl)
-
       self.hboxlayout = QtGui.QHBoxLayout()
       self.hboxlayout.setMargin(0)
       self.hboxlayout.setSpacing(6)
@@ -176,7 +158,6 @@ class Ui_EnsembleViewBase(object):
 
    def retranslateUi(self, EnsembleViewBase):
       EnsembleViewBase.setWindowTitle(QtGui.QApplication.translate("EnsembleViewBase", "Ensemble View", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Cluster Management", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddBtn.setToolTip(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddBtn.setWhatsThis(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Add a cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
