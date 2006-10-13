@@ -6,7 +6,7 @@ Basically there are only a few restrictions.
 - Selected attribute is only valid if parent is a choice.
 -->
 <stanza>
-  <application label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
+  <application name="ExampleVolumeRenderer" label="Example Volume Renderer" global_options="Configuration Files,VR Juggler 2.0" tooltip="Example Volume Renderer" helpUrl="">
     <command class="" hidden="true">./build.linux-i686/Viewer/infi_app</command>
     <env_var class="" hidden="true" label="Display" key="DISPLAY">:0.0</env_var>
     <cwd class="" hidden="true">/home/aronb/Source/Infiscape/common/IOV</cwd>
