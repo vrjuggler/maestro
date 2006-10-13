@@ -338,13 +338,24 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       widget.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.mLogWindow)
       self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
 
-      self.connect(self.mActionArchiveLogs, QtCore.SIGNAL("triggered()"),
+      self.connect(self.mArchiveLogsAction, QtCore.SIGNAL("triggered()"),
                    self.onArchiveLogs)
-      self.connect(self.action_Exit, QtCore.SIGNAL("triggered()"),
+      self.connect(self.mExitAction, QtCore.SIGNAL("triggered()"),
                    self.onExit)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout2.addWidget(self.mOutputTab)
+
+      # Make the toolbox a scroll area.
+      self.mToolboxScrollArea = QtGui.QScrollArea()
+      self.hboxlayout1.insertWidget(0, self.mToolboxScrollArea)
+      self.mToolboxScrollArea.setWidget(self.mToolbox)
+      self.mToolboxScrollArea.setWidgetResizable(True)
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      self.mToolboxScrollArea.setSizePolicy(sizePolicy)
+
 
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)

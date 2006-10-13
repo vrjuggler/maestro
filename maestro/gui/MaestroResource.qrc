@@ -4,9 +4,12 @@
         <file>images/copy.png</file>
         <file>images/cut.png</file>
         <file>images/desktop.png</file>
+        <file>images/edit_add.png</file>
+        <file>images/edit_remove.png</file>
         <file>images/editredo.png</file>
         <file>images/error2.png</file>
         <file>images/exit.png</file>
+        <file>images/infiscape.png</file>
         <file>images/launch.png</file>
         <file>images/linux2.png</file>
         <file>images/maestro_icon.png</file>
@@ -19,7 +22,5 @@
         <file>images/resources.png</file>
         <file>images/save.png</file>
         <file>images/win_xp.png</file>
-        <file>images/edit_add.png</file>
-        <file>images/edit_remove.png</file>
     </qresource>
 </RCC>
