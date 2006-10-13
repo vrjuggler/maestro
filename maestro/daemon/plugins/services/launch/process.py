@@ -246,6 +246,8 @@ def _getPathFromEnv(env):
         else:
             return None
 
+if not sys.platform.startswith("win"):
+   import select
 
 def _readRetryOnEINTR(fd, buffersize):
     """Like os.read, but retries on EINTR.
@@ -254,14 +256,16 @@ def _readRetryOnEINTR(fd, buffersize):
         [EINTR]     A read from a slow device was interrupted before any
                     data arrived by the delivery of a signal.
     """
-    import select
     while 1:
         try:
-            (ins, outs, errs) = select.select([], [fd], [], 0)
-            if fd in outs:
+            if sys.platform.startswith("win"):
                return os.read(fd, buffersize)
             else:
-               return ""
+               (ins, outs, errs) = select.select([], [fd], [], 0)
+               if fd in outs:
+                  return os.read(fd, buffersize)
+               else:
+                  return ""
         except OSError, e:
             if e.errno == errno.EINTR:
                 continue
@@ -1041,7 +1045,7 @@ class Process:
                                        self.WAIT_TIMEOUT)
         return retval
 
-    def kill(self, exitCode=0, gracePeriod=1.0, sig=None):
+    def kill(self, exitCode=0, gracePeriod=1, sig=None):
         """Kill process.
         
         "exitCode" [deprecated, not supported] (Windows only) is the
@@ -1425,7 +1429,7 @@ class ProcessOpen(Process):
         _unregisterProcess(self)
         return retval
 
-    def kill(self, exitCode=0, gracePeriod=1.0, sig=None):
+    def kill(self, exitCode=0, gracePeriod=1, sig=None):
         """Kill process.
         
         "exitCode" [deprecated, not supported] (Windows only) is the
@@ -1513,7 +1517,7 @@ class ProcessProxy(Process):
     #TODO:
     #   - .suspend() and .resume()? See Win32::Process Perl module.
     #
-    def __init__(self, cmd, mode='t', cwd=None, env=None,
+    def __init__(self, cmd, mode='t', cwd=None, env=None, avatar=None,
                  stdin=None, stdout=None, stderr=None):
         """Create a Process with proxy threads for each std handle.
 
@@ -1562,6 +1566,9 @@ class ProcessProxy(Process):
         else:
             self.stderr = stderr
         self._closed = 0
+
+        self._avatarId = avatar.mAvatarId
+        self._avatar = avatar
 
         if sys.platform.startswith("win"):
             self._startOnWindows()
@@ -1783,7 +1790,7 @@ class ProcessProxy(Process):
             try:
                 self._hProcess, hThread, self._processId, threadId\
                     = _SaferCreateProcess(
-                        None,           # credentials
+                        self._avatar,   # avatar
                         None,           # app name
                         cmd,            # command line 
                         None,           # process security attributes 
@@ -1880,7 +1887,7 @@ class ProcessProxy(Process):
         _unregisterProcess(self)
         return retval
 
-    def kill(self, exitCode=0, gracePeriod=1.0, sig=None):
+    def kill(self, exitCode=0, gracePeriod=1, sig=None):
         """Kill process.
         
         "exitCode" [deprecated, not supported] (Windows only) is the
@@ -2041,6 +2048,7 @@ class IOBuffer:
                 #log.debug("[%s]     >>> IOBuffer.read: done change .wait()"\
                 #          % self._name)
         else:
+            pass
             # Wait until there are the requested number of bytes to read
             # (or until the buffer is closed, i.e. no more writes will
             # come).
@@ -2051,16 +2059,16 @@ class IOBuffer:
             #     _stateChange.acquire() and .release() calls out side
             #     of the 'while 1:' here. ...and now they are back
             #     inside.
-            while 1:
-                if self._closed: break
-                if self._haveNumBytes(n): break
-                #log.debug("[%s]     <<< IOBuffer.read: state change .wait()"\
-                #          % self._name)
-                self._stateChange.acquire()
-                self._stateChange.wait()
-                self._stateChange.release()
-                #log.debug("[%s]     >>> IOBuffer.read: done change .wait()"\
-                #          % self._name)
+            #while 1:
+            #    if self._closed: break
+            #    if self._haveNumBytes(n): break
+            #    #log.debug("[%s]     <<< IOBuffer.read: state change .wait()"\
+            #    #          % self._name)
+            #    self._stateChange.acquire()
+            #    self._stateChange.wait()
+            #    self._stateChange.release()
+            #    #log.debug("[%s]     >>> IOBuffer.read: done change .wait()"\
+            #    #          % self._name)
         log.info("[%s] IOBuffer.read(): done waiting for data" % self._name)
 
         self._mutex.acquire()

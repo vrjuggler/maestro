@@ -122,8 +122,12 @@ class LaunchService(maestro.core.IServicePlugin):
                envMap['DISPLAY']    = os.environ['DISPLAY']
                envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
 
-            self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
-                                                env = envMap, avatar = avatar)
+            if sys.platform.startswith("win"):
+               self.mProcess = process.ProcessProxy(cmd = command, cwd = cwd,
+                                                    env = envMap, avatar = avatar)
+            else:
+               self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
+                                                   env = envMap, avatar = avatar)
             return True
       except KeyError, ex:
          #traceback.print_stack()
