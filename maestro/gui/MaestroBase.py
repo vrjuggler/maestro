@@ -59,11 +59,14 @@ class Ui_MaestroBase(object):
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
+
+      spacerItem = QtGui.QSpacerItem(20,40,QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding)
+      self.vboxlayout.addItem(spacerItem)
       self.hboxlayout1.addWidget(self.mToolbox)
 
       self.mStack = QtGui.QStackedWidget(self.centralwidget)
 
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(5),QtGui.QSizePolicy.Policy(5))
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(13),QtGui.QSizePolicy.Policy(13))
       sizePolicy.setHorizontalStretch(0)
       sizePolicy.setVerticalStretch(0)
       sizePolicy.setHeightForWidth(self.mStack.sizePolicy().hasHeightForWidth())
@@ -89,7 +92,7 @@ class Ui_MaestroBase(object):
       MaestroBase.setCentralWidget(self.centralwidget)
 
       self.menubar = QtGui.QMenuBar(MaestroBase)
-      self.menubar.setGeometry(QtCore.QRect(0,0,557,25))
+      self.menubar.setGeometry(QtCore.QRect(0,0,557,29))
       self.menubar.setObjectName("menubar")
 
       self.menuHelp = QtGui.QMenu(self.menubar)

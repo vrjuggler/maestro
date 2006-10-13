@@ -413,7 +413,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          btn.setCheckable(True)
          btn.setMinimumSize(QtCore.QSize(40,40))
          btn.setIconSize(QtCore.QSize(40,40))
-         self.mToolbox.layout().addWidget(btn)
+         self.mToolbox.layout().insertWidget(self.mToolbox.layout().count()-1, btn)
          self.mToolboxButtonGroup.addButton(btn, index)
 
          # Keep track of widgets to remove them later
