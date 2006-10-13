@@ -1,15 +1,12 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>EnsembleViewBase</class>
  <widget class="QWidget" name="EnsembleViewBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>742</width>
-    <height>489</height>
+    <width>585</width>
+    <height>522</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -171,7 +168,27 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1" >
+          <item row="5" column="0" >
+           <widget class="QLabel" name="mOtherLbl" >
+            <property name="text" >
+             <string>Other:</string>
+            </property>
+            <property name="alignment" >
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" >
+           <widget class="QLabel" name="mCurrentOsLbl" >
+            <property name="text" >
+             <string>Current OS:</string>
+            </property>
+            <property name="buddy" >
+             <cstring>mCurrentOsEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" >
            <widget class="QLineEdit" name="mIpAddressEdit" >
             <property name="autoFillBackground" >
              <bool>false</bool>
@@ -181,10 +198,23 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0" >
-           <widget class="QLabel" name="mNameLbl" >
+          <item row="4" column="1" >
+           <widget class="QLineEdit" name="mCurrentOsEdit" >
+            <property name="autoFillBackground" >
+             <bool>true</bool>
+            </property>
+            <property name="readOnly" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" >
+           <widget class="QLabel" name="mIpAddressLbl" >
             <property name="text" >
-             <string>Name:</string>
+             <string>IP Address:</string>
+            </property>
+            <property name="buddy" >
+             <cstring>mIpAddressEdit</cstring>
             </property>
            </widget>
           </item>
@@ -195,51 +225,28 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1" >
-           <widget class="QLineEdit" name="mCurrentOsEdit" >
-            <property name="autoFillBackground" >
-             <bool>true</bool>
-            </property>
-            <property name="readOnly" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" >
-           <widget class="QLabel" name="mIpAddressLbl" >
-            <property name="text" >
-             <string>IP Address:</string>
-            </property>
-            <property name="buddy" >
-             <cstring>mIpAddressEdit</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1" >
            <widget class="QLineEdit" name="mNameEdit" />
           </item>
-          <item row="3" column="0" >
-           <widget class="QLabel" name="mCurrentOsLbl" >
+          <item row="0" column="0" >
+           <widget class="QLabel" name="mNameLbl" >
             <property name="text" >
-             <string>Current OS:</string>
-            </property>
-            <property name="buddy" >
-             <cstring>mCurrentOsEdit</cstring>
+             <string>Name:</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0" >
-           <widget class="QLabel" name="mOtherLbl" >
-            <property name="text" >
-             <string>Other:</string>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" >
+          <item row="5" column="1" >
            <widget class="QTableView" name="mSettingsTableView" />
+          </item>
+          <item row="2" column="0" >
+           <widget class="QLabel" name="mClassLbl" >
+            <property name="text" >
+             <string>Class:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" >
+           <widget class="QLineEdit" name="mClassEdit" />
           </item>
          </layout>
         </widget>
@@ -250,7 +257,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
  <tabstops>
   <tabstop>mClusterListView</tabstop>
   <tabstop>mRefreshBtn</tabstop>

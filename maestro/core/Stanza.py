@@ -134,12 +134,12 @@ def traverse(option, visitor):
    return QUIT
 
 class OptionVisitor:
-   def __init__(self, nodeClassString=""):
+   def __init__(self, nodeClassList=[]):
       self.mArgs = []
       self.mCommands = []
       self.mCwds = []
       self.mEnvVars = {}
-      self.mNodeClassList = [c.lstrip().rstrip() for c in nodeClassString.split(",") if c != ""]
+      self.mNodeClassList = nodeClassList
 
    def visit(self, option):
       if not option.mSelected:

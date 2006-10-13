@@ -52,8 +52,8 @@
     </controls>
   </launcher>
   <!--
-  <cluster_node name="infiscape1" hostname="infiscape1" sub_class="master"/>
-  <cluster_node name="infiscape2" hostname="infiscape2" sub_class="master"/>
+  <cluster_node name="infiscape1" hostname="infiscape1" class="master"/>
+  <cluster_node name="infiscape2" hostname="infiscape2" class="master"/>
   -->
-  <cluster_node name="infiscape3" hostname="infiscape3" sub_class="master"/>
+  <cluster_node name="infiscape3" hostname="infiscape3" class="master"/>
 </cluster_config>

@@ -51,39 +51,6 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
    def deactivate(self, mainWindow):
       pass
 
-
-def numClassMatches(nodeClassString, subClassString):
-   node_classes = nodeClassString.split(",")
-   sub_classes = subClassString.split(",")
-   print "%s %s" % (node_classes, sub_classes)
-   count = 0
-   for c in sub_classes:
-      if node_classes.count(c) > 0:
-         print " -> Match [%s]" % (c)
-         count += 1
-   return count
-
-def getMaxMatchValue(valueMap, nodeClassString):
-   # Keep track of highest matching command.
-   max_match_value = None
-   max_match = 0
-
-   # Get the number of classes for the node.
-   num_node_classes = len(nodeClassString.split(","))
-
-   # For all commmands
-   for sub_class, value in valueMap.items():
-      # Get the number of classes for the command
-      num_value_classes = len(sub_class.split(","))
-      # Get the number of matches
-      num_matches = numClassMatches(nodeClassString, sub_class)
-      # Use the value only if it has the most matches and the
-      # number of matches higher then the least descriptive class.
-      if num_matches > max_match and (num_matches >= num_value_classes or num_matches >= num_node_classes):
-         max_match = num_matches
-         max_match_value = value
-   return max_match_value
-
 class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -173,8 +140,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          return
 
       for node in self.mEnsemble.mNodes:
-         print "Node [%s] [%s]" % (node.getName(), node.getClass())
-         option_visitor = Stanza.OptionVisitor(node.getClass())
+         print "Node [%s] [%s]" % (node.getName(), node.getClassList())
+         option_visitor = Stanza.OptionVisitor(node.getClassList())
          Stanza.traverse(self.mSelectedApp, option_visitor)
          print option_visitor.mArgs
          print option_visitor.mCommands

@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_EnsembleViewBase(object):
    def setupUi(self, EnsembleViewBase):
       EnsembleViewBase.setObjectName("EnsembleViewBase")
-      EnsembleViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,742,489).size()).expandedTo(EnsembleViewBase.minimumSizeHint()))
+      EnsembleViewBase.resize(QtCore.QSize(QtCore.QRect(0,0,585,522).size()).expandedTo(EnsembleViewBase.minimumSizeHint()))
 
       self.vboxlayout = QtGui.QVBoxLayout(EnsembleViewBase)
       self.vboxlayout.setMargin(9)
@@ -108,53 +108,61 @@ class Ui_EnsembleViewBase(object):
       self.mHostnameLbl.setObjectName("mHostnameLbl")
       self.gridlayout.addWidget(self.mHostnameLbl,1,0,1,1)
 
+      self.mOtherLbl = QtGui.QLabel(self.mNodeGroup)
+      self.mOtherLbl.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+      self.mOtherLbl.setObjectName("mOtherLbl")
+      self.gridlayout.addWidget(self.mOtherLbl,5,0,1,1)
+
+      self.mCurrentOsLbl = QtGui.QLabel(self.mNodeGroup)
+      self.mCurrentOsLbl.setObjectName("mCurrentOsLbl")
+      self.gridlayout.addWidget(self.mCurrentOsLbl,4,0,1,1)
+
       self.mIpAddressEdit = QtGui.QLineEdit(self.mNodeGroup)
       self.mIpAddressEdit.setAutoFillBackground(False)
       self.mIpAddressEdit.setReadOnly(True)
       self.mIpAddressEdit.setObjectName("mIpAddressEdit")
-      self.gridlayout.addWidget(self.mIpAddressEdit,2,1,1,1)
+      self.gridlayout.addWidget(self.mIpAddressEdit,3,1,1,1)
 
-      self.mNameLbl = QtGui.QLabel(self.mNodeGroup)
-      self.mNameLbl.setObjectName("mNameLbl")
-      self.gridlayout.addWidget(self.mNameLbl,0,0,1,1)
+      self.mCurrentOsEdit = QtGui.QLineEdit(self.mNodeGroup)
+      self.mCurrentOsEdit.setAutoFillBackground(True)
+      self.mCurrentOsEdit.setReadOnly(True)
+      self.mCurrentOsEdit.setObjectName("mCurrentOsEdit")
+      self.gridlayout.addWidget(self.mCurrentOsEdit,4,1,1,1)
+
+      self.mIpAddressLbl = QtGui.QLabel(self.mNodeGroup)
+      self.mIpAddressLbl.setObjectName("mIpAddressLbl")
+      self.gridlayout.addWidget(self.mIpAddressLbl,3,0,1,1)
 
       self.mHostnameEdit = QtGui.QLineEdit(self.mNodeGroup)
       self.mHostnameEdit.setReadOnly(False)
       self.mHostnameEdit.setObjectName("mHostnameEdit")
       self.gridlayout.addWidget(self.mHostnameEdit,1,1,1,1)
 
-      self.mCurrentOsEdit = QtGui.QLineEdit(self.mNodeGroup)
-      self.mCurrentOsEdit.setAutoFillBackground(True)
-      self.mCurrentOsEdit.setReadOnly(True)
-      self.mCurrentOsEdit.setObjectName("mCurrentOsEdit")
-      self.gridlayout.addWidget(self.mCurrentOsEdit,3,1,1,1)
-
-      self.mIpAddressLbl = QtGui.QLabel(self.mNodeGroup)
-      self.mIpAddressLbl.setObjectName("mIpAddressLbl")
-      self.gridlayout.addWidget(self.mIpAddressLbl,2,0,1,1)
-
       self.mNameEdit = QtGui.QLineEdit(self.mNodeGroup)
       self.mNameEdit.setObjectName("mNameEdit")
       self.gridlayout.addWidget(self.mNameEdit,0,1,1,1)
 
-      self.mCurrentOsLbl = QtGui.QLabel(self.mNodeGroup)
-      self.mCurrentOsLbl.setObjectName("mCurrentOsLbl")
-      self.gridlayout.addWidget(self.mCurrentOsLbl,3,0,1,1)
-
-      self.mOtherLbl = QtGui.QLabel(self.mNodeGroup)
-      self.mOtherLbl.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
-      self.mOtherLbl.setObjectName("mOtherLbl")
-      self.gridlayout.addWidget(self.mOtherLbl,4,0,1,1)
+      self.mNameLbl = QtGui.QLabel(self.mNodeGroup)
+      self.mNameLbl.setObjectName("mNameLbl")
+      self.gridlayout.addWidget(self.mNameLbl,0,0,1,1)
 
       self.mSettingsTableView = QtGui.QTableView(self.mNodeGroup)
       self.mSettingsTableView.setObjectName("mSettingsTableView")
-      self.gridlayout.addWidget(self.mSettingsTableView,4,1,1,1)
+      self.gridlayout.addWidget(self.mSettingsTableView,5,1,1,1)
+
+      self.mClassLbl = QtGui.QLabel(self.mNodeGroup)
+      self.mClassLbl.setObjectName("mClassLbl")
+      self.gridlayout.addWidget(self.mClassLbl,2,0,1,1)
+
+      self.mClassEdit = QtGui.QLineEdit(self.mNodeGroup)
+      self.mClassEdit.setObjectName("mClassEdit")
+      self.gridlayout.addWidget(self.mClassEdit,2,1,1,1)
       self.vboxlayout2.addWidget(self.mNodeGroup)
       self.hboxlayout.addLayout(self.vboxlayout2)
       self.vboxlayout.addLayout(self.hboxlayout)
       self.mHostnameLbl.setBuddy(self.mHostnameEdit)
-      self.mIpAddressLbl.setBuddy(self.mIpAddressEdit)
       self.mCurrentOsLbl.setBuddy(self.mCurrentOsEdit)
+      self.mIpAddressLbl.setBuddy(self.mIpAddressEdit)
 
       self.retranslateUi(EnsembleViewBase)
       QtCore.QMetaObject.connectSlotsByName(EnsembleViewBase)
@@ -178,10 +186,12 @@ class Ui_EnsembleViewBase(object):
       self.mRemoveBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "Remove", None, QtGui.QApplication.UnicodeUTF8))
       self.mNodeGroup.setTitle(QtGui.QApplication.translate("EnsembleViewBase", "Node Settings", None, QtGui.QApplication.UnicodeUTF8))
       self.mHostnameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Hostname:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mNameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Name:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mIpAddressLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "IP Address:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mCurrentOsLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Current OS:", None, QtGui.QApplication.UnicodeUTF8))
       self.mOtherLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Other:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mCurrentOsLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Current OS:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mIpAddressLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "IP Address:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Name:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mClassLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Class:", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

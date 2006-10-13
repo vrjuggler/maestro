@@ -203,7 +203,7 @@ class ClusterNode(QtCore.QObject):
       #print "HostName:", self.mElement.get("hostname")
       self.mName = self.mElement.get("name")
       self.mHostname = self.mElement.get("hostname")
-      self.mClass = self.mElement.get("sub_class")
+      self.mClass = self.mElement.get("class")
       self.mPlatform = const.ERROR 
 
    def lostConnection(self):
@@ -213,17 +213,23 @@ class ClusterNode(QtCore.QObject):
       self.mPlatform = const.ERROR 
 
    def getName(self):
-      return self.mElement.get("name")
+      return self.mElement.get('name', 'Unknown')
 
    def setName(self, newName):
-      return self.mElement.set("name", newName)
+      return self.mElement.set('name', newName)
+
+   def getClass(self):
+      return self.mElement.get('class', '')
+
+   def setClass(self, newClass):
+      self.mElement.set('class', newClass)
 
    def getHostname(self):
-      return self.mElement.get("hostname")
+      return self.mElement.get('hostname', 'Unknown')
 
    def setHostname(self, newHostname):
       self.mPlatform = const.ERROR
-      return self.mElement.set("hostname", newHostname)
+      return self.mElement.set('hostname', newHostname)
 
    def getId(self):
       return self.getIpAddress()
@@ -241,8 +247,9 @@ class ClusterNode(QtCore.QObject):
    def getPlatformName(self):
       return const.OsNameMap[self.mPlatform]
 
-   def getClass(self):
+   def getClassList(self):
+      class_list = [c.strip() for c in self.mClass.split(",") if c != ""]
       platform = self.getPlatformName()
       if platform > 0:
-         return platform + "," + self.mClass
-      return self.mClass
+         return class_list.insert(0, platform)
+      return class_list

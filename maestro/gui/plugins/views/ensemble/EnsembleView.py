@@ -175,6 +175,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       QtCore.QObject.connect(self.mRemoveBtn,QtCore.SIGNAL("clicked()"), self.onRemove)
       self.connect(self.mNameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
       self.connect(self.mHostnameEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
+      self.connect(self.mClassEdit, QtCore.SIGNAL("editingFinished()"), self.onNodeSettingsChanged)
       
       self.mClusterListView.setAlternatingRowColors(True)
       self.mClusterListView.setDragEnabled(True)
@@ -269,6 +270,11 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          self.mNameEdit.setModified(False)
          modified = True
 
+      if self.mClassEdit.isModified():
+         selected_node.setClass(str(self.mClassEdit.text()))
+         self.mClassEdit.setModified(False)
+         modified = True
+
       if self.mHostnameEdit.isModified():
          # Disconnect and try to connect to new hostname later..
          try:
@@ -320,6 +326,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       if self.mSelectedNode is not None:      
          # Set node information that we know
          self.mNameEdit.setText(self.mSelectedNode.getName())
+         self.mClassEdit.setText(self.mSelectedNode.getClass())
          self.mHostnameEdit.setText(self.mSelectedNode.getHostname())
 
          # Get IP address
