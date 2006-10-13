@@ -81,10 +81,10 @@ class Ui_LaunchViewBase(object):
       self.mLaunchBtn.setObjectName("mLaunchBtn")
       self.hboxlayout1.addWidget(self.mLaunchBtn)
 
-      self.mKillBtn = QtGui.QPushButton(LaunchViewBase)
-      self.mKillBtn.setEnabled(True)
-      self.mKillBtn.setObjectName("mKillBtn")
-      self.hboxlayout1.addWidget(self.mKillBtn)
+      self.mTerminateBtn = QtGui.QPushButton(LaunchViewBase)
+      self.mTerminateBtn.setEnabled(True)
+      self.mTerminateBtn.setObjectName("mTerminateBtn")
+      self.hboxlayout1.addWidget(self.mTerminateBtn)
 
       self.mHelpBtn = QtGui.QPushButton(LaunchViewBase)
 
@@ -104,7 +104,7 @@ class Ui_LaunchViewBase(object):
       LaunchViewBase.setWindowTitle(QtGui.QApplication.translate("LaunchViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
       self.mLaunchBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Launch", None, QtGui.QApplication.UnicodeUTF8))
-      self.mKillBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTerminateBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
       self.mHelpBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
 
 

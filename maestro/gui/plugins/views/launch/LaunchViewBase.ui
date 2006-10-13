@@ -110,7 +110,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="mKillBtn" >
+      <widget class="QPushButton" name="mTerminateBtn" >
        <property name="enabled" >
         <bool>true</bool>
        </property>

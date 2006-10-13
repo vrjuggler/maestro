@@ -254,9 +254,14 @@ def _readRetryOnEINTR(fd, buffersize):
         [EINTR]     A read from a slow device was interrupted before any
                     data arrived by the delivery of a signal.
     """
+    import select
     while 1:
         try:
-            return os.read(fd, buffersize)
+            (ins, outs, errs) = select.select([], [fd], [], 0)
+            if fd in outs:
+               return os.read(fd, buffersize)
+            else:
+               return ""
         except OSError, e:
             if e.errno == errno.EINTR:
                 continue
@@ -1233,6 +1238,11 @@ class ProcessOpen(Process):
         os.close(fdChildStdinRd)
         os.close(fdChildStdoutWr)
         os.close(fdChildStderrWr)
+
+
+        #import fcntl
+        #fcntl.fcntl(fdChildStdoutRd, fcntl.F_SETFL, os.O_NONBLOCK)
+        #fcntl.fcntl(fdChildStderrRd, fcntl.F_SETFL, os.O_NONBLOCK)
 
         self.stdin = _FileWrapper(descriptor=fdChildStdinWr)
         logres.info("[%s] ProcessOpen._start(): create child stdin: %r",

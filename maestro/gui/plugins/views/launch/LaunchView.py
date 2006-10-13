@@ -76,7 +76,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)
       
       self.connect(self.mLaunchBtn,QtCore.SIGNAL("clicked()"),self.onLaunchApp)
-      self.connect(self.mKillBtn,QtCore.SIGNAL("clicked()"),self.onKillApp)
+      self.connect(self.mTerminateBtn,QtCore.SIGNAL("clicked()"),self.onTerminateApp)
       self.connect(self.mAppComboBox,QtCore.SIGNAL("activated(int)"),self.onAppSelect)
       self.connect(self.mHelpBtn, QtCore.SIGNAL("clicked()"), self.onHelpClicked)
       # Disable help button by default. Only enable it if application has valid help url.
@@ -167,8 +167,13 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       for sh in self.mAppSpecificWidgets:
          sh.show()
 
-   def onKillApp(self):
-      pass
+   def onTerminateApp(self):
+      env = maestro.core.Environment()
+#      for node in self.mEnsemble.mNodes:
+#         ip_address = node.getIpAddress()
+#         env.mEventManager.emit(ip_address, "launch.terminate")
+#         print "Trying to terminate: ", ip_address
+      env.mEventManager.emit("*", "launch.terminate")
       #self.launchButton.setEnabled(True)
       #self.killButton.setEnabled(False)
 

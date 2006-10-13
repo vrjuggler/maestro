@@ -34,7 +34,9 @@ class LaunchService(maestro.core.IServicePlugin):
    def registerCallbacks(self):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
-      env.mEventManager.timers().createTimer(self.update, 0)
+      env.mEventManager.connect("*", "launch.terminate", self.onTerminateCommand)
+      env.mEventManager.connect("*", "launch.get_is_running", self.onIsRunning)
+      env.mEventManager.timers().createTimer(self.update, 0.5)
 
    def update(self):
       try:
@@ -67,17 +69,18 @@ class LaunchService(maestro.core.IServicePlugin):
             #   self.mEventManager.emit("*", "launch.output", line)
             #   self.mLogger.debug("line: " + line)
 
+            env = maestro.core.Environment()
             line = self.mProcess.stdout.read(4096)
             #line = self.mProcess.stdout.readline()
-            if line is None or line == "":
-               result = self.isProcessRunning()
-               self.mLogger.info("Testing process running: " + str(result))
-               if not result:
-                  self.mProcess = None
-                  return
-            self.mLogger.debug("line: " + line)
-            env = maestro.core.Environment()
-            env.mEventManager.emit("*", "launch.output", line)
+            result = self.isProcessRunning()
+            self.mLogger.info("Testing process running: " + str(result))
+            if result:
+               if line:
+                  self.mLogger.debug("line: " + line)
+                  env.mEventManager.emit("*", "launch.output", line)
+            else:
+               env.mEventManager.emit("*", "launch.report_is_running", False)
+               self.mProcess = None
 
       except Exception, ex:
          self.mLogger.error("I/O Error: " + str(ex))
@@ -127,12 +130,18 @@ class LaunchService(maestro.core.IServicePlugin):
          self.mLogger.error("runCommand() failed with KeyError: " + str(ex))
          return False
 
-   def stopCommand(self):
-      if not None == self.mProcess:
+   def onTerminateCommand(self, nodeId, avatar):
+      if self.mProcess is not None:
+         self.mLogger.debug("terminating process. %s"%self.mProcess)
          return self.mProcess.kill()
          #return self.mProcess.kill(sig=signal.SIGTERM)
          #return self.mProcess.kill(sig=signal.SIGSTOP)
 
+   def onIsRunning(self, nodeId, avatar):
+      running = self.isProcessRunning()
+      env = maestro.core.Environment()
+      env.mEventManager.emit("*", "launch.report_is_running", running)
+      
    def isProcessRunning(self):
       try:
          # poll to see if is process still running
