@@ -71,6 +71,10 @@ def process_command_line():
 
    (opts, pos_args) = parser.parse_args()
 
+   # For backwards compatability.
+   if len(pos_args) > 0 and opts.ensemble is None:
+      opts.ensemble = pos_args[0]
+
    return opts
 
 def main():
