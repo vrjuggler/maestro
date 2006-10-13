@@ -25,6 +25,8 @@ import MaestroResource
 import os.path
 pj = os.path.join
 
+import maestro
+
 class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -32,6 +34,23 @@ class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
 
    def setupUi(self, widget):
       LoginDialogBase.Ui_LoginDialogBase.setupUi(self, widget)
+
+      try:
+         if sys.platform.startswith("win"):
+            from maestro.daemon import wmi
+            c = maestro.daemon.wmi.WMI()
+            for computer in c.Win32_ComputerSystem():
+               if computer.PartOfDomain:
+                  self.mDomainCB.addItem(computer.Domain)
+               self.mDomainCB.addItem("No Domain")
+
+               domain_user_list = computer.UserName.split("\\")
+               if len(domain_user_list) > 1:
+                  self.mUserEdit.setText(domain_user_list[1])
+                  #self.mPasswordEdit.setFocus()
+      except:
+         # Do nothing if we fail to get domain/username.
+         pass
 
    def getLoginInfo(self):
       login_info = {'username':str(self.mUserEdit.text()),
