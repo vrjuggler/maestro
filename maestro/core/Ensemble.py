@@ -251,5 +251,5 @@ class ClusterNode(QtCore.QObject):
       class_list = [c.strip() for c in self.mClass.split(",") if c != ""]
       platform = self.getPlatformName()
       if platform > 0:
-         return class_list.insert(0, platform)
+         class_list.insert(0, platform)
       return class_list
