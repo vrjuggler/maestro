@@ -595,8 +595,9 @@ class Node(QtGui.QGraphicsItem):
                if len(self.mAttribNameList) > index.row():
                   return QtCore.QVariant(self.mAttribNameList[index.row()])
             if 1 == index.column():
-               if len(self.mAttribList) > index.row():
+               if index.row() < len(self.mAttribList):
                   value = self.mElement.get(self.mAttribList[index.row()], '')
+                  #XXX: This is proving to be a pretty large hack.
                   value = self.tryStrToBool(value)
                   return QtCore.QVariant(value)
       return QtCore.QVariant()
@@ -605,10 +606,15 @@ class Node(QtGui.QGraphicsItem):
       if index.isValid() and self.mElement is not None:
          assert role == QtCore.Qt.EditRole
          assert 1 == index.column()
-         if len(self.mAttribList) > index.row():
+         if index.row() < len(self.mAttribList):
             str_val = str(value.toString())
+            #XXX: This is proving to be a pretty large hack.
             real_val = self.tryBoolToStr(str_val)
-            self.mElement.set(self.mAttribList[index.row()], real_val)
+            key = self.mAttribList[index.row()]
+            # Names can not contain spaces.
+            if 'name' == key:
+               real_val = real_val.replace(' ', '')
+            self.mElement.set(key, real_val)
             self.update()
             return True
       return False
