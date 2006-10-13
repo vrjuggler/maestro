@@ -190,16 +190,18 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
+      self.mEnsembleModel = None
 
-      # Connect the new ensemble.
-      self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
-      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+      if self.mEnsemble is not None:
+         # Connect the new ensemble.
+         self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
+         self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
 
       # Create a model for our ListView
       self.mEnsembleModel = EnsembleModel.EnsembleModel(self.mEnsemble)
 
       # If selection model already exists then disconnect signal
-      if not None == self.mClusterListView.selectionModel():
+      if self.mClusterListView.selectionModel() is not None:
          QtCore.QObject.disconnect(self.mClusterListView.selectionModel(),
             QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
 

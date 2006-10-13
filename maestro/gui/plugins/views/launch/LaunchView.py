@@ -97,7 +97,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
    def setEnsemble(self, ensemble):
       self.mEnsemble = ensemble
-      self.mElement = self.mEnsemble.mElement
 
    def setupUi(self, widget):
       LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)

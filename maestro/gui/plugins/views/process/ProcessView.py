@@ -214,13 +214,18 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       self.mProcessModel = ProcessModel(self.mEnsemble)
       self.mSortedProcessModel = CaseInsensitiveSortProxyModel()
       self.mSortedProcessModel.setSourceModel(self.mProcessModel)
+
+      selection_model = self.mProcessTable.selectionModel()
+      if selection_model is not None:
+         self.disconnect(selection_model,
+            QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.onSelectionChanged)
+
       self.mProcessTable.setModel(self.mSortedProcessModel)
       self.mProcessTable.horizontalHeader().setSortIndicator(1, QtCore.Qt.AscendingOrder)
       self.mProcessTable.horizontalHeader().setSortIndicatorShown(True)
       self.mProcessTable.horizontalHeader().setClickable(True)
 
       selection_model = self.mProcessTable.selectionModel()
-      print "Selection model: ", selection_model
       self.connect(selection_model,
          QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.onSelectionChanged)
 
