@@ -111,6 +111,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
       self.mEnsemble = None
+      self.mProcessModel = None
 
    def setupUi(self, widget):
       """
@@ -148,11 +149,13 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
 
       env = maestro.core.Environment()
       env.mEventManager.emit("*", "process.get_procs")
-      self.mProcessModel.mProcs = []
-      self.mProcessModel.changed()
-      self.mProcessTable.resizeRowsToContents()
-      self.mProcessTable.selectionModel().clear()
-      #self.mProcessTable.reset()
+
+      if self.mProcessModel is not None:
+         self.mProcessModel.mProcs = []
+         self.mProcessModel.changed()
+         self.mProcessTable.resizeRowsToContents()
+         self.mProcessTable.selectionModel().clear()
+         #self.mProcessTable.reset()
 
    def onSelectionChanged(self, selected, deselected):
       num_procs_selected = len(self.mProcessTable.selectionModel().selection().indexes())

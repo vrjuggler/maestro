@@ -287,6 +287,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mEnsemble = None
       self.mActiveViewPlugins = {}
       self.mLoggers = []
+      self.mFileLogger = None
 
    def init(self):
       env = maestro.core.Environment()
@@ -527,7 +528,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          else:
             clean = False
 
-      if clean:
+      if clean and self.mFileLogger is not None:
          # In order to remove the log files on Windows, they must first be
          # closed.
          self.mFileLogger.close()

@@ -157,6 +157,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
       self.mEnsemble = None
+      self.mEnsembleModel = None
       self.mSelectedNode = None
 
    def setupUi(self, widget):
@@ -246,9 +247,11 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """ Slot that is called when the user has finished editing a
           field in the node settings.
       """
+      if self.mEnsembleModel is None:
+         return
 
       # Get the currently selected node.
-      selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
+      selected_node = self.mEnsembleModel.data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
 
       # Can't get a change if a node is not selected
       assert not None == selected_node

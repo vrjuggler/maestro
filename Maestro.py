@@ -25,6 +25,8 @@ except:
 
 import sys, os, os.path, time, traceback
 pj = os.path.join
+from optparse import OptionParser
+
 from PyQt4 import QtGui, QtCore
 app = QtGui.QApplication(sys.argv)
 
@@ -59,7 +61,31 @@ except:
 
 print "Base gui dir:", gui_base_dir
 
+
+def process_command_line():
+   """ Parse and process the command line options.
+       @returns Dictionary of the found options.
+   """
+   prog_desc = """
+   Maestro by Infiscape
+   """
+
+   parser = OptionParser(version="0.1", description=prog_desc)
+   parser.add_option("-e","--ensemble", type="string",
+                     help="Ensemble file to load")
+   parser.add_option("-s","--stanza", type="string",
+                     help="Load a specific stanza.")
+   parser.add_option("-v","--view", type="string",
+                     help="Start with a given view active.")
+
+   (opts, pos_args) = parser.parse_args()
+
+   return opts
+
 def main():
+   # --- Process command line options ---- #
+   opts = process_command_line()
+
    # Set up logging to sys.stderr.
    # Set up logging to sys.stderr.
    fmt_str  = '%(name)-12s %(levelname)-8s %(message)s'
@@ -139,10 +165,6 @@ def main():
       env = maestro.core.Environment()
       env.initialize(gui_settings, splashProgressCB)
 
-      # Parse XML ensemble file. This provides the initial set of cluster
-      # nodes.
-      tree = ET.ElementTree(file=sys.argv[1])
-
       splash.finish(None)
 
       ld = gui.LoginDialog.LoginDialog()
@@ -151,31 +173,31 @@ def main():
 
       env.mEventManager.setCredentials(ld.getLoginInfo())
 
-      # Try to make inital connections
-      # Create cluster configuration
-      ensemble = Ensemble.Ensemble(tree)
-#      ensemble.refreshConnections()
-
       # Create and display GUI
       m = gui.Maestro.Maestro()
       m.init()
-      m.setEnsemble(ensemble)
+
+      if opts.ensemble is not None:
+         try:
+            # Parse XML ensemble file. This provides the initial set of cluster
+            # nodes.
+            tree = ET.ElementTree(opts.ensemble)
+            ensemble = Ensemble.Ensemble(tree)
+            m.setEnsemble(ensemble)
+         except IOError, ex:
+            QtGui.QMessageBox.critical(None, "Error",
+                                       "Failed to read ensemble file %s: %s" % \
+                                          (opts.ensemble, ex.strerror))
+
       m.show()
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()
       logging.shutdown()
       sys.exit()
-   except IOError, ex:
+   except Exception, ex:
       QtGui.QMessageBox.critical(None, "Error",
-                                 "Failed to read ensemble file %s: %s" % \
-                                    (sys.argv[1], ex.strerror))
-
-def usage():
-   print "Usage: %s <XML configuration file>" % sys.argv[0]
+                                 "Error: %s" % ex)
 
 if __name__ == '__main__':
-   if len(sys.argv) >= 2:
-      main()
-   else:
-      usage()
+   main()

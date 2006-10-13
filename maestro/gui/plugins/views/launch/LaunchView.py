@@ -94,6 +94,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       # State information for the selected application.
       self.actionDict          = {}   # Storage for user-defined action slots
       self.activeThread        = None
+      self.mEnsemble = None
 
    def setEnsemble(self, ensemble):
       self.mEnsemble = ensemble
@@ -168,7 +169,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
    def onLaunchApp(self):
       """ Invoked when the built-in Launch button is clicked. """
-
+      if self.mEnsemble is None:
+         return
 
       for node in self.mEnsemble.mNodes:
          print "Node [%s] [%s]" % (node.getName(), node.getClass())
