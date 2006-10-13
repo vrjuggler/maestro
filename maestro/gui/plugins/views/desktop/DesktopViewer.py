@@ -76,18 +76,38 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
                    self.onChooseBackgroundFile)
       self.connect(self.mStopSaverBtn, QtCore.SIGNAL("clicked()"),
                    self.onStopScreenSaver)
+      self.connect(self.mNodeChooser, QtCore.SIGNAL("activated(int)"),
+                   self.nodeSelected)
 
-   def init(self, ensemble):
+      env = maestro.core.Environment()
+      env.mEventManager.connect('*', 'desktop.report_saver_use',
+                                self.onReportSaverUse)
+      env.mEventManager.connect('*', 'desktop.report_bg_image_file',
+                                self.onReportBackgroundImageFile)
+      env.mEventManager.connect('*', 'desktop.report_bg_image_data',
+                                self.onReportBackgroundImageData)
+
+   def setEnsemble(self, ensemble):
       '''
       Configures the user interface for this widget.
 
       @param ensemble The current ensemble configuration.
       '''
+
+      if self.mEnsemble is not None:
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"),
+                      self.onEnsembleChange)
+
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
 
+      self.mNodeChooser.clear()
       self.mNodeChooser.addItem('All Nodes', QtCore.QVariant('*'))
+      self.mSettings = {}
       self.mSettings['*'] = DesktopSettings()
+
+      # Clear current state when settings ensemble.
+      self._setBackgroundImage('', None)
 
       if ensemble is not None:
          self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"),
@@ -100,16 +120,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
             self.mNodeChooser.addItem(node.getHostname(), QtCore.QVariant(id))
             self.mSettings[id] = DesktopSettings()
 
-      self.connect(self.mNodeChooser, QtCore.SIGNAL("activated(int)"),
-                   self.nodeSelected)
+      # XXX: We should call this if we can't count on the ensembleChanged() signal.
+      #self.widget.refresh()
 
-      env = maestro.core.Environment()
-      env.mEventManager.connect('*', 'desktop.report_saver_use',
-                                self.onReportSaverUse)
-      env.mEventManager.connect('*', 'desktop.report_bg_image_file',
-                                self.onReportBackgroundImageFile)
-      env.mEventManager.connect('*', 'desktop.report_bg_image_data',
-                                self.onReportBackgroundImageData)
 
    def refresh(self):
       # Mark this view as being dirty, meaning that it needs to refresh its
@@ -194,6 +207,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.refresh()
 
    def onReportSaverUse(self, nodeId, usesSaver):
+      if not self.mSettings.has_key(nodeId):
+         print "WARNING: Got data for a node that was not in ensemble file."
+         return
       self.mSettings[nodeId].setUsesScreenSaver(usesSaver)
       cur_node_id = self.getCurrentNodeID()
 
@@ -251,6 +267,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          self.mReportCount += 1
 
    def onReportBackgroundImageFile(self, nodeId, fileName):
+      if not self.mSettings.has_key(nodeId):
+         print "WARNING: Got data for a node that was not in ensemble file."
+         return
       data = self.mSettings[nodeId]
       cur_file_name = data.getBackgroundImageFile()
 
@@ -265,6 +284,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
             self.mBgImgFileText.setText(fileName)
 
    def onReportBackgroundImageData(self, nodeId, imgData):
+      if not self.mSettings.has_key(nodeId):
+         print "WARNING: Got data for a node that was not in ensemble file."
+         return
       data = self.mSettings[nodeId]
       img_data_str = ''.join(imgData)
       img_digest = self._storeImage(img_data_str)
