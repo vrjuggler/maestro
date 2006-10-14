@@ -21,6 +21,9 @@ import elementtree.ElementTree as ET
 
 
 class Preferences:
+   def __init__(self):
+      self.mRoot = None
+
    def load(self, file):
       self.mFile = file
       self.mRoot = ET.parse(file)
@@ -41,14 +44,15 @@ class Preferences:
       name is specified, the file name used when load() was invoked is
       used, thus overwriting the old preferences file.
       '''
-      if prefsFile is None:
-         prefsFile = self.mFile
+      if self.mRoot is not None:
+         if prefsFile is None:
+            prefsFile = self.mFile
 
-      cfg_text = ET.tostring(self.mRoot)
-      dom = xml.dom.minidom.parseString(cfg_text)
-      output_file = file(prefsFile, 'w')
-      output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
-      output_file.close()
+         cfg_text = ET.tostring(self.mRoot)
+         dom = xml.dom.minidom.parseString(cfg_text)
+         output_file = file(prefsFile, 'w')
+         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+         output_file.close()
 
    def __getitem__(self, item):
       '''
@@ -56,11 +60,14 @@ class Preferences:
       XML tree. If the item is found, its text property is returned. If no
       such item is found, then a KeyError is raised.
       '''
-      element = self.mRoot.find(item)
-      if element is None:
-         raise KeyError, '%s is not a child of the root' % item
+      if self.mRoot is not None:
+         element = self.mRoot.find(item)
+         if element is None:
+            raise KeyError, '%s is not a child of the root' % item
 
-      return element.text
+         return element.text
+      else:
+         raise KeyError, '%s is not a child of the root' % item
 
    def __setitem__(self, item):
       # TODO: Implement me!
@@ -70,26 +77,30 @@ class Preferences:
       '''
       Returns this preferences structure as a flattened list.
       '''
-      return self.mRoot.getiterator()
+      if self.mRoot is not None:
+         return self.mRoot.getiterator()
+      else:
+         return None
 
    def __delitem__(self, item):
       '''
       Removes item (an element path string) from this structure. If item is
       not a valid child of the structure root, then a KeyError is raised.
       '''
-      # The removal operation can only remove a child from a node. Since the
-      # Element interface has no way to get the parent Element, we cannot use
-      # __getitem__() to get the element to remove. We have to find it and
-      # its parent ourselves.
-      path = item.split('/')
-      cur_node = self.mRoot.getroot()
-      for p in path:
-         parent   = cur_node
-         cur_node = parent.find(p)
-         if cur_node is None:
-            raise KeyError, '%s is not a child of the root' % item
+      if self.mRoot is not None:
+         # The removal operation can only remove a child from a node. Since
+         # the Element interface has no way to get the parent Element, we
+         # cannot use __getitem__() to get the element to remove. We have to
+         # find it and its parent ourselves.
+         path = item.split('/')
+         cur_node = self.mRoot.getroot()
+         for p in path:
+            parent   = cur_node
+            cur_node = parent.find(p)
+            if cur_node is None:
+               raise KeyError, '%s is not a child of the root' % item
 
-      parent.remove(cur_node)
+         parent.remove(cur_node)
 
    def has_key(self, item):
       '''
@@ -97,8 +108,11 @@ class Preferences:
       this preferences structure. True is returned if item is a child; False
       is returned otherwise.
       '''
-      element = self.mRoot.find(item)
-      return element is not None
+      if self.mRoot is not None:
+         element = self.mRoot.find(item)
+         return element is not None
+      else:
+         return False
 
    def get(self, item, default = None):
       '''
@@ -106,14 +120,20 @@ class Preferences:
       if it is a child of the root of this preferences structure. If item is
       not a child, then default is returned.
       '''
-      element = self.mRoot.find(item)
-      if element is None or element.text is None:
-         return default
+      if self.mRoot is not None:
+         element = self.mRoot.find(item)
+         if element is None or element.text is None:
+            return default
+         else:
+            return element.text
       else:
-         return element.text
+         return default
 
    def keys(self):
       '''
       Returns this preferences structure as a flattened list.
       '''
-      return self.mRoot.getiterator()
+      if self.mRoot is not None:
+         return self.mRoot.getiterator()
+      else:
+         return None
