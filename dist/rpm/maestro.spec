@@ -21,8 +21,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 License: GPL
 Packager: Infiscape Corporation
 Requires: maestro-base
-Requires: maestro-client
-Requires: maestro-daemon
+Requires: maestro-gui
+Requires: maestro-server
 BuildArch: noarch
 
 %description
