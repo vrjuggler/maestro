@@ -41,44 +41,16 @@ class LaunchService(maestro.core.IServicePlugin):
    def update(self):
       try:
          if self.mProcess is not None:
-            #if self.mBuffer._closed:
-            #   result = self.mBuffer.read()
-            #   self.mLogger.debug(result)
-            #   #self.mEventManager.emit("*", "launch.output", result)
-            #   self.mProcess = None
-            #elif self.mBuffer._haveNumBytes(1024):
-            #   result = self.mBuffer.read()
-            #   #self.mLogger.debug(result)
-            #   self.mEventManager.emit("*", "launch.output", result)
-            #result = self.isProcessRunning()
-            #self.mLogger.info("Testing process running: " + str(result))
-            #if not result:
-            #   self.mProcess = None
-            #   self.mBuffer = None
-            #   return
-              
-            #line = self.mBuffer.readline()
-            #line = self.mBuffer.read(2048)
-            #if line is not None:
-            #   if line == "":
-            #      result = self.isProcessRunning()
-            #      self.mLogger.info("Testing process running: " + str(result))
-            #      if not result:
-            #         self.mProcess = None
-            #         return
-            #   self.mEventManager.emit("*", "launch.output", line)
-            #   self.mLogger.debug("line: " + line)
-
             env = maestro.core.Environment()
+            # Try to get output from process.
             line = self.mProcess.stdout.read(4096)
-            #line = self.mProcess.stdout.readline()
-            result = self.isProcessRunning()
-            self.mLogger.info("Testing process running: " + str(result))
-            if result:
-               if line:
-                  self.mLogger.debug("line: " + line)
-                  env.mEventManager.emit("*", "launch.output", line)
-            else:
+            # If we got something back then send it across the network.
+            if line is not None and line != "":
+               self.mLogger.debug("line: " + line)
+               env.mEventManager.emit("*", "launch.output", line)
+            # Other wise check to see if the process is still running.
+            elif not self.isProcessRunning():
+               self.mLogger.info("Process is not longer running.")
                env.mEventManager.emit("*", "launch.report_is_running", False)
                self.mProcess = None
 
