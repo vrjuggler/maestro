@@ -43,6 +43,7 @@ install:
 	chmod 0755 $(sbindir)/maestrod
 	cat script/maestro | sed -e 's|@MAESTRO_DIR@|$(appdir)|' > $(bindir)/maestro
 	chmod 0755 $(bindir)/maestro
+	install -m 0755 script/mkpem $(appdir)
 	tar --exclude .svn -cvf - stanzas | tar -C $(appdir) -xpf -
 	install -m 0644 maestrod.xcfg $(confdir)
 ifeq ($(OS), Linux)

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+openssl genrsa 1024 > host.key
+chmod 400 host.key
+openssl req -new -x509 -nodes -sha1 -days 730 -key host.key > host.cert
+cat host.cert host.key > server.pem && rm -f host.cert host.key
+chmod 400 server.pem
