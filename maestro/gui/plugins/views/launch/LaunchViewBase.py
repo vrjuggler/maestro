@@ -101,7 +101,9 @@ class Ui_LaunchViewBase(object):
       QtCore.QMetaObject.connectSlotsByName(LaunchViewBase)
 
    def retranslateUi(self, LaunchViewBase):
-      LaunchViewBase.setWindowTitle(QtGui.QApplication.translate("LaunchViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
+      LaunchViewBase.setWindowTitle(QtGui.QApplication.translate("LaunchViewBase", "Launch View", None, QtGui.QApplication.UnicodeUTF8))
+      LaunchViewBase.setToolTip(QtGui.QApplication.translate("LaunchViewBase", "Launch View: Runs an application across the entire cluster.", None, QtGui.QApplication.UnicodeUTF8))
+      LaunchViewBase.setStatusTip(QtGui.QApplication.translate("LaunchViewBase", "Launch View", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("LaunchViewBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
       self.mLaunchBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Launch", None, QtGui.QApplication.UnicodeUTF8))
       self.mTerminateBtn.setText(QtGui.QApplication.translate("LaunchViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))

@@ -10,7 +10,13 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Form</string>
+   <string>Launch View</string>
+  </property>
+  <property name="toolTip" >
+   <string>Launch View: Runs an application across the entire cluster.</string>
+  </property>
+  <property name="statusTip" >
+   <string>Launch View</string>
   </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >

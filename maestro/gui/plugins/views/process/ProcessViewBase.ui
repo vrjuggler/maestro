@@ -10,7 +10,13 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Process Viewer</string>
+   <string>Process View</string>
+  </property>
+  <property name="toolTip" >
+   <string>Process View: Displays a list of processes running on all nodes.</string>
+  </property>
+  <property name="statusTip" >
+   <string>Process View</string>
   </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >

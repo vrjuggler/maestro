@@ -233,6 +233,7 @@ class OutputFileLogger(NodeLogger):
 
    def addLogger(self, nodeId):
       file_name = os.path.join(self.getLogDir(), '%s.log' % nodeId)
+      print "============== Adding Node Logger: %s =================" % (nodeId)
 
       try:
          handler = logging.FileHandler(file_name, 'w')
@@ -496,10 +497,21 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
          btn = QtGui.QToolButton(self.mToolbox)
          btn.setIcon(new_icon)
-         btn.setAutoRaise(1)
+         btn.setAutoRaise(True)
          btn.setCheckable(True)
+
+         # Steal ToolTip, StatusTip, and copy WhatsThis from ViewWidget.
+         btn.setToolTip(new_view_widget.toolTip())
+         btn.setStatusTip(new_view_widget.statusTip())
+         btn.setWhatsThis(new_view_widget.whatsThis())
+         new_view_widget.setToolTip('')
+         new_view_widget.setStatusTip('')
+
+         # Set a minimum size on the button.
          btn.setMinimumSize(QtCore.QSize(40,40))
          btn.setIconSize(QtCore.QSize(40,40))
+
+         # Insert the new button into the toolbox and it's QButtonGroup.
          self.mToolbox.layout().insertWidget(self.mToolbox.layout().count()-1, btn)
          self.mToolboxButtonGroup.addButton(btn, index)
 

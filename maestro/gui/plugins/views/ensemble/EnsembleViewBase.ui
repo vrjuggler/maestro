@@ -12,6 +12,12 @@
   <property name="windowTitle" >
    <string>Ensemble View</string>
   </property>
+  <property name="toolTip" >
+   <string>Ensemble View: Displays a list of the nodes and their current settings.</string>
+  </property>
+  <property name="statusTip" >
+   <string>Ensemble View</string>
+  </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >
     <number>9</number>

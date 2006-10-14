@@ -56,7 +56,9 @@ class Ui_ProcessViewBase(object):
       QtCore.QMetaObject.connectSlotsByName(ProcessViewBase)
 
    def retranslateUi(self, ProcessViewBase):
-      ProcessViewBase.setWindowTitle(QtGui.QApplication.translate("ProcessViewBase", "Process Viewer", None, QtGui.QApplication.UnicodeUTF8))
+      ProcessViewBase.setWindowTitle(QtGui.QApplication.translate("ProcessViewBase", "Process View", None, QtGui.QApplication.UnicodeUTF8))
+      ProcessViewBase.setToolTip(QtGui.QApplication.translate("ProcessViewBase", "Process View: Displays a list of processes running on all nodes.", None, QtGui.QApplication.UnicodeUTF8))
+      ProcessViewBase.setStatusTip(QtGui.QApplication.translate("ProcessViewBase", "Process View", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("ProcessViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
       self.mTerminateBtn.setText(QtGui.QApplication.translate("ProcessViewBase", "&Terminate", None, QtGui.QApplication.UnicodeUTF8))
 

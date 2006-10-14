@@ -102,6 +102,8 @@ class Ui_DesktopViewerBase(object):
 
    def retranslateUi(self, DesktopViewerBase):
       DesktopViewerBase.setWindowTitle(QtGui.QApplication.translate("DesktopViewerBase", "Desktop Management", None, QtGui.QApplication.UnicodeUTF8))
+      DesktopViewerBase.setToolTip(QtGui.QApplication.translate("DesktopViewerBase", "Desktop Management: Provides a method of changing the background and screen saver settings.", None, QtGui.QApplication.UnicodeUTF8))
+      DesktopViewerBase.setStatusTip(QtGui.QApplication.translate("DesktopViewerBase", "Desktop Management", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaverEnabledBox.setText(QtGui.QApplication.translate("DesktopViewerBase", "Screen Saver Enabled", None, QtGui.QApplication.UnicodeUTF8))
       self.mBgFileLbl.setText(QtGui.QApplication.translate("DesktopViewerBase", "Background Image:", None, QtGui.QApplication.UnicodeUTF8))
       self.mBgChooserBtn.setText(QtGui.QApplication.translate("DesktopViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))

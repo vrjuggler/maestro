@@ -12,6 +12,12 @@
   <property name="windowTitle" >
    <string>Stanza Editor</string>
   </property>
+  <property name="toolTip" >
+   <string>Stanza Editor: Provides a method to create/modify application launch options.</string>
+  </property>
+  <property name="statusTip" >
+   <string>Stanza Editor</string>
+  </property>
   <layout class="QGridLayout" >
    <property name="margin" >
     <number>9</number>
@@ -144,7 +150,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/no_drag.png</iconset>
+         <iconset/>
         </property>
         <property name="iconSize" >
          <size>
@@ -166,7 +172,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/scroll_drag.png</iconset>
+         <iconset/>
         </property>
         <property name="iconSize" >
          <size>
@@ -185,7 +191,7 @@
          <string>...</string>
         </property>
         <property name="icon" >
-         <iconset resource="StanzaEditorResource.qrc" >:/Maestro/StanzaEditor/images/rubber_drag.png</iconset>
+         <iconset/>
         </property>
         <property name="iconSize" >
          <size>
@@ -273,7 +279,7 @@
          </font>
         </property>
         <property name="text" >
-         <string>,</string>
+         <string/>
         </property>
         <property name="pixmap" >
          <pixmap/>

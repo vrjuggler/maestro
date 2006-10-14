@@ -53,6 +53,8 @@ class Ui_ResourceViewBase(object):
 
    def retranslateUi(self, ResourceViewBase):
       ResourceViewBase.setWindowTitle(QtGui.QApplication.translate("ResourceViewBase", "Form", None, QtGui.QApplication.UnicodeUTF8))
+      ResourceViewBase.setToolTip(QtGui.QApplication.translate("ResourceViewBase", "Resource View: Provides an overview of resource usage on each node.", None, QtGui.QApplication.UnicodeUTF8))
+      ResourceViewBase.setStatusTip(QtGui.QApplication.translate("ResourceViewBase", "Resource View", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("ResourceViewBase", "&Refresh", None, QtGui.QApplication.UnicodeUTF8))
 
 

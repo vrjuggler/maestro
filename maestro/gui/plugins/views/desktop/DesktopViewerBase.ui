@@ -12,6 +12,12 @@
   <property name="windowTitle" >
    <string>Desktop Management</string>
   </property>
+  <property name="toolTip" >
+   <string>Desktop Management: Provides a method of changing the background and screen saver settings.</string>
+  </property>
+  <property name="statusTip" >
+   <string>Desktop Management</string>
+  </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >
     <number>9</number>

@@ -12,6 +12,15 @@
   <property name="windowTitle" >
    <string>Form</string>
   </property>
+  <property name="toolTip" >
+   <string>Resource View: Provides an overview of resource usage on each node.</string>
+  </property>
+  <property name="statusTip" >
+   <string>Resource View</string>
+  </property>
+  <property name="whatsThis" >
+   <string/>
+  </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >
     <number>9</number>
