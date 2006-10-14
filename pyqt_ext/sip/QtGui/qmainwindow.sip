@@ -38,6 +38,8 @@ public:
     void setToolButtonStyle(Qt::ToolButtonStyle toolButtonStyle);
     QMenuBar *menuBar() const;
     void setMenuBar(QMenuBar *menubar /Transfer/);
+    QWidget * menuWidget();
+    void setMenuWidget(QWidget *menuBar /Transfer/);
     QStatusBar *statusBar() const;
     void setStatusBar(QStatusBar *statusbar /Transfer/);
     QWidget *centralWidget() const;
@@ -55,8 +57,13 @@ public:
     void addDockWidget(Qt::DockWidgetArea area, QDockWidget *dockwidget);
     void addDockWidget(Qt::DockWidgetArea area, QDockWidget *dockwidget, Qt::Orientation orientation);
     void splitDockWidget(QDockWidget *after, QDockWidget *dockwidget, Qt::Orientation orientation);
+    void tabifyDockWidget(QDockWidget *first, QDockWidget *second);
     void removeDockWidget(QDockWidget *dockwidget);
     Qt::DockWidgetArea dockWidgetArea(QDockWidget *dockwidget) const;
+    bool isDockNestingEnabled() const;
+    void setDockNestingEnabled(bool enabled);
+    bool isAnimated() const;
+    void setAnimated(bool enabled);
     QByteArray saveState(int version = 0) const;
     bool restoreState(const QByteArray &state, int version = 0);
     virtual QMenu *createPopupMenu() /Factory/;
