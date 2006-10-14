@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_LoginDialogBase(object):
    def setupUi(self, LoginDialogBase):
       LoginDialogBase.setObjectName("LoginDialogBase")
-      LoginDialogBase.resize(QtCore.QSize(QtCore.QRect(0,0,277,138).size()).expandedTo(LoginDialogBase.minimumSizeHint()))
+      LoginDialogBase.resize(QtCore.QSize(QtCore.QRect(0,0,311,202).size()).expandedTo(LoginDialogBase.minimumSizeHint()))
       LoginDialogBase.setWindowIcon(QtGui.QIcon(":/Maestro/images/maestro_icon.png"))
       LoginDialogBase.setModal(True)
 
@@ -32,6 +32,36 @@ class Ui_LoginDialogBase(object):
       self.vboxlayout.setMargin(9)
       self.vboxlayout.setSpacing(6)
       self.vboxlayout.setObjectName("vboxlayout")
+
+      self.hboxlayout = QtGui.QHBoxLayout()
+      self.hboxlayout.setMargin(0)
+      self.hboxlayout.setSpacing(6)
+      self.hboxlayout.setObjectName("hboxlayout")
+
+      self.mLockLbl = QtGui.QLabel(LoginDialogBase)
+      self.mLockLbl.setPixmap(QtGui.QPixmap(":/Maestro/images/lock.png"))
+      self.mLockLbl.setObjectName("mLockLbl")
+      self.hboxlayout.addWidget(self.mLockLbl)
+
+      self.mLoginLbl = QtGui.QLabel(LoginDialogBase)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(5))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mLoginLbl.sizePolicy().hasHeightForWidth())
+      self.mLoginLbl.setSizePolicy(sizePolicy)
+
+      font = QtGui.QFont(self.mLoginLbl.font())
+      font.setFamily("Sans Serif")
+      font.setPointSize(22)
+      font.setWeight(75)
+      font.setItalic(False)
+      font.setBold(True)
+      self.mLoginLbl.setFont(font)
+      self.mLoginLbl.setAlignment(QtCore.Qt.AlignCenter)
+      self.mLoginLbl.setObjectName("mLoginLbl")
+      self.hboxlayout.addWidget(self.mLoginLbl)
+      self.vboxlayout.addLayout(self.hboxlayout)
 
       self.gridlayout = QtGui.QGridLayout()
       self.gridlayout.setMargin(0)
@@ -65,22 +95,22 @@ class Ui_LoginDialogBase(object):
       self.gridlayout.addWidget(self.mPasswordLbl,1,0,1,1)
       self.vboxlayout.addLayout(self.gridlayout)
 
-      self.hboxlayout = QtGui.QHBoxLayout()
-      self.hboxlayout.setMargin(0)
-      self.hboxlayout.setSpacing(6)
-      self.hboxlayout.setObjectName("hboxlayout")
+      self.hboxlayout1 = QtGui.QHBoxLayout()
+      self.hboxlayout1.setMargin(0)
+      self.hboxlayout1.setSpacing(6)
+      self.hboxlayout1.setObjectName("hboxlayout1")
 
       spacerItem = QtGui.QSpacerItem(131,31,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
-      self.hboxlayout.addItem(spacerItem)
+      self.hboxlayout1.addItem(spacerItem)
 
       self.mLoginBtn = QtGui.QPushButton(LoginDialogBase)
       self.mLoginBtn.setObjectName("mLoginBtn")
-      self.hboxlayout.addWidget(self.mLoginBtn)
+      self.hboxlayout1.addWidget(self.mLoginBtn)
 
       self.mCancelBtn = QtGui.QPushButton(LoginDialogBase)
       self.mCancelBtn.setObjectName("mCancelBtn")
-      self.hboxlayout.addWidget(self.mCancelBtn)
-      self.vboxlayout.addLayout(self.hboxlayout)
+      self.hboxlayout1.addWidget(self.mCancelBtn)
+      self.vboxlayout.addLayout(self.hboxlayout1)
       self.mUserLbl.setBuddy(self.mUserEdit)
       self.mDomainLbl.setBuddy(self.mDomainCB)
       self.mPasswordLbl.setBuddy(self.mPasswordEdit)
@@ -98,11 +128,13 @@ class Ui_LoginDialogBase(object):
 
    def retranslateUi(self, LoginDialogBase):
       LoginDialogBase.setWindowTitle(QtGui.QApplication.translate("LoginDialogBase", "Maestro Client Login", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLoginLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "Maestro Login", None, QtGui.QApplication.UnicodeUTF8))
       self.mUserLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "User:", None, QtGui.QApplication.UnicodeUTF8))
       self.mDomainLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "Domain:", None, QtGui.QApplication.UnicodeUTF8))
       self.mPasswordLbl.setText(QtGui.QApplication.translate("LoginDialogBase", "Password:", None, QtGui.QApplication.UnicodeUTF8))
       self.mLoginBtn.setText(QtGui.QApplication.translate("LoginDialogBase", "&Login", None, QtGui.QApplication.UnicodeUTF8))
       self.mCancelBtn.setText(QtGui.QApplication.translate("LoginDialogBase", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":

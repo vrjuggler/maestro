@@ -1,15 +1,12 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>LoginDialogBase</class>
  <widget class="QDialog" name="LoginDialogBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>277</width>
-    <height>138</height>
+    <width>311</width>
+    <height>202</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -28,6 +25,53 @@
    <property name="spacing" >
     <number>6</number>
    </property>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="mLockLbl" >
+       <property name="text" >
+        <string/>
+       </property>
+       <property name="pixmap" >
+        <pixmap resource="MaestroResource.qrc" >:/Maestro/images/lock.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="mLoginLbl" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>7</hsizetype>
+         <vsizetype>5</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font" >
+        <font>
+         <family>Sans Serif</family>
+         <pointsize>22</pointsize>
+         <weight>75</weight>
+         <italic>false</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text" >
+        <string>Maestro Login</string>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item>
     <layout class="QGridLayout" >
      <property name="margin" >
@@ -124,7 +168,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
  <tabstops>
   <tabstop>mUserEdit</tabstop>
   <tabstop>mPasswordEdit</tabstop>
