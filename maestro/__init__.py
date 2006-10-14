@@ -19,3 +19,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 # package file
+
+__build__   = 1
+__version__ = '0.1.8.%d' % __build__
+__date__    = ' '.join('$Date$'.split()[1:3])
+__author__  = 'Infiscape Corporation'
+__doc__     = '''This is Maestro.  For information regarding Maestro see:
+    http://realityforge.vrsource.org/trac/maestro/'''
