@@ -118,6 +118,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
 
       if self.mProxies.has_key(nodeId):
          self.mLogger.debug("EventManager.disconnect(%s)" % (nodeId))
+         self.mProxies[nodeId].broker.transport.loseConnection()
          del self.mProxies[nodeId]
 
    def registerProxy(self, nodeId, obj):
@@ -179,6 +180,9 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
 
    def isConnected(self, nodeId):
       return self.mProxies.has_key(nodeId)
-      
+
+   def getNumProxies(self):
+      return len(self.mProxies)
+
    def _getProxies(self):
       return self.mProxies
