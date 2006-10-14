@@ -18,8 +18,11 @@
 
 VERSION=	0.1
 PKG=		maestro-$(VERSION)
+OS=		$(shell uname -s)
 
 prefix=		/usr
+confdir=	/etc
+svcdir=		$(confdir)/init.d
 bindir=		$(prefix)/bin
 sbindir=	$(prefix)/sbin
 datadir=	$(prefix)/share/$(PKG)
@@ -28,6 +31,7 @@ appdir=		$(prefix)/lib/$(PKG)
 
 install:
 	@mkdir -p $(bindir)
+	@mkdir -p $(sbindir)
 	@mkdir -p $(appdir)
 	@mkdir -p $(datadir)
 	tar --exclude .svn -cvf - maestro | tar -C $(appdir) -xpf -
@@ -38,6 +42,10 @@ install:
 	chmod 0755 $(sbindir)/maestrod
 	cat script/maestro | sed -e 's|@MAESTRO_DIR@|$(appdir)|' > $(bindir)/maestro
 	chmod 0755 $(bindir)/maestro
+ifeq ($(OS), Linux)
+	@mkdir -p $(svcdir)
+	install -m 0755 dist/maestrod $(svcdir)
+endif
 
 install-docs: docs
 	@mkdir -p $(docdir)

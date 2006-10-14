@@ -1,5 +1,5 @@
 #! /bin/bash
-# infclustercontrol init file for infclustercontrold
+# maestrod init file for maestrod
 #
 # chkconfig: 345 50 50
 # description: The simFUSION control server provides an XML-RPC interface \
@@ -10,7 +10,7 @@
 
 RETVAL=0
 
-prog="infclustercontrold"
+prog="/usr/sbin/maestrod"
 
 start() {
     echo -n $"Starting $prog: "
