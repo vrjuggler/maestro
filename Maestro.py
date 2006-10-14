@@ -159,12 +159,21 @@ def main():
       env = maestro.core.Environment()
       env.initialize(gui_settings, opts, splashProgressCB)
 
+      # Create a log in dialog.
+      ld = gui.LoginDialog.LoginDialog()
+
+      # Close the splash screen.
+      # NOTE: We wait until after the LoginDialog has been constructed
+      #       because on Windows the LoginDialog can take a while to
+      #       query the current username ans domain.
       splash.finish(None)
 
-      ld = gui.LoginDialog.LoginDialog()
+      # If the user canceld the login dialog, exit the application.
       if QtGui.QDialog.Rejected == ld.exec_():
          sys.exit(-1)
 
+      # Take the username/password and give them to the EventManager
+      # so that it can connect to the various nodes.
       env.mEventManager.setCredentials(ld.getLoginInfo())
 
       # Create and display GUI
