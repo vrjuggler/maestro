@@ -122,7 +122,15 @@ class MaestroServer:
    def update(self):
       """ Give the event manager time to handle it's timers. """
       env = maestro.core.Environment()
-      env.mEventManager.update()
+
+      # Try to limit the amount of work done when no nodes
+      # are connected to the daemon.
+      # XXX: This may not be a good thing if future services
+      #      need to have time schedule even when there are
+      #      no connections. This could be a service that
+      #      cleans up files every 30 minutes for example.
+      if env.mEventManager.getNumProxies() > 0:
+         env.mEventManager.update()
 
 if os.name == 'nt':
    class vrjclusterserver(win32serviceutil.ServiceFramework):
