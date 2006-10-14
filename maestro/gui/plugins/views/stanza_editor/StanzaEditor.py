@@ -45,10 +45,11 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
    def __init__(self):
       maestro.core.IViewPlugin.__init__(self)
       self.widget = StanzaEditor()
-      self.mToolbar = None
+      self.mStanzaEditorToolbar = None
       #self.mStanzaSearchToolbar = None
-      self.mStanzaToolbox = None
+      self.mOptionToolBox = None
       self.mMenu = None
+      self.mOptionEditorDockWidget = None
       
    def getName():
       return "Stanza Editor"
@@ -67,13 +68,13 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
 
       # Build toolbar by taking buttons from stanza editor. We onlyt do this
       # the first time that the view is activated.
-      if self.mToolbar is None:
-         self.mToolbar = QtGui.QToolBar("Stanza Toolbar", mainWindow)
-         self.mToolbar.addWidget(self.widget.mLayoutBtn)
-         self.mToolbar.addWidget(self.widget.mNoDragBtn)
-         self.mToolbar.addWidget(self.widget.mScrollDragBtn)
-         self.mToolbar.addWidget(self.widget.mRubberBandDragBtn)
-         self.mToolbar.addWidget(self.widget.mZoomExtentsBtn)
+      if self.mStanzaEditorToolbar is None:
+         self.mStanzaEditorToolbar = QtGui.QToolBar("Stanza Toolbar", mainWindow)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mLayoutBtn)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mNoDragBtn)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mScrollDragBtn)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mRubberBandDragBtn)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mZoomExtentsBtn)
 #      if self.mStanzaSearchToolbar is None:
 #         self.mStanzaSearchToolbar = QtGui.QToolBar("Stanza Search Toolbar", mainWindow)
 #         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationLbl)
@@ -85,21 +86,46 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
 #         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterCB)
 #         self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
 #         self.widget.mToolGroupBox.setParent(None)
-      if self.mStanzaToolbox is None:
-         self.mStanzaToolbox = QtGui.QToolBar("Stanza Toolbox", mainWindow)
+      if self.mOptionToolBox is None:
+         self.mOptionToolBox = QtGui.QToolBar("Stanza Toolbox", mainWindow)
          for btn in self.widget.mItemToolButtons:
-            self.mStanzaToolbox.addWidget(btn)
+            self.mOptionToolBox.addWidget(btn)
          #self.widget.gridlayout.removeWidget(self.widget.mToolGroupBox)
          self.widget.mToolboxFrame.setParent(None)
-      mainWindow.addToolBar(self.mToolbar)
-#      mainWindow.addToolBarBreak()
-      self.mToolbar.show()
-#      mainWindow.addToolBar(self.mStanzaSearchToolbar)
-#      self.mStanzaSearchToolbar.show()
-      mainWindow.addToolBar(QtCore.Qt.RightToolBarArea, self.mStanzaToolbox)
-      self.mStanzaToolbox.show()
 
-      # Add menu.
+      # Create a QDockWidget to contain the option editor.
+      if self.mOptionEditorDockWidget is None:
+         self.mOptionEditorDockWidget = QtGui.QDockWidget("Stanza Option Editor", 
+                                              mainWindow)
+         self.mOptionEditorDockWidget.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea)
+         self.mOptionEditorDockWidget.setObjectName("mLogWindow")
+         self.mOptionEditorDockWidget.setWidget(self.widget.mEditFrame)
+
+      # Add the various toolbars and dock widget to the main window
+
+      # Add a toolbar to the main window containing all main editor actions.
+      mainWindow.addToolBar(self.mStanzaEditorToolbar)
+      self.mStanzaEditorToolbar.show()
+
+      # The following will force the next toolbar added onto the next line
+      #mainWindow.addToolBarBreak()
+
+      # Add a search toolbar that allows the user to select the current
+      # application and filter it's options depending on the operating
+      # system and node class.
+      #mainWindow.addToolBar(self.mStanzaSearchToolbar)
+      #self.mStanzaSearchToolbar.show()
+
+      # Move all option tool items into a toolbar along the right side
+      # of the main window.
+      mainWindow.addToolBar(QtCore.Qt.RightToolBarArea, self.mOptionToolBox)
+      self.mOptionToolBox.show()
+
+      # Add a QDockWidget to the main window that contains the options editor.
+      mainWindow.addDockWidget(QtCore.Qt.BottomDockWidgetArea,
+                               self.mOptionEditorDockWidget)
+
+      # Build a menu that contains all stanza editors actions.
       if self.mMenu is None:
          self.mMenu = QtGui.QMenu("Stanza Editor")
          self.mMenu.addAction(self.widget.mNoDragAction)
@@ -110,16 +136,27 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
             self.mMenu.addAction(la)
          self.mMenu.addSeparator()
          self.mMenu.addAction(self.widget.mZoomExtentsAction)
+
+      # Add menu to mainWindow.
       mainWindow.menuBar().addAction(self.mMenu.menuAction())
    
    def deactivate(self, mainWindow):
-      mainWindow.removeToolBar(self.mToolbar)
+      # Remove main tool bar.
+      mainWindow.removeToolBar(self.mStanzaEditorToolbar)
+      self.mStanzaEditorToolbar.hide()
+
 #      mainWindow.removeToolBar(self.mStanzaSearchToolbar)
-      mainWindow.removeToolBar(self.mStanzaToolbox)
-      self.mToolbar.hide()
 #      self.mStanzaSearchToolbar.hide()
-      self.mStanzaToolbox.hide()
+
+      # Remove item toolbox.
+      mainWindow.removeToolBar(self.mOptionToolBox)
+      self.mOptionToolBox.hide()
+
+      # Remote option editor dock widget.
+      mainWindow.removeDockWidget(self.mOptionEditorDockWidget)
       self.mMenu.hide()
+
+      # Remove stanza editor menu.
       mainWindow.menuBar().removeAction(self.mMenu.menuAction())
 
 class StanzaScene(QtGui.QGraphicsScene):
