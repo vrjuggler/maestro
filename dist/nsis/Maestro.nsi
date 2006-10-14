@@ -93,6 +93,7 @@ SectionEnd
 Section -AdditionalIcons
   Call SetStartMenuToUse
 
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Maestro.lnk" "$INSTDIR\Maestro.py"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation (PDF).lnk" "$INSTDIR\doc\userguide.pdf"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation (HTML).lnk" "$INSTDIR\doc\userguide\index.html"
 
