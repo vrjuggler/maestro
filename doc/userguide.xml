@@ -37,10 +37,35 @@
    <preface>
       <title>Preface</title>
 
-      <para>In some places, command lines are wrapped to keep the text within
-      the margins of a page when this document is rendered to PDF. Such cases
-      should be obvious to the reader, but it is important to understand that
-      the command lines are intended to appear as a single line when
+      <para>Maestro was originally written by Aron Bierbaum at <ulink
+      url="http://www.infiscape.com/">Infiscape Corporation</ulink> in January
+      2006 and was known simply as the <quote>Cluster Control Tool.</quote> It
+      was born out of a need for improving the launching of <ulink
+      url="http://www.vrjuggler.org/">VR Juggler</ulink> applications<footnote>
+            <para>Applications that present the user(s) with an interactive,
+            immersive virtual space.</para>
+         </footnote> on graphics clusters—especially those running
+      <productname class="registered">Microsoft Windows</productname> where
+      remote execution of interactive applications is atypical. Existing
+      techniques for launching VR Juggler applications involved writing custom
+      shell scripts or batch files for each application. Through varying means
+      (SSH, <ulink
+      url="http://www.sysinternals.com/Utilities/PsExec.html">PsExec</ulink>,
+      etc.), these scripts would get access to the nodes of the cluster and
+      start the application process on each. To see the output from all the
+      cluster nodes usually required having a console window open for each
+      node (which was usually already open as a side effect of running the
+      remote logon and launch commands). All in all, these techniques suffered
+      from many limitations and complexities. As we will see in this document,
+      Maestro goes a long way to facilitating the easy use and maintenance of
+      graphics clusters.</para>
+
+      <para>Before we begin explaining Maestro and its use, we present the
+      conventions used in this document in order for readers to get the most
+      out of it. In some places, command lines are wrapped to keep the text
+      within the margins of a page when this document is rendered to PDF. Such
+      cases should be obvious to the reader, but it is important to understand
+      that the command lines are intended to appear as a single line when
       used.</para>
 
       <para>Typesetting conventions used in this document are as
@@ -200,7 +225,7 @@
          </indexterm>
 
          <para>Now that we know what Maestro is, we can explain what it does.
-         Below are some of the features of Maestro.</para>
+         Below are some of the features of Maestro:</para>
 
          <itemizedlist>
             <listitem>
@@ -236,9 +261,17 @@
             </listitem>
 
             <listitem>
-               <para>Pluggable authentication (currently supporting PAM and
-               <productname class="registered">Microsoft Windows</productname>
-               domians)</para>
+               <para>Pluggable authentication (currently supporting
+               PAM<indexterm>
+                     <primary>authentication</primary>
+
+                     <secondary>PAM</secondary>
+                  </indexterm> and <productname class="registered">Microsoft
+               Windows</productname> domians<indexterm>
+                     <primary>authentication</primary>
+
+                     <secondary>Windows domains</secondary>
+                  </indexterm>)</para>
             </listitem>
 
             <listitem>
@@ -251,8 +284,10 @@
 
             <listitem>
                <para>Ability to reboot any or all nodes of a cluster to a
-               different OS by interacting with the boot loader (currently,
-               GRUB and the NT loader are supported)</para>
+               different OS by interacting with the boot loader<indexterm>
+                     <primary>boot loader</primary>
+                  </indexterm> (currently, GRUB and the NT loader are
+               supported)</para>
             </listitem>
 
             <listitem>
@@ -262,28 +297,6 @@
          </itemizedlist>
 
          <indexterm class="endofrange" startref="index.section.features"></indexterm>
-      </section>
-
-      <section>
-         <title>History</title>
-
-         <para>Maestro was originally written by Aron Bierbaum at <ulink
-         url="http://www.infiscape.com/">Infiscape Corporation</ulink> in
-         January 2006 and was known simply as the <quote>Cluster Control
-         Tool.</quote> It was born out of a need for improving the launching
-         of <ulink url="http://www.vrjuggler.org/">VR Juggler</ulink>
-         applications on clusters—especially those running <productname
-         class="registered">Microsoft Windows</productname> where remote
-         application execution is atypical. Existing techniques for launching
-         such applications involved writing custom shell scripts or batch
-         files for each application. Through varying means (SSH, <ulink
-         url="http://www.sysinternals.com/Utilities/PsExec.html">PsExec</ulink>,
-         etc.), these scripts would get access to the nodes of the cluster and
-         start the application process on each. To see the output from all the
-         cluster nodes usually required having a console window open for each
-         node (which was usually already open as a side effect of running the
-         remote logon and launch commands). All in all, these techniques
-         suffered from many limitations and complexities.</para>
 
          <para>Maestro has been designed from the start to address the
          limitations associated with more brute force approaches to launching
@@ -369,9 +382,10 @@
 
          <indexterm class="endofrange" startref="index.section.help.lists"></indexterm>
 
-         <para>For support beyond the mailing lists, <ulink
+         <para>For assistance beyond the mailing lists, <ulink
          url="http://www.infiscape.com/contact.php">contact Infiscape
-         Corporation</ulink>.</para>
+         Corporation</ulink> to learn more about options for training,
+         installation, and support.</para>
       </section>
    </chapter>
 
@@ -531,12 +545,135 @@ Certificate information:
          <quote>maestro-dee</quote>). On <productname
          class="registered">Microsoft Windows</productname>, it runs as a
          service as the SYSTEM user; on other platforms, it runs as a daemon
-         as root.</para>
+         as root. In this section, we explain how to use
+         <command>maestrod</command>.</para>
 
          <section id="section.running.maestrod">
             <title>Running <command>maestrod</command></title>
 
-            <para></para>
+            <para>In general, maestrod will be running as a background
+            service/daemon that users do not need to worry about starting and
+            stopping. Nevertheless, to get a complete understanding of how
+            Maestro works, it is useful to understand how the server side is
+            managed. Below, we explain how the Maestro service is installed
+            and and started on <productname class="registered">Microsoft
+            Windows</productname> and then how the Maestro daemon is installed
+            on managed on Linux.</para>
+
+            <section>
+               <title>The <productname class="registered">Microsoft
+               Windows</productname> Maestro Service</title>
+
+               <para>On <productname class="registered">Microsoft
+               Windows</productname>, the automated installer sets up the
+               Maestro service and starts it running. Hence, by using that
+               installer, there is nothing further that has to be done in
+               order to run maestrod on that platform. However, if the
+               installer was not used, the process of installing and starting
+               the service is quite simple. As a user with administrative
+               privileges, simply run the following in the directory
+               containing the Maestro distribution:</para>
+
+               <screen>maestrod.py --interactive --startup auto install
+maestrod.py start</screen>
+
+               <para>Should it become necessary to remove the service, run
+               these commands as a user with admnistrative privlieges in the
+               directory containing the Maestro distribution:</para>
+
+               <screen>maestrod.py stop
+maestrod.py remove</screen>
+
+               <para>Running <command>maestrod</command> as a service causes
+               it to be run as the SYSTEM user. In general this is how most
+               people would run <command>maestrod</command> since that user
+               has all the necessary privileges in order for the Maestro
+               software to work. Sometimes it is useful to run
+               <command>maestrod</command> in debug mode, but doing this
+               requires that the logged on user have the necessary privileges
+               to spawn processes as other users and to impersonate other
+               users. To get these privileges, follow these steps:</para>
+
+               <orderedlist>
+                  <listitem>
+                     <para>Open the Start Menu, click
+                     <guimenuitem>Run...</guimenuitem>, and enter
+                     <command>secpol.msc</command>.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Find the policy item labeled <quote>Impersonate a
+                     client after authentication</quote> and double-click
+                     it.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>In the dialog box, enter the user name (with domain
+                     if necessary) for the user who will be running
+                     <command>maestrod</command> and click OK.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Do the same for the policy item labeled
+                     <quote>Replace a process level token.</quote></para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Log out and log in as the user who can now
+                     impersonate other users.</para>
+                  </listitem>
+               </orderedlist>
+
+               <para>Now, open a command shell and change to the directory
+               containing the Maestro distribution. If the Maestro service is
+               still running, enter the following:</para>
+
+               <screen>maestrod.py stop</screen>
+
+               <para>At the prompt, run the following:</para>
+
+               <screen>maestrod.py -debug</screen>
+            </section>
+
+            <section>
+               <title>The UNIX/Linux Maestro Daemon</title>
+
+               <para>For non-Windows platforms, <command>maestrod</command>
+               runs as a background daemon as the root user. Currently, Linux
+               is the only non-Windows platform supported, so this part of the
+               documentation will focus on how it is installed and used on
+               Linux. In the future, this text will be expanded to cover other
+               operating systems.</para>
+
+               <para>Maestro is packaged up for deployment on Linux using RPM
+               files. For the server side, there are two packages to install:
+               maestro-base and maestro-server. The maestro-base package
+               contains the core Python code that is used by both
+               <command>maestrod</command> and the Maestro client GUI;
+               maestro-server contains all the server-side code, scripts, and
+               data files. When the maestro-server package is installed on
+               Linux, there is a shell script added to
+               <filename>/etc/init.d</filename> called
+               <filename>maestrod</filename>. This script can be used by the
+               root user to start and stop the Maestro daemon as shown
+               below:</para>
+
+               <screen>/etc/init.d/maestrod start
+/etc/init.d/maestrod stop</screen>
+
+               <para>The actual command that is run by this shell script is
+               another shell script named <filename>maestrod</filename>
+               installed in <filename>/usr/sbin</filename>. This command can
+               be run directly in debug mode as follows:</para>
+
+               <screen>/usr/sbin/maestrod -debug</screen>
+
+               <para>Running <command>/usr/sbin/maestrod</command> without the
+               <option>-debug</option> option causes it to start up as a
+               background daemon. Running <command>maestrod</command> requires
+               root privileges in order to perform the PAM authentication of
+               remote users, so all of the above must be run as root.</para>
+            </section>
          </section>
 
          <section>
@@ -549,12 +686,67 @@ Certificate information:
       <section>
          <title>Client</title>
 
-         <para></para>
+         <para>The client side of Maestro is a cross-platform GUI written in
+         the Python programming language with PyQt as the widget set. As we
+         will see, it is designed to be a dynamic and flexible interface for
+         utilizing a cluster.</para>
+
+         <para>Before we get into the usage of the Maestro GUI, we must
+         introduce some terminology. In keeping with the musical theme of
+         Maestro, there are two data files (XML files) utilized by the Maestro
+         GUI: ensemble files and stanza files. An
+         <firstterm>ensemble</firstterm><indexterm>
+               <primary>ensemble</primary>
+
+               <secondary>definition of</secondary>
+            </indexterm> file identifies the nodes of the cluster, and in the
+         usage of Maestro, we frequently refer to the cluster nodes together
+         as an ensemble. The name ensemble was chosen because it represents a
+         group of musicians who perform together—an apropos choice in the
+         context of a graphics cluster.</para>
+
+         <para>The <firstterm>stanza</firstterm><indexterm>
+               <primary>stanza</primary>
+
+               <secondary>definition of</secondary>
+            </indexterm> file describes how to run an application. If we
+         consider that running an application is the performance of the
+         clsuter, then this name is quite meaningful. The term stanza also has
+         relevance in the realm of computing where it is <quote>a block or
+         subsection of a human-readable configuration file for computer
+         software.</quote> Application developers write stanza files by
+         filling in the executable name, command line options, and any
+         environment variables needed to launch the software. The stanza file
+         is then used by the Maestro GUI to construct a graphical interface
+         for that application in the Maestro Launch Viewer (see <xref
+         linkend="section.viewer.launch" />). Thus, it is up to the stanza
+         author to create a stanza that results in an understandable, flexbile
+         user interface when loaded by the Maestro GUI.</para>
 
          <section id="section.running.maestro.gui">
             <title>Running the Maestro GUI</title>
 
-            <para></para>
+            <para>To load the Maestro GUI, run the command
+            <command>maestro</command> or double-click on the application
+            icon. A splash screen appears while all the dynamically loaded
+            code and data files are loaded. Next, a login dialog is displayed
+            asking for the user name, the password, and (optionally) the
+            <productname class="registered">Microsoft Windows</productname>
+            domain for the user who will be launching applications on the
+            cluster. At this time, the login information must be the same for
+            all nodes of the cluster, and a user cannot authenticate as a
+            different person without restarting the Maestro GUI.</para>
+
+            <para>Its main interface panel has three parts: a tool bar, the
+            viewer panel, and the log window. The tool bar contains buttons
+            for basic operations such as loading and saving the ensemble
+            file.</para>
+
+            <section>
+               <title>Loading the Ensemble</title>
+
+               <para></para>
+            </section>
 
             <section id="section.viewer.launch">
                <title>Launch Viewer</title>
@@ -607,6 +799,12 @@ Certificate information:
                   <secondary>reboot</secondary>
                </indexterm>
 
+               <indexterm>
+                  <primary>rebooting</primary>
+
+                  <seealso>boot loader</seealso>
+               </indexterm>
+
                <para>The Reboot Viewer allows the GUI user to reboot
                individual nodes of the cluster or all the nodes of the cluster
                with the click of a button. When possible, the Reboot Viewer
@@ -615,63 +813,572 @@ Certificate information:
                the remote computer in order to change which OS it loads upon
                booting.</para>
 
-               <important>
-                  <para>Being able to change the target OS for rebooting
-                  relies upon two things: knowledge of the boot loader on the
-                  server side and access to the boot loader configuration from
-                  all installed operating systems. Without both of these, it
-                  is not possible to change the target OS. For example, if the
-                  GRUB configuration file cannot be accessed from <productname
-                  class="registered">Microsoft Windows</productname>, then it
-                  is not possible to change the default OS that GRUB boots
-                  when the computer is currently booted into <productname
-                  class="registered">Microsoft Windows</productname>.
-                  Similarly, if an unsupported boot loader is being used (such
-                  as <productname class="trade">BootMagic</productname>), then
-                  it is not possible to change the target OS at all. Support
-                  for different boot loaders can be added as a plug-in to the
-                  Maestro Reboot Service<indexterm>
+               <para>Being able to change the target OS for rebooting relies
+               upon two things: knowledge of the boot loader<indexterm>
+                     <primary>boot loader</primary>
+                  </indexterm> on the server side and access to the boot
+               loader configuration from all installed operating systems.
+               Without both of these, it is not possible to change the target
+               OS. For example, if the GRUB<indexterm>
+                     <primary>boot loader</primary>
+
+                     <secondary>GRUB</secondary>
+                  </indexterm> configuration file cannot be accessed from
+               <productname class="registered">Microsoft
+               Windows</productname>, then it is not possible to change the
+               default OS that GRUB boots when the computer is currently
+               booted into <productname class="registered">Microsoft
+               Windows</productname>. Similarly, if boot loader is being used
+               that is unknown to the Reboot Service<indexterm>
+                     <primary>services</primary>
+
+                     <secondary>reboot</secondary>
+                  </indexterm> (such as <productname
+               class="trade">BootMagic</productname><indexterm>
+                     <primary>boot loader</primary>
+
+                     <secondary>BootMagic</secondary>
+                  </indexterm>), then it is not possible to change the target
+               OS at all. Support for different boot loaders can be added as a
+               plug-in to the Maestro Reboot Service<indexterm>
+                     <primary>services</primary>
+
+                     <secondary>reboot</secondary>
+                  </indexterm>. See for <xref
+               linkend="section.plugins.boot.loader" /> more
+               information.</para>
+
+               <para>Given these constraints, it is vital to make the boot
+               loader configuration editable by all operating systems on the
+               computer. If there is only one OS involved, then the default
+               installation of the boot loader will be fine. (For a computer
+               that only has <productname class="registered">Microsoft
+               Windows</productname> installed, there may not be any obvious
+               use of a boot loader even though it is present and involved
+               with the boot process every time.) For multiple operating
+               systems, however, things get more complicated. Below, we
+               provide recommendations for how to make supported boot loaders
+               work with Maestro and its rebooting capabilities.</para>
+
+               <section>
+                  <title>Setting Up GRUB for use with Maestro</title>
+
+                  <indexterm class="startofrange"
+                             id="index.section.boot.loader.config.grub">
+                     <primary>boot loader</primary>
+
+                     <secondary>GRUB</secondary>
+
+                     <tertiary>use with Maestro</tertiary>
+                  </indexterm>
+
+                  <indexterm>
+                     <primary>GRUB</primary>
+
+                     <see>boot loader</see>
+                  </indexterm>
+
+                  <important>
+                     <para>Before making any changes to the GRUB installation,
+                     read this entire section very carefully. It is
+                     <emphasis>not</emphasis> intended to be used in a
+                     step-by-step fashion where readers are performing the
+                     steps as they read them for the first time. Rather,
+                     readers should understand the whole process first and be
+                     prepared to perform the steps before actually executing
+                     them.</para>
+                  </important>
+
+                  <para>On a computer that uses GRUB (the <ulink
+                  url="http://www.gnu.org/software/grub/">Grand Unified
+                  Bootloader</ulink>) to choose which operating system to
+                  load, a file called <filename>grub.conf</filename><indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>GRUB</secondary>
+
+                        <tertiary>grub.conf</tertiary>
+                     </indexterm> is stored on disk in a location that must be
+                  readable by the GRUB second stage loader. This file lists
+                  all the known operating systems with instructions on how to
+                  boot each one. If GRUB was installed as part of a Linux
+                  installation, then the GRUB files are likely to be in the
+                  directory <filename>/boot/grub</filename>. Depending on how
+                  things were installed, this may be in its own partition or
+                  in the partition containing the root Linux file
+                  system.</para>
+
+                  <indexterm class="startofrange"
+                             id="index.section.boot.loader.config.grub.fat32">
+                     <primary>boot loader</primary>
+
+                     <secondary>grub</secondary>
+
+                     <tertiary>FAT32 installation</tertiary>
+                  </indexterm>
+
+                  <para>The Maestro Reboot Service<indexterm>
                         <primary>services</primary>
 
                         <secondary>reboot</secondary>
-                     </indexterm>. See for <xref
-                  linkend="section.plugins.boot.loader" /> more
-                  information.</para>
-               </important>
+                     </indexterm> has a plug-in that knows how to read and
+                  modify <filename>grub.conf</filename> in order to allow
+                  rebooting into any of the operating systems known to GRUB.
+                  Getting <filename>grub.conf</filename> and all the other
+                  GRUB files into a location that is readable and writable by
+                  all installed operating systems is the tricky part.
+                  Fortunately, GRUB comes with support for many file system
+                  types, so it can be installed just about anywhere. At the
+                  same time, <productname class="registered">Microsoft
+                  Windows</productname> does not include support for many file
+                  system types, so it becomes the limiting factor. The lowest
+                  common denominator among most modern operating systems and
+                  GRUB is the FAT32 file system. By (re-)installing GRUB into
+                  a FAT32 partition, the <filename>grub.conf</filename> file
+                  will be readable and writable by all operating systems and
+                  by GRUB at boot time.</para>
 
-               <indexterm class="endofrange"
-                          startref="index.section.viewer.reboot"></indexterm>
+                  <caution>
+                     <para>The process for installing GRUB into a FAT32 file
+                     system manually is not difficult, but it requires care.
+                     If the boot blocks of a disk are not set up properly, the
+                     computer will be rendered unbootable, so having a
+                     recovery CD that can reinstall some boot loader (such as
+                     the default Master Boot Record [MBR] or GRUB's first
+                     stage loader) is highly recommended. Furthermore,
+                     understaind of how boot loaders and boot blocks work will
+                     come in very handy if anything should go wrong.</para>
+                  </caution>
+
+                  <para>The first step of installing GRUB onto a FAT32
+                  partition is to create the partition. It does not need to be
+                  large (a GRUB installation requires roughly 200 kB of
+                  storage), and since the partition may be used for other
+                  things that just giving GRUB a home, users should consider
+                  carefully just how large to make it. For the purposes of
+                  this discussion, let us say that the FAT32 partition is the
+                  third primary partition on the first hard disk. In <ulink
+                  url="http://www.gnu.org/software/grub/manual/html_node/Naming-convention.html#Naming-convention">GRUB
+                  terminology</ulink>, this makes it partition (hd0,2). The
+                  actual disk and partition used will vary from site to
+                  site.</para>
+
+                  <para>Once the partition is created, a GRUB <ulink
+                  url="http://www.gnu.org/software/grub/manual/html_node/Creating-a-GRUB-boot-floppy.html">boot
+                  floppy</ulink> or <ulink
+                  url="http://www.gnu.org/software/grub/manual/html_node/Making-a-GRUB-bootable-CD-ROM.html">boot
+                  CD</ulink> is needed. However, the steps described in the
+                  referenced pages will not produce a complete GRUB
+                  installation device. Instead, they are intended to give the
+                  user a way to load GRUB, not install it. To simplify things,
+                  we have a pre-made <ulink
+                  url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Start/MaestroAndGrub/grub.iso">GRUB
+                  0.95 boot CD ISO image</ulink><indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>grub</secondary>
+
+                        <tertiary>bootable CD installation image</tertiary>
+                     </indexterm> that can be burned to a CD (using a CD-R or
+                  a CD-RW works). The resulting CD will be capable of
+                  installing GRUB onto any file system supported by
+                  GRUB.</para>
+
+                  <para>With a bootable GRUB installation medium ready to go,
+                  boot the computer using the created floppy or CD, and at the
+                  GRUB prompt, enter the following:</para>
+
+                  <screen>root (hd0,2)
+setup (hd0)</screen>
+
+                  <para>This will install GRUB from the installation medium
+                  onto the third partition of the first hard disk (our FAT32
+                  partition) and install the GRUB first stage boot loader to
+                  the boot blocks of the first disk. The GRUB files will go
+                  into the directory <filename>boot/grub</filename> on the
+                  partition. This directory would be accessed as
+                  <filename>&lt;drive&gt;:\boot\grub</filename> in
+                  <productname class="registered">Microsoft
+                  Windows</productname>. On non-Windows operating systems, the
+                  FAT32 partition mount point would determine how the files
+                  get accessed.</para>
+
+                  <para>The next step would be to reboot the computer, but we
+                  must first consider what the user will see upon rebooting.
+                  Unless a <filename>grub.conf</filename> was included with
+                  the GRUB installation (the boot CD ISO image referenced
+                  above does not include one), rebooting would leave the user
+                  at a GRUB prompt. Without a good understanding of how to use
+                  GRUB through its command interface, there is not much that
+                  the average user can do at this point. To address this, an
+                  existing <filename>grub.conf</filename> could be placed into
+                  the <filename>boot/grub</filename> directory on the FAT32
+                  partition <emphasis>prior</emphasis> to installing GRUB. For
+                  example, let us assume that the newly created FAT32
+                  partition has been mounted at <filename>/mnt</filename> in
+                  Linux and that the original GRUB installation is in
+                  <filename>/boot/grub</filename>. The following commands (run
+                  as root or another user with write access to
+                  <filename>/mnt/boot/grub</filename>) would get the existing
+                  <filename>grub.conf</filename> into place for use by the
+                  GRUB installation that will be located in the FAT32
+                  partition:</para>
+
+                  <screen>mkdir -p /mnt/boot/grub
+cp /boot/grub/grub.conf /mnt/boot/grub</screen>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.boot.loader.config.grub.fat32"></indexterm>
+
+                  <para>Once we have GRUB installed in the FAT32 partition
+                  with a working <filename>grub.conf</filename>, we can reboot
+                  the computer. The GRUB configuration will be loaded from the
+                  FAT32 partition, and booting can behave just as it did
+                  before. They key difference is that now the Maestro Reboot
+                  Service<indexterm>
+                        <primary>services</primary>
+
+                        <secondary>reboot</secondary>
+                     </indexterm> plug-in for GRUB can edit
+                  <filename>grub.conf</filename> on all operating
+                  systems.</para>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.boot.loader.config.grub"></indexterm>
+               </section>
+
+               <section>
+                  <title>Setting Up the NT Loader for use with Maestro</title>
+
+                  <indexterm class="startofrange"
+                             id="index.section.boot.loader.config.nt">
+                     <primary>boot loader</primary>
+
+                     <secondary>NT Loader</secondary>
+
+                     <tertiary>use with Maestro</tertiary>
+                  </indexterm>
+
+                  <indexterm>
+                     <primary>NT Loader</primary>
+
+                     <see>boot loader</see>
+                  </indexterm>
+
+                  <indexterm>
+                     <primary>NTLDR</primary>
+
+                     <see>boot loader</see>
+                  </indexterm>
+
+                  <para>The boot loader used by <productname
+                  class="registered">Microsoft Windows</productname> NT 4.0
+                  through <productname
+                  class="registered">Windows</productname> XP is known as
+                  <ulink
+                  url="http://en.wikipedia.org/wiki/NTLDR">NTLDR</ulink> (or
+                  the NT Loader). It uses a file named
+                  <filename>boot.ini</filename><indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>NT Loader</secondary>
+
+                        <tertiary>boot.ini</tertiary>
+                     </indexterm> (located on the same disk as the NT Loader)
+                  to present the user with a menu of options to choose for
+                  booting the computer. By editing this file, the Maestro
+                  Reboot Service<indexterm>
+                        <primary>services</primary>
+
+                        <secondary>reboot</secondary>
+                     </indexterm> plug-in for the NT Loader can change which
+                  OS is chosen as the default boot target the next time the
+                  computer is booted. As with GRUB<indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>GRUB</secondary>
+                     </indexterm> and its <filename>grub.conf</filename> file,
+                  however, the <filename>boot.ini</filename> file must be
+                  writable from all operating systems installed on the
+                  computer in order to allow rebooting from one OS to
+                  another.</para>
+
+                  <para>Changing <filename>boot.ini</filename> from
+                  <productname class="registered">Microsoft
+                  Windows</productname> is not a problem. The complexity comes
+                  in when using the NT file system (<ulink
+                  url="http://en.wikipedia.org/wiki/NTFS">NTFS</ulink>) and
+                  trying to modify <filename>boot.ini</filename> from another
+                  operating system such as Linux. There is a freely available
+                  <ulink url="http://www.linux-ntfs.org/">Linux kernel
+                  module</ulink> that adds support for accessing NTFS
+                  partitions. While reading from an NTFS partition in Linux
+                  works very well, writing is still considered to be
+                  dangerous. File system corruption resulting from writing to
+                  an NTFS parition from Linux is something that is well within
+                  the realm of possibility. Nevertheless, the <ulink
+                  url="http://www.linux-ntfs.org/content/view/15/29/">information
+                  about the current version</ulink> of said Linux kernel
+                  module (2.1.20 at the time of this writing) states that it
+                  allows resizing of existing files. Given that the default
+                  boot target specification in <filename>boot.ini</filename>
+                  is a path rather than an index, the likelihood of changing
+                  the size of <filename>boot.ini</filename> in order to modify
+                  the default setting is quite high. Therefore, it is vital
+                  that resizing of existing files in an NTFS partition from
+                  Linux be supported.</para>
+
+                  <para>An alternative to using the Linux kernel module is to
+                  use <ulink
+                  url="http://wiki.linux-ntfs.org/doku.php?id=ntfsmount">ntfsmount</ulink>.
+                  It is a more fully featured approach to accessing NTFS
+                  partitions from Linux, though it tends to have slower
+                  performance than the kernel module. Resizing of files always
+                  works with ntfsmount, and if performance is not a concern
+                  for accessing the NTFS partition, then it would probably be
+                  a safer approach. Documentation is provided on the <ulink
+                  url="http://wiki.linux-ntfs.org/doku.php?id=ntfsmount">ntfsmount
+                  page</ulink> for using it to access NTFS partitions from
+                  Linux.</para>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.boot.loader.config.nt"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.reboot"></indexterm>
+               </section>
             </section>
 
             <section id="section.viewer.process">
                <title>Process Viewer</title>
 
-               <para></para>
+               <indexterm class="startofrange"
+                          id="index.section.viewer.process">
+                  <primary>viewers</primary>
+
+                  <secondary>process</secondary>
+               </indexterm>
+
+               <para>The Process Viewer provides a view of all the processes
+               currently running on the cluster as well as a means to
+               terminate individual processes. In conjunction with the
+               Resource Viewer<indexterm>
+                     <primary>viewers</primary>
+
+                     <secondary>resource</secondary>
+                  </indexterm>, users can identify errant processes can kill
+               them. Since the Process Management Service<indexterm>
+                     <primary>services</primary>
+
+                     <secondary>process management</secondary>
+                  </indexterm> runs on the server side with administrative
+               privileges, it is possible to kill any process.</para>
+
+               <caution>
+                  <para>It is important to be careful when killing processes
+                  using the Process Viewer. Users are effectively given
+                  administrator privileges to end any process that they
+                  choose. These being the early stages of Maestro's existence,
+                  this aspect may change so that users only have access to
+                  kill processes that they own.</para>
+               </caution>
+
+               <para>When first loaded, the Process Viewer displays nothing.
+               To populate the process list, click the
+               <guibutton>Refresh</guibutton> button. Queries will be sent to
+               each of the cluster nodes requesting the instantaneous state of
+               the running processes. To update the list, click the
+               <guibutton>Refresh</guibutton> button again. To kill a process,
+               right-click on it and select <menuchoice>
+                     <shortcut>
+                        <keycap>Ctrl+T</keycap>
+                     </shortcut>
+
+                     <guimenuitem>Terminate</guimenuitem>
+                  </menuchoice> from the context menu.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.viewer.process"></indexterm>
             </section>
 
             <section id="section.viewer.resource">
                <title>Resource Viewer</title>
 
-               <para></para>
+               <indexterm class="startofrange"
+                          id="index.section.viewer.resource">
+                  <primary>viewers</primary>
+
+                  <secondary>resource</secondary>
+               </indexterm>
+
+               <para>The Resource Viewer shows the current state of resource
+               consumption on each of the nodes in the cluster using graphs.
+               Currently, the resources tracked are CPU and memory usage, and
+               the graphs show this usage as a percentage of the total
+               available. When the Resource Viewer is first loaded, it shows
+               all the nodes of the cluster in a static state. Clicking the
+               <guibutton>Refresh</guibutton> button will get an instantaneous
+               snapshot of the resource usage. To get continuous updates,
+               right-click on a node and select the desired update rate from
+               the context menu. To stop the updates, choose the
+               <guimenuitem>Off</guimenuitem> item from the context
+               menu.</para>
+
+               <note>
+                  <para>Right-clicking on the white background of the Resource
+                  Viewer also brings up the context menu, but choosing an
+                  update rate from the context menu has no effect in this
+                  case. This is a known bug.</para>
+               </note>
+
+               <indexterm class="endofrange"
+                          startref="index.section.viewer.resource"></indexterm>
             </section>
 
             <section id="section.viewer.desktop">
                <title>Desktop Viewer</title>
 
-               <para></para>
+               <indexterm class="startofrange"
+                          id="index.section.viewer.desktop">
+                  <primary>viewers</primary>
+
+                  <secondary>desktop</secondary>
+               </indexterm>
+
+               <para>The Desktop Viewer is where users can control the state
+               of screen savers and display power management on the nodes of
+               the cluster. At the top of the view, there is a pull-down menu
+               listing all the nodes of the cluster as well as an item labeled
+               <guilabel>All</guilabel> indicating all cluster nodes. By
+               selecting an individual node from this menu, the screen saver
+               usage can be enabled or disabled (disabling the screen saver
+               implies that display power management should be disabled). A
+               running screen saver can be terminated by clicking the
+               <guibutton>Stop Screen Saver</guibutton> button. This button
+               also has the effect of unblanking a display and waking up a
+               sleeping display if power management is still active. After
+               clicking this button, the screen saver and power management are
+               both disabled.</para>
+
+               <important>
+                  <para>Unlocking a locked display on <productname
+                  class="registered">Microsoft Windows</productname> is not
+                  currently supported. Thus far, no workaround has been found
+                  for this limitation, so it is important to avoid enabling
+                  password protection for the screen saver of the user logged
+                  on to the individual cluster nodes running <productname
+                  class="registered">Microsoft Windows</productname>. This
+                  limitation does not exist on Linux as long as XScreenSaver
+                  is being used by the logged on user (if a user is logged on
+                  at all).</para>
+               </important>
+
+               <para>An in-development capability of the Desktop Viewer is the
+               ability to change the desktop background image (also known as
+               desktop wallpaper) of nodes of the cluster. This can be useful
+               in cases where it is necessary to distinguish between nodes on
+               the display surface while no application is running or when it
+               is necessary to get all nodes to use the same wallpaper. To
+               change the wallpaper of a given node, select it from the
+               pull-down menu. Then, click the <guibutton>...</guibutton>
+               button to the right of the image file name field to open a file
+               dialog box to choose an image file to use as the replacement
+               wallpaper. The node will be told about the new image, and if
+               the same path does not exist on that node, the image file will
+               be transmitted to it and used as the new wallpaper
+               image.</para>
+
+               <important>
+                  <para>This feature is still undergoing development and has
+                  known bugs and limitations. In particular, to change the
+                  wallpaper of nodes running <productname
+                  class="registered">Microsoft Windows</productname>, a BMP
+                  image must be used. Furthermore, it is not yet possible to
+                  use something such as a solid color for the wallpaper. An
+                  image has to be used.</para>
+               </important>
+
+               <indexterm class="endofrange"
+                          startref="index.section.viewer.desktop"></indexterm>
             </section>
 
             <section id="section.viewer.settings">
-               <title>Settings Viewer</title>
+               <title>Settings Viewer/Ensemble Editor</title>
 
-               <para></para>
+               <indexterm class="startofrange"
+                          id="index.section.viewer.settings">
+                  <primary>viewers</primary>
+
+                  <secondary>settings</secondary>
+               </indexterm>
+
+               <para>The Settings Viewer allows the user to browse information
+               about each of the nodes in the current cluster configuration.
+               It displays the computer host name, its IP address, the up
+               time, and low-level details about the running operating system.
+               To see the information for a node, simply click on its name in
+               the left panel containing the list of cluster nodes. This
+               viewer serves another purpose as the ensemble editor<indexterm>
+                     <primary>ensemble</primary>
+
+                     <secondary>editing</secondary>
+                  </indexterm>. We will explain more about editing the
+               ensemble in <xref linkend="section.files.ensemble" />.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.viewer.settings"></indexterm>
             </section>
          </section>
 
          <section>
             <title>Configuring the Maestro GUI</title>
 
-            <para></para>
+            <para>Presently, the Maestro GUI has only three user preferences:
+            the user skill level, the directory where the log files get stored
+            during execution, and whether to delete these log files when the
+            GUI exits. The GUI does not yet provide a graphical means to edit
+            these preferences, so users must edit the file
+            <filename>$HOME/.maestro/maestro.xml</filename>
+            (<filename>%APPDATA%\Maestro\maestro.xml</filename> or
+            <filename>%USERPROFILE%\Application
+            Data\Maestro\maestro.xml</filename> on <productname
+            class="registered">Microsoft Windows</productname>) by hand. An
+            example version of this file is shown in <xref
+            linkend="example.maestro.gui.config" />.</para>
+
+            <example id="example.maestro.gui.config">
+               <title>Sample <filename>maestro.xml</filename></title>
+
+               <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestro&gt;
+   &lt;logdir&gt;/var/tmp&lt;/logdir&gt;
+   &lt;clean_logfiles&gt;true&lt;/clean_logfiles&gt;
+&lt;/maestro&gt;</programlisting>
+            </example>
+
+            <para>This example demonstrates a key aspect of the Maestro GUI
+            configuration. Namely, the lack of a setting (in this case, the
+            user skill level) is not a problem. Reasonable defaults exist for
+            the current settings, and there is not usually a need to override
+            the defaults by adding to this file. The defaults for the settings
+            are as follows:</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>logdir</literal>: The platform-specific home
+                  directory of the user running the Maestro GUI</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>clean_logfiles</literal>:
+                  <literal>true</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>user_mode</literal>: <literal>100</literal>
+                  (meaning novice)</para>
+               </listitem>
+            </itemizedlist>
          </section>
       </section>
    </chapter>
@@ -727,7 +1434,80 @@ Certificate information:
          <section id="section.plugins.boot.loader">
             <title>Boot Loader Plug-ins</title>
 
-            <para></para>
+            <para>The Reboot Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>reboot</secondary>
+               </indexterm> uses plug-ins to capture the details of how to
+            control the default operating system selected by the boot
+            loader<indexterm>
+                  <primary>boot loader</primary>
+               </indexterm> when the computer starts up. The idea is that the
+            nodes of a cluster need not require direct intervention from a
+            user in order to change the operating system. Instead, the boot
+            loader can be reconfigured via the Reboot Service to change the OS
+            booted by default. The assumption is, of course, that the boot
+            loader is capable of being reconfigured by external software. If
+            this were not the case, then the Reboot Service would only be able
+            to reboot the computer and could not change the default OS.</para>
+
+            <para>The job of the plug-ins used by the Reboot Service involves
+            three tasks:</para>
+
+            <orderedlist>
+               <listitem>
+                  <para>Determine all the allowed boot targets<footnote>
+                        <para>In the context of a boot loader, we use the
+                        terms <quote>boot target</quote> and <quote>operating
+                        system</quote> interchangeably.</para>
+                     </footnote> (i.e., the operating system types and
+                  installed versions)</para>
+               </listitem>
+
+               <listitem>
+                  <para>Determine the default boot target (i.e., the default
+                  operating system started by the boot loader)</para>
+               </listitem>
+
+               <listitem>
+                  <para>Change the default boot target</para>
+               </listitem>
+            </orderedlist>
+
+            <para>This is done by implementing the interface
+            <interface>maestro.core.IBootPlugin</interface><indexterm>
+                  <primary>plug-ins</primary>
+
+                  <secondary>interfaces</secondary>
+
+                  <tertiary>maestro.core.IBootPlugin</tertiary>
+               </indexterm>, as defined in
+            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+            The current list of supported boot loader plug-ins is as follows
+            (each identified by its name used in the
+            <command>maestrod</command> configuration):</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>ntldr</literal>: The boot loader used by
+                  Windows NT 4.0 through Windows XP (known as the NT
+                  Loader<indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>NT Loader</secondary>
+                     </indexterm>)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>grub</literal>: The <ulink
+                  url="http://www.gnu.org/software/grub/">Grand Unified
+                  Bootloader</ulink><indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>GRUB</secondary>
+                     </indexterm> (GRUB) version 0.9x</para>
+               </listitem>
+            </itemizedlist>
          </section>
 
          <section>
@@ -738,14 +1518,14 @@ Certificate information:
 
                   <secondary>desktop</secondary>
                </indexterm> relies on plug-ins to handle controlling the
-            screen saver and power management on the local compuer. Since
+            screen saver and power management on the local computer. Since
             these are usually two separate features of the operating system or
             desktop interface, multiple screen saver plug-ins can be used
             together. The job of the plug-in is to enable and disable the
             screen saver and to handle killing a running screen saver. This is
             done by implementing the interface
             <interface>maestro.core.ISaverPlugin</interface><indexterm>
-                  <primary>plugins</primary>
+                  <primary>plug-ins</primary>
 
                   <secondary>interfaces</secondary>
 
@@ -796,7 +1576,7 @@ Certificate information:
             the wallpaper to a new image. This is done by implementing the
             interface
             <interface>maestro.core.IDesktopWallpaperPlugin</interface><indexterm>
-                  <primary>plugins</primary>
+                  <primary>plug-ins</primary>
 
                   <secondary>interfaces</secondary>
 
