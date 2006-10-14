@@ -1,0 +1,4 @@
+#!/bin/sh
+
+maestro_dir="@MAESTRO_DIR@"
+python "$maestro_dir/maestrod.py" $*
