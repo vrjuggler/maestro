@@ -17,8 +17,8 @@ XSLT_TOOL=	Saxon
 webroot=	$(HOME)/public_html
 instdir=	userguide
 
-prefix=		$(webroot)/$(instdir)
-INSTALL_DIRS=	images
+override prefix=$(webroot)/$(instdir)
+#INSTALL_DIRS=	images
 #INSTALL_FILES=	$(webroot)/base_style.css
 
 #NEED_DB_IMAGES=	1
