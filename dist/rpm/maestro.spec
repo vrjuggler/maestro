@@ -8,13 +8,14 @@
 %define release 1
 
 # Change to 0 to disable building documentation.
-%define build_doc 1
+%define build_doc 0
 
 Name: %{name}
 Summary: Maestro cluster management software
 Version: %{version}
 Release: %{release}
 Source: %{name}-%{version}.tar.bz2
+Source1: certificate.cfg
 URL: http://realityforge.vrsource.org/trac/maestro/
 Group: Applications/System
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -57,6 +58,7 @@ Group: Applications/System
 BuildArch: noarch
 Requires: maestro-base = %{version}
 Requires: python-pam >= 0.4.2
+Requires: openssl
 
 %description server
 Maestro server daemon.
@@ -94,6 +96,20 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %clean
 [ -z %{buildroot} ] || rm -rf %{buildroot}
 
+%post server
+maestro_dir=%{_prefix}/lib/maestro-%{version}
+openssl genrsa 1024 > $maestro_dir/host.key
+chmod 400 $maestro_dir/host.key
+cat %{SOURCE1} | sed -e "s/@COMMON_NAME@/`hostname`/" > $maestro_dir/cert.config
+openssl req -new -x509 -nodes -sha1 -days 730 -config $maestro_dir/cert.config -key $maestro_dir/host.key > $maestro_dir/host.cert
+rm -f $maestro_dir/cert.config
+cat $maestro_dir/host.cert $maestro_dir/host.key > $maestro_dir/server.pem && rm -f $maestro_dir/host.cert $maestro_dir/host.key
+chmod 400 $maestro_dir/server.pem
+
+%postun server
+maestro_dir=%{_prefix}/lib/maestro-%{version}
+rm -f $maestro_dir/server.pem
+
 %files
 
 %files base
@@ -112,6 +128,7 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %files server
 %defattr(-, root, root)
 /etc/init.d/maestrod
+/etc/maestrod.xcfg
 %{_sbindir}/maestrod
 %{_prefix}/lib/maestro-%{version}/maestrod.py*
 %{_prefix}/lib/maestro-%{version}/maestro/daemon
