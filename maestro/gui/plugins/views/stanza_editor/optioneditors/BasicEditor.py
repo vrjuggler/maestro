@@ -58,8 +58,12 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       self.mAttribTable.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mAttribTable.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
       text = self.mOption.mElement.text
+
       if text is not None:
+         text = text.strip()
          self.mValueEdit.setText(text)
+      else:
+         self.mValueEdit.setText('')
 
       if self.mOption.mElement.tag in ['application', 'choice', 'group']:
          self.mValueEdit.setParent(None)
@@ -72,7 +76,12 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
 
    def onValueChanged(self):
       if self.mOption is not None:
-         self.mOption.mElement.text = str(self.mValueEdit.text())
+         edit_text = str(self.mValueEdit.text())
+         edit_text = edit_text.strip()
+         if edit_text == '':
+            self.mOption.mElement.text = None
+         else:
+            self.mOption.mElement.text = edit_text
 
 class AttribModel(QtCore.QAbstractTableModel):
    def __init__(self, item, parent=None):

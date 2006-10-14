@@ -28,6 +28,39 @@ import maestro.core
 
 import elementtree.ElementTree as ET
 
+def buildItem(tagOrElm):
+   item = None
+   tag2Class = {'application':AppItem,
+                'group':GroupItem,
+                'choice':ChoiceItem,
+                'arg':ArgItem,
+                'env_var':EnvVarItem,
+                'command':CommandItem,
+                'cwd':CwdItem,
+                'ref':RefItem,
+                'add':AddItem,
+                'remove':RemoveItem,
+                'overrode':OverrideItem}
+   print type(tagOrElm)
+   if types.StringType == type(tagOrElm):
+      tag = tagOrElm
+      elm = None
+   else:
+      tag = tagOrElm.tag
+      elm = tagOrElm
+
+   if not tag2Class.has_key(tag):
+      print "Not building a node for: [%s]" % (tag)
+      return None
+
+   cls = tag2Class[tag]
+
+   if elm is None:
+      elm=ET.Element(tag, cls.getDefaultAttribs())
+
+   item = cls(elm)
+   return item
+
 def intersect(line, rect):
    top_line = QtCore.QLineF(rect.topLeft(), rect.topRight())
    bottom_line = QtCore.QLineF(rect.bottomLeft(), rect.bottomRight())
@@ -248,8 +281,8 @@ class Edge(QtGui.QGraphicsItem):
       self.mHotRect.moveCenter(sp)
       return self.mHotRect.contains(self.destPoint)
 
-AllAttribName = ['Name', 'Label']
-AllAttrib = ['name', 'label']
+AllAttribName = ['Name', 'Label', 'Class']
+AllAttrib = ['name', 'label', 'class']
 HSAttribName = ['Hidden', 'Selected']
 HSAttrib = ['hidden', 'selected']
 HESAttribName = ['Hidden', 'Editable', 'Selected']
@@ -289,6 +322,13 @@ class Node(QtGui.QGraphicsItem):
       self.inEdgeList = []
       self.outEdgeList = []
 
+   def getDefaultAttribs():
+      return {'name':'Unknown',
+              'label':'Unknown',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
    
    def acceptNewParent(self, newParent):
       """ Returns true if the given parent is valid for ourself and
@@ -632,6 +672,15 @@ class AppItem(Node):
       self.mAttribNameList = AllAttribName
       self.mAttribList = AllAttrib
 
+   def getDefaultAttribs():
+      return {'name':'NewApplication',
+              'label':'New Application',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'false'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class ChoiceItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -639,6 +688,15 @@ class ChoiceItem(Node):
       self.mColor = QtGui.QColor(76, 122, 255, 191)
       self.mAttribNameList = AllAttribName + HSAttribName
       self.mAttribList = AllAttrib + HSAttrib
+
+   def getDefaultAttribs():
+      return {'name':'NewChoice',
+              'label':'New Choice',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class GroupItem(Node):
    def __init__(self, elm=None, graphWidget=None):
@@ -649,6 +707,15 @@ class GroupItem(Node):
       self.mAttribNameList = AllAttribName + HSAttribName
       self.mAttribList = AllAttrib + HSAttrib
 
+   def getDefaultAttribs():
+      return {'name':'NewGroup',
+              'label':'New Group',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class RefItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -658,6 +725,11 @@ class RefItem(Node):
       self.mAttribNameList = ['ID']
       self.mAttribList = ['id']
 
+   def getDefaultAttribs():
+      return {'name':'NewReference',
+              'id':'*'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class ArgItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -666,6 +738,16 @@ class ArgItem(Node):
       self.mAttribNameList = AllAttribName + ['Flag'] + HESAttribName
       self.mAttribList = AllAttrib + ['flag'] + HESAttrib
 
+   def getDefaultAttribs():
+      return {'name':'NewArgument',
+              'label':'New Argument',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true',
+              'flag':''}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class EnvVarItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -673,6 +755,16 @@ class EnvVarItem(Node):
       self.mColor = QtGui.QColor(255, 253, 117, 191)
       self.mAttribNameList = AllAttribName + ['Key'] + HESAttribName
       self.mAttribList = AllAttrib + ['key'] + HESAttrib
+
+   def getDefaultAttribs():
+      return {'name':'NewEnvVar',
+              'label':'New EnvVar',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true',
+              'key':'NEW_ENV_VAR'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class CommandItem(Node):
    def __init__(self, elm=None, graphWidget=None):
@@ -683,6 +775,15 @@ class CommandItem(Node):
       self.mAttribNameList = AllAttribName + HESAttribName
       self.mAttribList = AllAttrib + HESAttrib
 
+   def getDefaultAttribs():
+      return {'name':'NewCommand',
+              'label':'New Command',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class CwdItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -691,6 +792,15 @@ class CwdItem(Node):
       self.mColor = QtGui.QColor(255, 76, 190, 191)
       self.mAttribNameList = AllAttribName + HESAttribName
       self.mAttribList = AllAttrib + HESAttrib
+
+   def getDefaultAttribs():
+      return {'name':'NewCwd',
+              'label':'New Cwd',
+              'class':'',
+              'hidden':'false',
+              'selected':'true',
+              'editable':'true'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class OverrideItem(Node):
    def __init__(self, elm=None, graphWidget=None):
@@ -710,6 +820,12 @@ class OverrideItem(Node):
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
+   def getDefaultAttribs():
+      return {'name':'NewOverride',
+              'id':'*',
+              'flag':'--newflag'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class AddItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -727,6 +843,11 @@ class AddItem(Node):
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
+   def getDefaultAttribs():
+      return {'name':'NewAdd',
+              'label':'New Add'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class RemoveItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
@@ -743,4 +864,9 @@ class RemoveItem(Node):
       if newParent is None or newParent.mElement is None:
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
+
+   def getDefaultAttribs():
+      return {'name':'NewRemove',
+              'id':'*'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
 

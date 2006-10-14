@@ -32,6 +32,7 @@ import maestro.core
 import maestro.core.Stanza
 import maestro.gui.MaestroResource
 
+import stanzaitems
 from stanzaitems import *
 import layout
 import elementtree.ElementTree as ET
@@ -181,7 +182,7 @@ class StanzaScene(QtGui.QGraphicsScene):
       self.mApplication = applicationElt
 
       # Build all first level nodes.
-      self.mApplicationItem = self._buildNode(self.mApplication)
+      self.mApplicationItem = self.__buildItemTree(self.mApplication)
       self.mClassFilterList = []
       
    def setClassFilter(self, classFilterString):
@@ -221,32 +222,8 @@ class StanzaScene(QtGui.QGraphicsScene):
       # Is this needed.
       item.update()      
    
-   def _buildNode(self, elm, parent=None):
-      item = None
-      if elm.tag == 'application':
-         item = AppItem(elm)
-      elif elm.tag == 'group':
-         item = GroupItem(elm)
-      elif elm.tag == 'choice':
-         item = ChoiceItem(elm)
-      elif elm.tag == 'arg':
-         item = ArgItem(elm)
-      elif elm.tag == 'env_var':
-         item = EnvVarItem(elm)
-      elif elm.tag == 'command':
-         item = CommandItem(elm)
-      elif elm.tag == 'cwd':
-         item = CwdItem(elm)
-      elif elm.tag == 'ref':
-         item = RefItem(elm)
-      elif elm.tag == 'add':
-         item = AddItem(elm)
-      elif elm.tag == 'remove':
-         item = RemoveItem(elm)
-      elif elm.tag == 'override':
-         item = OverrideItem(elm)
-      else:
-         print "Not building a node for: [%s]" % (elm.tag)
+   def __buildItemTree(self, elm, parent=None):
+      item = stanzaitems.buildItem(elm)
 
       if item is not None:
          self.addItem(item)
@@ -257,7 +234,7 @@ class StanzaScene(QtGui.QGraphicsScene):
          #   self.addItem(edge)
 
          for child in elm[:]:
-            child_item = self._buildNode(child, item)
+            child_item = self.__buildItemTree(child, item)
             # Add if we want a parent/child coordinate systems.
             if child_item is not None:
                child_item.setParent(item)
@@ -401,44 +378,13 @@ class StanzaScene(QtGui.QGraphicsScene):
          item_type = QtCore.QString()
          dataStream >> item_type
 
-         print "Type added: ", item_type
          item = None
          # Create the correct Element. We are not using SubElement because
          # we do not want to give the element a parent right now. This means
          # that it will disappear if we move from application to application.
-         if item_type == "Choice":
-            new_elm = self.mApplication.makeelement('choice', {})
-            item = ChoiceItem(new_elm)
-         elif item_type == "Group":
-            new_elm = self.mApplication.makeelement('group', {})
-            item = GroupItem(new_elm)
-         elif item_type == "Arg":
-            new_elm = self.mApplication.makeelement('arg', {})
-            item = ArgItem(new_elm)
-         elif item_type == "EnvVar":
-            new_elm = self.mApplication.makeelement('env_var', {})
-            item = EnvVarItem(new_elm)
-         elif item_type == "EnvVar":
-            new_elm = self.mApplication.makeelement('env_var', {})
-            item = EnvVarItem(new_elm)
-         elif item_type == 'Command':
-            new_elm = self.mApplication.makeelement('command', {})
-            item = CommandItem(new_elm)
-         elif item_type == 'Cwd':
-            new_elm = self.mApplication.makeelement('cwd', {})
-            item = CwdItem(new_elm)
-         elif item_type == 'Ref':
-            new_elm = self.mApplication.makeelement('ref', {})
-            item = RefItem(new_elm)
-         elif item_type == 'Override':
-            new_elm = self.mApplication.makeelement('override', {})
-            item = OverrideItem(new_elm)
-         elif item_type == 'AddItem':
-            new_elm = self.mApplication.makeelement('add', {})
-            item = AddItem(new_elm)
-         elif item_type == 'RemoveItem':
-            new_elm = self.mApplication.makeelement('remove', {})
-            item = RemoveItem(new_elm)
+         item_type = str(item_type)
+         item = stanzaitems.buildItem(item_type)
+         self.mApplication.append(item.mElement)
 
          if item is not None:
             self.addItem(item)
@@ -748,15 +694,18 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.connect(self.mClassFilterCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onClassFilterChanged)
 
       # Generate icons.
-      klasses = [ChoiceItem, GroupItem, ArgItem, EnvVarItem, CommandItem, CwdItem, RefItem, OverrideItem, AddItem, RemoveItem]
-      btn_labels = ['Choice', 'Group', 'Argument', 'Env Variable', 'Command', 'Cwd', 'Reference', 'Override', 'Add Options', 'Remove Option']
-      types = ['Choice', 'Group', 'Arg', 'EnvVar', 'Command', 'Cwd', 'Ref', 'Override', 'AddItem', 'RemoveItem']
+      klasses = [ChoiceItem, GroupItem, ArgItem, EnvVarItem, CommandItem,
+                 CwdItem, RefItem, OverrideItem, AddItem, RemoveItem]
+      btn_labels = ['Choice', 'Group', 'Argument', 'Env Variable', 'Command',
+                    'Cwd', 'Reference', 'Override', 'Add Options', 'Remove Option']
+      tags = ['choice', 'group', 'arg', 'env_var', 'command', 'cwd', 'ref',
+              'override', 'add', 'remove']
       self.mItemBtnCBs = []
       self.mItemToolButtons = []
 
       icon_size = QtCore.QSize(20, 20)
 
-      for (k, l, t) in zip(klasses, btn_labels, types):
+      for (k, l, t) in zip(klasses, btn_labels, tags):
          btn = QtGui.QPushButton(self.mToolboxFrame)
          self.mItemToolButtons.append(btn)
          layout = self.mToolboxFrame.layout()
@@ -962,7 +911,6 @@ if __name__ == "__main__":
    env.mPluginManager.scan(pj(maestro.core.const.PLUGIN_DIR), dumpProgressCb)
 
    widget = StanzaEditor()
-   widget.init()
    widget.updateGui()
    widget.show()
    sys.exit(app.exec_())
