@@ -115,7 +115,7 @@ Section -Post
   WriteRegStr HKCR "$1\shell" "" "MaestroEnsemble"
 
   # XXX: This path to python.exe should not be hard coded!
-  ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" --interactive install' $0
+  ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" --interactive --startup auto install' $0
   DetailPrint "Installing the Maestro service returned $0"
   # XXX: This path to python.exe should not be hard coded!
   Exec 'C:\Python24\python.exe "$INSTDIR\maestrod.py" start'
