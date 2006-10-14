@@ -107,7 +107,7 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_bindir}/maestro
 %{_prefix}/lib/maestro-%{version}/Maestro.py*
 %{_prefix}/lib/maestro-%{version}/maestro/gui
-%{_datadir}/maestro-%{version}
+%{_prefix}/lib/maestro-%{version}/stanzas
 
 %files server
 %defattr(-, root, root)

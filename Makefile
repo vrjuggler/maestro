@@ -33,7 +33,6 @@ install:
 	@mkdir -p $(bindir)
 	@mkdir -p $(sbindir)
 	@mkdir -p $(appdir)
-	@mkdir -p $(datadir)
 	tar --exclude .svn -cvf - maestro | tar -C $(appdir) -xpf -
 	install -m 0755 maestrod.py $(appdir)
 	install -m 0755 Maestro.py $(appdir)
@@ -43,7 +42,7 @@ install:
 	chmod 0755 $(sbindir)/maestrod
 	cat script/maestro | sed -e 's|@MAESTRO_DIR@|$(appdir)|' > $(bindir)/maestro
 	chmod 0755 $(bindir)/maestro
-	tar --exclude .svn -cvf - stanzas | tar -C $(datadir) -xpf -
+	tar --exclude .svn -cvf - stanzas | tar -C $(appdir) -xpf -
 ifeq ($(OS), Linux)
 	@mkdir -p $(svcdir)
 	install -m 0755 dist/maestrod $(svcdir)
