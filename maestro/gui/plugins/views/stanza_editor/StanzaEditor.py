@@ -124,6 +124,16 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       # Add a QDockWidget to the main window that contains the options editor.
       mainWindow.addDockWidget(QtCore.Qt.BottomDockWidgetArea,
                                self.mOptionEditorDockWidget)
+      self.mOptionEditorDockWidget.show()
+
+      # If the log window is already at the bottom, force them both into
+      # a tab widget and place our option editor on top.
+      if hasattr(mainWindow, 'mLogWindow') and mainWindow.mLogWindow is not None:
+         if QtCore.Qt.BottomDockWidgetArea == \
+            mainWindow.dockWidgetArea(mainWindow.mLogWindow):
+            mainWindow.tabifyDockWidget(mainWindow.mLogWindow,
+               self.mOptionEditorDockWidget)
+
 
       # Build a menu that contains all stanza editors actions.
       if self.mMenu is None:
