@@ -233,7 +233,6 @@ class OutputFileLogger(NodeLogger):
 
    def addLogger(self, nodeId):
       file_name = os.path.join(self.getLogDir(), '%s.log' % nodeId)
-      print "============== Adding Node Logger: %s =================" % (nodeId)
 
       try:
          handler = logging.FileHandler(file_name, 'w')

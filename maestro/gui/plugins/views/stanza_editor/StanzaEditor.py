@@ -129,10 +129,14 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       # If the log window is already at the bottom, force them both into
       # a tab widget and place our option editor on top.
       if hasattr(mainWindow, 'mLogWindow') and mainWindow.mLogWindow is not None:
-         if QtCore.Qt.BottomDockWidgetArea == \
-            mainWindow.dockWidgetArea(mainWindow.mLogWindow):
-            mainWindow.tabifyDockWidget(mainWindow.mLogWindow,
-               self.mOptionEditorDockWidget)
+         if QtCore.Qt.BottomDockWidgetArea ==                           \
+            mainWindow.dockWidgetArea(mainWindow.mLogWindow) and        \
+            QtCore.Qt.BottomDockWidgetArea ==                           \
+            mainWindow.dockWidgetArea(self.mOptionEditorDockWidget) and \
+            not self.mOptionEditorDockWidget.isFloating() and           \
+            not mainWindow.mLogWindow.isFloating():
+            mainWindow.tabifyDockWidget(self.mOptionEditorDockWidget,
+               mainWindow.mLogWindow)
 
 
       # Build a menu that contains all stanza editors actions.
