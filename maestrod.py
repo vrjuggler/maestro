@@ -81,6 +81,9 @@ class MaestroServer:
 
       settings_file = os.path.join(const.EXEC_DIR, 'maestrod.xcfg')
 
+      if not os.path.exists(settings_file):
+         settings_file = '/etc/maestrod.xcfg'
+
       try:
          server_settings.load(settings_file)
       except IOError, ex:
