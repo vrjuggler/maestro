@@ -10,7 +10,7 @@
 
 RETVAL=0
 
-prog="/usr/sbin/maestrod"
+prog="maestrod"
 
 start() {
     echo -n $"Starting $prog: "
