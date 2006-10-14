@@ -366,10 +366,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def onOpenEnsemble(self):
       new_file = \
-         QtGui.QFileDialog.getOpenFileName(
-            self, "Choose a Ensemble file",
-            "Ensemble (*.ensem)"
-         )
+         QtGui.QFileDialog.getOpenFileName(self, "Choose an Ensemble file",
+                                           "", "Ensemble (*.ensem)")
       new_file = str(new_file)
       print "New file: ", new_file
       if os.path.exists(new_file):
