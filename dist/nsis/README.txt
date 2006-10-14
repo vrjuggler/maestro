@@ -15,21 +15,16 @@ one process that can be followed:
          PyQt4
          elementtree
          OpenSSL
-         pythonwin
-         pywin32_system32
          twisted
-         win32
-         win32com
-         win32comext
          zope
-         pywin32-210-py2.6.egg-info
-         PyWin32.chm
-         pywin32.pth
          sip.pyd
          sipconfig.py
          sipdistutils.py
 
-      Note that the above use of pywin32 references version 210.
+      NOTE: pywin32 must already be installed on the machine. It seems to
+      install files to places other than C:\Python24\lib\site-packages,
+      and pulling everything together manually in a form that works could
+      be quite tricky.
    7. Render the HTML and PDF versions of the documentation and put it all
       in maestro\doc. Refer to maestro\doc\README.txt for more information
       on how to render the documentation (which probably has to be done on
