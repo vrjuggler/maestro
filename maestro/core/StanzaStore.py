@@ -1,4 +1,4 @@
-import os, sys, copy
+import os, sys, copy, types
 pj = os.path.join
 import re
 
@@ -30,9 +30,17 @@ class StanzaStore:
       for path, dirs, files in os.walk(stanza_path):
          stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
 
+      # Load all files that we found.
+      self.loadFiles(stanza_files, progressCB=progressCB)
+
+   def loadFiles(self, stanzaFiles, progressCB):
+      # If files is really a single file, turn it into a list.
+      if types.StringType == type(stanzaFiles):
+         stanzaFiles = [stanzaFiles,]
+
       self.mStanzas = []
-      num_files = len(stanza_files)
-      for (i, f) in zip(xrange(num_files), stanza_files):
+      num_files = len(stanzaFiles)
+      for (i, f) in zip(xrange(num_files), stanzaFiles):
          progressCB(i/num_files, "Loading file: %s"%f)
          stanza_elm = ET.ElementTree(file=f).getroot()
          self.mStanzas.append(stanza_elm)

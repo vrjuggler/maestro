@@ -297,9 +297,22 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
                              self.viewRemoved)
 
+      start_view_index = 0
+      found_matching_view = False
+      if env.mCmdOpts.view:
+         n = 0
+         view_names = [cls.getName() for cls in self.mViewPlugins.values()]
+         if view_names.count(env.mCmdOpts.view) > 0:
+            start_view_index = view_names.index(env.mCmdOpts.view)
+         else:
+            QtGui.QMessageBox.information(None, "View Not Found ",
+               "Could not find view named %s. You can selected from one "\
+               "of the following %s. We will default to the first view %s."\
+               % (env.mCmdOpts.view, view_names, view_names[0]))
+
 
       # Set the default button to display
-      btn = self.mToolboxButtonGroup.buttons()[0]
+      btn = self.mToolboxButtonGroup.buttons()[start_view_index]
       btn.click()
 
       # Set the stack widget's current width to be the one associated with

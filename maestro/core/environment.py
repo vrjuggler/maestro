@@ -35,12 +35,14 @@ class Environment(maestro.util.mixins.Singleton):
          self._init_called = True
          self.mPluginManager = None
          self.settings = None
+         self.mCmdOpts = None
          self.mViewPluginsHolder = None
          self.mStanzaStore = None
 
-   def initialize(self, settings, progressCB=None):
+   def initialize(self, settings, opts=None, progressCB=None):
       """ Initialize the environment. """
       self.settings = settings
+      self.mCmdOpts = opts
 
       # -- Event Manager -- #
       # Create an event dispatcher that will:
@@ -61,7 +63,11 @@ class Environment(maestro.util.mixins.Singleton):
       if maestro.core.const.MAESTRO_GUI:
          # Create a stanza store and scan for files.
          self.mStanzaStore = StanzaStore.StanzaStore()
-         self.mStanzaStore.scan(progressCB)
+         if opts.stanza:
+            files = str(opts.stanza).split(',')
+            self.mStanzaStore.loadFiles(files, progressCB)
+         else:
+            self.mStanzaStore.scan(progressCB)
       
       # -- Initialize the plugin holders -- #
       #self.mViewPluginsHolder = lucid.core.ViewPluginsHolder()

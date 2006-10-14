@@ -157,7 +157,7 @@ def main():
          time.sleep(0.03)
 
       env = maestro.core.Environment()
-      env.initialize(gui_settings, splashProgressCB)
+      env.initialize(gui_settings, opts, splashProgressCB)
 
       splash.finish(None)
 
