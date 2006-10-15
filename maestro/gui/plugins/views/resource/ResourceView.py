@@ -49,7 +49,7 @@ class ResourceViewPlugin(maestro.core.IViewPlugin):
       self.widget = ResourceView()
       
    def getName():
-      return "Reboot View"
+      return "Resource View"
    getName = staticmethod(getName)
    
    def getIcon():
