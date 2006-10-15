@@ -397,6 +397,29 @@ class Node(QtGui.QGraphicsItem):
          self.mElement.append(child.mElement)
       self.assertStructures()
 
+   def insertChild(self, index, child):
+      self.assertStructures()
+      if self.mChildren.count(child) > 0:
+         print "WARNING: Trying to add an existing child."
+         self.removeChild(child)
+
+      assert(index <= len(self.mChildren))
+
+      self.mChildren.insert(index, child)
+
+      # Create an edge.
+      new_edge = Edge(self, child)
+      print "Adding [%s] -> [%s]" % (new_edge.sourceNode(), new_edge.destNode())
+      self.scene().addItem(new_edge)
+
+      # Update the xml data structure.
+      if self.mElement.getchildren().count(child.mElement) > 0:
+         print "WARNING: ElementTree already has element."
+         self.mElement.remove(child.mElement)
+
+      self.mElement.insert(index, child.mElement)
+      self.assertStructures()
+
    def removeChild(self, child):
       self.assertStructures()
       if self.mChildren.count(child) == 0:

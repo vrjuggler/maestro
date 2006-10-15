@@ -78,8 +78,8 @@ class Ui_StanzaEditorBase(object):
       self.mSplitter2.setOrientation(QtCore.Qt.Horizontal)
       self.mSplitter2.setObjectName("mSplitter2")
 
-      self.mEditorArea = QtGui.QWidget(self.mSplitter2)
-      self.mEditorArea.setObjectName("mEditorArea")
+      self.mEditorTabWidget = QtGui.QTabWidget(self.mSplitter2)
+      self.mEditorTabWidget.setObjectName("mEditorTabWidget")
 
       self.mHelpWidget = QtGui.QTextEdit(self.mSplitter2)
       self.mHelpWidget.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)

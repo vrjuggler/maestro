@@ -520,10 +520,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             # For each type that is not already registered, register custom editor.
             for option_type in option_types:
                if self.mOptionEditors.has_key(option_type):
-                  print "WARNING: There is already a custom editor [%s] registered for type [%s]" \
-                     % (self.mOptionEditors[option_type], option_type)
+                  self.mOptionEditors[option_type].append(new_plugin)
                else:
-                  self.mOptionEditors[option_type] = new_plugin
+                  self.mOptionEditors[option_type] = [new_plugin]
          except Exception, ex:
             editor_name = "Unknown"
             if cls is not None and cls.getName() is not None:
@@ -653,16 +652,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
-      # Create a simple layout for our container widget
-      self.mEditorLayout = QtGui.QVBoxLayout(self.mEditorArea)
-      self.mEditorLayout.setMargin(0)
-      self.mEditorLayout.setSpacing(0)
-
-
       self.mNoEditorLbl = QtGui.QLabel("There is not editor for this Item.")
-      self.mOptionEditor = self.mNoEditorLbl
-      self.mEditorLayout.addWidget(self.mOptionEditor)
-      self.mOptionEditor.setParent(self.mEditorArea)
 
       zoom_icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/zoom-extents.png")
       self.mZoomExtentsAction = QtGui.QAction(zoom_icon, self.tr("Zoom Extents"), self)
@@ -763,25 +753,21 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mGraphicsView.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
          self.mGraphicsView.viewport().setCursor(QtGui.QCursor())
 
-#   def __buildOptionEditor(self, item):
-#      assert isinstance(item, Node) and item.mElement is not None
-#
-#      editor_class = None
-#      for name, cls in self.mOptionEditorPlugins.iteritems():
-#         if cls.getOptionType() == item.mElement.tag:
-#            editor_class = cls
-#            editor_name = name
-#            break
-
    def onItemSelected(self, item):
       self.mHelpWidget.clear()
-      old_editor = self.mOptionEditor
 
-      self.mOptionEditor = self.mNoEditorLbl
+      tag = item.mElement.tag
+
+      while self.mEditorTabWidget.count() > 0:
+         self.mEditorTabWidget.removeTab(0)
+
+      #self.mOptionEditor = self.mNoEditorLbl
       if isinstance(item, Node):
-         if self.mOptionEditors.has_key(item.mElement.tag):
-            editor = self.mOptionEditors[item.mElement.tag]
-            self.mOptionEditor = editor.getEditorWidget(item)
+         if self.mOptionEditors.has_key(tag):
+            for editor in self.mOptionEditors[tag]:
+               editor_widget = editor.getEditorWidget(item)
+               editor_name = editor.__class__.getName()
+               self.mEditorTabWidget.addTab(editor_widget, editor_name)
 
          # Load help HTML data.
          file_name = item.mElement.tag + ".html"
@@ -795,17 +781,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             self.mHelpWidget.setHtml(stream.readAll())
             QtGui.QApplication.restoreOverrideCursor()
          file.close()
-
-      # If the editor changed, remove the old editor and add the new one.
-      if self.mOptionEditor != old_editor:
-         if old_editor is not None:
-            self.mEditorLayout.removeWidget(old_editor)
-            old_editor.setParent(None)
-
-         if self.mOptionEditor is not None:
-            self.mEditorLayout.addWidget(self.mOptionEditor)
-            self.mOptionEditor.setParent(self.mEditorArea)
-
 
    def keyPressEvent(self, event):
       key = event.key()

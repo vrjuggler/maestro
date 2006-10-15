@@ -98,7 +98,7 @@
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QWidget" native="1" name="mEditorArea" />
+         <widget class="QTabWidget" native="1" name="mEditorTabWidget" />
          <widget class="QTextEdit" name="mHelpWidget" >
           <property name="textInteractionFlags" >
            <enum>Qt::TextBrowserInteraction</enum>
