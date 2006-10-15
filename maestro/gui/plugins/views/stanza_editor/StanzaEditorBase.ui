@@ -98,8 +98,25 @@
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QTabWidget" native="1" name="mEditorTabWidget" />
+         <widget class="QTabWidget" name="mEditorTabWidget" >
+          <property name="sizePolicy" >
+           <sizepolicy>
+            <hsizetype>7</hsizetype>
+            <vsizetype>7</vsizetype>
+            <horstretch>4</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
          <widget class="QTextEdit" name="mHelpWidget" >
+          <property name="sizePolicy" >
+           <sizepolicy>
+            <hsizetype>7</hsizetype>
+            <vsizetype>7</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="textInteractionFlags" >
            <enum>Qt::TextBrowserInteraction</enum>
           </property>

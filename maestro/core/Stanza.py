@@ -185,8 +185,6 @@ class Label(TreeItem):
 class Application(TreeItem):
    def __init__(self, xmlElt, parent=None, row=0):
       TreeItem.__init__(self, xmlElt, parent, row)
-      print "==== Constructing an application ==="
-      ET.dump(xmlElt)
 
       self.mLabel = xmlElt.get("label", "Unknown")
 

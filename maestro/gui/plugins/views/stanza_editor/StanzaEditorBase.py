@@ -79,9 +79,21 @@ class Ui_StanzaEditorBase(object):
       self.mSplitter2.setObjectName("mSplitter2")
 
       self.mEditorTabWidget = QtGui.QTabWidget(self.mSplitter2)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(7))
+      sizePolicy.setHorizontalStretch(4)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mEditorTabWidget.sizePolicy().hasHeightForWidth())
+      self.mEditorTabWidget.setSizePolicy(sizePolicy)
       self.mEditorTabWidget.setObjectName("mEditorTabWidget")
 
       self.mHelpWidget = QtGui.QTextEdit(self.mSplitter2)
+
+      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(7))
+      sizePolicy.setHorizontalStretch(0)
+      sizePolicy.setVerticalStretch(0)
+      sizePolicy.setHeightForWidth(self.mHelpWidget.sizePolicy().hasHeightForWidth())
+      self.mHelpWidget.setSizePolicy(sizePolicy)
       self.mHelpWidget.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
       self.mHelpWidget.setObjectName("mHelpWidget")
       self.vboxlayout1.addWidget(self.mSplitter2)

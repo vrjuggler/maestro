@@ -54,11 +54,41 @@ class ChildrenEditor(QtGui.QWidget, ChildrenEditorBase.Ui_ChildrenEditorBase):
       self.mChildrenView.setAcceptDrops(True)
       self.mChildrenView.setDropIndicatorShown(True)
 
-
    def setOption(self, option):
       self.mOption = option
+      # If selection model already exists then disconnect signal
+      if self.mChildrenView.selectionModel() is not None:
+         QtCore.QObject.disconnect(self.mChildrenView.selectionModel(),
+            QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onChildSelected)
       self.mChildrenModel = ChildrenModel(self.mOption)
       self.mChildrenView.setModel(self.mChildrenModel)
+      # Connect new selection model
+      QtCore.QObject.connect(self.mChildrenView.selectionModel(),
+         QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onChildSelected)
+
+      self.connect(self.mUpBtn, QtCore.SIGNAL("clicked()"), self.onUpClicked)
+      self.connect(self.mDownBtn, QtCore.SIGNAL("clicked()"), self.onDownClicked)
+
+   def onChildSelected(self, selected, deselected):
+      selected_row = selected.row()
+      self.mUpBtn.setEnabled(0 != selected_row)
+      self.mDownBtn.setEnabled(selected_row < len(self.mOption.mChildren)-1)
+
+   def onUpClicked(self, checked=False):
+      current_index = self.mChildrenView.currentIndex()
+      child_option = self.mChildrenModel.data(current_index, QtCore.Qt.UserRole)
+      self.mOption.removeChild(child_option)
+      self.mOption.insertChild(current_index.row()-1, child_option)
+      self.mChildrenModel.emit(QtCore.SIGNAL("modelReset()"))
+      self.mChildrenView.setCurrentIndex(self.mChildrenModel.index(current_index.row()-1))
+
+   def onDownClicked(self, checked=False):
+      current_index = self.mChildrenView.currentIndex()
+      child_option = self.mChildrenModel.data(current_index, QtCore.Qt.UserRole)
+      self.mOption.removeChild(child_option)
+      self.mOption.insertChild(current_index.row()+1, child_option)
+      self.mChildrenModel.emit(QtCore.SIGNAL("modelReset()"))
+      self.mChildrenView.setCurrentIndex(self.mChildrenModel.index(current_index.row()+1))
 
 class ChildrenModel(QtCore.QAbstractListModel):
    children_mime_type = 'application/maestro-option-children'
