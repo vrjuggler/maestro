@@ -65,7 +65,7 @@ class Environment(maestro.util.mixins.Singleton):
          self.mStanzaStore = StanzaStore.StanzaStore()
          if opts.stanza:
             files = str(opts.stanza).split(',')
-            self.mStanzaStore.loadFiles(files, progressCB)
+            self.mStanzaStore.loadStanzas(files, progressCB)
          else:
             self.mStanzaStore.scan(progressCB)
       

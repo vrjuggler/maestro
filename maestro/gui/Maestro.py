@@ -368,7 +368,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          QtGui.QFileDialog.getOpenFileName(self, "Choose an Ensemble file",
                                            "", "Ensemble (*.ensem)")
       new_file = str(new_file)
-      print "New file: ", new_file
       if os.path.exists(new_file):
          try:
             # Parse XML ensemble file. This provides the initial set of cluster
@@ -396,7 +395,27 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          QtGui.QMessageBox.critical(None, "Error",
             "Failed to save ensemble file %s: %s" % \
             (file_name, ex.strerror))
+
+   def onSaveStanzas(self):
+      env = maestro.core.Environment()
+      env.mStanzaStore.saveAll()
       
+   def onLoadStanza(self):
+      new_file = \
+         QtGui.QFileDialog.getOpenFileName(self, "Choose a Stanza file",
+                                           "", "Stanza (*.stanza)")
+      def printCB(p, t):
+         print "%s [%s]" % (t,p)
+      new_file = str(new_file)
+      if os.path.exists(new_file):
+         try:
+            env = maestro.core.Environment()
+            env.mStanzaStore.loadStanzas(new_file, printCB)
+         except IOError, ex:
+            QtGui.QMessageBox.critical(None, "Error",
+               "Failed to read stanza file %s: %s" % \
+               (new_file, ex.strerror))
+
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
@@ -416,6 +435,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onOpenEnsemble)
       self.connect(self.mSaveEnsembleAction, QtCore.SIGNAL("triggered()"),
                    self.onSaveEnsemble)
+      self.connect(self.mSaveStanzasAction, QtCore.SIGNAL("triggered()"),
+                   self.onSaveStanzas)
+      self.connect(self.mLoadStanzaAction, QtCore.SIGNAL("triggered()"),
+                   self.onLoadStanza)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout1.addWidget(self.mOutputTab)

@@ -5,6 +5,7 @@ import re
 import maestro.core
 import elementtree.ElementTree as ET
 import Stanza
+import xml.dom.minidom
 
 xpath_tokenizer = re.compile(
    "(\.\.|\(\)|[/.*\(\)@=])|((?:\{[^}]+\})?[^/\(\)@=\s]+)|\s+"
@@ -12,7 +13,7 @@ xpath_tokenizer = re.compile(
 
 class StanzaStore:
    def __init__(self):
-      self.mStanzas = []
+      self.mStanzas = {}
 
    def scan(self, progressCB=None):
       def null_progress_cb(p,s):
@@ -20,7 +21,10 @@ class StanzaStore:
       
       if not progressCB:
          progressCB = null_progress_cb
-         
+
+      # Clear all old stanza files.
+      self.mStanzas = {}
+
       stanza_path = pj(maestro.core.const.STANZA_PATH)
       progressCB(0.0, "Scanning for stanzas [%s]" % (stanza_path))
       assert os.path.exists(stanza_path)
@@ -31,26 +35,40 @@ class StanzaStore:
          stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
 
       # Load all files that we found.
-      self.loadFiles(stanza_files, progressCB=progressCB)
+      self.loadStanzas(stanza_files, progressCB=progressCB)
 
-   def loadFiles(self, stanzaFiles, progressCB):
+   def loadStanzas(self, stanzaFiles, progressCB):
       # If files is really a single file, turn it into a list.
       if types.StringType == type(stanzaFiles):
          stanzaFiles = [stanzaFiles,]
 
-      self.mStanzas = []
       num_files = len(stanzaFiles)
       for (i, f) in zip(xrange(num_files), stanzaFiles):
          progressCB(i/num_files, "Loading file: %s"%f)
          stanza_elm = ET.ElementTree(file=f).getroot()
-         self.mStanzas.append(stanza_elm)
+         self.mStanzas[f] = stanza_elm
+
+   def saveAll(self):
+      for file_name, stanza in self.mStanzas.iteritems():
+         try:
+            stanza_str = ET.tostring(stanza)
+            lines = [l.strip() for l in stanza_str.splitlines()]
+            stanza_str = ''.join(lines)
+            dom = xml.dom.minidom.parseString(stanza_str)
+            output_file = file(file_name, 'w')
+            output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+            output_file.close()
+         except IOError, ex:
+            QtGui.QMessageBox.critical(None, "Error",
+               "Failed to save stanza file %s: %s" % \
+               (file_name, ex.strerror))
 
    def findApplications(self):
       """ Returns all unexpanded application elements. """
       app_elms = []
 
       # Look in all stanza files for any children with an application tag.
-      for stanza in self.mStanzas:
+      for stanza in self.mStanzas.values():
          for item in stanza:
            if 'application' == item.tag:
               app_elms.append(item)
@@ -224,7 +242,7 @@ class StanzaStore:
       # that match the criteria at the start of the path (namespace and
       # base ID).
       roots = []
-      for s in self.mStanzas:
+      for s in self.mStanzas.values():
          ns = s.get('namespace', '')
          # If the namespaces match, or the search did not specify one.
          if ns == root_ns or root_ns == '':

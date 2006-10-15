@@ -186,7 +186,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       filled_namespaces = []
 
       # Get all applications and global options.
-      for stanza in env.mStanzaStore.mStanzas:
+      for stanza in env.mStanzaStore.mStanzas.values():
          # Get a namespace if it exists.
          namespace = stanza.get('namespace', '')
          if namespace != '':
