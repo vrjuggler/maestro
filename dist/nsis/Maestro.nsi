@@ -94,8 +94,8 @@ Section -AdditionalIcons
   Call SetStartMenuToUse
 
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Maestro.lnk" "$INSTDIR\Maestro.py"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation (PDF).lnk" "$INSTDIR\doc\userguide.pdf"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation (HTML).lnk" "$INSTDIR\doc\userguide\index.html"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (PDF).lnk" "$INSTDIR\doc\userguide.pdf"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (HTML).lnk" "$INSTDIR\doc\userguide\index.html"
 
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
