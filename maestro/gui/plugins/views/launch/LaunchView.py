@@ -197,8 +197,10 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
                                       "No command for node %s" % node.getName())
             continue
          elif len(option_visitor.mCommands) > 1:
-            print "ERROR: More than one command for node [%s], using first command." % node.getName()
             command = option_visitor.mCommands[0]
+            QtGui.QMessageBox.warning(self.parentWidget(),
+               "Multiple Commands",
+               "More that one command specified for node [%s]. Using the first command." % node.getName())
          else:
             command = option_visitor.mCommands[0]
 
@@ -208,8 +210,11 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
                                       "Working Directory Missing",
                                       "No working directory for node %s" % node.getName())
          elif len(option_visitor.mCommands) > 1:
-            print "ERROR: More than one working directory for node [%s], using first." % node.getName()
             cwd = option_visitor.mCwds[0]
+            QtGui.QMessageBox.warning(self.parentWidget(),
+               "Multiple Current Working Directories",
+               "More that one current working directory specified for node [%s]. "\
+               "Using the first command." % node.getName())
          else:
             cwd = option_visitor.mCwds[0]
 
@@ -287,7 +292,7 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
       else:
          widget = ChoiceSheet(obj, buttonType)
       widget.setupUi(buttonType)
-   if isinstance(obj, Stanza.Arg):
+   elif isinstance(obj, Stanza.Arg):
       #print "Building Arg Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
@@ -307,6 +312,9 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
+   else:
+      print "WARNING: Could not find sheet for obj: ", obj
+
    
    return widget
 
@@ -548,6 +556,7 @@ def isPointless(obj):
 class ValueSheet(Sheet):
    def __init__(self, obj, parent = None):
       Sheet.__init__(self, obj, parent)
+      self.mValueEditor = None
 
    def setupUi(self, buttonType = NO_BUTTON):
       # Create layout to use for sheet.

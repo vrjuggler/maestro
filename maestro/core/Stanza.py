@@ -54,8 +54,10 @@ class TreeItem:
             obj = None
             if elts[i].tag == "application":
                obj = Application(elts[i], self, i)
+            # Handle the case when the user references a global option
+            # instead of all of its children.
             elif elts[i].tag == "global_option":
-               obj = GlobalOption(elts[i], self, i)
+               obj = Group(elts[i], self, i)
             elif elts[i].tag == "choice":
                obj = Choice(elts[i], self, i)
             elif elts[i].tag == "group":
@@ -180,28 +182,13 @@ class Label(TreeItem):
    def __repr__(self):
       return "<Category: label: %s>" % (self.mLabel)
 
-class GlobalOption(TreeItem):
-   def __init__(self, xmlElt, parent, row):
-      TreeItem.__init__(self, xmlElt, parent, row)
-      self.mLabel = "Unknown"
-
-      self.mLabel = xmlElt.get("label", "Unknown")
-
-   def getName(self):
-      return self.mLabel
-
-   def __repr__(self):
-      return "<Global Options: label:%s>"\
-               % (self.mLabel)
-
 class Application(TreeItem):
    def __init__(self, xmlElt, parent=None, row=0):
       TreeItem.__init__(self, xmlElt, parent, row)
+      print "==== Constructing an application ==="
+      ET.dump(xmlElt)
 
       self.mLabel = xmlElt.get("label", "Unknown")
-
-      global_options = xmlElt.get("global_options", "")
-      self.mGlobalOptions = [opt.rstrip().lstrip() for opt in global_options.split(',')]
 
       self.mTooltip = xmlElt.get("tooltip", '')
       self.mHelpUrl = xmlElt.get("helpUrl", '')
@@ -210,8 +197,8 @@ class Application(TreeItem):
       return self.mLabel
 
    def __repr__(self):
-      return "<Application: label:%s global_options: %s tooltip: %s helpUrl: %s>"\
-               % (self.mLabel, self.mGlobalOptions, self.mTooltip, self.mHelpUrl)
+      return "<Application: label:%s tooltip: %s helpUrl: %s>"\
+               % (self.mLabel, self.mTooltip, self.mHelpUrl)
 
 class Group(TreeItem):
    def __init__(self, xmlElt, parent, row):
