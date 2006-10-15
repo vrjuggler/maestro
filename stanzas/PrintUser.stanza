@@ -1,11 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" ?>
 <stanza>
-  <application name="PrintUser" label="Print User" global_options="" tooltip="Prints the name of the user running the process." helpUrl="">
-    <command name="linux_cmd" class="Linux">/usr/bin/python</command>
-    <command name="win_cmd" class="Windows XP">C:\Python24\python.exe</command>
-    <cwd name="linux_cwd" class="Linux">/</cwd>
-    <cwd name="win_cwd" class="Windows XP">C:\</cwd>
-    <arg name="linux_arg" label="Code" editable="false" class="Linux" flag="-c">import os, pwd; print pwd.getpwuid(os.getuid())[0]</arg>
-    <arg name="win_arg" label="Code" editable="false" class="Windows XP" flag="-c">import win32api; print win32api.GetUserName()</arg>
-  </application>
+   <application global_options="" helpUrl="" label="Print User" name="PrintUser" tooltip="Prints the name of the user running the process.">
+      <command class="Linux" name="linux_cmd">
+         /usr/bin/python
+      </command>
+      <command class="Windows XP" name="win_cmd">
+         C:\Python24\python.exe
+      </command>
+      <cwd class="Linux" name="linux_cwd">
+         /
+      </cwd>
+      <cwd class="Windows XP" name="win_cwd">
+         C:\
+      </cwd>
+      <arg class="Linux" editable="false" flag="-c" label="Code" name="linux_arg">
+         import os, pwd; print pwd.getpwuid(os.getuid())[0]
+      </arg>
+      <arg class="Windows XP" editable="false" flag="-c" label="Code" name="win_arg">
+         import win32api; print win32api.GetUserName()
+      </arg>
+   </application>
 </stanza>

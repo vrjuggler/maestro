@@ -1,9 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" ?>
 <stanza>
-  <application name="Calculator" label="Calculator" global_options="" tooltip="Run a calculator program." helpUrl="">
-    <command name="linux_cmd" class="Linux">/usr/X11R6/bin/xcalc</command>
-    <command name="windows_cmd" class="Windows XP">C:\WINDOWS\system32\calc.exe</command>
-    <cwd name="linux_cwd" class="Linux">/</cwd>
-    <cwd name="win_cwd" class="Windows XP">C:\</cwd>
-  </application>
+   <application global_options="" helpUrl="" label="Calculator" name="Calculator" tooltip="Run a calculator program.">
+      <command class="Linux" name="linux_cmd">
+         /usr/X11R6/bin/xcalc
+      </command>
+      <command class="Windows XP" name="windows_cmd">
+         C:\WINDOWS\system32\calc.exe
+      </command>
+      <cwd class="Linux" name="linux_cwd">
+         /
+      </cwd>
+      <cwd class="Windows XP" name="win_cwd">
+         C:\
+      </cwd>
+   </application>
 </stanza>
