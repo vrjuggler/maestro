@@ -153,6 +153,11 @@
          <listitem>
             <para><acronym>SSH</acronym>: Secure shell</para>
          </listitem>
+
+         <listitem>
+            <para><acronym>PAM</acronym>: Pluggable authentication
+            module</para>
+         </listitem>
       </itemizedlist>
    </preface>
 
@@ -177,7 +182,7 @@
 
          <para>Maestro is a software package using a simple client/server
          model for utilizing the resources of a cluster of computers. Its
-         current intended audience is owners of grahpics clusters (also known
+         current intended audience is owners of graphics clusters (also known
          as image generator clusters) used for displaying high-quality,
          real-time graphics on multiple projection surfaces. As with most
          cluster-based technology, the idea is to spread the work load over
@@ -267,7 +272,7 @@
 
                      <secondary>PAM</secondary>
                   </indexterm> and <productname class="registered">Microsoft
-               Windows</productname> domians<indexterm>
+               Windows</productname> domains<indexterm>
                      <primary>authentication</primary>
 
                      <secondary>Windows domains</secondary>
@@ -275,7 +280,8 @@
             </listitem>
 
             <listitem>
-               <para>Remote control of scren saver and power management</para>
+               <para>Remote control of screen saver and power
+               management</para>
             </listitem>
 
             <listitem>
@@ -291,8 +297,8 @@
             </listitem>
 
             <listitem>
-               <para>Graceful handling of disconnections and
-               reconnections</para>
+               <para>Graceful handling of disconnection and reconnection on
+               the fly</para>
             </listitem>
          </itemizedlist>
 
@@ -483,6 +489,20 @@
                working source</ulink>)</para>
             </listitem>
          </itemizedlist>
+
+         <para>Maestro also relies upon the <ulink
+         url="http://www.zope.org/Products/ZopeInterface">zope.interface
+         package</ulink>, and the source for this is usually included with the
+         Twisted 2.4 source. It must be installed before installing Twisted,
+         so be sure to read the Twisted installation instructions carefully.
+         For people who plan on using <application>Qt Designer</application>
+         to make custom views or to modify the <application>Maestro
+         GUI</application>, <ulink url="http://www.scons.org/">SCons</ulink>
+         and <ulink
+         url="https://realityforge.vrsource.org/view/SconsAddons/WebHome">SConsAddons</ulink>
+         can be used to run <command>pyuic4</command> in order to generate the
+         Python code from the <application>Qt Designer</application>
+         <filename>.ui</filename> files.</para>
       </section>
 
       <section>
@@ -520,6 +540,15 @@ Certificate information:
             is reissued).</para>
          </sidebar>
 
+         <para>Releases of Maestro are distributed in various ways. The source
+         is packaged up as compressed <command>tar</command>(1) archives and
+         as ZIP archives. For Linux distributions that use the Red Hat Package
+         Manager (RPM) for package management, .rpm files are prepared. The
+         Maestro RPMs are not specific to any distribution or Python version,
+         but the dependencies are. As such, it is important to get the right
+         dependencies for the Linux distribution where Maestro will be
+         used.</para>
+
          <section>
             <title><command>maestrod</command> Installation</title>
 
@@ -527,7 +556,7 @@ Certificate information:
          </section>
 
          <section>
-            <title>Maestro GUI Installation</title>
+            <title><application>Maestro GUI</application> Installation</title>
 
             <para></para>
          </section>
@@ -537,8 +566,8 @@ Certificate information:
    <chapter id="chapter.using.maestrod">
       <title>Using Maestro</title>
 
-      <section>
-         <title>Server</title>
+      <section id="section.usage.server">
+         <title>Using the Maestro Server</title>
 
          <para>The server side of the Maestro software is an application
          called <command>maestrod</command> (pronounced
@@ -556,13 +585,20 @@ Certificate information:
             stopping. Nevertheless, to get a complete understanding of how
             Maestro works, it is useful to understand how the server side is
             managed. Below, we explain how the Maestro service is installed
-            and and started on <productname class="registered">Microsoft
+            and started on <productname class="registered">Microsoft
             Windows</productname> and then how the Maestro daemon is installed
             on managed on Linux.</para>
 
             <section>
                <title>The <productname class="registered">Microsoft
                Windows</productname> Maestro Service</title>
+
+               <indexterm class="startofrange" id="index.maestrod.service">
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+               </indexterm>
 
                <para>On <productname class="registered">Microsoft
                Windows</productname>, the automated installer sets up the
@@ -574,12 +610,39 @@ Certificate information:
                privileges, simply run the following in the directory
                containing the Maestro distribution:</para>
 
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>installation</tertiary>
+               </indexterm>
+
                <screen>maestrod.py --interactive --startup auto install
 maestrod.py start</screen>
 
                <para>Should it become necessary to remove the service, run
-               these commands as a user with admnistrative privlieges in the
+               these commands as a user with administrative privileges in the
                directory containing the Maestro distribution:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>start</tertiary>
+               </indexterm>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>stop</tertiary>
+               </indexterm>
 
                <screen>maestrod.py stop
 maestrod.py remove</screen>
@@ -593,6 +656,15 @@ maestrod.py remove</screen>
                requires that the logged on user have the necessary privileges
                to spawn processes as other users and to impersonate other
                users. To get these privileges, follow these steps:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>user security policies</tertiary>
+               </indexterm>
 
                <orderedlist>
                   <listitem>
@@ -632,11 +704,28 @@ maestrod.py remove</screen>
 
                <para>At the prompt, run the following:</para>
 
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>debug mode</tertiary>
+               </indexterm>
+
                <screen>maestrod.py -debug</screen>
+
+               <indexterm class="endofrange" startref="index.maestrod.service"></indexterm>
             </section>
 
             <section>
                <title>The UNIX/Linux Maestro Daemon</title>
+
+               <indexterm class="startofrange" id="index.maestrod.daemon">
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+               </indexterm>
 
                <para>For non-Windows platforms, <command>maestrod</command>
                runs as a background daemon as the root user. Currently, Linux
@@ -654,17 +743,60 @@ maestrod.py remove</screen>
                data files. When the maestro-server package is installed on
                Linux, there is a shell script added to
                <filename>/etc/init.d</filename> called
-               <filename>maestrod</filename>. This script can be used by the
-               root user to start and stop the Maestro daemon as shown
-               below:</para>
+               <filename>maestrod</filename><indexterm>
+                     <primary><filename>/etc/init.d/maestrod</filename></primary>
+
+                     <see>maestrod</see>
+                  </indexterm><indexterm>
+                     <primary>maestrod</primary>
+
+                     <secondary>daemon</secondary>
+
+                     <tertiary><filename>/etc/init.d/maestrod</filename></tertiary>
+                  </indexterm>. This script can be used by the root user to
+               start and stop the Maestro daemon as shown below:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+
+                  <tertiary>Linux start</tertiary>
+               </indexterm>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+
+                  <tertiary>Linux stop</tertiary>
+               </indexterm>
 
                <screen>/etc/init.d/maestrod start
 /etc/init.d/maestrod stop</screen>
 
                <para>The actual command that is run by this shell script is
                another shell script named <filename>maestrod</filename>
-               installed in <filename>/usr/sbin</filename>. This command can
-               be run directly in debug mode as follows:</para>
+               installed in <filename>/usr/sbin</filename><indexterm>
+                     <primary><filename>/usr/sbin/maestrod</filename></primary>
+
+                     <see>maestrod</see>
+                  </indexterm><indexterm>
+                     <primary>maestrod</primary>
+
+                     <secondary>daemon</secondary>
+
+                     <tertiary><filename>/usr/sbin/maestrod</filename></tertiary>
+                  </indexterm>. This command can be run directly in debug mode
+               as follows:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+
+                  <tertiary>debug mode</tertiary>
+               </indexterm>
 
                <screen>/usr/sbin/maestrod -debug</screen>
 
@@ -672,131 +804,118 @@ maestrod.py remove</screen>
                <option>-debug</option> option causes it to start up as a
                background daemon. Running <command>maestrod</command> requires
                root privileges in order to perform the PAM authentication of
-               remote users, so all of the above must be run as root.</para>
+               remote users<indexterm>
+                     <primary>authentication</primary>
+
+                     <secondary>PAM</secondary>
+                  </indexterm>, so all of the above must be run as
+               root.</para>
+
+               <indexterm class="endofrange" startref="index.maestrod.daemon"></indexterm>
             </section>
          </section>
 
          <section>
             <title>Configuring <command>maestrod</command></title>
 
-            <para></para>
-         </section>
-      </section>
+            <indexterm class="startofrange" id="index.section.maestrod.xcfg">
+               <primary><filename>maestrod.xcfg</filename></primary>
+            </indexterm>
 
-      <section>
-         <title>Client</title>
+            <para>The <command>maestrod</command> software uses a
+            configuration file named <filename>maestrod.xcfg</filename>. This
+            file can be located in the same directory as the
+            <filename>maestrod.py</filename> file or in
+            <filename>/etc</filename>. It uses XML, but its form is quite
+            flexible. This flexibility is offered to allow service plug-in
+            authors (see <xref linkend="section.extending.services" />) to
+            configure their plug-ins in the manner that best suits their
+            needs. The only requirement is that the root node must be
+            <sgmltag>&lt;maestrod&gt;</sgmltag><indexterm>
+                  <primary><filename>maestrod.xcfg</filename></primary>
 
-         <para>The client side of Maestro is a cross-platform GUI written in
-         the Python programming language with PyQt as the widget set. As we
-         will see, it is designed to be a dynamic and flexible interface for
-         utilizing a cluster.</para>
+                  <secondary>elements</secondary>
 
-         <para>Before we get into the usage of the Maestro GUI, we must
-         introduce some terminology. In keeping with the musical theme of
-         Maestro, there are two data files (XML files) utilized by the Maestro
-         GUI: ensemble files and stanza files. An
-         <firstterm>ensemble</firstterm><indexterm>
-               <primary>ensemble</primary>
-
-               <secondary>definition of</secondary>
-            </indexterm> file identifies the nodes of the cluster, and in the
-         usage of Maestro, we frequently refer to the cluster nodes together
-         as an ensemble. The name ensemble was chosen because it represents a
-         group of musicians who perform together—an apropos choice in the
-         context of a graphics cluster.</para>
-
-         <para>The <firstterm>stanza</firstterm><indexterm>
-               <primary>stanza</primary>
-
-               <secondary>definition of</secondary>
-            </indexterm> file describes how to run an application. If we
-         consider that running an application is the performance of the
-         clsuter, then this name is quite meaningful. The term stanza also has
-         relevance in the realm of computing where it is <quote>a block or
-         subsection of a human-readable configuration file for computer
-         software.</quote> Application developers write stanza files by
-         filling in the executable name, command line options, and any
-         environment variables needed to launch the software. The stanza file
-         is then used by the Maestro GUI to construct a graphical interface
-         for that application in the Maestro Launch Viewer (see <xref
-         linkend="section.viewer.launch" />). Thus, it is up to the stanza
-         author to create a stanza that results in an understandable, flexbile
-         user interface when loaded by the Maestro GUI.</para>
-
-         <section id="section.running.maestro.gui">
-            <title>Running the Maestro GUI</title>
-
-            <para>To load the Maestro GUI, run the command
-            <command>maestro</command> or double-click on the application
-            icon. A splash screen appears while all the dynamically loaded
-            code and data files are loaded. Next, a login dialog is displayed
-            asking for the user name, the password, and (optionally) the
-            <productname class="registered">Microsoft Windows</productname>
-            domain for the user who will be launching applications on the
-            cluster. At this time, the login information must be the same for
-            all nodes of the cluster, and a user cannot authenticate as a
-            different person without restarting the Maestro GUI.</para>
-
-            <para>Its main interface panel has three parts: a tool bar, the
-            viewer panel, and the log window. The tool bar contains buttons
-            for basic operations such as loading and saving the ensemble
-            file.</para>
+                  <tertiary><sgmltag>&lt;maestrod&gt;</sgmltag></tertiary>
+               </indexterm>. Beneath that, the structure can be arbitrarily
+            deep nesting with any attributes and CDATA needed to configure
+            server-side components. In this section, we explain how to
+            configure <command>maestrod</command> and the services that are
+            included with Maestro by default.</para>
 
             <section>
-               <title>Loading the Ensemble</title>
+               <title><command>maestrod</command> Settings</title>
 
-               <para></para>
-            </section>
+               <para>When <command>maestrod</command> is running on a
+               operating system that uses the X Window System, the
+               authenticated user must be allowed to open windows on the local
+               X server. This is done by granting modifying the authenticated
+               user's <filename>~/.Xauthority</filename> file to include the
+               local X server's authorization key using the
+               <command>xauth</command>(1) command. To avoid tying
+               <command>maestrod</command> to any specific operating system
+               installation or site configuration, the path to
+               <command>xauth</command>(1) and the local X server's Xauthority
+               file are configurable. For example, we see in <xref
+               linkend="example.maestrod.xcfg.rhel4" /> how to configure
+               maestrod to run on Red Hat Enterprise Linux 4. For Fedora Core
+               5, the configuration is slightly different, as seen in <xref
+               linkend="example.maestrod.xcfg.fc5" />. In both cases, <ulink
+               url="http://www.gnome.org/projects/gdm/">GDM</ulink> is being
+               used as the X display manager. The path to the Xauthority file
+               would differ if using <ulink
+               url="http://docs.kde.org/en/HEAD/kdebase/kdm/">KDM</ulink> or
+               XDM.</para>
 
-            <section id="section.viewer.launch">
-               <title>Launch Viewer</title>
+               <indexterm>
+                  <primary><filename>maestrod.xcfg</filename></primary>
 
-               <indexterm class="startofrange"
-                          id="index.section.viewer.launch">
-                  <primary>viewers</primary>
+                  <secondary>elements</secondary>
 
-                  <secondary>launch</secondary>
+                  <tertiary><sgmltag>&lt;xauth_cmd&gt;</sgmltag></tertiary>
                </indexterm>
 
-               <para>The Launch Viewer is likely to be the one seen most
-               frequently by Maestro users. This module provides the end user
-               interface to remote application launching. The interface itself
-               is composed dynamically based on the configuration file (known
-               as a <firstterm>stanza</firstterm>) for each application. This
-               means that every application is likely to have a different
-               launching interface in terms of options and parameters, and it
-               is entirely up to each application author to devise a stanza
-               that results in a clear, simple interface to launching an
-               application. The interface for choosing which application to
-               launch and the actual launch controls, however, will always be
-               the same. In this section, we explain these
-               application-agnostic controls as well as the basic controls
-               that are available for stanza authors to utilize.</para>
+               <indexterm>
+                  <primary><filename>maestrod.xcfg</filename></primary>
 
-               <section>
-                  <title>Basic Launch Controls</title>
+                  <secondary>elements</secondary>
 
-                  <para></para>
-               </section>
+                  <tertiary><sgmltag>&lt;xauthority_file&gt;</sgmltag></tertiary>
+               </indexterm>
 
-               <section>
-                  <title>Application Option Controls</title>
+               <example id="example.maestrod.xcfg.rhel4">
+                  <title><command>maestrod.xcfg</command> for Red Hat
+                  Enterprise Linux 4</title>
 
-                  <para></para>
+                  <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+&lt;/maestrod&gt;</programlisting>
+               </example>
 
-                  <indexterm class="endofrange"
-                             startref="index.section.viewer.launch"></indexterm>
-               </section>
+               <example id="example.maestrod.xcfg.fc5">
+                  <title><command>maestrod.xcfg</command> for Fedora Core
+                  5</title>
+
+                  <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+&lt;/maestrod&gt;</programlisting>
+               </example>
             </section>
 
-            <section id="section.viewer.reboot">
-               <title>Reboot Viewer</title>
+            <section id="section.maestrod.settings.reboot">
+               <title>Reboot Service Settings</title>
 
                <indexterm class="startofrange"
-                          id="index.section.viewer.reboot">
-                  <primary>viewers</primary>
+                          id="index.sectcion.service.reboot.settings">
+                  <primary>services</primary>
 
                   <secondary>reboot</secondary>
+
+                  <tertiary>settings</tertiary>
                </indexterm>
 
                <indexterm>
@@ -805,13 +924,92 @@ maestrod.py remove</screen>
                   <seealso>boot loader</seealso>
                </indexterm>
 
-               <para>The Reboot Viewer allows the GUI user to reboot
-               individual nodes of the cluster or all the nodes of the cluster
-               with the click of a button. When possible, the Reboot Viewer
-               allows the GUI user to change the target operating system when
-               rebooting so that it is not necessary to have direct access to
-               the remote computer in order to change which OS it loads upon
-               booting.</para>
+               <para>The Reboot Service<indexterm>
+                     <primary>services</primary>
+
+                     <secondary>reboot</secondary>
+                  </indexterm> makes it possible for the <application>Maestro
+               GUI</application> user to reboot the machine where maestrod is
+               running and, when possible, to change the operating system
+               loaded on the next boot. To do this in a flexible manner, the
+               service uses pluggable boot loader handling plug-ins. In order
+               for the service to know which plug-in to use, it looks at
+               <filename>maestrod.xcfg</filename> and the
+               <sgmltag>&lt;boot_loader&gt;</sgmltag><indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;boot_loader&gt;</sgmltag></tertiary>
+                  </indexterm> XML element. The CDATA in this element names
+               which loader to use. Maestro comes with plug-ins for
+               GRUB<indexterm>
+                     <primary>boot loader</primary>
+
+                     <secondary>GRUB</secondary>
+                  </indexterm> and for the NT Loader<indexterm>
+                     <primary>boot loader</primary>
+
+                     <secondary>NT Loader</secondary>
+                  </indexterm> (used by <productname
+               class="registered">Microsoft Windows</productname> NT 4.0
+               through <productname class="registered">Windows</productname>
+               XP). The corresponding values to use for the
+               <sgmltag>&lt;boot_loader&gt;</sgmltag> CDATA are
+               <literal>GRUB</literal> and <literal>ntldr</literal>
+               respectively. If no value is set, the GRUB plug-in is used as
+               the default.</para>
+
+               <para>The GRUB plug-in itself looks at maestrod.xcfg for
+               information. More specifically, the plug-in needs to know where
+               to find <filename>grub.conf</filename>. This path is set using
+               the <sgmltag>&lt;grub_conf&gt;</sgmltag> XML element. Examples
+               of configuring the Reboot Service for GRUB and the NT Loader
+               are shown in <xref
+               linkend="example.maestrod.xcfg.reboot.grub" /> and in <xref
+               linkend="example.maestrod.xcfg.reboot.ntldr" /> respectively.
+               Note that the NT Loader example includes the
+               <sgmltag>&lt;grub_conf&gt;<indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;grub_conf&gt;</sgmltag></tertiary>
+                  </indexterm></sgmltag> XML element. This is not necessary
+               since the NT Loader plug-in does not care about
+               <filename>grub.conf</filename>, but it demonstrates that having
+               additional, unused data is not invalid. (For that matter, the
+               <filename>maestrod.xcfg</filename> in <xref
+               linkend="example.maestrod.xcfg.reboot.ntldr" /> might be for a
+               <productname class="registered">Microsoft Windows</productname>
+               installation of <command>maestrod</command>, and thus the
+               Xauthority information would be ignored entirely.)</para>
+
+               <example id="example.maestrod.xcfg.reboot.grub">
+                  <title><command>maestrod.xcfg</command>: Using GRUB with the
+                  Reboot Service</title>
+
+                  <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;/boot/grub/grub.conf&lt;/grub_conf&gt;
+&lt;/maestrod&gt;</programlisting>
+               </example>
+
+               <example id="example.maestrod.xcfg.reboot.ntldr">
+                  <title><command>maestrod.xcfg</command>: Using the NT Loader
+                  with the Reboot Service</title>
+
+                  <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+   &lt;boot_loader&gt;ntldr&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;/boot/grub/grub.conf&lt;/grub_conf&gt;
+&lt;/maestrod&gt;</programlisting>
+               </example>
 
                <para>Being able to change the target OS for rebooting relies
                upon two things: knowledge of the boot loader<indexterm>
@@ -819,12 +1017,8 @@ maestrod.py remove</screen>
                   </indexterm> on the server side and access to the boot
                loader configuration from all installed operating systems.
                Without both of these, it is not possible to change the target
-               OS. For example, if the GRUB<indexterm>
-                     <primary>boot loader</primary>
-
-                     <secondary>GRUB</secondary>
-                  </indexterm> configuration file cannot be accessed from
-               <productname class="registered">Microsoft
+               OS. For example, if the GRUB configuration file cannot be
+               accessed from <productname class="registered">Microsoft
                Windows</productname>, then it is not possible to change the
                default OS that GRUB boots when the computer is currently
                booted into <productname class="registered">Microsoft
@@ -912,7 +1106,7 @@ maestrod.py remove</screen>
                              id="index.section.boot.loader.config.grub.fat32">
                      <primary>boot loader</primary>
 
-                     <secondary>grub</secondary>
+                     <secondary>GRUB</secondary>
 
                      <tertiary>FAT32 installation</tertiary>
                   </indexterm>
@@ -946,7 +1140,7 @@ maestrod.py remove</screen>
                      recovery CD that can reinstall some boot loader (such as
                      the default Master Boot Record [MBR] or GRUB's first
                      stage loader) is highly recommended. Furthermore,
-                     understaind of how boot loaders and boot blocks work will
+                     understand of how boot loaders and boot blocks work will
                      come in very handy if anything should go wrong.</para>
                   </caution>
 
@@ -976,7 +1170,7 @@ maestrod.py remove</screen>
                   0.95 boot CD ISO image</ulink><indexterm>
                         <primary>boot loader</primary>
 
-                        <secondary>grub</secondary>
+                        <secondary>GRUB</secondary>
 
                         <tertiary>bootable CD installation image</tertiary>
                      </indexterm> that can be burned to a CD (using a CD-R or
@@ -1043,6 +1237,55 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                   <filename>grub.conf</filename> on all operating
                   systems.</para>
 
+                  <para>After all of that, <filename>maestrod.xcfg</filename>
+                  must be updated to point to the new location for
+                  <filename>grub.conf</filename>. For Linux, let us assume
+                  that the FAT32 partition will be mounted at
+                  <filename>/fat32</filename> every time the computer boots.
+                  In that case, <filename>maestrod.xcfg</filename> would be
+                  similar to what is shown in <xref
+                  linkend="example.maestrod.xcfg.reboot.grub.linux" />. On
+                  <productname class="registered">Microsoft
+                  Windows</productname>, let us assume that the FAT32
+                  partition is accessed as drive <filename>E:</filename>,
+                  which would mean that <filename>maestrod.xcfg</filename>
+                  would be similar to that shown in <xref
+                  linkend="example.maestrod.xcfg.reboot.grub.windows" />.</para>
+
+                  <indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;grub_conf&gt;</sgmltag></tertiary>
+                  </indexterm>
+
+                  <example id="example.maestrod.xcfg.reboot.grub.linux">
+                     <title><command>maestrod.xcfg</command>: Multi-Platform
+                     <filename>grub.conf</filename> Access (Linux)</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
+                  <example id="example.maestrod.xcfg.reboot.grub.windows">
+                     <title><command>maestrod.xcfg</command>: Multi-Platform
+                     <filename>grub.conf</filename> Access (<productname
+                     class="registered">Microsoft
+                     Windows</productname>)</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
                   <indexterm class="endofrange"
                              startref="index.section.boot.loader.config.grub"></indexterm>
                </section>
@@ -1070,6 +1313,17 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
 
                      <see>boot loader</see>
                   </indexterm>
+
+                  <note>
+                     <para>As of this writing, the NT Loader plug-in for the
+                     Reboot Service is only available on <productname
+                     class="registered">Microsoft Windows</productname>. It
+                     still needs to be extended to be able to access boot.ini
+                     from non-Windows platforms. As such, it is not yet
+                     suitable for switching back and forth between
+                     <productname class="registered">Microsoft
+                     Windows</productname> and other operating systems.</para>
+                  </note>
 
                   <para>The boot loader used by <productname
                   class="registered">Microsoft Windows</productname> NT 4.0
@@ -1115,8 +1369,8 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                   partitions. While reading from an NTFS partition in Linux
                   works very well, writing is still considered to be
                   dangerous. File system corruption resulting from writing to
-                  an NTFS parition from Linux is something that is well within
-                  the realm of possibility. Nevertheless, the <ulink
+                  an NTFS partition from Linux is something that is well
+                  within the realm of possibility. Nevertheless, the <ulink
                   url="http://www.linux-ntfs.org/content/view/15/29/">information
                   about the current version</ulink> of said Linux kernel
                   module (2.1.20 at the time of this writing) states that it
@@ -1145,8 +1399,626 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                              startref="index.section.boot.loader.config.nt"></indexterm>
 
                   <indexterm class="endofrange"
-                             startref="index.section.viewer.reboot"></indexterm>
+                             startref="index.sectcion.service.reboot.settings"></indexterm>
                </section>
+            </section>
+
+            <section>
+               <title>Desktop Service Settings</title>
+
+               <indexterm class="startofrange"
+                          id="index.sectcion.service.desktop.settings">
+                  <primary>services</primary>
+
+                  <secondary>desktop</secondary>
+
+                  <tertiary>settings</tertiary>
+               </indexterm>
+
+               <para>The Desktop Service<indexterm>
+                     <primary>services</primary>
+
+                     <secondary>desktop</secondary>
+                  </indexterm> controls the use of a screen saver and power
+               management on the machine running <command>maestrod</command>,
+               and it allows remote manipulation of the local desktop
+               wallpaper image (when a user is logged on to the local node).
+               This is made possible through the use of a collection of
+               plug-ins that capture various mechanisms for screen saver
+               usage, power management, and desktop wallpaper switching, and
+               the plug-ins to use are chosen through
+               <filename>maestrod.xcfg</filename>. We begin with the screen
+               saver and power management together since they are closely
+               related. We then explain how the desktop wallpaper switching is
+               configured.</para>
+
+               <section>
+                  <title>Screen Saver and Power Management Settings</title>
+
+                  <para>Screen savers and power management are very common
+                  features of modern operating systems. Both, however,
+                  interfere with the usage of graphics applications that are
+                  run on clusters. We do not want a screen saver to activate
+                  or a screen to go black in the middle of running a VR
+                  demonstration as it would, among other things, ruin the
+                  suspension of disbelief. The Desktop Service uses one or
+                  more plug-ins to disable and deactivate screen savers and
+                  power management. The plug-ins to use are identified using
+                  the <sgmltag>&lt;saver_types&gt;</sgmltag><indexterm>
+                        <primary><filename>maestrod.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;saver_types&gt;</sgmltag></tertiary>
+                     </indexterm> XML element in
+                  <filename>maestrod.xcfg</filename>. The value is a
+                  comma-separated list of plug-ins to use. The current set of
+                  screen saver and power management plug-ins are as follows
+                  (identified by their <emphasis>case-sensitive</emphasis>
+                  name used in the <sgmltag>&lt;saver_types&gt;</sgmltag>
+                  list):</para>
+
+                  <itemizedlist>
+                     <listitem>
+                        <para><literal>windows</literal>: Screen saver
+                        management using the regular Windows desktop screen
+                        saver.</para>
+
+                        <important>
+                           <para>This plug-in does not support unlocking a
+                           display that is locked by a screen saver that
+                           requires a password. It could be extended to disable
+                           password authorization prior to the screen saver
+                           being activated, but in general, cluster nodes
+                           running <productname class="registered">Microsoft
+                           Windows</productname> must currently be configured
+                           so that the logged on user's screen saver does not
+                           require a password to be deactivated.</para>
+                        </important>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>powercfg</literal>: Power management
+                        using the Windows utility program
+                        <command>powercfg.exe</command> to control monitor
+                        power off. </para>
+
+                        <note>
+                           <para>The <command>powercfg.exe</command> utility
+                           was introduced with <productname
+                           class="registered">Microsoft Windows</productname>
+                           Server 2003 and is available on <productname
+                           class="registered">Windows</productname> XP SP2.
+                           According to Microsoft, it is not guaranteed to work
+                           with <productname class="registered">Microsoft
+                           Windows</productname> 2000.</para>
+                        </note>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>xset</literal>: Screen blanking and
+                        DPMS management through the X server. Unless the X
+                        server is configured to disable screen blanking and
+                        DPMS explicitly, this plug-in will always be needed on
+                        operating systems using the X Window System.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>xscreensaver</literal>: Screen saver
+                        and screen locking using the <ulink
+                        url="http://www.jwz.org/xscreensaver/">XScreenSaver</ulink>
+                        software. This is only needed when users are routinely
+                        logged on to cluster nodes in order to prevent their
+                        screen saver from activating. For cluster nodes using
+                        the X Window System, it is not necessary for users to
+                        be logged on locally in order for graphics windows to
+                        be displayed, so this plug-in would generally not be
+                        needed.</para>
+                     </listitem>
+                  </itemizedlist>
+
+                  <para>Below, we show examples of
+                  <filename>maestrod.xcfg</filename> settings for Microsoft
+                  Windows and Linux. Note that <xref
+                  linkend="example.maestrod.xcfg.desktop.saver.linux.xscreensaver" />
+                  includes additional settings used by the
+                  <literal>xscreensaver</literal> plug-in. These settings
+                  provide the paths to the XScreenSaver commands
+                  <command>xscreensaver</command> and
+                  <command>xscreensaver-command</command>. Both are used by
+                  the plug-in and must be set when it is in use.</para>
+
+                  <important>
+                     <para>If there is no value set for
+                     <sgmltag>&lt;saver_types&gt;</sgmltag><indexterm>
+                           <primary><filename>maestrod.xcfg</filename></primary>
+
+                           <secondary>elements</secondary>
+
+                           <tertiary><sgmltag>&lt;saver_types&gt;</sgmltag></tertiary>
+                        </indexterm> or the
+                     <sgmltag>&lt;saver_types&gt;</sgmltag> XML element is not
+                     present in <filename>maestrod.xcfg</filename>, then the
+                     Desktop Service has platform-specific default settings
+                     for the screen saver plug-in list. For <productname
+                     class="registered">Microsoft Windows</productname>, the
+                     default setting is to use the <literal>windows</literal>
+                     and <literal>powercfg</literal> plug-ins; for non-Windows
+                     platforms, the default setting is to use the
+                     <literal>xset</literal> plug-in.</para>
+                  </important>
+
+                  <example id="example.maestrod.xcfg.desktop.saver.linux">
+                     <title><command>maestrod.xcfg</command>: Screen Saver and
+                     Power Management on Linux Without Local Logon</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
+   &lt;saver_types&gt;xset&lt;/saver_types&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
+                  <indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;xscreensaver_cmd&gt;</sgmltag></tertiary>
+                  </indexterm>
+
+                  <indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;xscreensaver_command_cmd&gt;</sgmltag></tertiary>
+                  </indexterm>
+
+                  <example id="example.maestrod.xcfg.desktop.saver.linux.xscreensaver">
+                     <title><command>maestrod.xcfg</command>: Screen Saver and
+                     Power Management on Linux With Local Logon</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
+   &lt;saver_types&gt;xset,xscreensaver&lt;/saver_types&gt;
+   &lt;xscreensaver_cmd&gt;/usr/X11R6/bin/xscreensaver&lt;/xscreensaver_cmd&gt;
+   &lt;xscreensaver_command_cmd&gt;/usr/X11R6/bin/xscreensaver-command&lt;/xscreensaver_command_cmd&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
+                  <example id="example.maestrod.xcfg.desktop.saver.windows">
+                     <title><command>maestrod.xcfg</command>: Screen Saver and
+                     Power Management on <productname
+                     class="registered">Microsoft
+                     Windows</productname></title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestrod&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
+   &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+               </section>
+
+               <section>
+                  <title>Desktop Wallpaper Switching Settings</title>
+
+                  <para>When a cluster node has a locally logged on user, that
+                  user will sometimes have an image displayed on his or
+                  desktop. This is commonly referred to as <quote>desktop
+                  wallpaper,</quote> and the Desktop Service has a mechanism
+                  for changing this image from the <application>Maestro
+                  GUI</application>. As with the screen saver and power
+                  management capability, the platform- and site-specific
+                  details are captured in different plug-ins. The
+                  configuration of which plug-in to use is quite simple. Just
+                  choose one of the plug-ins named in the list below and set
+                  it as the CDATA of the
+                  <sgmltag>&lt;background_image_manager&gt;</sgmltag><indexterm>
+                        <primary><filename>maestrod.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;background_image_manager&gt;</sgmltag></tertiary>
+                     </indexterm> XML element in
+                  <filename>maestrod.xcfg</filename>. Supported values at the
+                  time of this writing are as follows: </para>
+
+                  <itemizedlist>
+                     <listitem>
+                        <para><literal>windows</literal>: Desktop wallpaper
+                        management using the regular Windows desktop.</para>
+
+                        <important>
+                           <para>Presently, only BMP images can be used as the
+                           input to this plug-in (see <xref
+                           linkend="section.viewer.reboot" />). In a future
+                           version of Maestro, on-the-fly conversion to BMP may
+                           be implemented to allow other formats such as JPEG
+                           and PNG to be used.</para>
+                        </important>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>gnome</literal>: Background querying
+                        and switching using GConf (via
+                        <command>gconftool-2</command>). The path to
+                        gconftool-2 can be specified by setting the value of
+                        the <sgmltag>&lt;gconftool_cmd&gt;</sgmltag><indexterm>
+                              <primary><filename>maestrod.xcfg</filename></primary>
+
+                              <secondary>elements</secondary>
+
+                              <tertiary><sgmltag>&lt;gconftool_cmd&gt;</sgmltag></tertiary>
+                           </indexterm> XML element in
+                        <filename>maestrod.xcfg</filename>. If not set, this
+                        path defaults to
+                        <filename>/usr/bin/gconftool-2</filename>.</para>
+                     </listitem>
+                  </itemizedlist>
+
+                  <para>If the
+                  <sgmltag>&lt;background_image_manager&gt;</sgmltag> XML
+                  element has no value or is not present, the Desktop Service
+                  defaults to using the plug-in <literal>windows</literal> on
+                  <productname class="registered">Microsoft
+                  Windows</productname> and the plug-in
+                  <literal>gnome</literal> on other platforms.</para>
+
+                  <indexterm class="endofrange"
+                             startref="index.sectcion.service.desktop.settings"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.maestrod.xcfg"></indexterm>
+               </section>
+            </section>
+         </section>
+      </section>
+
+      <section id="section.usage.gui">
+         <title>Using the Maestro GUI Client</title>
+
+         <para>The client side of Maestro is a cross-platform GUI written in
+         the Python programming language with PyQt as the widget set. As we
+         will see, it is designed to be a dynamic and flexible interface for
+         utilizing a cluster.</para>
+
+         <para>Before we get into the usage of the <application>Maestro
+         GUI</application>, we must introduce some terminology. In keeping
+         with the musical theme of Maestro, there are two data files (XML
+         files) utilized by the <application>Maestro GUI</application>:
+         ensemble files and stanza files. An
+         <firstterm>ensemble</firstterm><indexterm>
+               <primary>ensemble</primary>
+
+               <secondary>definition of</secondary>
+            </indexterm> file identifies the nodes of the cluster, and in the
+         usage of Maestro, we frequently refer to the cluster nodes together
+         as an ensemble. The name ensemble was chosen because it represents a
+         group of musicians who perform together—an apropos choice in the
+         context of a graphics cluster.</para>
+
+         <para>The <firstterm>stanza</firstterm><indexterm>
+               <primary>stanza</primary>
+
+               <secondary>definition of</secondary>
+            </indexterm> file describes how to run an application. If we
+         consider that running an application is the performance of the
+         cluster, then this name is quite meaningful. The term stanza also has
+         relevance in the realm of computing where it is <quote>a block or
+         subsection of a human-readable configuration file for computer
+         software.</quote> Application developers write stanza files by
+         filling in the executable name, command line options, and any
+         environment variables needed to launch the software. The stanza file
+         is then used by the <application>Maestro GUI</application> to
+         construct a graphical interface for that application in the Maestro
+         Launch Viewer (see <xref linkend="section.viewer.launch" />). Thus,
+         it is up to the stanza author to create a stanza that results in an
+         understandable, flexible user interface when loaded by the
+         <application>Maestro GUI</application>.</para>
+
+         <section id="section.running.maestro.gui">
+            <title>Running the <application>Maestro GUI</application></title>
+
+            <para>To load the <application>Maestro GUI</application>, run the
+            command <command>maestro</command> or double-click on the
+            application icon. A splash screen appears while all the
+            dynamically loaded code and data files are loaded. Next, a login
+            dialog is displayed asking for the user name, the password, and
+            (optionally) the <productname class="registered">Microsoft
+            Windows</productname> domain for the user who will be launching
+            applications on the cluster. At this time, the login information
+            must be the same for all nodes of the cluster, and a user cannot
+            authenticate as a different person without restarting the
+            <application>Maestro GUI</application>.</para>
+
+            <para>Its main interface panel has three parts: a tool bar, the
+            viewer panel, and the log window. The tool bar contains buttons
+            for basic operations such as loading and saving the ensemble file.
+            Within the viewer panel, the various viewer plug-ins can be
+            accessed. Only one viewer is displayed at a time, and switching
+            viewers is done by clicking on an icon in the left side of the
+            viewer panel. Tool bars and menu items may be added and removed on
+            the fly as the current viewer changes.</para>
+
+            <section id="section.gui.command.line.options">
+               <title>Command Line Options for the <application>Maestro
+               GUI</application></title>
+
+               <para>There are three command line options to the
+               <command>maestro</command> command:
+               <option>--ensemble</option>, <option>--stanza</option>, and
+               <option>--view</option>. The exact syntax and usage information
+               for these options can be displayed by running the
+               following:</para>
+
+               <screen>maestro --help</screen>
+
+               <para>The <option>--ensemble</option> option names an ensemble
+               file to load when the <application>Maestro GUI</application>
+               starts. Using this option eliminates the need to open an
+               ensemble after the GUI opens, but it does not preclude the user
+               from changing the current ensemble (as we will see in <xref
+               linkend="section.gui.ensemble.load" />). One use of this
+               command line option would be in the context of associations
+               that cause the <application>Maestro GUI</application> to load
+               when a user double-clicks on a file. The file association
+               action could include this option to cause a specific ensemble
+               to be loaded by default so that the <application>Maestro
+               GUI</application> automatically connects to a cluster when it
+               opens.</para>
+
+               <para>The <option>--stanza</option> option names the stanza
+               file that will be accessible from the <application>Maestro
+               GUI</application>. Using this option prevents the
+               <application>Maestro GUI</application> from scanning for other
+               stanza files so that the named file is the only one that is
+               accessible. As with the <option>--ensemble</option> option, one
+               way of using this option is in the context of file
+               associations. If the file associated with launching the
+               <application>Maestro GUI</application> is an input file to an
+               application, the stanza for the application that uses the input
+               file could be identified as the one (and only) to use in the
+               <application>Maestro GUI</application>. In that way, the user
+               would be presented with a <application>Maestro
+               GUI</application> configuration that only pertains to the
+               application and input file in question.</para>
+
+               <para>The <option>--view</option> option tells the
+               <application>Maestro GUI</application> which viewer plug-in to
+               display when it opens. By default, the <application>Maestro
+               GUI</application> displays whichever viewer plug-in is the
+               first in the list when it opens. This option overrides that
+               behavior. The viewer plug-in to use is identified by its name,
+               and the names of the viewer plug-ins that come with Maestro are
+               as follows:</para>
+
+               <indexterm>
+                  <primary>viewers</primary>
+               </indexterm>
+
+               <itemizedlist>
+                  <listitem>
+                     <para>Launch View</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Reboot View</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Process View</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Resource View</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Desktop View</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Ensemble View</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Stanza Editor</para>
+                  </listitem>
+               </itemizedlist>
+
+               <para>Using any of these names on a command line would require
+               proper quoting to avoid misinterpreting the space in the viewer
+               name. For example, here is one way that the Maestro GUI could
+               be launched as a result of a file association on <productname
+               class="registered">Microsoft Windows</productname> (the wrapped
+               line is to facilitate rendering rather than to indicate
+               syntax):</para>
+
+               <screen>maestro.py --ensemble="C:\site\cluster-open.jconf"
+           --stanza="C:\myapp.stanza" --view="Launch View"</screen>
+
+               <para>We will explain more about these viewers in the following
+               sections.</para>
+            </section>
+
+            <section id="section.gui.ensemble.load">
+               <title>Loading an Ensemble</title>
+
+               <para>When the Maestro GUI starts, it either loads an ensemble
+               as specified on the command line, or it starts with no
+               ensemble. In the latter case, the user must load an ensemble
+               through the GUI. This can be accomplished by selecting
+               <menuchoice>
+                     <guimenu>File</guimenu>
+
+                     <guimenuitem>Load Ensemble</guimenuitem>
+                  </menuchoice> or by clicking on the <guibutton>Load
+               Ensemble</guibutton> tool bar button. If there is already an
+               ensemble loaded, this operation <emphasis>replaces</emphasis>
+               the existing ensemble. That means that all existing cluster
+               node connections are closed, and new connections set
+               made.</para>
+            </section>
+
+            <section id="section.viewer.launch">
+               <title>Launch Viewer</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.viewer.launch">
+                  <primary>viewers</primary>
+
+                  <secondary>launch</secondary>
+               </indexterm>
+
+               <para>The Launch Viewer is likely to be the one seen most
+               frequently by Maestro users. This module provides the end user
+               interface to remote application launching. The interface itself
+               is composed dynamically based on the configuration file (known
+               as a <firstterm>stanza</firstterm>) for each application. This
+               means that every application is likely to have a different
+               launching interface in terms of options and parameters, and it
+               is entirely up to each application author to devise a stanza
+               that results in a clear, simple interface to launching an
+               application. The interface for choosing which application to
+               launch and the actual launch controls, however, will always be
+               the same. In this section, we explain these
+               application-agnostic controls as well as the basic controls
+               that are available for stanza authors to utilize.</para>
+
+               <section>
+                  <title>Basic Launch Controls</title>
+
+                  <para>At the top of the Launch Viewer panel is a pull-down
+                  menu that lists all the known applications. Recall that the
+                  applications are described using stanzas, so this pull-down
+                  menu lists all the loaded stanzas. By selecting an
+                  application in the Launch Viewer, the user is indicating
+                  which application will be launched.</para>
+
+                  <para>At the bottom of the Launch Viewer, there are three
+                  buttons at the bottom of the panel:
+                  <guibutton>Launch</guibutton>,
+                  <guibutton>Terminate</guibutton>, and
+                  <guibutton>Help</guibutton>. The
+                  <guibutton>Launch</guibutton> button tells all the remote
+                  nodes to run the command with the options provided by the
+                  user. The <guibutton>Terminate</guibutton> button kills the
+                  launched application. The <guibutton>Help</guibutton> button
+                  loads HTML help associated with the selected application (as
+                  specified in its stanza file). The
+                  <guibutton>Help</guibutton> button is only enabled when an
+                  application stanza includes information about where to find
+                  the HTML help.</para>
+
+                  <para>When an application is launched, any output that it
+                  would normally write to a console window is streamed back to
+                  the Maestro GUI and displayed in the tabbed panel of log
+                  windows. This panel is normally at the bottom of the Maestro
+                  GUI. Note that each tab can be detached from the Maestro GUI
+                  and moved &amp; resized independently. This allows the
+                  output from multiple nodes to be seen simultaneously if so
+                  desired. Otherwise, as a tabbed panel, it offers a very
+                  compact view of the log output.</para>
+
+                  <para>The output from the launched application is also
+                  written to node-specific log files in the user's home
+                  directory. In some instances, it may be necessary or useful
+                  to save this output. This can be done at any time by
+                  selecting the <menuchoice>
+                        <guimenu>File</guimenu>
+
+                        <guimenuitem>Archive Logs</guimenuitem>
+                     </menuchoice> item or by clicking the <guibutton>Archive
+                  Logs</guibutton> tool bar button. A file chooser dialog will
+                  open asking the user to name the file used for the archive.
+                  Upon choosing a file, the log files are collected into a ZIP
+                  archive.</para>
+               </section>
+
+               <section>
+                  <title>Application Option Controls</title>
+
+                  <para>To manipulate the launch options for an application, a
+                  basic set of controls are used. These controls are
+                  structured based on the stanza file. The GUI layout for the
+                  Launch Viewer will reflect the nesting and grouping of
+                  options as they are specified in the stanza. The controls
+                  used are the following:</para>
+
+                  <itemizedlist>
+                     <listitem>
+                        <para>Text fields where users enter values, strings,
+                        paths, etc. In the case of a file path, the stanza
+                        author may choose to indicate that a file chooser
+                        dialog box can be opened. Should that information be
+                        present in the stanza, a button will be placed to the
+                        right of the text field for opening the file chooser
+                        dialog.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Radio button groups are used for controlling
+                        which mutually exclusive choice the user can make
+                        among different cases.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Pull-down menus are used for long lists of
+                        mutually exclusive options in order to save space in
+                        the GUI layout. The stanza author is responsible for
+                        making the decision about when a pull-down menu is
+                        more appropriate than a group of radio buttons.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Check boxes are used for groups of options that
+                        are not mutually exclusive.</para>
+                     </listitem>
+                  </itemizedlist>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.launch"></indexterm>
+               </section>
+            </section>
+
+            <section id="section.viewer.reboot">
+               <title>Reboot Viewer</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.viewer.reboot">
+                  <primary>viewers</primary>
+
+                  <secondary>reboot</secondary>
+               </indexterm>
+
+               <para>The Reboot Viewer allows the GUI user to reboot
+               individual nodes of the cluster or all the nodes of the cluster
+               with the click of a button. When possible<footnote>
+                     <para>Information about how to set up the Reboot Service
+                     was provided earlier in <xref
+                     linkend="section.maestrod.settings.reboot" />.</para>
+                  </footnote>, the Reboot Viewer allows the GUI user to change
+               the target operating system when rebooting so that it is not
+               necessary to have direct access to the remote computer in order
+               to change which OS it loads upon booting. This can be done for
+               all nodes at once using the buttons at the top of the view
+               panel, or it can be done for individual nodes. To change the
+               boot target for an individual node, click on the table item
+               that identifies the current OS, and a pull-down menu will be
+               activated that allows the target OS to change. </para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.viewer.reboot"></indexterm>
             </section>
 
             <section id="section.viewer.process">
@@ -1331,20 +2203,32 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          </section>
 
          <section>
-            <title>Configuring the Maestro GUI</title>
+            <title>Configuring the <application>Maestro
+            GUI</application></title>
 
-            <para>Presently, the Maestro GUI has only three user preferences:
-            the user skill level, the directory where the log files get stored
-            during execution, and whether to delete these log files when the
-            GUI exits. The GUI does not yet provide a graphical means to edit
-            these preferences, so users must edit the file
-            <filename>$HOME/.maestro/maestro.xml</filename>
+            <para>Presently, the <application>Maestro GUI</application> has
+            only three user preferences: the user skill level, the directory
+            where the log files get stored during execution, and whether to
+            delete these log files when the GUI exits. The GUI does not yet
+            provide a graphical means to edit these preferences, so users must
+            edit the file
+            <filename>$HOME/.maestro/maestro.xml</filename><indexterm>
+                  <primary><filename>maestro.xml</filename></primary>
+               </indexterm>
             (<filename>%APPDATA%\Maestro\maestro.xml</filename> or
             <filename>%USERPROFILE%\Application
             Data\Maestro\maestro.xml</filename> on <productname
             class="registered">Microsoft Windows</productname>) by hand. An
             example version of this file is shown in <xref
             linkend="example.maestro.gui.config" />.</para>
+
+            <indexterm>
+               <primary><filename>maestro.xml</filename></primary>
+
+               <secondary>elements</secondary>
+
+               <tertiary><sgmltag>&lt;maestro&gt;</sgmltag></tertiary>
+            </indexterm>
 
             <example id="example.maestro.gui.config">
                <title>Sample <filename>maestro.xml</filename></title>
@@ -1356,27 +2240,45 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
 &lt;/maestro&gt;</programlisting>
             </example>
 
-            <para>This example demonstrates a key aspect of the Maestro GUI
-            configuration. Namely, the lack of a setting (in this case, the
-            user skill level) is not a problem. Reasonable defaults exist for
-            the current settings, and there is not usually a need to override
-            the defaults by adding to this file. The defaults for the settings
-            are as follows:</para>
+            <para>This example demonstrates a key aspect of the
+            <application>Maestro GUI</application> configuration. Namely, the
+            lack of a setting (in this case, the user skill level) is not a
+            problem. Reasonable defaults exist for the current settings, and
+            there is not usually a need to override the defaults by adding to
+            this file. The defaults for the settings are as follows:</para>
 
             <itemizedlist>
                <listitem>
-                  <para><literal>logdir</literal>: The platform-specific home
-                  directory of the user running the Maestro GUI</para>
+                  <para><literal>logdir</literal><indexterm>
+                        <primary><filename>maestro.xml</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;logdir&gt;</sgmltag></tertiary>
+                     </indexterm>: The platform-specific home directory of the
+                  user running the <application>Maestro
+                  GUI</application></para>
                </listitem>
 
                <listitem>
-                  <para><literal>clean_logfiles</literal>:
-                  <literal>true</literal></para>
+                  <para><literal>clean_logfiles</literal><indexterm>
+                        <primary><filename>maestro.xml</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;clean_logfiles&gt;</sgmltag></tertiary>
+                     </indexterm>: <literal>true</literal></para>
                </listitem>
 
                <listitem>
-                  <para><literal>user_mode</literal>: <literal>100</literal>
-                  (meaning novice)</para>
+                  <para><literal>user_mode</literal><indexterm>
+                        <primary><filename>maestro.xml</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;user_mode&gt;</sgmltag></tertiary>
+                     </indexterm>: <literal>100</literal> (meaning
+                  novice)</para>
                </listitem>
             </itemizedlist>
          </section>
@@ -1386,39 +2288,294 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
    <chapter id="chapter.maestro.files">
       <title>Maestro Files</title>
 
-      <para></para>
+      <para>Aside from preferences or configuration files, there are two data
+      files utilized by Maestro: ensembles and stanzas. These files were
+      introduced earlier in <xref linkend="section.usage.gui" />, and we go
+      into more detail about their use and how to edit them in this chapter.
+      These files are loaded by the <application>Maestro GUI</application>, so
+      all users of the <application>Maestro GUI</application> will have some
+      interaction with them. However, not all users will have to know how
+      interpret or edit the contents of these files. We explain more in the
+      following sections.</para>
 
       <section id="section.files.ensemble">
          <title>Ensembles</title>
 
-         <para></para>
+         <indexterm class="startofrange" id="index.file.ensemble">
+            <primary>ensemble</primary>
+
+            <secondary>file</secondary>
+         </indexterm>
+
+         <para>Ensemble files (having the extension
+         <filename>.ensem</filename> or <filename>.ensemble</filename>)
+         identify the nodes of a cluster. When the <application>Maestro
+         GUI</application> loads an ensemble file, it tries to connect to the
+         <command>maestrod</command> process running on each of the identified
+         nodes. The structure of these files is very simple, and the example
+         included with the Maestro source is shown in <xref
+         linkend="example.maestro.ensemble" />. The root XML node must be
+         <sgmltag>&lt;ensemble&gt;</sgmltag><indexterm>
+               <primary>ensemble</primary>
+
+               <secondary>elements</secondary>
+
+               <tertiary><sgmltag>&lt;ensemble&gt;</sgmltag></tertiary>
+            </indexterm>, and it has one level child nodes that are
+         <sgmltag>&lt;cluster_node&gt;</sgmltag><indexterm>
+               <primary>ensemble</primary>
+
+               <secondary>elements</secondary>
+
+               <tertiary><sgmltag>&lt;cluster_node&gt;</sgmltag></tertiary>
+            </indexterm> elements. The &lt;cluster_node&gt; elements have
+         three attributes: <literal>class</literal>,
+         <literal>hostname</literal>, and <literal>name</literal>. The
+         <literal>class</literal> is a comma-separated list of identifiers
+         indicating the role of the node in the cluster, and it comes into
+         play with the stanzas and application launching. Common values are
+         <literal>master</literal> or <literal>slave</literal>. The
+         <literal>hostname</literal> is the IP address or machine name for the
+         node. This is what the <application>Maestro GUI</application> uses
+         for making the connection to the remote node. Finally, the
+         <literal>name</literal> is a <quote>friendly</quote> identifier for
+         the node that is used whenever the nodes of the ensemble are
+         displayed in the <application>Maestro GUI</application>.</para>
+
+         <example id="example.maestro.ensemble">
+            <title>Maestro Ensemble</title>
+
+            <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;ensemble&gt;
+   &lt;cluster_node class="" hostname="timmy" name="timmy" /&gt;
+   &lt;cluster_node class="" hostname="smalls" name="smalls" /&gt;
+&lt;/ensemble&gt;</programlisting>
+         </example>
+
+         <indexterm class="startofrange" id="index.file.ensemble.edit">
+            <primary>ensemble</primary>
+
+            <secondary>file</secondary>
+
+            <tertiary>editing</tertiary>
+         </indexterm>
+
+         <para>Ensemble files can be edited by hand using a text editor or by
+         using the <application>Maestro GUI</application>'s ensemble editor.
+         This editor is integrated into the Ensemble Viewer (first introduced
+         in <xref linkend="section.viewer.settings" />). This viewer has
+         controls for adding nodes to and removing nodes from the loaded
+         ensemble. After making edits to the ensemble, it can be saved using
+         the <menuchoice>
+               <guimenu>File</guimenu>
+
+               <guimenuitem>Save Ensemble</guimenuitem>
+            </menuchoice> menu item or the <guibutton>Save
+         Ensemble</guibutton> tool bar button. As of this writing, there is
+         not currently a <menuchoice>
+               <guimenu>File</guimenu>
+
+               <guimenuitem>Save Ensemble As...</guimenuitem>
+            </menuchoice> item, but that will likely be added in a future
+         release.</para>
+
+         <indexterm class="endofrange" startref="index.file.ensemble.edit"></indexterm>
+
+         <para>Generally, an ensemble would be edited once per cluster when
+         setting up Maestro for use with that cluster. An administrator would
+         put the ensemble file in a place that is convenient for accessing by
+         all users of the cluster. At this time, the Maestro GUI does not have
+         a way to name a default ensemble to load, but this capability will be
+         added in a future release.</para>
+
+         <indexterm class="endofrange" startref="index.file.ensemble"></indexterm>
       </section>
 
       <section id="section.files.stanza">
          <title>Stanzas</title>
 
-         <para>The other type of file utilized by the Maestro GUI is known as
-         a stanza. Every application that can be launched by Maestro must be
-         described using a stanza.</para>
+         <indexterm class="startofrange" id="index.file.stanza">
+            <primary>stanza</primary>
+
+            <secondary>file</secondary>
+         </indexterm>
+
+         <para>The other type of file utilized by the <application>Maestro
+         GUI</application> is known as a stanza. Every application that can be
+         launched by Maestro must be described using a stanza. Stanzas are
+         discovered dynamically when the <application>Maestro
+         GUI</application> is launched or by using the
+         <option>--stanza</option> command line option.</para>
+
+         <para>Stanza files are XML files, and their structure is quite
+         complex. They have a high degree of flexibility that allows
+         arbitrarily deep nesting and references to external stanzas. Due to
+         their complexity, we refrain from going into detail about the format
+         here and instead concentrate on how to use the stanza editor.</para>
+
+         <indexterm class="startofrange" id="index.file.stanza.edit">
+            <primary>stanza</primary>
+
+            <secondary>file</secondary>
+
+            <tertiary>editing</tertiary>
+         </indexterm>
+
+         <para>The stanza editor is one of the Maestro GUI viewer plug-ins. It
+         is currently the only viewer that does not have a corresponding
+         service since it does not do anything with the ensemble. Thus, it is
+         not necessary to have an ensemble loaded in order to edit stanza
+         files. There are two items in the <guimenu>File</guimenu> menu
+         related to stanza editing: <menuchoice>
+               <guimenu>File</guimenu>
+
+               <guimenuitem>Load Stanza</guimenuitem>
+            </menuchoice> and <menuchoice>
+               <guimenu>File</guimenu>
+
+               <guimenuitem>Save All Stanzas</guimenuitem>
+            </menuchoice>. The stanza editor itself contains a button
+         <guibutton>New Application</guibutton> for creating a new application
+         stanza from scratch.</para>
+
+         <para>Since stanzas describe a hierarchy of options and environment
+         variables, the idea behind the editor is to represent that hierarchy
+         in an understandable yet powerful manner. A simple graph structure is
+         used to achieve this. The parent/child relationships are represented
+         by arrows between nodes of the graph. Each node of the graph
+         represents an XML element, and the attributes of the XML element are
+         editable in the dockable panel at the bottom of the stanza editor.
+         This panel is dockable so that it can be detached from the
+         <application>Maestro GUI</application> and resized independently as
+         necessary.</para>
+
+         <para>In the stanza editor, there is a tool bar containing all the
+         information that can go into a stanza. The tool bar items are as
+         follows:</para>
+
+         <itemizedlist>
+            <listitem>
+               <para><guibutton>Choice</guibutton>: Creates a structural item
+               containing a list of choices, either mutually exclusive or not.
+               Choices can encompass one or more groups, one or more other
+               choices, one or more arguments, and/or one or more environment
+               variables.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Group</guibutton>: Creates a structural
+               grouping of related items. Groups can encompass other groups,
+               choices, arguments, and/or environment variables.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Argument</guibutton>: An argument describes a
+               command line argument to an application. This may or may not
+               have a flag, but it always has a value.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Env Variable</guibutton>: An environment
+               variable describes a setting that is applied to the execution
+               environment of the application.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Command</guibutton>: A command is what
+               actually gets executed when the application is launched.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Cwd</guibutton>: The current working directory
+               identifies where in the file system the command will be
+               executed. This does not have to be the same as the directory
+               containing the command since the command can be specified using
+               an absolute path.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Reference</guibutton>: A reference allows
+               reuse of a structural item in another stanza. References can be
+               refined by using add, remove, and override operations. A
+               reference has an identifier that uniquely describes what XML
+               element in another stanza is being referenced.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Override</guibutton>: An override changes a
+               detail of a referenced structural item. This can include XML
+               attributes and the CDATA of the referenced element.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Add Options</guibutton>: An add operation
+               extends a referenced structural item by defining further
+               structural items such as groups, choices, arguments, and
+               environment variables. The exact result of the add operation
+               depends on what structural item is being referenced.</para>
+            </listitem>
+
+            <listitem>
+               <para><guibutton>Remove Option</guibutton>: A remove operation
+               deletes a child of the referenced structural item.</para>
+            </listitem>
+         </itemizedlist>
+
+         <para>To add any one of these to the stanza being edited, click the
+         desired tool bar item and drag it to the stanza editor canvas. At
+         that point, connections can be made between the new structural item
+         and existing items. The attributes of the item can be edited in the
+         dockable panel at the bottom of the stanza editor.</para>
+
+         <indexterm class="endofrange" startref="index.file.stanza.edit"></indexterm>
+
+         <para>Application developers would create a stanza file for their
+         application when the application is deployed for use at a site that
+         is already running Maestro. The site-specific details (such as what
+         VR Juggler configuration to load) can be referenced by a stanza, but
+         in general, a stanza file for an application will vary from one site
+         and one cluster to another. Since the variation is captured in the
+         stanza file, however, it is much easier to deploy cluster-ready
+         applications than writing a custom launch solution for each
+         site.</para>
+
+         <indexterm class="endofrange" startref="index.file.stanza"></indexterm>
       </section>
    </chapter>
 
    <chapter id="chapter.extending.maestro">
       <title>Extending Maestro</title>
 
-      <section>
+      <section id="section.extending.services">
          <title>Services</title>
 
          <indexterm class="startofrange" id="index.section.services">
             <primary>services</primary>
          </indexterm>
 
-         <para></para>
+         <para>Services are plug-ins that are loaded by maestrod when it
+         starts. It scans the directory
+         <filename>maestro/daemon/plugins/services</filename> in the Maestro
+         installation directory (henceforth referred to as
+         <filename>&lt;MAESTRODIR&gt;</filename>) at startup to discover what
+         services are available. Services are identified as classes that
+         implement the interface
+         <interface>maestro.core.IServicePlugin</interface><indexterm>
+               <primary>plug-ins</primary>
+
+               <secondary>interfaces</secondary>
+
+               <tertiary>maestro.core.IServicePlugin</tertiary>
+            </indexterm> as defined in
+         <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+         All discovered service plug-ins are instantiated and made available
+         for use. If any plug-in fails to load or fails to instantiate, then
+         it is deactivated.</para>
 
          <indexterm startref="index.section.services"></indexterm>
       </section>
 
-      <section>
+      <section id="section.extending.service.plugins">
          <title>Service Plug-ins</title>
 
          <indexterm class="startofrange" id="index.section.services.plugins">
@@ -1499,7 +2656,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </listitem>
 
                <listitem>
-                  <para><literal>grub</literal>: The <ulink
+                  <para><literal>GRUB</literal>: The <ulink
                   url="http://www.gnu.org/software/grub/">Grand Unified
                   Bootloader</ulink><indexterm>
                         <primary>boot loader</primary>
@@ -1610,8 +2767,26 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          <title>Views</title>
 
          <para>In order for a service to be utilized, there must be a
-         corresponding view in the Maestro GUI. Views provide a visual
-         interface to the remote service.</para>
+         corresponding view in the <application>Maestro GUI</application>.
+         Views provide a visual interface to the remote service. Views are
+         identified as classes that implement the interface
+         <interface>maestro.core.IViewPlugin</interface><indexterm>
+               <primary>plug-ins</primary>
+
+               <secondary>interfaces</secondary>
+
+               <tertiary>maestro.core.IViewPlugin</tertiary>
+            </indexterm> as defined in
+         <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.</para>
+
+         <para>When the <application>Maestro GUI</application> starts, it
+         scans the directory
+         <filename>&lt;MAESTRODIR&gt;/maestro/gui/plugins/views</filename> to
+         discover what views are available. Services All discovered view
+         plug-ins are instantiated and made available for use. If any plug-in
+         fails to load or fails to instantiate, then it is deactivated and not
+         shown in the GUI. The views that come with Maestro were described in
+         <xref linkend="section.running.maestro.gui" />.</para>
       </section>
    </chapter>
 
