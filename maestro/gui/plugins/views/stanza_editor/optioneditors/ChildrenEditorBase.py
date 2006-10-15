@@ -40,11 +40,13 @@ class Ui_ChildrenEditorBase(object):
 
       self.mDownBtn = QtGui.QToolButton(ChildrenEditorBase)
       self.mDownBtn.setEnabled(False)
+      self.mDownBtn.setIcon(QtGui.QIcon(":/Maestro/images/down32.png"))
       self.mDownBtn.setObjectName("mDownBtn")
       self.gridlayout.addWidget(self.mDownBtn,1,1,1,1)
 
       self.mUpBtn = QtGui.QToolButton(ChildrenEditorBase)
       self.mUpBtn.setEnabled(False)
+      self.mUpBtn.setIcon(QtGui.QIcon(":/Maestro/images/up32.png"))
       self.mUpBtn.setObjectName("mUpBtn")
       self.gridlayout.addWidget(self.mUpBtn,0,1,1,1)
 

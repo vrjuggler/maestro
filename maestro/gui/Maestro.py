@@ -415,6 +415,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             QtGui.QMessageBox.critical(None, "Error",
                "Failed to read stanza file %s: %s" % \
                (new_file, ex.strerror))
+      print "Stanzas: ", env.mStanzaStore.mStanzas
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)

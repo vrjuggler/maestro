@@ -143,7 +143,7 @@ class Ui_MaestroBase(object):
       self.mAboutAction.setObjectName("mAboutAction")
 
       self.mLoadStanzaAction = QtGui.QAction(MaestroBase)
-      self.mLoadStanzaAction.setIcon(QtGui.QIcon(":/Maestro/images/open.png"))
+      self.mLoadStanzaAction.setIcon(QtGui.QIcon(":/Maestro/images/stanza.png"))
       self.mLoadStanzaAction.setObjectName("mLoadStanzaAction")
 
       self.mSaveEnsembleAction = QtGui.QAction(MaestroBase)
@@ -175,9 +175,7 @@ class Ui_MaestroBase(object):
       self.menubar.addAction(self.menuFile.menuAction())
       self.menubar.addAction(self.menuHelp.menuAction())
       self.mToolbar.addAction(self.mLoadEnsembleAction)
-      self.mToolbar.addAction(self.mSaveEnsembleAction)
       self.mToolbar.addAction(self.mLoadStanzaAction)
-      self.mToolbar.addAction(self.mSaveStanzasAction)
       self.mToolbar.addAction(self.mArchiveLogsAction)
 
       self.retranslateUi(MaestroBase)

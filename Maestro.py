@@ -63,8 +63,8 @@ def process_command_line():
    parser = OptionParser(usage="%prog [options] [ensemble]", version="0.1", description=prog_desc)
    parser.add_option("-e","--ensemble", type="string",
                      help="Ensemble file to load")
-   parser.add_option("-s","--stanza", type="string",
-                     help="Load a specific stanza.")
+   parser.add_option("-s","--stanza", action="append", type="string",
+                     help="Load a specific stanza.", dest="stanzas")
    parser.add_option("-v","--view", type="string",
                      help="Start with a given view active.")
 
@@ -154,7 +154,6 @@ def main():
       def splashProgressCB(percent, message):
          splash.showMessage("%3.0f%% %s"%(percent*100,message))
          app.processEvents()   
-         time.sleep(0.03)
 
       env = maestro.core.Environment()
       env.initialize(gui_settings, opts, splashProgressCB)

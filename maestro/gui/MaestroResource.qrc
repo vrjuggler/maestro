@@ -5,6 +5,7 @@
         <file>images/copy.png</file>
         <file>images/cut.png</file>
         <file>images/desktop.png</file>
+        <file>images/down32.png</file>
         <file>images/edit_add.png</file>
         <file>images/edit_remove.png</file>
         <file>images/editredo.png</file>
@@ -28,6 +29,9 @@
         <file>images/resources.png</file>
         <file>images/resourcesView.png</file>
         <file>images/save.png</file>
+        <file>images/stanza.png</file>
+        <file>images/stanza_new.png</file>
+        <file>images/up32.png</file>
         <file>images/win_xp.png</file>
     </qresource>
 </RCC>

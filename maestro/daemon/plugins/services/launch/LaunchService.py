@@ -54,6 +54,11 @@ class LaunchService(maestro.core.IServicePlugin):
                env.mEventManager.emit("*", "launch.report_is_running", False)
                self.mProcess = None
 
+            #if not self.isProcessRunning():
+            #   #self.mLogger.info("Testing process running: " + str())
+            #   env.mEventManager.emit("*", "launch.report_is_running", False)
+            #   self.mProcess = None
+
       except Exception, ex:
          self.mLogger.error("I/O Error: " + str(ex))
 

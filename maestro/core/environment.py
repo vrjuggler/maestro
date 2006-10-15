@@ -63,9 +63,8 @@ class Environment(maestro.util.mixins.Singleton):
       if maestro.core.const.MAESTRO_GUI:
          # Create a stanza store and scan for files.
          self.mStanzaStore = StanzaStore.StanzaStore()
-         if opts.stanza:
-            files = str(opts.stanza).split(',')
-            self.mStanzaStore.loadStanzas(files, progressCB)
+         if opts.stanzas:
+            self.mStanzaStore.loadStanzas(opts.stanzas, progressCB)
          else:
             self.mStanzaStore.scan(progressCB)
       

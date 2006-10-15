@@ -179,9 +179,7 @@
     <number>4</number>
    </attribute>
    <addaction name="mLoadEnsembleAction" />
-   <addaction name="mSaveEnsembleAction" />
    <addaction name="mLoadStanzaAction" />
-   <addaction name="mSaveStanzasAction" />
    <addaction name="mArchiveLogsAction" />
   </widget>
   <widget class="QDockWidget" name="mLogWindow" >
@@ -223,7 +221,7 @@
   </action>
   <action name="mLoadStanzaAction" >
    <property name="icon" >
-    <iconset resource="MaestroResource.qrc" >:/Maestro/images/open.png</iconset>
+    <iconset resource="MaestroResource.qrc" >:/Maestro/images/stanza.png</iconset>
    </property>
    <property name="text" >
     <string>Load Stanza</string>

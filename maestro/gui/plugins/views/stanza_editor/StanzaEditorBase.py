@@ -107,6 +107,12 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.setSpacing(3)
       self.hboxlayout.setObjectName("hboxlayout")
 
+      self.mNewAppBtn = QtGui.QToolButton(self.mToolGroupBox)
+      self.mNewAppBtn.setIcon(QtGui.QIcon(":/Maestro/images/stanza_new.png"))
+      self.mNewAppBtn.setIconSize(QtCore.QSize(24,24))
+      self.mNewAppBtn.setObjectName("mNewAppBtn")
+      self.hboxlayout.addWidget(self.mNewAppBtn)
+
       self.mLayoutBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mLayoutBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png"))
       self.mLayoutBtn.setIconSize(QtCore.QSize(24,24))
@@ -116,6 +122,7 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mLayoutBtn)
 
       self.mNoDragBtn = QtGui.QToolButton(self.mToolGroupBox)
+      self.mNoDragBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/no-drag.png"))
       self.mNoDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mNoDragBtn.setCheckable(True)
       self.mNoDragBtn.setChecked(True)
@@ -123,12 +130,14 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mNoDragBtn)
 
       self.mScrollDragBtn = QtGui.QToolButton(self.mToolGroupBox)
+      self.mScrollDragBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/scroll-drag.png"))
       self.mScrollDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mScrollDragBtn.setCheckable(True)
       self.mScrollDragBtn.setObjectName("mScrollDragBtn")
       self.hboxlayout.addWidget(self.mScrollDragBtn)
 
       self.mRubberBandDragBtn = QtGui.QToolButton(self.mToolGroupBox)
+      self.mRubberBandDragBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/rubber-drag.png"))
       self.mRubberBandDragBtn.setIconSize(QtCore.QSize(24,24))
       self.mRubberBandDragBtn.setCheckable(True)
       self.mRubberBandDragBtn.setObjectName("mRubberBandDragBtn")
@@ -204,10 +213,17 @@ class Ui_StanzaEditorBase(object):
       StanzaEditorBase.setWindowTitle(QtGui.QApplication.translate("StanzaEditorBase", "Stanza Editor", None, QtGui.QApplication.UnicodeUTF8))
       StanzaEditorBase.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Stanza Editor: Provides a method to create/modify application launch options.", None, QtGui.QApplication.UnicodeUTF8))
       StanzaEditorBase.setStatusTip(QtGui.QApplication.translate("StanzaEditorBase", "Stanza Editor", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewAppBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "New Application", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewAppBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLayoutBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Layout", None, QtGui.QApplication.UnicodeUTF8))
       self.mLayoutBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "Layout", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNoDragBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Select Mode", None, QtGui.QApplication.UnicodeUTF8))
       self.mNoDragBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mScrollDragBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Scroll Mode", None, QtGui.QApplication.UnicodeUTF8))
       self.mScrollDragBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRubberBandDragBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Group Mode", None, QtGui.QApplication.UnicodeUTF8))
       self.mRubberBandDragBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mZoomExtentsBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Zoom Extents", None, QtGui.QApplication.UnicodeUTF8))
       self.mZoomExtentsBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
 

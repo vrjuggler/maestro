@@ -44,9 +44,11 @@ class StanzaStore:
 
       num_files = len(stanzaFiles)
       for (i, f) in zip(xrange(num_files), stanzaFiles):
-         progressCB(i/num_files, "Loading file: %s"%f)
-         stanza_elm = ET.ElementTree(file=f).getroot()
-         self.mStanzas[f] = stanza_elm
+         file_name = os.path.abspath(f)
+         if os.path.exists(file_name):
+            progressCB(i/num_files, "Loading file: %s"%file_name)
+            stanza_elm = ET.ElementTree(file=file_name).getroot()
+            self.mStanzas[file_name] = stanza_elm
 
    def saveAll(self):
       for file_name, stanza in self.mStanzas.iteritems():
