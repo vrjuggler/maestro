@@ -389,7 +389,16 @@ class StanzaScene(QtGui.QGraphicsScene):
             self.addItem(item)
             pos = event.scenePos()
             item.setPos(pos)
-            item.setParent(self.mApplicationItem)
+            tag = item.mElement.tag
+            # XXX: We need to decide what to do with new items when they
+            #      are added to the scene. If we do not add them to the
+            #      actual xml tree then we lose them when we change to
+            #      another view and then back. But it is also not valid
+            #      to have certain parents for a new item. For now we will
+            #      add all element types but the three listed below to
+            #      the root application element.
+            if tag not in ['add', 'remove', 'override']:
+               item.setParent(self.mApplicationItem)
             item.update()
 
          self.update(self.sceneRect())
