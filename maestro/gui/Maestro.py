@@ -29,6 +29,7 @@ from maestro.util import plugin
 
 import MaestroBase
 import MaestroResource
+import AboutDialogBase
 
 import maestro
 import maestro.core
@@ -442,6 +443,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onSaveStanzas)
       self.connect(self.mLoadStanzaAction, QtCore.SIGNAL("triggered()"),
                    self.onLoadStanza)
+      self.connect(self.mAboutAction, QtCore.SIGNAL("triggered()"),
+                   self.onAbout)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout1.addWidget(self.mOutputTab)
@@ -460,6 +463,12 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
       self.mModuleButtons = []
+
+   def onAbout(self):
+      dialog = QtGui.QDialog()
+      about_ui = AboutDialogBase.Ui_AboutDialogBase()
+      about_ui.setupUi(dialog)
+      dialog.exec_()
 
    def onArchiveLogs(self):
       zip_file_name = \
