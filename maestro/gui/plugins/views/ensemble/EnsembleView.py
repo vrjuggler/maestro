@@ -379,7 +379,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """
       selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
       if selected_node is not None and \
-         self.mSelectedNode is not None and \
+         isinstance(selected_node, Ensemble.ClusterNode) and \
          nodeId == selected_node.getId():
          self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
          self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
