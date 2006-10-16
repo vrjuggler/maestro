@@ -157,7 +157,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       for c in self.mSelectedApp.mChildren:
          # All top level objects are selected by default.
          c.mSelected = True
-         if not c.mHidden:
+         if not c.mHidden and not isPointless(c):
             sh = _buildWidget(c)
             sh.setParent(self.mAppFrame);
             self.mAppFrame.layout().insertWidget(self.mAppFrame.layout().count()-1, sh)
