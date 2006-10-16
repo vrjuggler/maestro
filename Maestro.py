@@ -67,6 +67,8 @@ def process_command_line():
                      help="Load a specific stanza.", dest="stanzas")
    parser.add_option("-v","--view", type="string",
                      help="Start with a given view active.")
+   parser.add_option("-o","--override", action="append", type="string",
+                     help="Start with a given view active.", dest="overrides")
 
    (opts, pos_args) = parser.parse_args()
 
