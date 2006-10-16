@@ -213,7 +213,8 @@ class ClusterNode(QtCore.QObject):
       self.mName = self.mElement.get("name")
       self.mHostname = self.mElement.get("hostname")
       self.mClass = self.mElement.get("class")
-      self.mPlatform = const.ERROR 
+      self.mPlatform = const.ERROR
+      self.mIpAddress = '0.0.0.0'
 
    def lostConnection(self):
       """ Slot that is called when the connection to this node is lost. All
@@ -238,16 +239,17 @@ class ClusterNode(QtCore.QObject):
 
    def setHostname(self, newHostname):
       self.mPlatform = const.ERROR
+      try:
+         self.mIpAddress = socket.gethostbyname(newHostname)
+      except:
+         self.mIpAddress = '0.0.0.0'
       return self.mElement.set('hostname', newHostname)
 
    def getId(self):
       return self.getIpAddress()
 
    def getIpAddress(self):
-      try:
-         return socket.gethostbyname(self.getHostname())
-      except:
-         return "0.0.0.0"
+      return self.mIpAddress
 
    def setPlatform(self, os):
       self.mPlatform = os
