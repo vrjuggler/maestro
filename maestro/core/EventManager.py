@@ -171,12 +171,18 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
          try:
-            v.callRemote("emit", ip_address, sigName, args, **kwArgs)
+            v.callRemote("emit", ip_address, sigName, args, **kwArgs).addErrback(self.onErrorEmitting)
          except banana.BananaError, ex:
             self.mLogger.error('Emitting failed: %s' % str(ex))
          except Exception, ex:
             del self.mProxies[k]
             self.mLogger.info('Removed dead connection ' + str(k))
+
+   def onErrorEmitting(self, reason):
+      # Quietly ignore all emitting errors
+      # XXX: This is only temporary until we can figure out why there are errors on exit.
+      pass
+      #print "ERROR: ", reason
 
    def isConnected(self, nodeId):
       return self.mProxies.has_key(nodeId)
