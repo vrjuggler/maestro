@@ -192,6 +192,7 @@ def main():
                                           (opts.ensemble, ex.strerror))
 
       m.show()
+      m.resize(800, 850)
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()
