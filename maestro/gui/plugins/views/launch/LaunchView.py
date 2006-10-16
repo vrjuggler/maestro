@@ -184,6 +184,13 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
       for node in self.mEnsemble.mNodes:
          print "Node [%s] [%s]" % (node.getName(), node.getClassList())
+
+         if node.mPlatform == const.ERROR:
+            QtGui.QMessageBox.warning(self.parentWidget(),
+               "Not Connected",
+               "%s is not connected." % node.getName())
+            continue
+            
          option_visitor = Stanza.OptionVisitor(node.getClassList())
          Stanza.traverse(self.mSelectedApp, option_visitor)
          print option_visitor.mArgs

@@ -57,6 +57,7 @@ class OutputTabWidget(QtGui.QTabWidget):
       self.mEnsemble = None
       self.mTabMap = {}
       self.mEditMap = {}
+      self.mIpToEditMap = {}
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
@@ -90,17 +91,21 @@ class OutputTabWidget(QtGui.QTabWidget):
       ip_address = node.getIpAddress()
       del self.mTabMap[node]
       del self.mEditMap[node]
+      del self.mIpToEditMap[ip_address]
 
    def onNodeChanged(self, node):
       if self.mTabMap.has_key(node):
          node_index = self.mEnsemble.mNodes.index(node)
          self.setTabText(node_index, node.getName())
+         ip_address = node.getIpAddress()
+         self.mIpToEditMap[ip_address] = self.mEditMap[node]
 
    def reset(self):
       for i in xrange(self.count()):
          self.removeTab(0)
       self.mTabMap = {}
       self.mEditMap = {}
+      self.mIpToEditMap = {}
          
       for i in xrange(len(self.mEnsemble.mNodes)):
          node = self.mEnsemble.mNodes[i]
@@ -108,7 +113,7 @@ class OutputTabWidget(QtGui.QTabWidget):
 
    def onOutput(self, nodeId, output):
       try:
-         textedit = self.mEditMap[nodeId]
+         textedit = self.mIpToEditMap[nodeId]
          textedit.append(output)
       except KeyError:
          print "ERROR: OutputTabWidget.onOutput: Got output for [%s] when we do not have a tab for it." % (nodeId)
@@ -130,6 +135,8 @@ class OutputTabWidget(QtGui.QTabWidget):
          raise AttributeError("OutputTabWidget: [%s] already has a tab." % ip_address)
       if self.mEditMap.has_key(node):
          raise AttributeError("OutputTabWidget: [%s] already has a textedit widget." % ip_address)
+      if self.mIpToEditMap.has_key(ip_address):
+         print "WARNING: We already have a node with that IP address."
 
       tab = QtGui.QWidget()
       tab.setObjectName("tab")
@@ -148,6 +155,7 @@ class OutputTabWidget(QtGui.QTabWidget):
       
       self.mTabMap[node] = tab
       self.mEditMap[node] = log_widget
+      self.mIpToEditMap[ip_address] = log_widget
 
 class NodeLogger:
    def __init__(self):
