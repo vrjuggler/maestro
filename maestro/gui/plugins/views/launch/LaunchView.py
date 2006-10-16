@@ -209,12 +209,14 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
             QtGui.QMessageBox.warning(self.parentWidget(),
                                       "Working Directory Missing",
                                       "No working directory for node %s" % node.getName())
-         elif len(option_visitor.mCommands) > 1:
+         elif len(option_visitor.mCwds) > 1:
             cwd = option_visitor.mCwds[0]
             QtGui.QMessageBox.warning(self.parentWidget(),
                "Multiple Current Working Directories",
                "More that one current working directory specified for node [%s]. "\
                "Using the first command." % node.getName())
+         elif len(option_visitor.mCwds) == 0:
+            cwd = ''
          else:
             cwd = option_visitor.mCwds[0]
 
