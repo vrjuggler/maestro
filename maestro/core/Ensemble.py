@@ -113,11 +113,8 @@ class Ensemble(QtCore.QObject):
          print "ERROR: ", ex
 
    def lookupIpAddrs(self):
-      for node in self.mNodes():
-         try:
-            node.mIpAddress = socket.gethostbyname(node.mHostname)
-         except:
-            node.mIpAddress = '0.0.0.0'
+      for node in self.mNodes:
+         node.lookupIpAddress()
 
    def refreshConnections(self):
       """Try to connect to all nodes."""
@@ -218,10 +215,11 @@ class ClusterNode(QtCore.QObject):
       #print "Name:", self.mElement.get("name")
       #print "HostName:", self.mElement.get("hostname")
       self.mName = self.mElement.get('name', '')
-      self.setHostname(self.mElement.get('hostname', ''))
+      self.mHostname = self.mElement.get('hostname', '')
       self.mClass = self.mElement.get('class', '')
       self.mPlatform = const.ERROR
       self.mIpAddress = '0.0.0.0'
+      self.lookupIpAddress()
 
    def lostConnection(self):
       """ Slot that is called when the connection to this node is lost. All
@@ -244,13 +242,16 @@ class ClusterNode(QtCore.QObject):
    def getHostname(self):
       return self.mElement.get('hostname', 'Unknown')
 
-   def setHostname(self, newHostname):
-      self.mPlatform = const.ERROR
+   def lookupIpAddress(self):
       try:
-         self.mIpAddress = socket.gethostbyname(newHostname)
+         self.mIpAddress = socket.gethostbyname(self.getHostname())
       except:
          self.mIpAddress = '0.0.0.0'
+      
+   def setHostname(self, newHostname):
+      self.mPlatform = const.ERROR
       self.mElement.set('hostname', newHostname)
+      self.lookupIpAddress()
 
    def getId(self):
       return self.getIpAddress()
