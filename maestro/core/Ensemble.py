@@ -164,6 +164,7 @@ class Ensemble(QtCore.QObject):
       new_node = ClusterNode(new_element)
       self.mNodes.append(new_node)
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
+      return new_node
 
    def addNode(self, node, index=-1):
       if -1 == index:
