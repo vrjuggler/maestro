@@ -43,11 +43,20 @@ class LaunchService(maestro.core.IServicePlugin):
          if self.mProcess is not None:
             env = maestro.core.Environment()
             # Try to get output from process.
-            line = self.mProcess.stdout.read(4096)
+            stdout_line = self.mProcess.stdout.read(4096)
+            stderr_line = self.mProcess.stderr.read(4096)
+            check_done = True
             # If we got something back then send it across the network.
-            if line is not None and line != "":
-               self.mLogger.debug("line: " + line)
-               env.mEventManager.emit("*", "launch.output", line)
+            if stdout_line is not None and stdout_line != "":
+               self.mLogger.debug("line: " + stdout_line)
+               env.mEventManager.emit("*", "launch.output", stdout_line)
+               check_done = False
+
+            if stderr_line is not None and stderr_line != "":
+               self.mLogger.debug("line: " + stderr_line)
+               env.mEventManager.emit("*", "launch.output", stderr_line)
+               check_done = False
+               
             # Other wise check to see if the process is still running.
             elif not self.isProcessRunning():
                self.mLogger.info("Process is not longer running.")

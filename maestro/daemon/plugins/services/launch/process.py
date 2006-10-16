@@ -261,8 +261,8 @@ def _readRetryOnEINTR(fd, buffersize):
             if sys.platform.startswith("win"):
                return os.read(fd, buffersize)
             else:
-               (ins, outs, errs) = select.select([], [fd], [], 0)
-               if fd in outs:
+               (ins, outs, errs) = select.select([fd], [], [fd], 0)
+               if fd in ins:
                   return os.read(fd, buffersize)
                else:
                   return ""
