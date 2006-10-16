@@ -326,6 +326,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          # or id could have changed.
          self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
          self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
+         # Inform everyone that the node changed.
+         self.mEnsemble.emit(QtCore.SIGNAL("nodeChanged"), selected_node)
    
    def onNodeSelected(self, selected, deselected):
       """ Slot that is called when a cluster node is selected. """

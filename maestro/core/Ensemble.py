@@ -164,6 +164,8 @@ class Ensemble(QtCore.QObject):
       new_node = ClusterNode(new_element)
       self.mNodes.append(new_node)
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
+      new_index = len(self.mNodes) - 1
+      self.emit(QtCore.SIGNAL("nodeAdded"), new_index, new_node)
       return new_node
 
    def addNode(self, node, index=-1):
@@ -172,6 +174,7 @@ class Ensemble(QtCore.QObject):
       self.mNodes.insert(index, node)
       self.mElement.insert(index, node.mElement)
       self.emit(QtCore.SIGNAL("ensembleChanged()"))
+      self.emit(QtCore.SIGNAL("nodeAdded"), index, node)
 
    def removeNode(self, nodeOrIndexOrId):
       node = None
@@ -182,20 +185,19 @@ class Ensemble(QtCore.QObject):
       elif types.StringType == type(nodeOrIndexOrId):
          for n in self.mNodes[:]:
             if n.getId() == node.getId():
-               self.mElement.remove(n.mElement)
-               self.mNodes.remove(n)
-               self.emit(QtCore.SIGNAL("ensembleChanged()"))
+               node = n
                break
 
       if node is None:
          print "WARNING: Node could not be removed: %s", nodeOrIndexOrId
-      else:
+      elif self.mNodes.count(node) > 0:
+         old_index = self.mNodes.index(node)
          self.mNodes.remove(node)
          self.mElement.remove(node.mElement)
          env = maestro.core.Environment()
          env.mEventManager.disconnectFromNode(node.getId())
          self.emit(QtCore.SIGNAL("ensembleChanged()"))
-      
+         self.emit(QtCore.SIGNAL("nodeRemoved"), old_index, node)
  
 class ClusterNode(QtCore.QObject):
    """ Represents a node in the active cluster configuration. Most of this
