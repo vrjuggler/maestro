@@ -262,9 +262,8 @@ class Arg(TreeItem):
       self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
       self.mValue = ""
-      value = xmlElt.text
-      if None is not value:
-         self.mValue = value
+      if xmlElt.text is not None:
+         self.mValue = xmlElt.text.strip()
 
    def getValue(self):
       return self.mValue
@@ -289,9 +288,8 @@ class Command(TreeItem):
       self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
       self.mValue = ""
-      value = xmlElt.text
-      if None is not value:
-         self.mValue = value
+      if xmlElt.text is not None:
+         self.mValue = xmlElt.text.strip()
 
    def getName(self):
       return self.mValue
@@ -316,9 +314,8 @@ class Cwd(TreeItem):
       self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
       self.mValue = ""
-      value = xmlElt.text
-      if None is not value:
-         self.mValue = value
+      if xmlElt.text is not None:
+         self.mValue = xmlElt.text.strip()
 
    def setData(self, index, value, role):
       row = index.row()
@@ -353,9 +350,8 @@ class EnvVar(TreeItem):
       self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
 
       self.mValue = ""
-      value = xmlElt.text
-      if None is not value:
-         self.mValue = value
+      if xmlElt.text is not None:
+         self.mValue = xmlElt.text.strip()
 
    def getName(self):
       return self.mLabel
