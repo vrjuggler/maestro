@@ -384,13 +384,13 @@ class StanzaScene(QtGui.QGraphicsScene):
          # that it will disappear if we move from application to application.
          item_type = str(item_type)
          item = stanzaitems.buildItem(item_type)
-         self.mApplication.append(item.mElement)
 
          if item is not None:
             self.addItem(item)
             pos = event.scenePos()
             item.setPos(pos)
-
+            item.setParent(self.mApplicationItem)
+            item.update()
 
          self.update(self.sceneRect())
       #elif event.mimeData().hasFormat("maestro/create-link"):
@@ -804,31 +804,32 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def onItemSelected(self, item):
       self.mHelpWidget.clear()
 
-      tag = item.mElement.tag
-
       while self.mEditorTabWidget.count() > 0:
          self.mEditorTabWidget.removeTab(0)
 
-      #self.mOptionEditor = self.mNoEditorLbl
-      if isinstance(item, Node):
-         if self.mOptionEditors.has_key(tag):
-            for editor in self.mOptionEditors[tag]:
-               editor_widget = editor.getEditorWidget(item)
-               editor_name = editor.__class__.getName()
-               self.mEditorTabWidget.addTab(editor_widget, editor_name)
+      # If we didn't actually select an item.
+      if item is None or not isinstance(item, Node):
+         return
 
-         # Load help HTML data.
-         file_name = item.mElement.tag + ".html"
-         file_path = pj(os.path.dirname(__file__), 'help', file_name)
-         file = QtCore.QFile(file_path)
-         if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
-            print "Cannot read file %s:\n%s." % (file_path, file.errorString())
-         else:
-            stream = QtCore.QTextStream(file)
-            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-            self.mHelpWidget.setHtml(stream.readAll())
-            QtGui.QApplication.restoreOverrideCursor()
-         file.close()
+      tag = item.mElement.tag
+      if self.mOptionEditors.has_key(tag):
+         for editor in self.mOptionEditors[tag]:
+            editor_widget = editor.getEditorWidget(item)
+            editor_name = editor.__class__.getName()
+            self.mEditorTabWidget.addTab(editor_widget, editor_name)
+
+      # Load help HTML data.
+      file_name = item.mElement.tag + ".html"
+      file_path = pj(os.path.dirname(__file__), 'help', file_name)
+      file = QtCore.QFile(file_path)
+      if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+         print "Cannot read file %s:\n%s." % (file_path, file.errorString())
+      else:
+         stream = QtCore.QTextStream(file)
+         QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+         self.mHelpWidget.setHtml(stream.readAll())
+         QtGui.QApplication.restoreOverrideCursor()
+      file.close()
 
    def keyPressEvent(self, event):
       key = event.key()
