@@ -2096,13 +2096,6 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                <guimenuitem>Off</guimenuitem> item from the context
                menu.</para>
 
-               <note>
-                  <para>Right-clicking on the white background of the Resource
-                  Viewer also brings up the context menu, but choosing an
-                  update rate from the context menu has no effect in this
-                  case. This is a known bug.</para>
-               </note>
-
                <indexterm class="endofrange"
                           startref="index.section.viewer.resource"></indexterm>
             </section>

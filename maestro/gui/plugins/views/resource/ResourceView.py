@@ -74,7 +74,12 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       delegate = GraphDelegate(self.mResourceTable)
       self.mResourceTable.setItemDelegate(delegate)
       self.mResourceTable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-      self.mResourceTable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+
+      # Force the resource table to bring up a custom context menu. This allows us
+      # to only display the context menu if nodes are selected in the table.
+      self.mResourceTable.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+      self.connect(self.mResourceTable, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+         self.onResourceContextMenu)
 
       self.mActions = []
       self.mActionCallables = []
@@ -92,6 +97,14 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
          self.mActionCallables.append(callable)
 
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
+
+   def onResourceContextMenu(self, point):
+      """ Create a pop-up menu listing all valid operations for selection. """
+   
+      selected_indices = self.mResourceTable.selectedIndexes()
+      if len(selected_indices) > 0:
+         # Show the context menu.
+         QtGui.QMenu.exec_(self.mResourceTable.actions(), self.mResourceTable.mapToGlobal(point));
 
    def onChangeReportTime(self, reportTime):
       env = maestro.core.Environment()
