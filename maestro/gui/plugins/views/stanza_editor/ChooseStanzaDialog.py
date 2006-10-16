@@ -34,23 +34,39 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
    def setupUi(self, widget):
       ChooseStanzaDialogBase.Ui_ChooseStanzaDialogBase.setupUi(self, widget)
 
+      # Connect the browse button.
+      self.connect(self.mBrowseBtn, QtCore.SIGNAL("clicked()"), self.onBrowse)
+
       env = maestro.core.Environment()
       for stanza_file in env.mStanzaStore.mStanzas.keys():
          self.mStanzaList.addItem(stanza_file)
 
-   def onBrowse(self):
+      # Set the first stanza as the default.
+      if self.mStanzaList.count() > 0:
+         self.mStanzaList.setCurrentRow(0)
+
+   def onBrowse(self, checked=False):
       start_dir = ''
       if os.path.exists(maestro.core.const.STANZA_PATH):
          start_dir = maestro.core.const.STANZA_PATH
 
       new_file = \
          QtGui.QFileDialog.getSaveFileName(
-            self, "Choose a new stanza file.", start_dir,
-            "Stanza (*.stanza)"
+            self, "Choose a new stanza file", start_dir,
+            "Stanza (*.stanza)", "", QtGui.QFileDialog.DontConfirmOverwrite
          )
       new_file = str(new_file)
+      self.mNewStanzaEdit.setText(new_file)
    
    def getFilename(self):
+      if self.mExistingStazaRB.isChecked():
+         current_item = self.mStanzaList.currentItem()
+         if current_item is not None:
+            return str(current_item.text())
+      else:
+         return str(self.mNewStanzaEdit.text())
+
+      # If nothing else, return '' which is an invalid filename
       return ''
 
 if __name__ == "__main__":

@@ -36,11 +36,10 @@ import stanzaitems
 from stanzaitems import *
 import layout
 import elementtree.ElementTree as ET
+import xml.dom.minidom
 
 import StanzaEditorResource
-
-
-
+import ChooseStanzaDialog
 
 class StanzaEditorPlugin(maestro.core.IViewPlugin):
    def __init__(self):
@@ -71,6 +70,7 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       # the first time that the view is activated.
       if self.mStanzaEditorToolbar is None:
          self.mStanzaEditorToolbar = QtGui.QToolBar("Stanza Toolbar", mainWindow)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mNewAppBtn)
          self.mStanzaEditorToolbar.addWidget(self.widget.mLayoutBtn)
          self.mStanzaEditorToolbar.addWidget(self.widget.mNoDragBtn)
          self.mStanzaEditorToolbar.addWidget(self.widget.mScrollDragBtn)
@@ -577,7 +577,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def updateGui(self):
       # Last step, fill in application combobox and select the first one.
       self.__fillApplicationCB()
-      self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
 
    def setEnsemble(self, ensemble=None):
       pass
@@ -649,10 +648,56 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          # Force the view 
          self.mGraphicsView.fitInView(extents, QtCore.Qt.KeepAspectRatio)
 
+   def onNewApplication(self):
+      (app_name, ok) = QtGui.QInputDialog.getText(self, "Application Name",
+         "What is the name of the new application?")
+      if not ok:
+         return
+      app_name = str(app_name)
+      app_name_no_spaces = app_name.replace(' ', '')
+
+      app_element = ET.Element('application', {'name': app_name_no_spaces,
+                                               'label': app_name})
+
+      dialog = ChooseStanzaDialog.ChooseStanzaDialog(self)
+      if QtGui.QDialog.Accepted == dialog.exec_():
+         stanza_filename = dialog.getFilename()
+         env = maestro.core.Environment()
+         if env.mStanzaStore.mStanzas.has_key(stanza_filename):
+            stanza = env.mStanzaStore.mStanzas[stanza_filename]
+            stanza.append(app_element)
+         elif os.path.exists(stanza_filename):
+            try:
+               env.mStanzaStore.loadStanzas(stanza_filename)
+            except IOError, ex:
+               QtGui.QMessageBox.critical(None, "Error",
+                  "Failed to load stanza file %s: %s" % \
+                  (stanza_filename, ex.strerror))
+               return
+            stanza = env.mStanzaStore.mStanzas[stanza_filename]
+            stanza.append(app_element)
+         else:
+            stanza = ET.Element('stanza', {})
+            stanza.append(app_element)
+            env.mStanzaStore.mStanzas[stanza_filename] = stanza
+            # Attempt to save the new file
+            env.mStanzaStore.saveStanza(stanza, stanza_filename)
+         # Update the GUI to include the new application.
+         self.updateGui()
+         new_app_index = self.mApplicationCB.findText(app_name)
+         if new_app_index > 0:
+            self.mApplicationCB.setCurrentIndex(new_app_index)
+            #self.onApplicationSelected(0)
+
+            
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
       self.mNoEditorLbl = QtGui.QLabel("There is not editor for this Item.")
+
+      # Hook up the new application action.
+      self.connect(self.mNewApplicationAction, QtCore.SIGNAL("triggered()"), self.onNewApplication)
+      self.mNewAppBtn.setDefaultAction(self.mNewApplicationAction)
 
       zoom_icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/zoom-extents.png")
       self.mZoomExtentsAction = QtGui.QAction(zoom_icon, self.tr("Zoom Extents"), self)
@@ -682,6 +727,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Get signaled when the user selects an existing class, or types a new one.
       self.connect(self.mOperatingSystemCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onClassFilterChanged)
       self.connect(self.mClassFilterCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onClassFilterChanged)
+
+      # Register for a signal when an application is selected.
+      self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
 
       # Generate icons.
       klasses = [ChoiceItem, GroupItem, ArgItem, EnvVarItem, CommandItem,

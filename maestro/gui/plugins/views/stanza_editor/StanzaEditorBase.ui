@@ -359,6 +359,14 @@
     </widget>
    </item>
   </layout>
+  <action name="mNewApplicationAction" >
+   <property name="icon" >
+    <iconset resource="../../../MaestroResource.qrc" >:/Maestro/images/stanza_new.png</iconset>
+   </property>
+   <property name="text" >
+    <string>New Application</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="StanzaEditorResource.qrc" />

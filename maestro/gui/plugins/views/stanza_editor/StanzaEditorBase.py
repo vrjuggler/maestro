@@ -206,6 +206,10 @@ class Ui_StanzaEditorBase(object):
       self.hboxlayout.addWidget(self.mClassFilterCB)
       self.gridlayout.addWidget(self.mToolGroupBox,0,0,1,2)
 
+      self.mNewApplicationAction = QtGui.QAction(StanzaEditorBase)
+      self.mNewApplicationAction.setIcon(QtGui.QIcon(":/Maestro/images/stanza_new.png"))
+      self.mNewApplicationAction.setObjectName("mNewApplicationAction")
+
       self.retranslateUi(StanzaEditorBase)
       QtCore.QMetaObject.connectSlotsByName(StanzaEditorBase)
 
@@ -226,6 +230,7 @@ class Ui_StanzaEditorBase(object):
       self.mZoomExtentsBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Zoom Extents", None, QtGui.QApplication.UnicodeUTF8))
       self.mZoomExtentsBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewApplicationAction.setText(QtGui.QApplication.translate("StanzaEditorBase", "New Application", None, QtGui.QApplication.UnicodeUTF8))
 
 
 
