@@ -498,7 +498,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
          log_files = self.mFileLogger.getLogFiles()
          for l in log_files:
-            if os.path.exists(f):
+            if os.path.exists(l):
                zip_file.write(l)
 
          zip_file.close()
