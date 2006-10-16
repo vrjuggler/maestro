@@ -1,0 +1,162 @@
+<ui version="4.0" >
+ <class>ChooseStanzaDialogBase</class>
+ <widget class="QDialog" name="ChooseStanzaDialogBase" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>437</width>
+    <height>271</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Choose Stanza</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item row="0" column="1" colspan="2" >
+    <widget class="QListWidget" name="mStanzaList" />
+   </item>
+   <item row="1" column="2" >
+    <widget class="QToolButton" name="mBrowseBtn" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="text" >
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" >
+    <widget class="QLineEdit" name="mNewStanzaEdit" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QRadioButton" name="mNewStanzaRB" >
+     <property name="text" >
+      <string>New Stanza</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" >
+    <widget class="QRadioButton" name="mExistingStazaRB" >
+     <property name="text" >
+      <string>Existing Stanza</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3" >
+    <widget class="QDialogButtonBox" name="mButtonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>mExistingStazaRB</tabstop>
+  <tabstop>mStanzaList</tabstop>
+  <tabstop>mButtonBox</tabstop>
+  <tabstop>mNewStanzaRB</tabstop>
+  <tabstop>mNewStanzaEdit</tabstop>
+  <tabstop>mBrowseBtn</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>mButtonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ChooseStanzaDialogBase</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mButtonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ChooseStanzaDialogBase</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mExistingStazaRB</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mStanzaList</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>79</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>133</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mNewStanzaRB</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mNewStanzaEdit</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>70</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>153</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mNewStanzaRB</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mBrowseBtn</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>37</x>
+     <y>206</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>413</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
