@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
 <ensemble>
-   <cluster_node class="" hostname="timmy" name="timmy"/>
-   <cluster_node class="" hostname="smalls" name="smalls"/>
+   <cluster_node class="" hostname="node0" name="Node 0"/>
+   <cluster_node class="" hostname="node1" name="Node 1"/>
 </ensemble>
