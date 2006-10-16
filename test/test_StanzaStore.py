@@ -56,9 +56,7 @@ class StanzaStoreTest(unittest.TestCase):
    def testAddOurOwn(self):
       apps = self.mStanzaStore.find('expand:AddOurOwnDisplaySystem')
       self.assert_(1 == len(apps))
-      print "START"
       expanded_app = self.mStanzaStore.expand(apps[0])
-      print "STOP"
       found = self.mStanzaStore._find(expanded_app, "DisplaySystem")
       self.assert_(1 == len(found))
       display_choice = found[0]
@@ -110,6 +108,27 @@ class StanzaStoreTest(unittest.TestCase):
       for group in found:
          for arg in group:
             self.assert_(arg.get('flag') == '--jconf')
+
+   def testCommandLineOverride(self):
+      class DummyOptions:
+         pass
+
+      # NOTE: This test assumes that env.mCmdOpts was None
+      #       when self.mStanzaStore.scan() was called.
+      env = maestro.core.Environment()
+      d = DummyOptions()
+      setattr(d, 'overrides',
+         ["expand:ChangeFilename/File?flag=-j&cdata=new_file.xmlsoe"])
+      env.mCmdOpts = d
+
+      elms = self.mStanzaStore.find('expand:ChangeFilename/File')
+      self.assert_(1 == len(elms))
+      file_arg = elms[0]
+      self.assert_('-f' == file_arg.get('flag'))
+      self.assert_('old_file.xmlsoe' == file_arg.text)
+      self.mStanzaStore._expandCmdLine()
+      self.assert_('-j' == file_arg.get('flag'))
+      self.assert_('new_file.xmlsoe' == file_arg.text)
 
 def printPointers(elm, indent=0):
    string = "   " * indent

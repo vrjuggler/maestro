@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stanza namespace="expand">
+  <application name="ChangeFilename">
+     <arg name="File" flag="-f">old_file.xmlsoe</arg>
+  </application>
+</stanza>

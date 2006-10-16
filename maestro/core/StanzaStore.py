@@ -53,6 +53,8 @@ class StanzaStore:
             stanza_elm = ET.ElementTree(file=file_name).getroot()
             self.mStanzas[file_name] = stanza_elm
 
+      self._expandCmdLine()
+
    def saveAll(self):
       for file_name, stanza in self.mStanzas.iteritems():
          self.saveStanza(stanza, file_name)
@@ -95,6 +97,21 @@ class StanzaStore:
          app = Stanza.Application(expanded)
          apps.append(app)
       return apps
+
+   def _expandCmdLine(self):
+      env = maestro.core.Environment()
+      if env.mCmdOpts is None or not env.mCmdOpts.overrides:
+         return
+
+      for override in env.mCmdOpts.overrides:
+         (id, attrib_str) = override.split('?')
+         pairs = [p.split('=') for p in attrib_str.split('&')]
+         elms = self.find(id)
+         for (k, v) in pairs:
+            if k == 'cdata':
+               self._replaceText(elms, v)
+            if k != 'id':
+               self._replaceAttrib(elms, k, v)
 
    def expand(self, elm):
       """ Expands a top level element. """
