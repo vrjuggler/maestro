@@ -360,7 +360,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
    def refreshNodeSettings(self):
       selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
       # Early out if there is no node selected.
-      if selected_node is not None:      
+      if selected_node is not None and isinstance(selected_node, Ensemble.ClusterNode):
          # Get IP address
          try:
             self.mIpAddressEdit.setText(selected_node.getIpAddress())
