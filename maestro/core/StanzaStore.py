@@ -11,14 +11,14 @@ xpath_tokenizer = re.compile(
    "(\.\.|\(\)|[/.*\(\)@=])|((?:\{[^}]+\})?[^/\(\)@=\s]+)|\s+"
    )
 
+def null_progress_cb(p,s):
+   pass
+
 class StanzaStore:
    def __init__(self):
       self.mStanzas = {}
 
    def scan(self, progressCB=None):
-      def null_progress_cb(p,s):
-         pass
-      
       if not progressCB:
          progressCB = null_progress_cb
 
@@ -37,10 +37,13 @@ class StanzaStore:
       # Load all files that we found.
       self.loadStanzas(stanza_files, progressCB=progressCB)
 
-   def loadStanzas(self, stanzaFiles, progressCB):
+   def loadStanzas(self, stanzaFiles, progressCB=None):
       # If files is really a single file, turn it into a list.
       if types.StringType == type(stanzaFiles):
          stanzaFiles = [stanzaFiles,]
+      
+      if not progressCB:
+         progressCB = null_progress_cb
 
       num_files = len(stanzaFiles)
       for (i, f) in zip(xrange(num_files), stanzaFiles):
@@ -52,18 +55,23 @@ class StanzaStore:
 
    def saveAll(self):
       for file_name, stanza in self.mStanzas.iteritems():
-         try:
-            stanza_str = ET.tostring(stanza)
-            lines = [l.strip() for l in stanza_str.splitlines()]
-            stanza_str = ''.join(lines)
-            dom = xml.dom.minidom.parseString(stanza_str)
-            output_file = file(file_name, 'w')
-            output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
-            output_file.close()
-         except IOError, ex:
-            QtGui.QMessageBox.critical(None, "Error",
-               "Failed to save stanza file %s: %s" % \
-               (file_name, ex.strerror))
+         self.saveStanza(stanza, file_name)
+
+   def saveStanza(self, stanza, fileName):
+      try:
+         stanza_str = ET.tostring(stanza)
+         lines = [l.strip() for l in stanza_str.splitlines()]
+         stanza_str = ''.join(lines)
+         dom = xml.dom.minidom.parseString(stanza_str)
+         output_file = file(fileName, 'w')
+         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+         output_file.close()
+         return True
+      except IOError, ex:
+         QtGui.QMessageBox.critical(None, "Error",
+            "Failed to save stanza file %s: %s" % \
+            (file_name, ex.strerror))
+         return False
 
    def findApplications(self):
       """ Returns all unexpanded application elements. """
