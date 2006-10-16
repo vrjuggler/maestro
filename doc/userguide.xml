@@ -1844,7 +1844,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                line is to facilitate rendering rather than to indicate
                syntax):</para>
 
-               <screen>maestro.py --ensemble="C:\site\cluster-open.jconf"
+               <screen>maestro.py --ensemble="C:\site\cluster.ensem"
            --stanza="C:\myapp.stanza" --view="Launch View"</screen>
 
                <para>We will explain more about these viewers in the following
