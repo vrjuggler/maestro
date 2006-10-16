@@ -395,10 +395,12 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          QtGui.QMessageBox.critical(None, "Error",
             "Failed to save ensemble file %s: %s" % \
             (file_name, ex.strerror))
+      self.statusBar().showMessage("Ensemble saved")
 
    def onSaveStanzas(self):
       env = maestro.core.Environment()
       env.mStanzaStore.saveAll()
+      self.statusBar().showMessage("All stanzas saved")
       
    def onLoadStanza(self):
       new_file = \
