@@ -112,6 +112,13 @@ class Ensemble(QtCore.QObject):
       except Exception, ex:
          print "ERROR: ", ex
 
+   def lookupIpAddrs(self):
+      for node in self.mNodes():
+         try:
+            node.mIpAddress = socket.gethostbyname(node.mHostname)
+         except:
+            node.mIpAddress = '0.0.0.0'
+
    def refreshConnections(self):
       """Try to connect to all nodes."""
 
@@ -210,9 +217,9 @@ class ClusterNode(QtCore.QObject):
       self.mElement = xmlElt
       #print "Name:", self.mElement.get("name")
       #print "HostName:", self.mElement.get("hostname")
-      self.mName = self.mElement.get("name")
-      self.mHostname = self.mElement.get("hostname")
-      self.mClass = self.mElement.get("class")
+      self.mName = self.mElement.get('name', '')
+      self.setHostname(self.mElement.get('hostname', ''))
+      self.mClass = self.mElement.get('class', '')
       self.mPlatform = const.ERROR
       self.mIpAddress = '0.0.0.0'
 
@@ -243,7 +250,7 @@ class ClusterNode(QtCore.QObject):
          self.mIpAddress = socket.gethostbyname(newHostname)
       except:
          self.mIpAddress = '0.0.0.0'
-      return self.mElement.set('hostname', newHostname)
+      self.mElement.set('hostname', newHostname)
 
    def getId(self):
       return self.getIpAddress()

@@ -242,6 +242,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
    def onRefresh(self):
       """ Slot that requests information about all nodes in the Ensemble. """
       if not self.mEnsemble is None:
+         self.mEnsemble.lookupIpAddrs()
          self.mEnsemble.refreshConnections()
 
       env = maestro.core.Environment()
