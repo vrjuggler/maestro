@@ -5,7 +5,7 @@
    <bookinfo>
       <title>Maestro User's Guide</title>
 
-      <releaseinfo>Version 0.1</releaseinfo>
+      <releaseinfo>Version 0.2</releaseinfo>
 
       <authorgroup>
          <corpauthor><ulink url="http://www.infiscape.com/">Infiscape
@@ -31,7 +31,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>October 16, 2006</pubdate>
+      <pubdate>October 20, 2006</pubdate>
    </bookinfo>
 
    <preface>
@@ -1481,7 +1481,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                         <para><literal>powercfg</literal>: Power management
                         using the Windows utility program
                         <command>powercfg.exe</command> to control monitor
-                        power off. </para>
+                        power off.</para>
 
                         <note>
                            <para>The <command>powercfg.exe</command> utility
@@ -1631,7 +1631,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                         <tertiary><sgmltag>&lt;background_image_manager&gt;</sgmltag></tertiary>
                      </indexterm> XML element in
                   <filename>maestrod.xcfg</filename>. Supported values at the
-                  time of this writing are as follows: </para>
+                  time of this writing are as follows:</para>
 
                   <itemizedlist>
                      <listitem>
@@ -2015,7 +2015,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                panel, or it can be done for individual nodes. To change the
                boot target for an individual node, click on the table item
                that identifies the current OS, and a pull-down menu will be
-               activated that allows the target OS to change. </para>
+               activated that allows the target OS to change.</para>
 
                <indexterm class="endofrange"
                           startref="index.section.viewer.reboot"></indexterm>

@@ -4,11 +4,11 @@
 
 # Spec file for Maestro.
 %define name    maestro
-%define version 0.1
+%define version 0.2.0
 %define release 1
 
 # Change to 0 to disable building documentation.
-%define build_doc 0
+%define build_doc 1
 
 Name: %{name}
 Summary: Maestro cluster management software
