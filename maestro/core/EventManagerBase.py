@@ -212,6 +212,7 @@ class TimerHandler(object):
       # map callable --> next_trigger_time
       #  - If trigger time == 0, then tigger always
       self.mTimerMap = {}
+      self.mLogger = logging.getLogger('maestrod.TimerHandler')
       
    def createTimer(self, slot, duration=0):
       """ Create a new timer.
@@ -241,9 +242,9 @@ class TimerHandler(object):
                try:
                   slot_ref()               # Call the slot
                except Exception, ex:
-                  err_text = "Error calling timer callback: %s\n  exception:"%slot_ref + str(ex)
-                  self.mLogger.error(err_txt)
-                  self.mLogger.error("Removing slot: " + ex)
+                  err_text = "Error calling timer callback: %s\n  exception:"% str(slot_ref) + str(ex)
+                  self.mLogger.error(err_text)
+                  self.mLogger.error("Removing slot: " + str(ex))
                   #traceback.print_exc()
                   null_keys.append(slot_ref)
                except:
