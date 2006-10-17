@@ -724,14 +724,13 @@ class ChoiceItem(Node):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
       self.mColor = QtGui.QColor(76, 122, 255, 191)
-      self.mAttribNameList = AllAttribName + ['Type'] + HSAttribName
-      self.mAttribList = AllAttrib + ['type'] + HSAttrib
+      self.mAttribNameList = AllAttribName + HSAttribName
+      self.mAttribList = AllAttrib + HSAttrib
 
    def getDefaultAttribs():
       return {'name':'NewChoice',
               'label':'New Choice',
               'class':'',
-              'type':'one',
               'hidden':'false',
               'selected':'true',
               'editable':'true'}

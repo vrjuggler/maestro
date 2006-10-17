@@ -35,8 +35,7 @@ class BasicEditorPlugin(maestro.core.IOptionEditorPlugin):
    getName = staticmethod(getName)
 
    def getOptionType():
-      return ['application', 'choice', 'group', 'arg', 'env_var', \
-              'command', 'cwd', 'ref', 'add', 'remove']
+      return ['application', 'choice', 'group', 'arg', 'env_var', 'command', 'cwd']
    getOptionType = staticmethod(getOptionType)
 
    def getEditorWidget(self, option):
