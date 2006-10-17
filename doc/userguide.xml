@@ -469,6 +469,12 @@
 
             <listitem>
                <para><ulink
+               url="http://www.python.org/pyvault/SRPMS/repodata/repoview/python-crypto-0-2.0.1-2.html">python-crypto</ulink>
+               2.0.1</para>
+            </listitem>
+
+            <listitem>
+               <para><ulink
                url="http://pyopenssl.sourceforge.net/">pyOpenSSL</ulink> 0.6.1
                (<ulink
                url="http://twisted.sourceforge.net/contrib/pyOpenSSL-0.6.win32-py2.3.exe">Windows
@@ -483,8 +489,8 @@
 
             <listitem>
                <para><ulink
-               url="http://www.pangalactic.org/PyPAM/">PyPAM</ulink> 0.4.2
-               (Linux server only; <ulink
+               url="http://www.pangalactic.org/PyPAM/">PyPAM</ulink> (or
+               python-pam) 0.4.2 (Linux server only; <ulink
                url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Dev/GettingTheCode/python-pam_0.4.2-10.4.tar.gz">known
                working source</ulink>)</para>
             </listitem>
