@@ -339,6 +339,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.refreshNodeSettings()
       # Refresh the settings model.
       self.mNodeSettingsModel.setSelectedNode(selected_node)
+      self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
+      self.mSettingsTableView.setModel(None)
+      self.mSettingsTableView.setModel(self.mNodeSettingsModel)
+      self.mSettingsTableView.reset()
 
    def updateFields(self):
       """
