@@ -246,9 +246,6 @@ def _getPathFromEnv(env):
         else:
             return None
 
-if not sys.platform.startswith("win"):
-   import select
-
 def _readRetryOnEINTR(fd, buffersize):
     """Like os.read, but retries on EINTR.
     
@@ -258,14 +255,7 @@ def _readRetryOnEINTR(fd, buffersize):
     """
     while 1:
         try:
-            if sys.platform.startswith("win"):
-               return os.read(fd, buffersize)
-            else:
-               (ins, outs, errs) = select.select([fd], [], [fd], 0)
-               if fd in ins:
-                  return os.read(fd, buffersize)
-               else:
-                  return ""
+            return os.read(fd, buffersize)
         except OSError, e:
             if e.errno == errno.EINTR:
                 continue

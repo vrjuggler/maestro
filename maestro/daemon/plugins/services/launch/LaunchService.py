@@ -18,12 +18,54 @@
 
 
 import re
-import sys, os
-import os.path
+import sys, os, os.path, threading, time
 
 import maestro.core
 import process
 import logging
+
+class OutputThread(threading.Thread):
+   def __init__(self, launchService):
+      threading.Thread.__init__(self)
+      self.mLaunchService = launchService
+
+   def run(self):
+      sys.stdout.flush()
+      #return
+      try:
+         env = maestro.core.Environment()
+         env.mEventManager.emit("*", "launch.report_is_running", True)
+         while self.mLaunchService.mProcess is not None: # and  self.mLaunchService.isProcessRunning():
+            # Try to get output from process.
+            stdout_line = self.mLaunchService.mProcess.stdout.read(4096)
+            #stderr_line = self.mLaunchService.mProcess.stderr.read(4096)
+            stderr_line = ""
+            check_done = True
+            # If we got something back then send it across the network.
+            if stdout_line is not None and stdout_line != "":
+               self.mLaunchService.mLogger.debug("line: " + stdout_line)
+               env.mEventManager.emit("*", "launch.output", stdout_line)
+               check_done = False
+
+            #if stderr_line is not None and stderr_line != "":
+            #   self.mLaunchService.mLogger.debug("line: " + stderr_line)
+            #   env.mEventManager.emit("*", "launch.output", stderr_line)
+            #   check_done = False
+               
+            # Other wise check to see if the process is still running.
+            else:
+               if not self.mLaunchService.isProcessRunning():
+                  print "Process is not running."
+                  if stdout_line == "" and stderr_line == "":
+                     print "Both stdout and stderr are empty"
+                     break
+            time.sleep(0.1)
+
+         self.mLaunchService.mLogger.info("Process is not longer running.")
+         env.mEventManager.emit("*", "launch.report_is_running", False)
+         self.mLaunchService.mProcess = None
+      except Exception, ex:
+         self.mLaunchService.mLogger.error("I/O Error: " + str(ex))
 
 class LaunchService(maestro.core.IServicePlugin):
    def __init__(self):
@@ -36,40 +78,6 @@ class LaunchService(maestro.core.IServicePlugin):
       env.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
       env.mEventManager.connect("*", "launch.terminate", self.onTerminateCommand)
       env.mEventManager.connect("*", "launch.get_is_running", self.onIsRunning)
-      env.mEventManager.timers().createTimer(self.update, 0.5)
-
-   def update(self):
-      try:
-         if self.mProcess is not None:
-            env = maestro.core.Environment()
-            # Try to get output from process.
-            stdout_line = self.mProcess.stdout.read(4096)
-            stderr_line = self.mProcess.stderr.read(4096)
-            check_done = True
-            # If we got something back then send it across the network.
-            if stdout_line is not None and stdout_line != "":
-               self.mLogger.debug("line: " + stdout_line)
-               env.mEventManager.emit("*", "launch.output", stdout_line)
-               check_done = False
-
-            if stderr_line is not None and stderr_line != "":
-               self.mLogger.debug("line: " + stderr_line)
-               env.mEventManager.emit("*", "launch.output", stderr_line)
-               check_done = False
-               
-            # Other wise check to see if the process is still running.
-            elif not self.isProcessRunning():
-               self.mLogger.info("Process is not longer running.")
-               env.mEventManager.emit("*", "launch.report_is_running", False)
-               self.mProcess = None
-
-            #if not self.isProcessRunning():
-            #   #self.mLogger.info("Testing process running: " + str())
-            #   env.mEventManager.emit("*", "launch.report_is_running", False)
-            #   self.mProcess = None
-
-      except Exception, ex:
-         self.mLogger.error("I/O Error: " + str(ex))
 
    def onRunCommand(self, nodeId, avatar, command, cwd, envMap):
       def merge(d1, d2):
@@ -85,42 +93,59 @@ class LaunchService(maestro.core.IServicePlugin):
       self.mLogger.debug("LaunchService.onRunCommand(%s, %s, %s)" % (command, cwd, envMap))
 
       try:
-         if not None == self.mProcess and self.isProcessRunning():
-            self.mLogger.warning("Command already running.")
-            return False
+         if self.mProcess is not None:
+            if self.isProcessRunning():
+               self.mLogger.warning("Command already running.")
+               return False
+            else:
+               self.mProcess = None
+               env.mEventManager.emit("*", "launch.report_is_running", False)
+
+         #self.mLogger.debug("Original env: " + str(envMap))
+
+
+
+         # Expand all environment variables.
+         # XXX: Do we really need to do this in all cases. The operating system
+         #      should be able to do this for us. Except we are not using cross
+         #      platform envvar syntax.
+         self.evaluateEnvVars(envMap)
+         command = self.expandEnv(command, envMap)[0]
+         cwd     = self.expandEnv(cwd, envMap)[0]
+         #command = command.replace('\\', '\\\\')
+         #self.mLogger.info("Running command: " + command)
+         self.mLogger.debug("Working Dir: " + cwd)
+         self.mLogger.debug("Translated env: " + str(envMap))
+
+         # Merge our environment with the local environment.
+         # XXX: This might not give us what we think it does because on UNIX
+         #      os.environ is bound when the service starts. This will happen
+         #      before many things get set up in the environment, $HOSTNAME
+         #      for example is not defined yet. On Windows it should give
+         #      us the System Environment.
+         merge(envMap, os.environ)
+         self.mLogger.debug("After merge with local: " + str(envMap['DISPLAY']))
+
+         # No need to do this since we are merging the entire os.environ.
+         if sys.platform.startswith("win"):
+            envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+         # XXX: We should not assume that a non-Windows platform is running
+         # the X Window System.
          else:
-            self.mLogger.debug("Original env: " + str(envMap))
-            self.evaluateEnvVars(envMap)
-            command = self.expandEnv(command, envMap)[0]
-            cwd     = self.expandEnv(cwd, envMap)[0]
-            #command = command.replace('\\', '\\\\')
-            self.mLogger.info("Running command: " + command)
-            self.mLogger.debug("Working Dir: " + cwd)
-            self.mLogger.debug("Translated env: " + str(envMap))
+            envMap['DISPLAY']    = os.environ['DISPLAY']
+            envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
 
-            # Merge our environment with the local environment.
-            # XXX: This might not give us what we think it does because on UNIX
-            #      os.environ is bound when the service starts. This will happen
-            #      before many things get set up in the environment, $HOSTNAME
-            #      for example is not defined yet. On Windows it should give
-            #      us the System Environment.
-            merge(envMap, os.environ)
-#            self.mLogger.debug(envMap)
-            if sys.platform.startswith("win"):
-               envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
-            # XXX: We should not assume that a non-Windows platform is running
-            # the X Window System.
-            else:
-               envMap['DISPLAY']    = os.environ['DISPLAY']
-               envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+         self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
+                                             env = envMap, avatar = avatar)
 
-            if sys.platform.startswith("win"):
-               self.mProcess = process.ProcessProxy(cmd = command, cwd = cwd,
-                                                    env = envMap, avatar = avatar)
-            else:
-               self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
-                                                   env = envMap, avatar = avatar)
-            return True
+         self.mOutputThread = OutputThread(self)
+         print "BEFORE THREAD START"
+         sys.stdout.flush()
+         self.mOutputThread.start()
+         #self.mOutputThread.join()
+         print "AFTER THREAD START"
+         sys.stdout.flush()
+         return True
       except KeyError, ex:
          #traceback.print_stack()
          self.mLogger.error("runCommand() failed with KeyError: " + str(ex))
