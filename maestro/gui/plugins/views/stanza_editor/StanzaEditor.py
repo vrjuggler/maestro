@@ -175,14 +175,14 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       mainWindow.menuBar().removeAction(self.mMenu.menuAction())
 
 class StanzaScene(QtGui.QGraphicsScene):
-   def __init__(self, applicationElt, parent = None):
+   def __init__(self, rootElt, parent = None):
       QtGui.QGraphicsScene.__init__(self, parent)
       self.mLine = None
 
-      self.mApplication = applicationElt
+      self.mRootElement = rootElt
 
       # Build all first level nodes.
-      self.mApplicationItem = self.__buildItemTree(self.mApplication)
+      self.mRootItem = self.__buildItemTree(self.mRootElement)
       self.mClassFilterList = []
       
    def setClassFilter(self, classFilterString):
@@ -202,8 +202,8 @@ class StanzaScene(QtGui.QGraphicsScene):
       for item in self.items():
          if isinstance(item, Node) and item.mParent is None:
             roots.append(item)
-      roots.remove(self.mApplicationItem)
-      roots.extend(self.mApplicationItem.mChildren)
+      roots.remove(self.mRootItem)
+      roots.extend(self.mRootItem.mChildren)
 
       for root in roots:
          self.__matchItemClass(root)
@@ -398,7 +398,7 @@ class StanzaScene(QtGui.QGraphicsScene):
             #      add all element types but the three listed below to
             #      the root application element.
             if tag not in ['add', 'remove', 'override']:
-               item.setParent(self.mApplicationItem)
+               item.setParent(self.mRootItem)
             item.update()
 
          self.update(self.sceneRect())
@@ -592,7 +592,15 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
    def __fillApplicationCB(self):
       env = maestro.core.Environment()
-      self.mApplications = env.mStanzaStore.findApplications()
+      app_elms = []
+      for stanza in env.mStanzaStore.mStanzas.values():
+         for item in stanza:
+            if ('application' == item.tag or
+                'global_option' == item.tag):
+               app_elms.append(item)
+
+      #self.mApplications = env.mStanzaStore.findApplications()
+      self.mApplications = app_elms
       self.mApplicationCB.clear()
       for app in self.mApplications:
          label = app.get('label', None)

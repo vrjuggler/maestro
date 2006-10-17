@@ -31,6 +31,7 @@ import elementtree.ElementTree as ET
 def buildItem(tagOrElm):
    item = None
    tag2Class = {'application':AppItem,
+                'global_option':GlobalOptionItem,
                 'group':GroupItem,
                 'choice':ChoiceItem,
                 'arg':ArgItem,
@@ -339,7 +340,8 @@ class Node(QtGui.QGraphicsItem):
 
       return ((isinstance(newParent, ChoiceItem) or
                isinstance(newParent, GroupItem) or
-               isinstance(newParent, AppItem)) and
+               isinstance(newParent, AppItem) or
+               isinstance(newParent, GlobalOptionItem)) and
                not self.isConnectedTo(newParent))
 
    def isConnectedTo(self, otherNode):
@@ -704,18 +706,32 @@ class AppItem(Node):
               'editable':'false'}
    getDefaultAttribs = staticmethod(getDefaultAttribs)
 
+class GlobalOptionItem(Node):
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Global Option"
+      self.mColor = QtGui.QColor(182, 131, 189, 191)
+      self.mAttribNameList = AllAttribName
+      self.mAttribList = AllAttrib
+
+   def getDefaultAttribs():
+      return {'name':'NewGlobalOption',
+              'label':'New Global Option'}
+   getDefaultAttribs = staticmethod(getDefaultAttribs)
+
 class ChoiceItem(Node):
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
       self.mColor = QtGui.QColor(76, 122, 255, 191)
-      self.mAttribNameList = AllAttribName + HSAttribName
-      self.mAttribList = AllAttrib + HSAttrib
+      self.mAttribNameList = AllAttribName + ['Type'] + HSAttribName
+      self.mAttribList = AllAttrib + ['type'] + HSAttrib
 
    def getDefaultAttribs():
       return {'name':'NewChoice',
               'label':'New Choice',
               'class':'',
+              'type':'one',
               'hidden':'false',
               'selected':'true',
               'editable':'true'}

@@ -145,7 +145,7 @@ class DirectedTreeLayout(maestro.core.IGraphicsSceneLayout):
       bbox[0] = self.__getXOrigin()
       bbox[1] = self.__getYOrigin()
 
-      root_nodes = [scene.mApplicationItem]
+      root_nodes = [scene.mRootItem]
       # Layout all graph subgraph
       for root in root_nodes:
          self._layout(root, bbox, 0)
