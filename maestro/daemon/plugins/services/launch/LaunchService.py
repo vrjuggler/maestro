@@ -98,7 +98,13 @@ class LaunchService(maestro.core.IServicePlugin):
             self.mLogger.debug("Working Dir: " + cwd)
             self.mLogger.debug("Translated env: " + str(envMap))
 
-#            merge(envMap, os.environ)
+            # Merge our environment with the local environment.
+            # XXX: This might not give us what we think it does because on UNIX
+            #      os.environ is bound when the service starts. This will happen
+            #      before many things get set up in the environment, $HOSTNAME
+            #      for example is not defined yet. On Windows it should give
+            #      us the System Environment.
+            merge(envMap, os.environ)
 #            self.mLogger.debug(envMap)
             if sys.platform.startswith("win"):
                envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
