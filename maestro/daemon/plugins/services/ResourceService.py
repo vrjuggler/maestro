@@ -50,6 +50,10 @@ class ResourceService(maestro.core.IServicePlugin):
          self.mPdhQuery = win32pdh.OpenQuery(None, 0)
          self.mProcPath = win32pdh.MakeCounterPath((None, "Processor", "_Total", None, 0, "% Processor Time"))
          self.mProcCounter = win32pdh.AddCounter(self.mPdhQuery, self.mProcPath, 0)
+         try:
+            self.update()
+         except:
+            pass
       else:
          self.mLastCPUTime = [0,0,0,0]
 
