@@ -44,7 +44,7 @@ class OutputThread(threading.Thread):
             # If we got something back then send it across the network.
             if stdout_line is not None and stdout_line != "":
                self.mLaunchService.mLogger.debug("line: " + stdout_line)
-               env.mEventManager.emit("*", "launch.output", stdout_line)
+               env.mEventManager.emit("*", "launch.output", stdout_line, debug=False)
                check_done = False
 
             #if stderr_line is not None and stderr_line != "":
@@ -124,7 +124,6 @@ class LaunchService(maestro.core.IServicePlugin):
          #      for example is not defined yet. On Windows it should give
          #      us the System Environment.
          merge(envMap, os.environ)
-         self.mLogger.debug("After merge with local: " + str(envMap['DISPLAY']))
 
          # No need to do this since we are merging the entire os.environ.
          if sys.platform.startswith("win"):
