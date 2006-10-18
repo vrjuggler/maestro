@@ -143,9 +143,10 @@ if os.name == 'nt':
       def __init__(self, args):
          win32serviceutil.ServiceFramework.__init__(self, args)
          self.mNtEvent = logging.handlers.NTEventLogHandler(self._svc_name_)
-         log_file = os.path.join(os.environ['SystemRoot'], 'system32',
+      
+         const.LOGFILE = os.path.join(os.environ['SystemRoot'], 'system32',
                                  'maestrod.log')
-         self.mFileLog = logging.handlers.RotatingFileHandler(log_file, 'a',
+         self.mFileLog = logging.handlers.RotatingFileHandler(const.LOGFILE, 'a',
                                                               50000, 10)
 
       def SvcStop(self):
@@ -172,6 +173,7 @@ if os.name == 'nt':
          logger = logging.getLogger('')
          logger.addHandler(self.mNtEvent)
          logger.addHandler(self.mFileLog)
+         logger.setLevel(logging.DEBUG)
 
          logger.info('Started')
 
@@ -450,20 +452,29 @@ def daemonize (stdin='/dev/null', stdout='/dev/null', stderr=None, pidfile=None)
       pf.close()
 
 if __name__ == '__main__':
-   # Set up logging to sys.stderr.
-   fmt_str  = '%(name)-12s %(levelname)-8s %(message)s'
-   date_fmt = '%m-%d %H:%M'
-   if sys.version_info[0] == 2 and sys.version_info[1] < 4:
-      handler = logging.StreamHandler()
-      handler.setFormatter(logging.Formatter(fmt_str, date_fmt))
-      logger = logging.getLogger('')
-      logger.setLevel(logging.DEBUG)
-      logger.addHandler(handler)
-   else:
-      logging.basicConfig(level = logging.DEBUG, format = fmt_str,
-                          datefmt = date_fmt)
-
    if '-debug' in sys.argv:
+      # Set up logging to sys.stderr.
+      fmt_str  = '%(name)-12s %(levelname)-8s %(message)s'
+      date_fmt = '%m-%d %H:%M'
+      if sys.version_info[0] == 2 and sys.version_info[1] < 4:
+         handler = logging.StreamHandler()
+         handler.setFormatter(logging.Formatter(fmt_str, date_fmt))
+         logger = logging.getLogger('')
+         logger.setLevel(logging.DEBUG)
+         logger.addHandler(handler)
+      else:
+         logging.basicConfig(level = logging.DEBUG, format = fmt_str,
+                             datefmt = date_fmt)
+
+      const.LOGFILE = os.path.abspath(os.path.join(const.EXEC_DIR, 'maestro.log'))
+      file_log = logging.FileHandler(const.LOGFILE, 'a')
+      formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
+      file_log.setLevel(logging.DEBUG)
+      file_log.setFormatter(formatter)
+
+      logger = logging.getLogger('')
+      logger.addHandler(file_log)
+      logger.setLevel(logging.DEBUG)
       # For debugging, it is handy to be able to run the servers
       # without being a service on Windows or a daemon on Linux.
       RunServer()
@@ -474,6 +485,18 @@ if __name__ == '__main__':
       if '-log' in sys.argv:
          log = '/var/log/maestrod.log'
          print "Using log file: ", log
+
+         const.LOGFILE = '/var/log/maestrod.log'
+         file_log = logging.handlers.RotatingFileHandler(const.LOGFILE, 'a',
+                                                         50000, 10)
+         formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
+         file_log.setLevel(logging.DEBUG)
+         file_log.setFormatter(formatter)
+
+         logger = logging.getLogger('')
+         logger.addHandler(file_log)
+         logger.setLevel(logging.DEBUG)
+         log = const.LOGFILE
       else:
          log = '/dev/null'
 

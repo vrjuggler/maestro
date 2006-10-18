@@ -161,6 +161,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.setupUi(self)
       self.mEnsemble = None
       self.mEnsembleModel = None
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "ensemble.report_log", self.onReportLog)
 
    def setupUi(self, widget):
       """
@@ -186,14 +188,69 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.connect(self.mListModeAction, QtCore.SIGNAL("triggered()"), self.mViewModeCBs[0])
       self.connect(self.mIconModeAction, QtCore.SIGNAL("triggered()"), self.mViewModeCBs[1])
 
+      self.mSeperatorAction = QtGui.QAction(self)
+      self.mSeperatorAction.setSeparator(True)
+
+      # Create a log action that will ask the selected node for its current log.
+      self.mLogAction = QtGui.QAction("Get Log", self)
+      self.connect(self.mLogAction, QtCore.SIGNAL("triggered()"), self.onGetLog)
+
       self.mClusterListView.addAction(self.mListModeAction)
       self.mClusterListView.addAction(self.mIconModeAction)
+      self.mClusterListView.addAction(self.mSeperatorAction)
+      self.mClusterListView.addAction(self.mLogAction)
+
       self.mClusterListView.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
       self.mClusterListView.setAlternatingRowColors(True)
       self.mClusterListView.setDragEnabled(True)
       self.mClusterListView.setAcceptDrops(True)
       self.mClusterListView.setDropIndicatorShown(True)
       #self.treeView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+
+   def onGetLog(self):
+      #current_index = self.mClusterListView.currentIndex()
+      current_indexes = self.mClusterListView.selectionModel().selectedIndexes()
+      if len(current_indexes) > 0:
+         assert len(current_indexes) == 1
+         current_index = current_indexes[0]
+         selected_node = self.mEnsembleModel.data(current_index, QtCore.Qt.UserRole)
+         env = maestro.core.Environment()
+         env.mEventManager.emit(selected_node.getId(), "ensemble.get_log")
+         print "Selected node: [%s][%s]" % (selected_node, selected_node.getId())
+
+   def onReportLog(self, nodeId, debugList):
+      node = self.mEnsemble.getNodeById(nodeId)
+      if node is not None:
+         title = "Log Window [%s][%s]" % (node.getHostname(), nodeId)
+      else:
+         title = "Log Window [%s]" % (nodeId)
+
+      dialog = QtGui.QDialog(self)
+      dialog.setWindowTitle(title)
+
+      # Create a layout for the whole dialog
+      dialog.vboxlayout = QtGui.QVBoxLayout(dialog)
+
+      # Create a log window to hold all log data.
+      dialog.mLogWindow = QtGui.QTextEdit()
+      dialog.vboxlayout.addWidget(dialog.mLogWindow)
+      dialog.mLogWindow.setReadOnly(True)
+      dialog.mLogWindow.setText(''.join(debugList))
+
+      # Create an OK button and place it in the lower right.
+      dialog.hboxlayout = QtGui.QHBoxLayout()
+      spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
+      dialog.hboxlayout.addItem(spacerItem)
+      dialog.mOkBtn = QtGui.QPushButton('OK')
+      dialog.hboxlayout.addWidget(dialog.mOkBtn)
+
+      dialog.vboxlayout.addLayout(dialog.hboxlayout)
+
+      QtCore.QObject.connect(dialog.mOkBtn, QtCore.SIGNAL("clicked()"),dialog.accept)
+
+      # Show the actual dialog.
+      dialog.resize(800, 600)
+      dialog.show()
 
    def setEnsemble(self, ensemble):
       """ Configure the user interface.
