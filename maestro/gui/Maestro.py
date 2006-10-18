@@ -26,6 +26,7 @@ from PyQt4 import QtGui, QtCore
 
 import maestro
 from maestro.util import plugin
+from maestro.util import xplatform
 
 import MaestroBase
 import MaestroResource
@@ -222,14 +223,9 @@ class OutputFileLogger(NodeLogger):
       if env.settings.has_key('logdir'):
          logdir = env.settings['logdir']
       else:
-         if os.environ.has_key('HOME'):
-            logdir = os.environ['HOME']
-         elif os.environ.has_key('HOMESHARE'):
-            logdir = os.environ['HOMESHARE']
-         elif os.environ.has_key('HOMEDRIVE'):
-            logdir = '%s%s' % (os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
-         elif os.environ.has_key('APPDATA'):
-            logdir = os.path.join(os.environ['APPDATA'], 'Maestro')
+         home_dir = xplatform.getUserHome()
+         if home_dir is not None:
+            logdir = home_dir
          else:
             logdir = '.'
 

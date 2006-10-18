@@ -33,6 +33,7 @@ app = QtGui.QApplication(sys.argv)
 import maestro.util
 from maestro.util import qt4reactor
 from maestro.util import plugin
+from maestro.util import xplatform
 qt4reactor.install(app)
 from twisted.internet import reactor
 
@@ -113,20 +114,7 @@ def main():
       cfg_file_name = 'maestro.xml'
       data_dir      = None
 
-      # Windows.
-      if sys.platform.startswith("win"):
-         if os.environ.has_key('APPDATA'):
-            data_dir = os.path.join(os.environ['APPDATA'], 'Maestro')
-         elif os.environ.has_key('USERPROFILE'):
-            data_dir = os.path.join(os.environ['USERPROFILE'],
-                                    'Application Data', 'Maestro')
-      # Mac OS X.
-      elif sys.platform == 'darwin':
-         data_dir = os.path.join(os.environ['HOME'], 'Library', 'Maestro')
-      # Everything else.
-      else:
-         data_dir = os.path.join(os.environ['HOME'], '.maestro')
-
+      data_dir = xplatform.getUserAppDir()
       if data_dir is not None:
          if not os.path.exists(data_dir):
             os.makedirs(data_dir)
