@@ -1,11 +1,6 @@
 #!python
-# SCons based build file for the property template crap
-# Base file
-import SCons;
-import sys;
-import os;
-import string;
-#import wing.wingdbstub;       # stuff for debugging
+import sys, os, re, string
+import SCons
 import SConsAddons.Util as sca_util
 
 pj = os.path.join;
@@ -27,7 +22,7 @@ license = \
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA."""
@@ -41,7 +36,6 @@ def addLicense(source, target, env):
       lines[:0] = license
       f = open(source[0].path, 'w+')
       f.writelines(lines)
-
 
 # Pyuic builder
 def registerPyuicBuilder(env):
@@ -68,10 +62,6 @@ def registerPyuicBuilder(env):
   env.Append(BUILDERS = {'Pyrcc' : pyrcc_license})
 
 
-# ###############################
-# Create builder
-# ###############################
-
 env = Environment(ENV=os.environ)
 
 registerPyuicBuilder(env);    # Register custom builders
@@ -94,16 +84,10 @@ for path, dirs, files in sca_util.WalkBuildFromSource('.',env):
 
 #print pyuic_rc_files
 
-generated_entries = {}
 for sfile in pyuic_src_files:
-   generated_entries += env.Pyuic(sfile)
+   env.Pyuic(sfile)
 for sfile in pyuic_rc_files:
-   generated_entries += env.Pyrcc(sfile)
-
-#for entry in generated_entries:
-#   if os.path.exists(entry.path):
-#      removeComments(entry.path)
-
+   env.Pyrcc(sfile)
 
 Default(".");
 Help(help_text); 
