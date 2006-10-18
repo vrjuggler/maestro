@@ -39,6 +39,7 @@ import logging
 import logging.handlers
 
 from twisted.spread import pb
+import maestro.util
 from maestro.util import pboverssl
 from twisted.cred import checkers, credentials, portal, error
 from zope.interface import implements
@@ -467,7 +468,7 @@ if __name__ == '__main__':
                              datefmt = date_fmt)
 
       const.LOGFILE = os.path.abspath(os.path.join(const.EXEC_DIR, 'maestro.log'))
-      file_log = logging.FileHandler(const.LOGFILE, 'a')
+      file_log = logging.FileHandler(const.LOGFILE, 'w')
       formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
       file_log.setLevel(logging.DEBUG)
       file_log.setFormatter(formatter)
@@ -475,6 +476,18 @@ if __name__ == '__main__':
       logger = logging.getLogger('')
       logger.addHandler(file_log)
       logger.setLevel(logging.DEBUG)
+
+      stdout_logger = logging.getLogger('stdout')
+      stderr_logger = logging.getLogger('stderr')
+
+      def remNewl(func, t):
+         if t.strip() != '':
+            func(t)
+
+      # Create file like objects to get all stdout and stderr.
+      sys.stdout = maestro.util.PseudoFileOut(lambda t: remNewl(stdout_logger.debug,t))
+      sys.stdout = maestro.util.PseudoFileErr(lambda t: remNewl(stderr_logger.debug,t))
+
       # For debugging, it is handy to be able to run the servers
       # without being a service on Windows or a daemon on Linux.
       RunServer()
