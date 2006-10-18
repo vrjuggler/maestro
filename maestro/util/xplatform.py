@@ -25,12 +25,14 @@ import os.path
 import sys
 
 
-def getUserAppDir():
+def getUserAppDir(appName):
    '''
-   Returns the platform-specific path to the user's Maestro application
-   directory. For Windows, if either of the environment variables APPDATA
-   or USERPROFILE is not set, then None will be returned. If the platform is
-   not Windows or Mac OS X, the directory returned will be $HOME/.maestro.
+   Returns the platform-specific path to the user-specific application data
+   directory for the named application. For Windows, if either of the
+   environment variables APPDATA or USERPROFILE is not set, then None will be
+   returned. Otherwise, the returned directory would be "%APPDATA%\<appName>"
+   or "%USERPROFILE%\Application Data\<appName>". If the platform is
+   not Windows or Mac OS X, the directory returned will be $HOME/.<appName>.
    If os.environ['HOME'] does not exist, then None will be returned.
    '''
    app_dir = None
@@ -39,19 +41,37 @@ def getUserAppDir():
    # environment variable being set.
    if sys.platform.startswith('win'):
       if os.environ.has_key('APPDATA'):
-         app_dir = os.path.join(os.environ['APPDATA'], 'Maestro')
+         app_dir = os.path.join(os.environ['APPDATA'], appName)
       elif os.environ.has_key('USERPROFILE'):
          app_dir = os.path.join(os.environ['USERPROFILE'], 'Application Data',
-                                'Maestro')
+                                appName)
    # Non-Windows platforms that use the environment variable HOME to identify
    # the user's home directory.
    elif os.environ.has_key('HOME'):
       # Mac OS X.
       if sys.platform == 'darwin':
-         app_dir = os.path.join(os.environ['HOME'], 'Library', 'Maestro')
+         app_dir = os.path.join(os.environ['HOME'], 'Library', appName)
       # Everything else.
       else:
-         app_dir = os.path.join(os.environ['HOME'], '.maestro')
+         app_dir = os.path.join(os.environ['HOME'], '.' + appName)
+
+   return app_dir
+
+def getSiteAppDir(appName):
+   '''
+   Returns the platform-specific path to the system-wide application data
+   directory for the named application. For Windows, this will be
+   '%SystemDrive%\Documents and Settings\All Users\ApplicationData\<appName>'.
+   For all other platforms, this will be '/etc/<appName>'.
+   '''
+   app_dir = None
+
+   if sys.platform.startswith('win'):
+      app_dir = os.path.join(os.environ['SystemDrive'],
+                             r'\Documents and Settings', 'All Users',
+                             'Application Data', appName)
+   else:
+      app_dir = '/etc/%s' % appName
 
    return app_dir
 

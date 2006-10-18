@@ -47,7 +47,7 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
 
    def onBrowse(self, checked=False):
       start_dir = ''
-      if os.path.exists(maestro.core.const.STANZA_PATH):
+      if os.path.exists(maestro.core.const.STANZA_PATH[0]):
          start_dir = maestro.core.const.STANZA_PATH
 
       new_file = \

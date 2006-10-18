@@ -938,9 +938,10 @@ if __name__ == "__main__":
    random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
 
    # If we want all.
-   maestro.core.const.STANZA_PATH = pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')
+   maestro.core.const.STANZA_PATH = \
+      [pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')]
    maestro.core.const.PLUGIN_DIR = pj(os.path.dirname(__file__), '.')
-   #maestro.core.const.STANZA_PATH = pj(os.getcwd(), os.path.dirname(__file__))
+   #maestro.core.const.STANZA_PATH = [pj(os.getcwd(), os.path.dirname(__file__))]
    env = maestro.core.Environment()
    env.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
    env.mStanzaStore.scan()

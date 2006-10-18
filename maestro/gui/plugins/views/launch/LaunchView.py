@@ -95,17 +95,21 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
    def onHelpClicked(self, checked=False):
       if self.mSelectedApp.mHelpUrl is not None and \
          self.mSelectedApp.mHelpUrl is not '':
-         # Load help HTML data.
-         # XXX: This only searched the two directories for the file. This
-         #      should be fixed at some point.
-         file_path = pj(maestro.core.const.EXEC_DIR, self.mSelectedApp.mHelpUrl)
+         # Load help HTML data. This searches the application execution
+         # directory and all the directories listed in const.STANZA_PATH.
+         file_path = pj(const.EXEC_DIR, self.mSelectedApp.mHelpUrl)
          if not os.path.exists(file_path):
-            file_path = pj(maestro.core.const.STANZA_PATH, self.mSelectedApp.mHelpUrl)
-            
+            for p in const.STANZA_PATH:
+               file_path = pj(p, self.mSelectedApp.mHelpUrl)
+               if os.path.exists(file_path):
+                  break
+
          if os.path.exists(file_path):
             file = QtCore.QFile(file_path)
             if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
-               print "Cannot read file %s:\n%s." % (file_path, file.errorString())
+               # TODO: This should be displayed in a dialog box.
+               print "Cannot read file %s:\n%s." % \
+                        (file_path, file.errorString())
             else:
                stream = QtCore.QTextStream(file)
                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -115,10 +119,10 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
                file.close()
                dialog.exec_()
          else:
-            print "Cannot read file %s or %s." % (                              \
-               pj(maestro.core.const.EXEC_DIR, self.mSelectedApp.mHelpUrl),     \
-               pj(maestro.core.const.STANZA_PATH, self.mSelectedApp.mHelpUrl))
-
+            # TODO: This should be displayed in a dialog box.
+            print "Cannot find file '%s' in any of\n%s, %s." % \
+                     (self.mSelectedApp.mHelpUrl, maestro.core.const.EXEC_DIR,
+                      ', '.join(const.STANZA_PATH))
 
    def onAppSelect(self):
      self._setApplication(self.mAppComboBox.currentIndex())

@@ -25,17 +25,23 @@ class StanzaStore:
       # Clear all old stanza files.
       self.mStanzas = {}
 
-      stanza_path = pj(maestro.core.const.STANZA_PATH)
-      progressCB(0.0, "Scanning for stanzas [%s]" % (stanza_path))
-      assert os.path.exists(stanza_path)
-      assert os.path.isdir(stanza_path)
-      files = os.listdir(stanza_path)
-      stanza_files = []
-      for path, dirs, files in os.walk(stanza_path):
-         stanza_files += [pj(path,f) for f in files if f.endswith('.stanza')]
+      # We'll say that reading the N stanza directories totals up to 1% of
+      # the overall work.
+      increment = 1.0 / len(maestro.core.const.STANZA_PATH)
+      status    = 0.0
 
-      # Load all files that we found.
-      self.loadStanzas(stanza_files, progressCB=progressCB)
+      for stanza_path in maestro.core.const.STANZA_PATH:
+         progressCB(status, "Scanning for stanzas in %s" % stanza_path)
+         status += increment
+
+         if os.path.exists(stanza_path) and os.path.isdir(stanza_path):
+            files = os.listdir(stanza_path)
+            stanza_files = []
+            for path, dirs, files in os.walk(stanza_path):
+               stanza_files += [pj(path, f) for f in files if f.endswith('.stanza')]
+
+            # Load all files that we found.
+            self.loadStanzas(stanza_files, progressCB=progressCB)
 
    def loadStanzas(self, stanzaFiles, progressCB=None):
       # If files is really a single file, turn it into a list.

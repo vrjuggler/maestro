@@ -6,7 +6,7 @@ import maestro.core
 import maestro.core.Stanza as Stanza
 import maestro.core.StanzaStore
 const = maestro.core.const
-const.STANZA_PATH = pj(os.path.dirname(__file__), "data")
+const.STANZA_PATH = [pj(os.path.dirname(__file__), "data")]
 import elementtree.ElementTree as ET
 
 class StanzaStoreTest(unittest.TestCase):

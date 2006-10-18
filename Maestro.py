@@ -37,11 +37,22 @@ from maestro.util import xplatform
 qt4reactor.install(app)
 from twisted.internet import reactor
 
+stanza_path_env = []
+if os.environ.has_key('STANZA_PATH'):
+   stanza_path_env = os.environ['STANZA_PATH'].split(os.path.pathsep)
+
 import maestro.core
 const = maestro.core.const
+const.APP_NAME = 'maestro'
 const.EXEC_DIR = os.path.dirname(__file__)
 const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'plugins')
-const.STANZA_PATH = pj(const.EXEC_DIR, "stanzas")
+const.STANZA_PATH = [pj(const.EXEC_DIR, 'stanzas'),
+                     pj(xplatform.getUserAppDir(const.APP_NAME), 'stanzas'),
+                     pj(xplatform.getSiteAppDir(const.APP_NAME), 'stanzas')] + \
+                    stanza_path_env
+
+print const.STANZA_PATH
+
 const.MAESTRO_GUI = True
 from maestro.core import Ensemble
 
@@ -114,7 +125,7 @@ def main():
       cfg_file_name = 'maestro.xml'
       data_dir      = None
 
-      data_dir = xplatform.getUserAppDir()
+      data_dir = xplatform.getUserAppDir(const.APP_NAME)
       if data_dir is not None:
          if not os.path.exists(data_dir):
             os.makedirs(data_dir)
