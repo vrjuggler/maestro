@@ -30,10 +30,10 @@
             </arg>
          </choice>
       </choice>
-      <ref id="editor:Global1">
+      <ref id="editor:Global1/*">
          <add id="">
-            <group name="Powerwall">
-               <arg flag="-j" name="base">
+            <group name="Powerwall" label="Powerwall">
+               <arg flag="-j" name="base" label="Powerwall Arg">
                   powerwall.jconf
                </arg>
             </group>
@@ -43,12 +43,12 @@
       </ref>
    </application>
    <global_option name="Global1">
-      <arg name="Arg0"/>
-      <group name="Group0">
-         <cwd name="Cwd0"/>
-         <choice name="Choice0">
-            <arg name="SubArg0"/>
-            <arg name="SubArg1"/>
+      <arg name="Arg0" label="Arg 0"/>
+      <group name="Group0" label="Group 0">
+         <cwd name="Cwd0" label="Cwd 0"/>
+         <choice name="Choice0" label="Choice 0" type="one">
+            <arg name="SubArg0" label="Sub Arg 0"/>
+            <arg name="SubArg1" label="Sub Arg 1"/>
          </choice>
       </group>
    </global_option>
