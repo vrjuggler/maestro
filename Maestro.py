@@ -30,6 +30,7 @@ from optparse import OptionParser
 from PyQt4 import QtGui, QtCore
 app = QtGui.QApplication(sys.argv)
 
+import maestro.util
 from maestro.util import qt4reactor
 from maestro.util import plugin
 qt4reactor.install(app)
@@ -197,11 +198,16 @@ def main():
       reactor.stop()
       reactor.runUntilCurrent()
       logging.shutdown()
-      sys.exit()
    except Exception, ex:
-      print "ERROR: ", ex
-      raise
-      #QtGui.QMessageBox.critical(None, "Error", "Error: %s" % ex)
+      global error_str
+      error_str = ''
+      def appendErr(text):
+         global error_str
+         error_str += text
+      error_file = maestro.util.PseudoFileOut(appendErr)
+      traceback.print_exc(file=error_file)
+      QtGui.QMessageBox.critical(None, "Error", "Error: %s\n%s" % (ex,error_str))
+   sys.exit(0)
 
 if __name__ == '__main__':
    main()
