@@ -88,9 +88,6 @@ def writeErr(text):
    if text.strip() != '':
       stderr_logger.debug(text)
 
-# Create file like objects to get all stdout and stderr.
-sys.stdout = maestro.util.PseudoFileOut(writeOut)
-sys.stdout = maestro.util.PseudoFileErr(writeErr)
 
 
 
@@ -186,6 +183,10 @@ if os.name == 'nt':
 
       def SvcDoRun(self):
          import servicemanager
+
+         # Create file like objects to get all stdout and stderr.
+         sys.stdout = maestro.util.PseudoFileOut(writeOut)
+         sys.stdout = maestro.util.PseudoFileErr(writeErr)
 
          formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
          self.mNtEvent.setLevel(logging.INFO)
@@ -499,7 +500,9 @@ if __name__ == '__main__':
       logger.addHandler(file_log)
       logger.setLevel(logging.DEBUG)
 
-
+      # Create file like objects to get all stdout and stderr.
+      sys.stdout = maestro.util.PseudoFileOut(writeOut)
+      sys.stdout = maestro.util.PseudoFileErr(writeErr)
 
       # For debugging, it is handy to be able to run the servers
       # without being a service on Windows or a daemon on Linux.
@@ -523,6 +526,10 @@ if __name__ == '__main__':
          logger.addHandler(file_log)
          logger.setLevel(logging.DEBUG)
          log = const.LOGFILE
+
+         # Create file like objects to get all stdout and stderr.
+         sys.stdout = maestro.util.PseudoFileOut(writeOut)
+         sys.stdout = maestro.util.PseudoFileErr(writeErr)
       else:
          log = '/dev/null'
 
