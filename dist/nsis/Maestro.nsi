@@ -2,7 +2,7 @@
 
 # HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Maestro"
-!define PRODUCT_VERSION "0.2.0"
+!define PRODUCT_VERSION "0.1.0"
 !define FILE_VERSION "${PRODUCT_VERSION}.1"
 !define PRODUCT_PUBLISHER "Infiscape Corporation"
 !define PRODUCT_WEB_SITE "http://realityforge.vrsource.org/trac/maestro/"
@@ -30,7 +30,7 @@ SetCompressor bzip2
 # Welcome page
 !insertmacro MUI_PAGE_WELCOME
 # Components page
-#!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_COMPONENTS
 # Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 # Instfiles page
@@ -69,18 +69,38 @@ Function RefreshShellIcons
   (${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)'
 FunctionEnd
 
-Section "MainSection" SEC01
-  SetOutPath "$INSTDIR"
+Section "!Maestro Core" SecCore
   SetOverwrite ifnewer
-  # What about a stanza.ico?
-  File /r /x .svn /x dist /x doc /x pyqt_ext /x test /x playpen infiscape_maestro.ico ensemble.ico maestro\*
-  File /r /x .svn /x *.mk /x Makefile /x *.xml maestro\doc
+  SetOutPath "$INSTDIR\maestro\core"
+  File /r maestro\maestro\core\*
+  SetOutPath "$INSTDIR\maestro\util"
+  File /r maestro\maestro\util\*
+  SetOutPath "$INSTDIR\maestro"
+  File /r maestro\maestro\__init__.py
+  SetOutPath "$INSTDIR"
+  File /r core_deps\*
+SectionEnd
+
+Section "Maestro GUI" SecGUI
+  SetOverwrite ifnewer
+  SetOutPath "$INSTDIR\maestro\gui"
+  #File /r /x .svn /x dist /x doc /x pyqt_ext /x test /x playpen infiscape_maestro.ico ensemble.ico stanza.ico maestro\gui\*
+  File /r maestro\maestro\gui\* 
+
+  SetOutPath "$INSTDIR\stanzas"
+  File /r maestro\stanzas\* 
+
+  SetOutPath "$INSTDIR"
+  File maestro\cluster.ensem maestro\LICENSE.txt maestro\Maestro.py maestro\maestrod.py maestro\maestrod.xcfg maestro\server.pem
+  File infiscape_maestro.ico ensemble.ico stanza.ico
+  File /r gui_deps\*
+
   Call SetStartMenuToUse
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
 
   # Associate .ensem files with the Maestro GUI.
   Push ".ensem"
-  Push "Maestro Ensemble"
+  Push "MaestroEnsemble"
   Push "Ensemble File"
   Push "$INSTDIR\ensemble.ico"
   Push "Load Ensemble into Maestro"
@@ -88,6 +108,31 @@ Section "MainSection" SEC01
   Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" "%1"'
   Call FileAssociation
   Call RefreshShellIcons
+
+  # Associate .stanza files with the Maestro GUI.
+  Push ".stanza"
+  Push "MaestroStanza"
+  Push "Stanza File"
+  Push "$INSTDIR\stanza.ico"
+  Push "Load Stanza into Maestro"
+  # XXX: This path to python.exe should not be hard coded!
+  Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" "-s %1"'
+  Call FileAssociation
+  Call RefreshShellIcons
+SectionEnd
+
+Section "Maestro Service" SecService
+  SetOverwrite ifnewer
+  SetOutPath "$INSTDIR\maestro\daemon"
+  File /r maestro\maestro\daemon\*
+  SetOutPath "$INSTDIR"
+  File /r maestro\maestrod.py
+SectionEnd
+
+Section "Maestro Documentation" SecDoc
+  SetOutPath "$INSTDIR"
+  SetOverwrite ifnewer
+  File /r /x .svn /x *.mk /x Makefile /x *.xml /x README.txt maestro\doc
 SectionEnd
 
 Section -AdditionalIcons
@@ -102,7 +147,7 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
- WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
 
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\Maestro.py"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
@@ -114,6 +159,9 @@ Section -Post
   ReadRegStr $1 HKCR ".ensem" ""
   WriteRegStr HKCR "$1\shell" "" "MaestroEnsemble"
 
+  ReadRegStr $1 HKCR ".stanza" ""
+  WriteRegStr HKCR "$1\shell" "" "MaestroStanza"
+
   # XXX: This path to python.exe should not be hard coded!
   ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" --interactive --startup auto install' $0
   DetailPrint "Installing the Maestro service returned $0"
@@ -122,18 +170,21 @@ Section -Post
 SectionEnd
 
 # Descriptions
-#LangString DESC_SecService ${LANG_ENGLISH} \
-#   "Maestro service (required for all non-client cluster nodes)."
-#LangString DESC_SecGUI ${LANG_ENGLISH} \
-#   "Maestro client grahpical user interface application."
-#LangString DESC_SecDoc ${LANG_ENGLISH} \
-#   "Maestro documentation in HTML and PDF formats."
-#
-#!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-#   !insertmacro MUI_DESCRIPTION_TEXT ${SecService} $(DESC_SecService)
-#   !insertmacro MUI_DESCRIPTION_TEXT ${SecGUI} $(DESC_SecGUI)
-#   !insertmacro MUI_DESCRIPTION_TEXT ${SecDoc} $(DESC_SecDoc)
-#!insertmacro MUI_FUNCTION_DESCRIPTION_END
+LangString DESC_SecCore ${LANG_ENGLISH} \
+   "Maestro core (required for both GUI and service)."
+LangString DESC_SecService ${LANG_ENGLISH} \
+   "Maestro service (required for all non-client cluster nodes)."
+LangString DESC_SecGUI ${LANG_ENGLISH} \
+   "Maestro client grahpical user interface application."
+LangString DESC_SecDoc ${LANG_ENGLISH} \
+   "Maestro documentation in HTML and PDF formats."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} $(DESC_SecCore)
+   !insertmacro MUI_DESCRIPTION_TEXT ${SecService} $(DESC_SecService)
+   !insertmacro MUI_DESCRIPTION_TEXT ${SecGUI} $(DESC_SecGUI)
+   !insertmacro MUI_DESCRIPTION_TEXT ${SecDoc} $(DESC_SecDoc)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function un.onUninstSuccess
   HideWindow
@@ -165,7 +216,12 @@ Section Uninstall
   RMDir /R /REBOOTOK "$INSTDIR\"
 
   Push ".ensem"
-  Push "Maestro Ensemble"
+  Push "MaestroEnsemble"
+  Call un.RemoveFileAssociation
+  Call un.RefreshShellIcons
+
+  Push ".stanza"
+  Push "MaestroStanza"
   Call un.RemoveFileAssociation
   Call un.RefreshShellIcons
 

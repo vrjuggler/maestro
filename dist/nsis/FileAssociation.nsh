@@ -50,8 +50,8 @@ Function FileAssociation
   # If we have the associations add icon
   StrCmp $1 $NAME 0 +2
   WriteRegStr HKCR "$1\DefaultIcon" "" $ICON
-  WriteRegStr HKCR "$1\shell\MaestroEnsemble" "" $MAESTRO_TOOL_TIP
-  WriteRegStr HKCR "$1\shell\MaestroEnsemble\command" "" $MAESTRO_COMMAND
+  WriteRegStr HKCR "$1\shell\$NAME" "" $MAESTRO_TOOL_TIP
+  WriteRegStr HKCR "$1\shell\$NAME\command" "" $MAESTRO_COMMAND
 
 FunctionEnd
 
