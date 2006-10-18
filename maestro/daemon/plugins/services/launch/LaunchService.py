@@ -111,10 +111,15 @@ class LaunchService(maestro.core.IServicePlugin):
          #      platform envvar syntax.
          self.evaluateEnvVars(envMap)
          command = self.expandEnv(command, envMap)[0]
-         cwd     = self.expandEnv(cwd, envMap)[0]
+
+         if sys.platform.startswith("win"):
+            command = '"' + command.strip("'"'"') + '"'
+
+         if cwd is not None:
+            cwd = self.expandEnv(cwd, envMap)[0]
          #command = command.replace('\\', '\\\\')
          #self.mLogger.info("Running command: " + command)
-         self.mLogger.debug("Working Dir: " + cwd)
+         self.mLogger.debug("Working Dir: " + str(cwd))
          self.mLogger.debug("Translated env: " + str(envMap))
 
          # Merge our environment with the local environment.
@@ -182,6 +187,9 @@ class LaunchService(maestro.core.IServicePlugin):
       """
       Expands a single entry in out environment map.
       """
+      if value is None:
+         return
+
       sEnvVarRegexBraces = re.compile('\${(\w+)}')
 
       start_pos = 0

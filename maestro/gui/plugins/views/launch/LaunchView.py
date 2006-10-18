@@ -211,20 +211,16 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          else:
             command = option_visitor.mCommands[0]
 
-         cwd = ""
-         if len(option_visitor.mCommands) == 0:
-            QtGui.QMessageBox.warning(self.parentWidget(),
-                                      "Working Directory Missing",
-                                      "No working directory for node %s" % node.getName())
-         elif len(option_visitor.mCwds) > 1:
+         # Default to sending the cwd as None because this will cause
+         # ProcessOpen to inherit the cwd from the parent process.
+         cwd = None
+         if len(option_visitor.mCwds) > 1:
             cwd = option_visitor.mCwds[0]
             QtGui.QMessageBox.warning(self.parentWidget(),
                "Multiple Current Working Directories",
                "More that one current working directory specified for node [%s]. "\
                "Using the first command." % node.getName())
-         elif len(option_visitor.mCwds) == 0:
-            cwd = ''
-         else:
+         elif len(option_visitor.mCwds) == 1:
             cwd = option_visitor.mCwds[0]
 
          arg_string = ""
