@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, os, platform
+import sys, os, platform, traceback
 
 import maestro.core
 const = maestro.core.const
@@ -81,15 +81,20 @@ stderr_logger = logging.getLogger('stderr')
 stderr_logger.setLevel(logging.DEBUG)
 
 def writeOut(text):
-   if text.strip() != '':
-      stdout_logger.debug(text)
+   if sys.platform.startswith("win"):
+      real_text = text.strip('\r\n')
+   else:
+      real_text = text.strip('\r')
+   if real_text != '':
+      stdout_logger.debug(real_text)
 
 def writeErr(text):
-   if text.strip() != '':
-      stderr_logger.debug(text)
-
-
-
+   if sys.platform.startswith("win"):
+      real_text = text.strip('\r\n')
+   else:
+      real_text = text.strip('\r')
+   if real_text != '':
+      stderr_logger.debug(real_text)
 
 class MaestroServer:
    def __init__(self):
@@ -135,6 +140,7 @@ class MaestroServer:
             if new_service:
                new_service = None
             print "Error loading service:" + name + "\n  exception:" + str(ex)
+            traceback.print_exc()
 
       # Register callbacks to send info to clients
       #self.mEventManager.timers().createTimer(settings.update, 2.0)
@@ -186,7 +192,7 @@ if os.name == 'nt':
 
          # Create file like objects to get all stdout and stderr.
          sys.stdout = maestro.util.PseudoFileOut(writeOut)
-         sys.stdout = maestro.util.PseudoFileErr(writeErr)
+         sys.stderr = maestro.util.PseudoFileErr(writeErr)
 
          formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
          self.mNtEvent.setLevel(logging.INFO)
@@ -502,7 +508,7 @@ if __name__ == '__main__':
 
       # Create file like objects to get all stdout and stderr.
       sys.stdout = maestro.util.PseudoFileOut(writeOut)
-      sys.stdout = maestro.util.PseudoFileErr(writeErr)
+      sys.stderr = maestro.util.PseudoFileErr(writeErr)
 
       # For debugging, it is handy to be able to run the servers
       # without being a service on Windows or a daemon on Linux.
@@ -529,7 +535,7 @@ if __name__ == '__main__':
 
          # Create file like objects to get all stdout and stderr.
          sys.stdout = maestro.util.PseudoFileOut(writeOut)
-         sys.stdout = maestro.util.PseudoFileErr(writeErr)
+         sys.stderr = maestro.util.PseudoFileErr(writeErr)
       else:
          log = '/dev/null'
 
