@@ -30,6 +30,7 @@ pj = os.path.join
 sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
 import maestro.core
 import maestro.core.Stanza
+from maestro.util import xplatform
 import maestro.gui.MaestroResource
 
 import stanzaitems
@@ -485,6 +486,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.setupUi(self)
       #self.timerId = 0
       self.mOptionEditors = {}
+      self.mStanzaStartDir = \
+         os.path.join(xplatform.getUserAppDir(maestro.core.const.APP_NAME),
+                      'stanzas')
 
       # Remove old graphics view widget.
       self.mGraphicsView.setParent(None)
@@ -676,9 +680,17 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       app_element = ET.Element('application', {'name': app_name_no_spaces,
                                                'label': app_name})
 
-      dialog = ChooseStanzaDialog.ChooseStanzaDialog(self)
+      dialog = ChooseStanzaDialog.ChooseStanzaDialog(self,
+                                                     self.mStanzaStartDir)
+
       if QtGui.QDialog.Accepted == dialog.exec_():
          stanza_filename = dialog.getFilename()
+
+         # Store the directory that contains stanza_filename so that the next
+         # time the user opens the stanza chooser dialog, it will start out in
+         # that same directory.
+         self.mStanzaStartDir = os.path.dirname(stanza_filename)
+
          env = maestro.core.Environment()
          if env.mStanzaStore.mStanzas.has_key(stanza_filename):
             stanza = env.mStanzaStore.mStanzas[stanza_filename]

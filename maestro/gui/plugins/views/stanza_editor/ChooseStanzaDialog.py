@@ -20,15 +20,38 @@ import sys
 from PyQt4 import QtGui, QtCore
 import ChooseStanzaDialogBase
 
+import os
 import os.path
 pj = os.path.join
 
 import maestro
 import maestro.core
+const = maestro.core.const
 
 class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDialogBase):
-   def __init__(self, parent = None):
+   def __init__(self, parent = None, startDir = None):
       QtGui.QWidget.__init__(self, parent)
+      self.mStartDir = startDir
+
+      if self.mStartDir is not None:
+         # Ensure that self.mStartDir exists.
+         if not os.path.exists(self.mStartDir):
+            os.makedirs(self.mStartDir)
+         # If self.mStartDir exists, it has to be a directory. If it is not,
+         # inform the user and clear out self.mStartDir since it is not a
+         # valid directory.
+         elif os.path.exists(self.mStartDir) and not os.path.isdir(self.mStartDir):
+            QtGui.QMessageBox.warning(
+               self.parentWidget(), 'Path Error',
+               '%s exists but is not a directory!' % self.mStartDir
+            )
+            self.mStartDir = None
+
+      # If we still lack a starting directory, use the first directory in
+      # const.STANZA_PATH if it exists.
+      if self.mStartDir is None and os.path.exists(const.STANZA_PATH[0]):
+         self.mStartDir = const.STANZA_PATH[0]
+
       self.setupUi(self)
 
    def setupUi(self, widget):
@@ -45,18 +68,47 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
       if self.mStanzaList.count() > 0:
          self.mStanzaList.setCurrentRow(0)
 
+      if self.mStartDir is not None:
+         start_dir = self.mStartDir
+         if not os.path.isabs(start_dir):
+            start_dir = os.path.abspath(start_dir)
+
+         # Tack on an extra os.path.sep if start_dir does not already end
+         # with one. The idea here is to make it clear to the user that a
+         # file name can be appended to this default directory name.
+         if not start_dir.endswith(os.path.sep):
+            start_dir += os.path.sep
+
+         self.mNewStanzaEdit.setText(start_dir)
+
    def onBrowse(self, checked=False):
       start_dir = ''
-      if os.path.exists(maestro.core.const.STANZA_PATH[0]):
-         start_dir = maestro.core.const.STANZA_PATH
+      text = str(self.mNewStanzaEdit.text())
+
+      # Figure out what to use as the starting directory for the file
+      # browser based on what is currently in self.mNewStanzaEdit. If the
+      # value is a directory, go ahead and use it.
+      if os.path.isdir(text):
+         start_dir = text
+      # If the parent of the named file is a directory, then use that
+      # directory.
+      elif os.path.isdir(os.path.dirname(text)):
+         start_dir = os.path.dirname(text)
+      # Otherwise, fall back on the starting directory.
+      else:
+         start_dir = self.mStartDir
+
+      if os.path.exists(start_dir) and not os.path.isabs(start_dir):
+         start_dir = os.path.abspath(start_dir)
 
       new_file = \
          QtGui.QFileDialog.getSaveFileName(
             self, "Choose a new stanza file", start_dir,
             "Stanza (*.stanza)", "", QtGui.QFileDialog.DontConfirmOverwrite
          )
-      new_file = str(new_file)
-      self.mNewStanzaEdit.setText(new_file)
+
+      if new_file is not None and new_file != '':
+         self.mNewStanzaEdit.setText(new_file)
    
    def getFilename(self):
       if self.mExistingStazaRB.isChecked():
