@@ -12,9 +12,10 @@ one process that can be followed:
    6. Copy Python modules from C:\Python24\lib\site-packages. These are
       at least the following:
 
-         PyQt4
          elementtree
+         Crypto
          OpenSSL
+         PyQt4
          twisted
          zope
          sip.pyd
