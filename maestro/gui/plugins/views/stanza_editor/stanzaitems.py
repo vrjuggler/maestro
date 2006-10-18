@@ -335,7 +335,7 @@ class Node(QtGui.QGraphicsItem):
       """ Returns true if the given parent is valid for ourself and
           we are not already connected.
       """
-      if newParent is None or newParent.mElement is None:
+      if newParent is None or newParent.mElement is None or newParent is self:
          return False
 
       return ((isinstance(newParent, ChoiceItem) or
@@ -854,7 +854,7 @@ class OverrideItem(Node):
       """ Returns true if the given parent is valid for ourself and
           we are not already connected.
       """
-      if newParent is None or newParent.mElement is None:
+      if newParent is None or newParent.mElement is None or newParent is self:
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
@@ -877,7 +877,7 @@ class AddItem(Node):
       """ Returns true if the given parent is valid for ourself and
           we are not already connected.
       """
-      if newParent is None or newParent.mElement is None:
+      if newParent is None or newParent.mElement is None or newParent is self:
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
@@ -899,7 +899,7 @@ class RemoveItem(Node):
       """ Returns true if the given parent is valid for ourself and
           we are not already connected.
       """
-      if newParent is None or newParent.mElement is None:
+      if newParent is None or newParent.mElement is None or newParent is self:
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
