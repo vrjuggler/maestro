@@ -72,6 +72,28 @@ if os.name == 'nt':
 class ServerSettings(maestro.core.prefs.Preferences):
    pass
 
+
+# Redirect stdout and stderr into the logging system. This will ensure that we
+# can see all error output.
+stdout_logger = logging.getLogger('stdout')
+stdout_logger.setLevel(logging.DEBUG)
+stderr_logger = logging.getLogger('stderr')
+stderr_logger.setLevel(logging.DEBUG)
+
+def writeOut(text):
+   if text.strip() != '':
+      stdout_logger.debug(text)
+
+def writeErr(text):
+   if text.strip() != '':
+      stderr_logger.debug(text)
+
+# Create file like objects to get all stdout and stderr.
+sys.stdout = maestro.util.PseudoFileOut(writeOut)
+sys.stdout = maestro.util.PseudoFileErr(writeErr)
+
+
+
 class MaestroServer:
    def __init__(self):
       self.mLogger = logging.getLogger('maestrod.MaestroServer')
@@ -477,16 +499,7 @@ if __name__ == '__main__':
       logger.addHandler(file_log)
       logger.setLevel(logging.DEBUG)
 
-      stdout_logger = logging.getLogger('stdout')
-      stderr_logger = logging.getLogger('stderr')
 
-      def remNewl(func, t):
-         if t.strip() != '':
-            func(t)
-
-      # Create file like objects to get all stdout and stderr.
-      sys.stdout = maestro.util.PseudoFileOut(lambda t: remNewl(stdout_logger.debug,t))
-      sys.stdout = maestro.util.PseudoFileErr(lambda t: remNewl(stderr_logger.debug,t))
 
       # For debugging, it is handy to be able to run the servers
       # without being a service on Windows or a daemon on Linux.
