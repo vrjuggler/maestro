@@ -107,9 +107,9 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          if os.path.exists(file_path):
             file = QtCore.QFile(file_path)
             if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
-               # TODO: This should be displayed in a dialog box.
-               print "Cannot read file %s:\n%s." % \
-                        (file_path, file.errorString())
+               QtGui.QMessageBox.warning(self.parentWidget(), "I/O Error",
+                                         "Cannot read file '%s':\n%s." % \
+                                            (file_path, file.errorString()))
             else:
                stream = QtCore.QTextStream(file)
                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -119,10 +119,12 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
                file.close()
                dialog.exec_()
          else:
-            # TODO: This should be displayed in a dialog box.
-            print "Cannot find file '%s' in any of\n%s, %s." % \
-                     (self.mSelectedApp.mHelpUrl, maestro.core.const.EXEC_DIR,
-                      ', '.join(const.STANZA_PATH))
+            QtGui.QMessageBox.warning(
+               self.parentWidget(), "File Not Found",
+               "Cannot find file '%s' in any of\n%s, %s." % \
+                  (self.mSelectedApp.mHelpUrl, maestro.core.const.EXEC_DIR,
+                   ', '.join(const.STANZA_PATH))
+            )
 
    def onAppSelect(self):
      self._setApplication(self.mAppComboBox.currentIndex())
