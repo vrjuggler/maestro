@@ -33,14 +33,14 @@ def makeEnsemble(file):
 
 class Ensemble(QtCore.QObject):
    """ Contains information about a cluster of nodes. """
-   def __init__(self, file, parent=None):
+   def __init__(self, xmlTree, fileName=None, parent=None):
       QtCore.QObject.__init__(self, parent)
 
       # Store filename to save to later.
-      self.mFilename = file
+      self.mFilename = fileName
 
-      # Parse XML file.
-      self.mElementTree = ET.ElementTree(file=file)
+      # Store the element tree.
+      self.mElementTree = xmlTree
 
       # Store cluster XML element
       self.mElement = self.mElementTree.getroot()
@@ -52,7 +52,8 @@ class Ensemble(QtCore.QObject):
       self.mNodes = []
       for node_elt in self.mElement.findall("./cluster_node"):
          node = ClusterNode(node_elt)
-         self.addNode(node)
+         self.mNodes.append(node)
+         self.connect(node, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
 
       self.mIpToNodeMap = {}
 
