@@ -357,7 +357,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          self.mEnsemble.refreshConnections()
 
    def onOpenEnsemble(self):
-      if self.mEnsembleStartDir is not None:
+      if self.mEnsemble is not None and \
+         self.mEnsemble.mFilename is not None:
+         start_dir = os.path.abspath(os.path.dirname(self.mEnsemble.mFilename))
+      elif self.mEnsembleStartDir is not None:
          start_dir = self.mEnsembleStartDir
       else:
          start_dir = xplatform.getUserAppDir(const.APP_NAME)
@@ -365,13 +368,15 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       ensemble_filename = \
          QtGui.QFileDialog.getOpenFileName(self, "Choose an Ensemble file",
                                            start_dir, "Ensemble (*.ensem)")
+
       ensemble_filename = str(ensemble_filename)
       if os.path.exists(ensemble_filename):
          try:
             # Parse XML ensemble file. This provides the initial set of cluster
             # nodes.
             element_tree = ET.ElementTree(file=ensemble_filename)
-            ensemble = Ensemble.Ensemble(element_tree)
+            ensemble = Ensemble.Ensemble(xmlTree=element_tree,
+                                         fileName=ensemble_filename)
             self.setEnsemble(ensemble)
             self.statusBar().showMessage("Opened ensemble %s"%ensemble_filename)
 
@@ -402,6 +407,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             self, "Choose a new ensemble file", start_dir,
             "Ensemble (*.ensem)")
 
+      ensemble_filename = str(ensemble_filename)
+
       # XXX: Should we be forcing the file extenstion.
       #if not ensemble_filename.endswith('.ensem'):
       #   ensemble_filename = ensemble_filename + '.ensem'
@@ -423,11 +430,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          output_file = file(ensemble_filename, 'w')
          output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
          output_file.close()
+         self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
       except IOError, ex:
          QtGui.QMessageBox.critical(None, "Error",
             "Failed to save ensemble file %s: %s" % \
             (ensemble_filename, ex.strerror))
-      self.statusBar().showMessage("Ensemble saved")
 
    def onSaveEnsemble(self):
       if self.mEnsemble is None:
@@ -436,10 +443,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          return
 
       # Get the filename for our ensemble.
-      file_name = self.mEnsemble.mFilename
+      filename = self.mEnsemble.mFilename
 
       # If the ensemble does not have a filename, we have to use save as.
-      if file_name is None:
+      if ensemble_filename is None:
          self.onSaveEnsembleAs()
          return
 
@@ -448,14 +455,14 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          lines = [l.strip() for l in ensemble_str.splitlines()]
          ensemble_str = ''.join(lines)
          dom = xml.dom.minidom.parseString(ensemble_str)
-         output_file = file(file_name, 'w')
+         output_file = file(ensemble_filename, 'w')
          output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
          output_file.close()
+         self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
       except IOError, ex:
          QtGui.QMessageBox.critical(None, "Error",
             "Failed to save ensemble file %s: %s" % \
-            (file_name, ex.strerror))
-      self.statusBar().showMessage("Ensemble saved")
+            (ensemble_filename, ex.strerror))
 
    def onCreateNewEnsemble(self):
       if self.mEnsemble is not None:
@@ -478,20 +485,23 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.statusBar().showMessage("All stanzas saved")
       
    def onLoadStanza(self):
-      new_file = \
+      ensemble_filename = \
          QtGui.QFileDialog.getOpenFileName(self, "Choose a Stanza file",
                                            "", "Stanza (*.stanza)")
+
+      ensemble_filename = str(ensemble_filename)
+
       def printCB(p, t):
          print "%s [%s]" % (t,p)
-      new_file = str(new_file)
-      if os.path.exists(new_file):
+
+      if os.path.exists(ensemble_filename):
          try:
             env = maestro.core.Environment()
-            env.mStanzaStore.loadStanzas(new_file, printCB)
+            env.mStanzaStore.loadStanzas(ensemble_filename, printCB)
          except IOError, ex:
             QtGui.QMessageBox.critical(None, "Error",
                "Failed to read stanza file %s: %s" % \
-               (new_file, ex.strerror))
+               (ensemble_filename, ex.strerror))
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
