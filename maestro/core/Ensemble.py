@@ -125,7 +125,6 @@ class Ensemble(QtCore.QObject):
          node.setPlatform(os)
          self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
 
-
    def lookupIpAddrs(self):
       for node in self.mNodes:
          node.lookupIpAddress()
@@ -248,9 +247,6 @@ class ClusterNode(QtCore.QObject):
       QtCore.QObject.__init__(self, parent)
       assert xmlElt.tag == "cluster_node"
       self.mElement = xmlElt
-      self.mName = self.mElement.get('name', '')
-      self.mHostname = self.mElement.get('hostname', '')
-      self.mClass = self.mElement.get('class', '')
       self.mPlatform = const.ERROR
       self.mIpAddress = None
       self.lookupIpAddress()
@@ -310,7 +306,7 @@ class ClusterNode(QtCore.QObject):
       return const.OsNameMap[self.mPlatform]
 
    def getClassList(self):
-      class_list = [c.strip() for c in self.mClass.split(",") if c != ""]
+      class_list = [c.strip() for c in self.getClass().split(",") if c != ""]
       platform = self.getPlatformName()
       if platform > 0:
          class_list.insert(0, platform)
