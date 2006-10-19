@@ -25,7 +25,7 @@ import elementtree.ElementTree as ET
 import maestro.core
 const = maestro.core.const
 from maestro.core import Stanza
-import maestro.core.environment as env
+LOCAL = maestro.core.EventManager.EventManager.LOCAL
 
 import os.path
 pj = os.path.join
@@ -176,6 +176,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
    def onTerminateApp(self):
       env = maestro.core.Environment()
       env.mEventManager.emit("*", "launch.terminate")
+      # Send a signal to the local GUI indicating that we have terminated a process.
+      env.mEventManager.localEmit(LOCAL, "launch.terminate")
       #self.launchButton.setEnabled(True)
       #self.killButton.setEnabled(False)
 
@@ -183,6 +185,10 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       """ Invoked when the built-in Launch button is clicked. """
       if self.mEnsemble is None:
          return
+
+      env = maestro.core.Environment()
+      # Send a signal to the local GUI indicating that we have launched process.
+      env.mEventManager.localEmit(LOCAL, "launch.launch")
 
       for node in self.mEnsemble.mNodes:
          print "Node [%s] [%s]" % (node.getName(), node.getClassList())
@@ -241,7 +247,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          print "   Cwd       [%s]" % (cwd)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
 
-         env = maestro.core.Environment()
          env.mEventManager.emit(ip_address, "launch.run_command", total_command, cwd, env_map)
 
    def _resetAppState(self):
@@ -556,7 +561,8 @@ def isPointless(obj):
        not editable then there is no point displaying it unless it is
        in a choice.
    """
-   user_mode = env.Environment().settings.getUserMode()
+   env = maestro.core.Environment()
+   user_mode = env.settings.getUserMode()
    return (const.ADVANCED != user_mode and not obj.mHidden and not obj.mEditable)
 
 
@@ -583,7 +589,8 @@ class ValueSheet(Sheet):
       # Create editor if we want to allow the user to edit the value
       # or we are in advanced mode.
       self.mValueEditor = None
-      user_mode = env.Environment().settings.getUserMode()
+      env = maestro.core.Environment()
+      user_mode = env.settings.getUserMode()
       if (self.mObj.mEditable or const.ADVANCED == user_mode):
          self.mValueEditor = QtGui.QLineEdit(self)
          self.mValueEditor.setText(self.mObj.mValue)

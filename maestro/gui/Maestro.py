@@ -36,6 +36,7 @@ import maestro
 import maestro.core
 const = maestro.core.const
 from maestro.core import Ensemble
+LOCAL = maestro.core.EventManager.EventManager.LOCAL
 
 import elementtree.ElementTree as ET
 import xml.dom.minidom
@@ -63,6 +64,14 @@ class OutputTabWidget(QtGui.QTabWidget):
       self.connect(self, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
          self.onContextMenu)
 
+      env = maestro.core.Environment()
+      env.mEventManager.connect("*", "launch.output", self.onOutput)
+
+      # Listen for launch signal so that we can clear all log windows
+      # before starting a new command.
+      env.mEventManager.connect(LOCAL, "launch.launch", self.onClearOutput)
+      #env.mEventManager.connect(LOCAL, "launch.terminate", self.onClearOutput)
+
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
          self.disconnect(self.mEnsemble, QtCore.SIGNAL("nodeAdded"),
@@ -81,9 +90,6 @@ class OutputTabWidget(QtGui.QTabWidget):
                       self.onNodeRemoved);
          self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"),
                       self.onNodeChanged);
-
-      env = maestro.core.Environment()
-      env.mEventManager.connect("*", "launch.output", self.onOutput)
 
       self.reset()
 
@@ -146,11 +152,11 @@ class OutputTabWidget(QtGui.QTabWidget):
       except KeyError:
          print "ERROR: OutputTabWidget.onOutput: Got output for [%s] when we do not have a tab for it." % (nodeId)
 
-   def dataChanged(self, index):
-      """ Called when the name of a node changes. """
-      node = self.mClusterModel.mNodes[index]
-      self.setTabText(index, node.getName())
-      
+   def onClearOutput(self, localId):
+      """ Slot that clears all log windows. """
+      for (tab, scroll_area, log_widget) in self.mTabMap.values():
+         log_widget.clear()
+
    def addOutputTab(self, node, index):
       """ Adds an output tab for the specified node are the given node.
           node - Node to add output tab for.
