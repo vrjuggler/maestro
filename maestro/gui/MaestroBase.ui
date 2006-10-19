@@ -150,12 +150,27 @@
     <property name="title" >
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuNew" >
+     <property name="title" >
+      <string>New</string>
+     </property>
+     <addaction name="mCreateNewEnsembleAction" />
+    </widget>
+    <widget class="QMenu" name="menuOpen" >
+     <property name="title" >
+      <string>Open</string>
+     </property>
+     <addaction name="mLoadEnsembleAction" />
+     <addaction name="mLoadStanzaAction" />
+    </widget>
     <addaction name="separator" />
-    <addaction name="mLoadEnsembleAction" />
+    <addaction name="menuNew" />
+    <addaction name="menuOpen" />
     <addaction name="mSaveEnsembleAction" />
+    <addaction name="mSaveEnsembleAsAction" />
     <addaction name="separator" />
-    <addaction name="mLoadStanzaAction" />
     <addaction name="mSaveStanzasAction" />
+    <addaction name="mSaveStanzaAsAction" />
     <addaction name="separator" />
     <addaction name="mArchiveLogsAction" />
     <addaction name="separator" />
@@ -208,7 +223,7 @@
     <iconset resource="MaestroResource.qrc" >:/Maestro/images/maestro_icon.png</iconset>
    </property>
    <property name="text" >
-    <string>Load Ensemble</string>
+    <string>Ensemble</string>
    </property>
   </action>
   <action name="mAboutAction" >
@@ -224,7 +239,7 @@
     <iconset resource="MaestroResource.qrc" >:/Maestro/images/stanza.png</iconset>
    </property>
    <property name="text" >
-    <string>Load Stanza</string>
+    <string>Stanza</string>
    </property>
   </action>
   <action name="mSaveEnsembleAction" >
@@ -257,6 +272,21 @@
    </property>
    <property name="text" >
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="mSaveEnsembleAsAction" >
+   <property name="text" >
+    <string>Save Ensemble As...</string>
+   </property>
+  </action>
+  <action name="mCreateNewEnsembleAction" >
+   <property name="text" >
+    <string>New Ensemble</string>
+   </property>
+  </action>
+  <action name="mSaveStanzaAsAction" >
+   <property name="text" >
+    <string>Save Stanza As...</string>
    </property>
   </action>
  </widget>
