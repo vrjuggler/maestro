@@ -2,8 +2,8 @@
 
 # HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Maestro"
-!define PRODUCT_VERSION "0.1.0"
-!define FILE_VERSION "${PRODUCT_VERSION}.1"
+!define PRODUCT_VERSION "0.2.0"
+!define FILE_VERSION "${PRODUCT_VERSION}.0"
 !define PRODUCT_PUBLISHER "Infiscape Corporation"
 !define PRODUCT_WEB_SITE "http://realityforge.vrsource.org/trac/maestro/"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\maestro.py"
@@ -30,6 +30,7 @@ SetCompressor bzip2
 # Welcome page
 !insertmacro MUI_PAGE_WELCOME
 # Components page
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE ComponentLeaveFunc
 !insertmacro MUI_PAGE_COMPONENTS
 # Directory page
 !insertmacro MUI_PAGE_DIRECTORY
@@ -43,6 +44,11 @@ SetCompressor bzip2
 
 # Language files
 !insertmacro MUI_LANGUAGE "English"
+
+# Variables
+Var GUI_INST
+Var SERVICE_INST
+Var DOC_INST
 
 # MUI end ------
 
@@ -70,15 +76,19 @@ Function RefreshShellIcons
 FunctionEnd
 
 Section "!Maestro Core" SecCore
+  SectionIn RO
   SetOverwrite ifnewer
   SetOutPath "$INSTDIR\maestro\core"
-  File /r maestro\maestro\core\*
+  File /r /x .svn maestro\maestro\core\*
   SetOutPath "$INSTDIR\maestro\util"
-  File /r maestro\maestro\util\*
+  File /r /x .svn maestro\maestro\util\*
   SetOutPath "$INSTDIR\maestro"
-  File /r maestro\maestro\__init__.py
+  File maestro\maestro\__init__.py
   SetOutPath "$INSTDIR"
   File /r core_deps\*
+
+  Call SetStartMenuToUse
+  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
 SectionEnd
 
 Section "Maestro GUI" SecGUI
@@ -88,15 +98,12 @@ Section "Maestro GUI" SecGUI
   File /r maestro\maestro\gui\* 
 
   SetOutPath "$INSTDIR\stanzas"
-  File /r maestro\stanzas\* 
+  File /r /x .svn maestro\stanzas\* 
 
   SetOutPath "$INSTDIR"
   File maestro\cluster.ensem maestro\LICENSE.txt maestro\Maestro.py maestro\maestrod.py maestro\maestrod.xcfg maestro\server.pem
   File infiscape_maestro.ico ensemble.ico stanza.ico
   File /r gui_deps\*
-
-  Call SetStartMenuToUse
-  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
 
   # Associate .ensem files with the Maestro GUI.
   Push ".ensem"
@@ -107,7 +114,6 @@ Section "Maestro GUI" SecGUI
   # XXX: This path to python.exe should not be hard coded!
   Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" "%1"'
   Call FileAssociation
-  Call RefreshShellIcons
 
   # Associate .stanza files with the Maestro GUI.
   Push ".stanza"
@@ -116,17 +122,18 @@ Section "Maestro GUI" SecGUI
   Push "$INSTDIR\stanza.ico"
   Push "Load Stanza into Maestro"
   # XXX: This path to python.exe should not be hard coded!
-  Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" "-s %1"'
+  Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" -s "%1" -v "Launch View"'
   Call FileAssociation
+
   Call RefreshShellIcons
 SectionEnd
 
 Section "Maestro Service" SecService
   SetOverwrite ifnewer
   SetOutPath "$INSTDIR\maestro\daemon"
-  File /r maestro\maestro\daemon\*
+  File /r /x .svn maestro\maestro\daemon\*
   SetOutPath "$INSTDIR"
-  File /r maestro\maestrod.py
+  File maestro\maestrod.py
 SectionEnd
 
 Section "Maestro Documentation" SecDoc
@@ -138,9 +145,14 @@ SectionEnd
 Section -AdditionalIcons
   Call SetStartMenuToUse
 
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Maestro.lnk" "$INSTDIR\Maestro.py"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (PDF).lnk" "$INSTDIR\doc\userguide.pdf"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (HTML).lnk" "$INSTDIR\doc\userguide\index.html"
+  ${If} $GUI_INST == '1'
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Maestro.lnk" "$INSTDIR\Maestro.py"
+  ${EndIf}
+
+  ${If} $DOC_INST == '1'
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (PDF).lnk" "$INSTDIR\doc\userguide.pdf"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (HTML).lnk" "$INSTDIR\doc\userguide\index.html"
+  ${EndIf}
 
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
@@ -156,17 +168,21 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 
-  ReadRegStr $1 HKCR ".ensem" ""
-  WriteRegStr HKCR "$1\shell" "" "MaestroEnsemble"
+  ${If} $GUI_INST == '1'
+    ReadRegStr $1 HKCR ".ensem" ""
+    WriteRegStr HKCR "$1\shell" "" "MaestroEnsemble"
 
-  ReadRegStr $1 HKCR ".stanza" ""
-  WriteRegStr HKCR "$1\shell" "" "MaestroStanza"
+    ReadRegStr $1 HKCR ".stanza" ""
+    WriteRegStr HKCR "$1\shell" "" "MaestroStanza"
+  ${EndIf}
 
-  # XXX: This path to python.exe should not be hard coded!
-  ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" --interactive --startup auto install' $0
-  DetailPrint "Installing the Maestro service returned $0"
-  # XXX: This path to python.exe should not be hard coded!
-  Exec 'C:\Python24\python.exe "$INSTDIR\maestrod.py" start'
+  ${If} $SERVICE_INST == '1'
+    # XXX: This path to python.exe should not be hard coded!
+    ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" --interactive --startup auto install' $0
+    DetailPrint "Installing the Maestro service returned $0"
+    # XXX: This path to python.exe should not be hard coded!
+    Exec 'C:\Python24\python.exe "$INSTDIR\maestrod.py" start'
+  ${EndIf}
 SectionEnd
 
 # Descriptions
@@ -205,27 +221,65 @@ FunctionEnd
 Section Uninstall
   Call un.SetStartMenuToUse
 
-  # XXX: This path to python.exe should not be hard coded!
-  ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" stop' $0
-  DetailPrint "Stopping the Maestro service returned $0"
-  # XXX: This path to python.exe should not be hard coded!
-  ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" remove' $0
-  DetailPrint "Removing the Maestro service returned $0"
+  ${If} $SERVICE_INST == '1'
+    # XXX: This path to python.exe should not be hard coded!
+    ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" stop' $0
+    DetailPrint "Stopping the Maestro service returned $0"
+    # XXX: This path to python.exe should not be hard coded!
+    ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" remove' $0
+    DetailPrint "Removing the Maestro service returned $0"
+  ${EndIf}
 
   RMDir /R "$SMPROGRAMS\${PRODUCT_NAME}"
   RMDir /R /REBOOTOK "$INSTDIR\"
 
-  Push ".ensem"
-  Push "MaestroEnsemble"
-  Call un.RemoveFileAssociation
-  Call un.RefreshShellIcons
+  ${If} $GUI_INST == '1'
+    Push ".ensem"
+    Push "MaestroEnsemble"
+    Call un.RemoveFileAssociation
 
-  Push ".stanza"
-  Push "MaestroStanza"
-  Call un.RemoveFileAssociation
-  Call un.RefreshShellIcons
+    Push ".stanza"
+    Push "MaestroStanza"
+    Call un.RemoveFileAssociation
+
+    Call un.RefreshShellIcons
+  ${EndIf}
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   SetAutoClose true
 SectionEnd
+
+Function ComponentLeaveFunc
+
+  !insertmacro SectionFlagIsSet ${SecGUI} ${SF_PSELECTED} guiIsSel guiChkAll
+  guiChkAll:
+  !insertmacro SectionFlagIsSet ${SecGUI} ${SF_SELECTED} guiIsSel guiNotSel
+    guiIsSel:
+      StrCpy $GUI_INST "1"
+      Goto guiEnd
+    guiNotSel:
+      StrCpy $GUI_INST "0"
+  guiEnd:
+
+  !insertmacro SectionFlagIsSet ${SecDoc} ${SF_PSELECTED} docIsSel docChkAll
+  docChkAll:
+  !insertmacro SectionFlagIsSet ${SecDoc} ${SF_SELECTED} docIsSel docNotSel
+    docIsSel:
+      StrCpy $DOC_INST "1"
+      Goto docEnd
+    docNotSel:
+      StrCpy $DOC_INST "0"
+  docEnd:
+
+  !insertmacro SectionFlagIsSet ${SecService} ${SF_PSELECTED} svcIsSel svcChkAll
+  svcChkAll:
+  !insertmacro SectionFlagIsSet ${SecService} ${SF_SELECTED} svcIsSel svcNotSel
+    svcIsSel:
+      StrCpy $SERVICE_INST "1"
+      Goto svcEnd
+    svcNotSel:
+      StrCpy $SERVICE_INST "0"
+  svcEnd:
+
+FunctionEnd
