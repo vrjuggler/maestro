@@ -112,8 +112,8 @@ class LaunchService(maestro.core.IServicePlugin):
          self.evaluateEnvVars(envMap)
          command = self.expandEnv(command, envMap)[0]
 
-         if sys.platform.startswith("win"):
-            command = '"' + command.strip("'"'"') + '"'
+         #if sys.platform.startswith("win"):
+         #   command = '"' + command.strip("'"'"') + '"'
 
          if cwd is not None:
             cwd = self.expandEnv(cwd, envMap)[0]
