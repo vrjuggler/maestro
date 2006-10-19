@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import re
 import sys
 from PyQt4 import QtCore, QtGui
 
@@ -175,12 +176,12 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       self.mPathCB.clear()
 
       # Add current filter and a default '*' filter.
-      current_path = self.mOption.mElement.get('id', '*')
+      current_path = self.mOption.mElement.get('id', '*/*')
       self.mPathCB.addItem(current_path)
 
       # Add a reasonable default.
-      if current_path is not '*':
-         self.mPathCB.addItem('*')
+      if current_path is not '*/*':
+         self.mPathCB.addItem('*/*')
 
       # Keep a list of namespaces around so we don't add duplicates.
       filled_namespaces = []
@@ -194,7 +195,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
             # If we don't have one yet, add an item for selecting
             # an entire namspace.
             if 0 == filled_namespaces.count(namespace):
-               self.mPathCB.addItem(namespace + '*')
+               self.mPathCB.addItem(namespace + '*/*')
                filled_namespaces.append(namespace)
 
          # For all applications and global options.
@@ -204,7 +205,10 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
             if child_name is None:
                print "WARNING: %s has no name." % elm
             else:
-               self.mPathCB.addItem(namespace + child_name)
+               self.mPathCB.addItem(namespace + child_name + '/*')
+
+   no_space_path_re = re.compile(r'^\S+$')
+   valid_path_re    = re.compile(r'^(\w+:|)\S+/\S+$')
 
    def onPathSelected(self, text):
       """ Slot that is called when the user either selects a value from the
@@ -218,10 +222,28 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       new_path = str(text)
       old_path = self.mOption.mElement.get('id', '')
 
-      # If the path has changed, update the element and match lists.
-      if new_path != old_path:
-         self.mOption.mElement.set('id', new_path)
-         self.__fillMatchList()
+      if not self.no_space_path_re.search(new_path):
+         QtGui.QMessageBox.critical(
+            self.parentWidget(), 'Invalid Reference ID',
+            'ERROR: %s is not a valid reference ID!\nReference IDs cannot contain spaces.' % new_path
+         )
+         self.mPathCB.blockSignals(True)
+         self.mPathCB.setEditText(old_path)
+         self.mPathCB.blockSignals(False)
+      elif not self.valid_path_re.search(new_path):
+         QtGui.QMessageBox.critical(
+            self.parentWidget(), 'Invalid Reference ID',
+            'ERROR: %s is not a valid reference ID!\nReference IDs cannot reference only the root.' % new_path
+         )
+         self.mPathCB.blockSignals(True)
+         self.mPathCB.setEditText(old_path)
+         self.mPathCB.blockSignals(False)
+      else:
+
+         # If the path has changed, update the element and match lists.
+         if new_path != old_path:
+            self.mOption.mElement.set('id', new_path)
+            self.__fillMatchList()
 
    def __fillMatchList(self):
       """ Helper method that fills the match list with all application
