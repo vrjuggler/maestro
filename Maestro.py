@@ -24,6 +24,16 @@ except:
    pass
 
 import sys, os, os.path, time, traceback
+
+exec_dir = os.path.dirname(__file__)
+
+# With the way that Maestro is currently installed on Windows, DLLs for
+# software such as Qt lives in the same directory as this file. We need to
+# extend the DLL search path so that those DLLs are found correctly no matter
+# where the Maestro GUI is launched.
+if sys.platform.startswith('win'):
+   os.environ['PATH'] += os.path.pathsep + os.path.abspath(exec_dir)
+
 pj = os.path.join
 from optparse import OptionParser
 
@@ -45,7 +55,7 @@ if os.environ.has_key('STANZA_PATH'):
 import maestro.core
 const = maestro.core.const
 const.APP_NAME = 'maestro'
-const.EXEC_DIR = os.path.dirname(__file__)
+const.EXEC_DIR = exec_dir
 const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'plugins')
 const.STANZA_PATH = [pj(const.EXEC_DIR, 'stanzas'),
                      pj(xplatform.getUserAppDir(const.APP_NAME), 'stanzas'),
