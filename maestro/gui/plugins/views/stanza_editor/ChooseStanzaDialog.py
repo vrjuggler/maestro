@@ -29,9 +29,10 @@ import maestro.core
 const = maestro.core.const
 
 class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDialogBase):
-   def __init__(self, parent = None, startDir = None):
+   def __init__(self, parent = None, startDir = None, defaultFileName = None):
       QtGui.QWidget.__init__(self, parent)
-      self.mStartDir = startDir
+      self.mStartDir        = startDir
+      self.mDefaultFileName = defaultFileName
 
       if self.mStartDir is not None:
          # Ensure that self.mStartDir exists.
@@ -73,10 +74,12 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
          if not os.path.isabs(start_dir):
             start_dir = os.path.abspath(start_dir)
 
+         if self.mDefaultFileName is not None:
+            start_dir = os.path.join(start_dir, self.mDefaultFileName)
          # Tack on an extra os.path.sep if start_dir does not already end
          # with one. The idea here is to make it clear to the user that a
          # file name can be appended to this default directory name.
-         if not start_dir.endswith(os.path.sep):
+         elif not start_dir.endswith(os.path.sep):
             start_dir += os.path.sep
 
          self.mNewStanzaEdit.setText(start_dir)
@@ -108,15 +111,20 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
          )
 
       if new_file is not None and new_file != '':
+         if not new_file.endswith('.stanza'):
+            new_file = new_file + '.stanza'
          self.mNewStanzaEdit.setText(new_file)
-   
+
    def getFilename(self):
       if self.mExistingStazaRB.isChecked():
          current_item = self.mStanzaList.currentItem()
          if current_item is not None:
             return str(current_item.text())
       else:
-         return str(self.mNewStanzaEdit.text())
+         name = str(self.mNewStanzaEdit.text())
+         if not name.endswith('.stanza'):
+            name = name + '.stanza'
+         return name
 
       # If nothing else, return '' which is an invalid filename
       return ''

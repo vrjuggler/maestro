@@ -691,8 +691,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       element = ET.Element(eltType, {'name'  : name_no_spaces,
                                      'label' : name})
 
-      dialog = ChooseStanzaDialog.ChooseStanzaDialog(self,
-                                                     self.mStanzaStartDir)
+      dialog = \
+         ChooseStanzaDialog.ChooseStanzaDialog(self, self.mStanzaStartDir,
+                                               name_no_spaces + '.stanza')
 
       if QtGui.QDialog.Accepted == dialog.exec_():
          stanza_filename = dialog.getFilename()
