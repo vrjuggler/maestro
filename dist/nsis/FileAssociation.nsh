@@ -3,7 +3,7 @@
 #
 # Example:
 #  Push ".ensem"                               - Extension
-#  Push "Maestro Ensemble"                     - Name
+#  Push "MaestroEnsemble"                      - Name
 #  Push "Ensemble File"                        - Label
 #  Push "$OUTDIR\ensemble.ico"                 - Icon
 #  Push "Load Ensemble into Maestro GUI"       - Context Menu Text
@@ -60,7 +60,7 @@ FunctionEnd
 #
 # Example:
 #  Push ".ensem"                               - Extension
-#  Push "Maestro Ensemble"                     - Name
+#  Push "MaestroEnsemble"                      - Name
 #
 Function un.RemoveFileAssociation
   Pop $NAME
@@ -75,7 +75,7 @@ Function un.RemoveFileAssociation
 "RemoveActions:"
   # If we have the associations add icon
   ReadRegStr $1 HKCR $EXT ""
-  DeleteRegKey HKCR "$1\shell\MaestroEnsemble"
+  DeleteRegKey HKCR "$1\shell\$NAME"
 "DoneRFA:"
 
 FunctionEnd
