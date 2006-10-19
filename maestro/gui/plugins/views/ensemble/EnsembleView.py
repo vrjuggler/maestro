@@ -297,6 +297,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       QtCore.QObject.connect(self.mClusterListView.selectionModel(),
          QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onNodeSelected)
 
+      # Update textedits to reflect the new ensemble.
+      self.updateFields()
+      self.refreshNodeSettings()
+
    def __getSelectedIndex(self):
       """ Helper method that returns the currently selected index. """
 

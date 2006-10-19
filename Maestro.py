@@ -36,6 +36,7 @@ from maestro.util import plugin
 from maestro.util import xplatform
 qt4reactor.install(app)
 from twisted.internet import reactor
+import elementtree.ElementTree as ET
 
 stanza_path_env = []
 if os.environ.has_key('STANZA_PATH'):
@@ -181,15 +182,24 @@ def main():
       m = gui.Maestro.Maestro()
       m.init()
 
+      element_tree = None
       if opts.ensemble is not None:
          try:
             print "Trying to load file: ", opts.ensemble
-            ensemble = Ensemble.Ensemble(opts.ensemble)
+            # Parse XML file.
+            element_tree = ET.ElementTree(file=opts.ensemble)
+            ensemble = Ensemble.Ensemble(element_tree, fileName=opts.ensemble)
             m.setEnsemble(ensemble)
          except IOError, ex:
+            element_tree = None
             QtGui.QMessageBox.critical(None, "Error",
                                        "Failed to read ensemble file %s: %s" % \
                                           (opts.ensemble, ex.strerror))
+
+      # Create a new ensemble ElementTree if one was not sepecifed or
+      # we could not open it.
+      if element_tree is None:
+         m.onCreateNewEnsemble()
 
       m.show()
       m.resize(800, 850)

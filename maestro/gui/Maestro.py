@@ -273,6 +273,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mActiveViewPlugins = {}
       self.mLoggers = []
       self.mFileLogger = None
+      self.mEnsembleStartDir = None
 
    def init(self):
       env = maestro.core.Environment()
@@ -356,29 +357,96 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          self.mEnsemble.refreshConnections()
 
    def onOpenEnsemble(self):
-      new_file = \
+      if self.mEnsembleStartDir is not None:
+         start_dir = self.mEnsembleStartDir
+      else:
+         start_dir = xplatform.getUserAppDir(const.APP_NAME)
+
+      ensemble_filename = \
          QtGui.QFileDialog.getOpenFileName(self, "Choose an Ensemble file",
-                                           "", "Ensemble (*.ensem)")
-      new_file = str(new_file)
-      if os.path.exists(new_file):
+                                           start_dir, "Ensemble (*.ensem)")
+      ensemble_filename = str(ensemble_filename)
+      if os.path.exists(ensemble_filename):
          try:
             # Parse XML ensemble file. This provides the initial set of cluster
             # nodes.
-            ensemble = Ensemble.Ensemble(new_file)
+            element_tree = ET.ElementTree(file=ensemble_filename)
+            ensemble = Ensemble.Ensemble(element_tree)
             self.setEnsemble(ensemble)
+            self.statusBar().showMessage("Opened ensemble %s"%ensemble_filename)
+
+            # Store the directory that contains ensemble_filename so that the next
+            # time the user tries to save an ensemble without a filename, it will
+            # start out in that same directory.
+            self.mEnsembleStartDir = os.path.dirname(ensemble_filename)
          except IOError, ex:
             QtGui.QMessageBox.critical(None, "Error",
-               "Failed to read ensemble file %s: %s" % \
-               (new_file, ex.strerror))
+               "Failed to load ensemble file %s: %s" % \
+               (ensemble_filename, ex.strerror))
+
+   def onSaveEnsembleAs(self):
+      if self.mEnsemble is None:
+         QtGui.QMessageBox.information(None, "Save Ensemble",
+            "There is currently no Ensemble open.")
+         return
+
+      if self.mEnsemble.mFilename is not None:
+         start_dir = os.path.abspath(os.path.dirname(self.mEnsemble.mFilename))
+      elif self.mEnsembleStartDir is not None:
+         start_dir = self.mEnsembleStartDir
+      else:
+         start_dir = xplatform.getUserAppDir(const.APP_NAME)
+
+      ensemble_filename = \
+         QtGui.QFileDialog.getSaveFileName(
+            self, "Choose a new ensemble file", start_dir,
+            "Ensemble (*.ensem)")
+
+      # XXX: Should we be forcing the file extenstion.
+      #if not ensemble_filename.endswith('.ensem'):
+      #   ensemble_filename = ensemble_filename + '.ensem'
+
+      # If ensemble_filename is None or empty, then the user must have canceled.
+      if ensemble_filename is None or ensemble_filename == '':
+         return
+
+      # Store the directory that contains ensemble_filename so that the next
+      # time the user tries to save an ensemble without a filename, it will
+      # start out in that same directory.
+      self.mEnsembleStartDir = os.path.dirname(ensemble_filename)
+
+      try:
+         ensemble_str = ET.tostring(self.mEnsemble.mElement)
+         lines = [l.strip() for l in ensemble_str.splitlines()]
+         ensemble_str = ''.join(lines)
+         dom = xml.dom.minidom.parseString(ensemble_str)
+         output_file = file(ensemble_filename, 'w')
+         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+         output_file.close()
+      except IOError, ex:
+         QtGui.QMessageBox.critical(None, "Error",
+            "Failed to save ensemble file %s: %s" % \
+            (ensemble_filename, ex.strerror))
+      self.statusBar().showMessage("Ensemble saved")
 
    def onSaveEnsemble(self):
       if self.mEnsemble is None:
          QtGui.QMessageBox.information(None, "Save Ensemble",
             "There is currently no Ensemble open.")
+         return
+
+      # Get the filename for our ensemble.
       file_name = self.mEnsemble.mFilename
+
+      # If the ensemble does not have a filename, we have to use save as.
+      if file_name is None:
+         self.onSaveEnsembleAs()
+         return
 
       try:
          ensemble_str = ET.tostring(self.mEnsemble.mElement)
+         lines = [l.strip() for l in ensemble_str.splitlines()]
+         ensemble_str = ''.join(lines)
          dom = xml.dom.minidom.parseString(ensemble_str)
          output_file = file(file_name, 'w')
          output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
@@ -388,6 +456,21 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             "Failed to save ensemble file %s: %s" % \
             (file_name, ex.strerror))
       self.statusBar().showMessage("Ensemble saved")
+
+   def onCreateNewEnsemble(self):
+      if self.mEnsemble is not None:
+         reply = QtGui.QMessageBox.question(self, self.tr("Create New Ensemble"),
+            self.tr("Do you want to save the current ensemble first?"),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         if reply == QtGui.QMessageBox.Yes:
+            self.onSaveEnsemble()
+
+      elm = ET.Element('ensemble')
+      element_tree = ET.ElementTree(element=elm)
+      ensemble = Ensemble.Ensemble(element_tree)
+      self.setEnsemble(ensemble)
+      self.statusBar().showMessage("Created new ensemble")
 
    def onSaveStanzas(self):
       env = maestro.core.Environment()
@@ -429,6 +512,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onOpenEnsemble)
       self.connect(self.mSaveEnsembleAction, QtCore.SIGNAL("triggered()"),
                    self.onSaveEnsemble)
+      self.connect(self.mSaveEnsembleAsAction, QtCore.SIGNAL("triggered()"),
+                   self.onSaveEnsembleAs)
+      self.connect(self.mCreateNewEnsembleAction, QtCore.SIGNAL("triggered()"),
+                   self.onCreateNewEnsemble)
       self.connect(self.mSaveStanzasAction, QtCore.SIGNAL("triggered()"),
                    self.onSaveStanzas)
       self.connect(self.mLoadStanzaAction, QtCore.SIGNAL("triggered()"),
