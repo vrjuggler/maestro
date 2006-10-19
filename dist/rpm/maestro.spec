@@ -119,6 +119,15 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_prefix}/lib/maestro-%{version}/mkpem
 %{_prefix}/lib/maestro-%{version}/maestro/daemon
 
+%post server
+/sbin/chkconfig --add maestrod
+/sbin/chkconfig --level 34 maestro off
+/sbin/chkconfig --level 5 maestro on
+
+%postun server
+/sbin/service maestrod stop
+/sbin/chkconfig --del maestrod
+
 %if %{build_doc}
 %files doc
 %doc %{_docdir}/maestro-%{version}
