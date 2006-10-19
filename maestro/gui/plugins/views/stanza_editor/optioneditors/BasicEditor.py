@@ -50,6 +50,16 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
    def setupUi(self, widget):
       BasicEditorBase.Ui_BasicEditorBase.setupUi(self, widget)
       self.connect(self.mValueEdit, QtCore.SIGNAL("editingFinished()"), self.onValueChanged)
+      print type(QtGui.QAbstractItemView.AllEditTriggers)
+      print type(~QtGui.QAbstractItemView.CurrentChanged)
+      print type(QtGui.QAbstractItemView.AllEditTriggers & ~QtGui.QAbstractItemView.CurrentChanged)
+      triggers = QtGui.QAbstractItemView.DoubleClicked |        \
+                 QtGui.QAbstractItemView.CurrentChanged |       \
+                 QtGui.QAbstractItemView.SelectedClicked |      \
+                 QtGui.QAbstractItemView.EditKeyPressed |       \
+                 QtGui.QAbstractItemView.AnyKeyPressed
+      self.mAttribTable.setEditTriggers(triggers)
+      self.mAttribTable.setTabKeyNavigation(True)
 
    def setOption(self, option):
       self.mOption = option

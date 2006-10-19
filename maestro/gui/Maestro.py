@@ -58,7 +58,6 @@ class OutputTabWidget(QtGui.QTabWidget):
       self.mEnsemble = None
       self.mTabMap = {}
       self.mEditMap = {}
-      self.mIpToEditMap = {}
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
@@ -84,29 +83,24 @@ class OutputTabWidget(QtGui.QTabWidget):
 
       self.reset()
 
-   def onNodeAdded(self, index, node):
+   def onNodeAdded(self, node, index):
       self.addOutputTab(node, index)
 
-   def onNodeRemoved(self, index, node):
+   def onNodeRemoved(self, node, index):
       self.removeTab(index)
-      ip_address = node.getIpAddress()
       del self.mTabMap[node]
       del self.mEditMap[node]
-      del self.mIpToEditMap[ip_address]
 
    def onNodeChanged(self, node):
       if self.mTabMap.has_key(node):
-         node_index = self.mEnsemble.mNodes.index(node)
-         self.setTabText(node_index, node.getName())
-         ip_address = node.getIpAddress()
-         self.mIpToEditMap[ip_address] = self.mEditMap[node]
+         tab_index = self.indexOf(self.mTabMap[node])
+         self.setTabText(tab_index, node.getName())
 
    def reset(self):
       for i in xrange(self.count()):
          self.removeTab(0)
       self.mTabMap = {}
       self.mEditMap = {}
-      self.mIpToEditMap = {}
          
       for i in xrange(len(self.mEnsemble.mNodes)):
          node = self.mEnsemble.mNodes[i]
@@ -114,8 +108,10 @@ class OutputTabWidget(QtGui.QTabWidget):
 
    def onOutput(self, nodeId, output):
       try:
-         textedit = self.mIpToEditMap[nodeId]
-         textedit.append(output)
+         node = self.mEnsemble.getNodeById(nodeId)
+         if node is not None:
+            textedit = self.mEditMap[node]
+            textedit.append(output)
       except KeyError:
          print "ERROR: OutputTabWidget.onOutput: Got output for [%s] when we do not have a tab for it." % (nodeId)
 
@@ -130,14 +126,10 @@ class OutputTabWidget(QtGui.QTabWidget):
           index - index to insert tab at.
       """
       # Ensure that we do not already have a tab for this node.
-      ip_address = node.getIpAddress()
-
       if self.mTabMap.has_key(node):
-         raise AttributeError("OutputTabWidget: [%s] already has a tab." % ip_address)
+         raise AttributeError("OutputTabWidget: [%s] already has a tab." % node.getName())
       if self.mEditMap.has_key(node):
-         raise AttributeError("OutputTabWidget: [%s] already has a textedit widget." % ip_address)
-      if self.mIpToEditMap.has_key(ip_address):
-         print "WARNING: We already have a node with that IP address."
+         raise AttributeError("OutputTabWidget: [%s] already has a textedit widget." % node.getName())
 
       tab = QtGui.QWidget()
       tab.setObjectName("tab")
@@ -156,7 +148,6 @@ class OutputTabWidget(QtGui.QTabWidget):
       
       self.mTabMap[node] = tab
       self.mEditMap[node] = log_widget
-      self.mIpToEditMap[ip_address] = log_widget
 
 class NodeLogger:
    def __init__(self):
@@ -174,7 +165,6 @@ class NodeLogger:
          v.setLevel(level)
 
    def onAppOutput(self, nodeId, output):
-      print nodeId
       if not self.mLoggers.has_key(nodeId):
          self.addLogger(nodeId)
 
@@ -419,7 +409,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             QtGui.QMessageBox.critical(None, "Error",
                "Failed to read stanza file %s: %s" % \
                (new_file, ex.strerror))
-      print "Stanzas: ", env.mStanzaStore.mStanzas
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)

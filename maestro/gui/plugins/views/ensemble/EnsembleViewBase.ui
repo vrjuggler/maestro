@@ -112,10 +112,10 @@
             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Remove selected cluster node.&lt;/p>&lt;/body>&lt;/html></string>
            </property>
            <property name="text" >
-            <string>&amp;Remove</string>
+            <string>Remove</string>
            </property>
            <property name="shortcut" >
-            <string>Delete</string>
+            <string>Del</string>
            </property>
           </widget>
          </item>
@@ -146,7 +146,7 @@
           <item row="1" column="0" >
            <widget class="QLabel" name="mHostnameLbl" >
             <property name="text" >
-             <string>Hostname:</string>
+             <string>&amp;Hostname:</string>
             </property>
             <property name="buddy" >
              <cstring>mHostnameEdit</cstring>
@@ -156,10 +156,13 @@
           <item row="5" column="0" >
            <widget class="QLabel" name="mOtherLbl" >
             <property name="text" >
-             <string>Other:</string>
+             <string>&amp;Other:</string>
             </property>
             <property name="alignment" >
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="buddy" >
+             <cstring>mSettingsTableView</cstring>
             </property>
            </widget>
           </item>
@@ -175,6 +178,9 @@
           </item>
           <item row="3" column="1" >
            <widget class="QLineEdit" name="mIpAddressEdit" >
+            <property name="focusPolicy" >
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="autoFillBackground" >
              <bool>false</bool>
             </property>
@@ -185,6 +191,9 @@
           </item>
           <item row="4" column="1" >
            <widget class="QLineEdit" name="mCurrentOsEdit" >
+            <property name="focusPolicy" >
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="autoFillBackground" >
              <bool>true</bool>
             </property>
@@ -216,7 +225,10 @@
           <item row="0" column="0" >
            <widget class="QLabel" name="mNameLbl" >
             <property name="text" >
-             <string>Name:</string>
+             <string>&amp;Name:</string>
+            </property>
+            <property name="buddy" >
+             <cstring>mNameEdit</cstring>
             </property>
            </widget>
           </item>
@@ -226,7 +238,10 @@
           <item row="2" column="0" >
            <widget class="QLabel" name="mClassLbl" >
             <property name="text" >
-             <string>Class:</string>
+             <string>&amp;Class:</string>
+            </property>
+            <property name="buddy" >
+             <cstring>mClassEdit</cstring>
             </property>
            </widget>
           </item>
@@ -249,8 +264,10 @@
   <tabstop>mRemoveBtn</tabstop>
   <tabstop>mNameEdit</tabstop>
   <tabstop>mHostnameEdit</tabstop>
+  <tabstop>mClassEdit</tabstop>
   <tabstop>mIpAddressEdit</tabstop>
   <tabstop>mCurrentOsEdit</tabstop>
+  <tabstop>mSettingsTableView</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -29,6 +29,7 @@ from maestro.util import pboverssl
 class EventManager(pb.Root, EventManagerBase.EventManagerBase):
    """ Handles sending messages to remote objects.
    """
+   LOCAL = "<LOCAL>"
    def __init__(self, ipAddress):
       """ Initialize the event dispatcher. """
       EventManagerBase.EventManagerBase.__init__(self)
@@ -94,14 +95,14 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
 
       return d
 
-   def lostConnection(self, nodeId):
-      self.mLogger.debug("EventManager.lostConnection(%s)" % (nodeId))
+   def connectionLost(self, nodeId):
+      self.mLogger.debug("EventManager.connectionLost(%s)" % (nodeId))
       self.unregisterProxy(nodeId)
-      self.localEmit("*", "lostConnection", (nodeId, ))
+      self.localEmit(EventManager.LOCAL, "connectionLost", nodeId)
 
    def completeConnect(self, nodeId, factory, object):
       object.callRemote("registerCallback", self.mIpAddress, self)
-      factory._broker.notifyOnDisconnect(lambda n=nodeId: self.lostConnection(n))
+      factory._broker.notifyOnDisconnect(lambda n=nodeId: self.connectionLost(n))
       self.registerProxy(nodeId, object)
       # As soon as we connect to a new node, we want to know what OS it is running.
       self.emit("*", "ensemble.get_os")

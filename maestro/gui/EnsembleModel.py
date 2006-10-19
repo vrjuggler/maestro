@@ -33,18 +33,12 @@ class EnsembleModel(QtCore.QAbstractListModel):
       self.mEnsemble = ensemble
 
       # Connect the new ensemble.
-      self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
-      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"), self.onEnsembleChanged)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
 
       env = maestro.core.Environment()
-      # XXX: Should we manage this signal on a per node basis? We would have
-      #      to make each node generate a signal when it's OS changed and
-      #      listen for it here anyway.
-      # Register to receive signals from all nodes about their current os.
-      env.mEventManager.connect("*", "settings.os", self.onReportOs)
 
-
-   def onNodeChanged(self, nodeId):
+   def onNodeChanged(self, node):
       """ Slot that is called when a node's state changes. If the currently
           selected node changes, we need to update the target list and the
           current default target.
@@ -52,34 +46,17 @@ class EnsembleModel(QtCore.QAbstractListModel):
           @param nodeId: The id of the node that changed.
       """
 
-      for i in xrange(self.mEnsemble.getNumNodes()):
-         node = self.mEnsemble.getNode(i)
-         if nodeId == node.getId():
-            changed_index = self.index(i)
-            self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-               changed_index, changed_index)
+      if node in self.mEnsemble.mNodes:
+         node_index = self.mEnsemble.mNodes.index(node)
+         changed_index = self.index(node_index)
+         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
+            changed_index, changed_index)
 
    def onEnsembleChanged(self):
       """ Slot that is called when the ensemble has changed. This will
           force all views to be updated.
       """
       self.emit(QtCore.SIGNAL("modelReset()"))
-
-   def onReportOs(self, nodeId, os):
-      try:
-         changed = False
-         for node in self.mEnsemble.mNodes:
-            if node.getIpAddress() == nodeId:
-               if os != node.mPlatform:
-                  node.mPlatform = os
-                  changed = True
-
-         if changed:
-            # TODO: Only send changed signal when nodes really changed os.
-            #self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), QtCore.QModelIndex(), QtCore.QModelIndex())
-            self.emit(QtCore.SIGNAL("modelReset()"))
-      except Exception, ex:
-         print "ERROR: ", ex
 
    def flags(self, index):
       default_flags = QtCore.QAbstractListModel.flags(self, index)
@@ -99,18 +76,23 @@ class EnsembleModel(QtCore.QAbstractListModel):
       # Get the cluster node we want data for.
       cluster_node = self.mEnsemble.getNode(index.row())
 
-      # Return an icon representing the operating system.
-      if role == QtCore.Qt.DecorationRole:
-         return QtCore.QVariant(const.mOsIcons[cluster_node.mPlatform])
-      # Return the name of the node.
-      elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-         return QtCore.QVariant(str(cluster_node.getName()))
-      elif role == QtCore.Qt.UserRole:
+      if role == QtCore.Qt.UserRole:
          return cluster_node
+
+      if cluster_node is not None:
+         # Return an icon representing the operating system.
+         if role == QtCore.Qt.DecorationRole:
+            return QtCore.QVariant(const.mOsIcons[cluster_node.mPlatform])
+         # Return the name of the node.
+         elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+            return QtCore.QVariant(str(cluster_node.getName()))
+         elif role == QtCore.Qt.UserRole:
+            return cluster_node
        
       return QtCore.QVariant()
 
    def setData(self, index, value, role):
+      """ Set the name of the cluster node at the given index. """
       if not index.isValid():
          return False
       if role == QtCore.Qt.EditRole and index.row() < self.rowCount():
@@ -169,8 +151,7 @@ class EnsembleModel(QtCore.QAbstractListModel):
          row = int(row_str)
          node = self.mEnsemble.getNode(row)
          new_index = parent.row()
-         self.mEnsemble.removeNode(node)
-         self.mEnsemble.addNode(node, new_index)
+         self.mEnsemble.moveNode(node, new_index)
       return True
 
    def rowCount(self, parent=QtCore.QModelIndex()):

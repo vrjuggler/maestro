@@ -175,10 +175,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
    def onTerminateApp(self):
       env = maestro.core.Environment()
-#      for node in self.mEnsemble.mNodes:
-#         ip_address = node.getIpAddress()
-#         env.mEventManager.emit(ip_address, "launch.terminate")
-#         print "Trying to terminate: ", ip_address
       env.mEventManager.emit("*", "launch.terminate")
       #self.launchButton.setEnabled(True)
       #self.killButton.setEnabled(False)
@@ -191,7 +187,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       for node in self.mEnsemble.mNodes:
          print "Node [%s] [%s]" % (node.getName(), node.getClassList())
 
-         if node.mPlatform == const.ERROR:
+         ip_address = node.getIpAddress()
+         if ip_address is None:
             QtGui.QMessageBox.warning(self.parentWidget(),
                "Not Connected",
                "%s is not connected." % node.getName())
@@ -244,7 +241,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          print "   Cwd       [%s]" % (cwd)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
 
-         ip_address = node.getIpAddress()
          env = maestro.core.Environment()
          env.mEventManager.emit(ip_address, "launch.run_command", total_command, cwd, env_map)
 

@@ -255,7 +255,7 @@ class ResourceModel(QtCore.QAbstractTableModel):
          if index.column() == 0:
             return QtCore.QVariant(str(node.getName()))
          ip_addr = node.getIpAddress()
-         if not self.mNodeDataMap.has_key(ip_addr):
+         if ip_addr is not None and not self.mNodeDataMap.has_key(ip_addr):
             all_resources = []
             for r in self.mDataSizes:
                resource_history = [0 for i in xrange(r)]

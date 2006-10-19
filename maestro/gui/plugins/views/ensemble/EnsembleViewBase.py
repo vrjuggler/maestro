@@ -13,7 +13,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -100,12 +100,14 @@ class Ui_EnsembleViewBase(object):
       self.gridlayout.addWidget(self.mCurrentOsLbl,4,0,1,1)
 
       self.mIpAddressEdit = QtGui.QLineEdit(self.mNodeGroup)
+      self.mIpAddressEdit.setFocusPolicy(QtCore.Qt.NoFocus)
       self.mIpAddressEdit.setAutoFillBackground(False)
       self.mIpAddressEdit.setReadOnly(True)
       self.mIpAddressEdit.setObjectName("mIpAddressEdit")
       self.gridlayout.addWidget(self.mIpAddressEdit,3,1,1,1)
 
       self.mCurrentOsEdit = QtGui.QLineEdit(self.mNodeGroup)
+      self.mCurrentOsEdit.setFocusPolicy(QtCore.Qt.NoFocus)
       self.mCurrentOsEdit.setAutoFillBackground(True)
       self.mCurrentOsEdit.setReadOnly(True)
       self.mCurrentOsEdit.setObjectName("mCurrentOsEdit")
@@ -143,8 +145,11 @@ class Ui_EnsembleViewBase(object):
       self.hboxlayout.addLayout(self.vboxlayout2)
       self.vboxlayout.addLayout(self.hboxlayout)
       self.mHostnameLbl.setBuddy(self.mHostnameEdit)
+      self.mOtherLbl.setBuddy(self.mSettingsTableView)
       self.mCurrentOsLbl.setBuddy(self.mCurrentOsEdit)
       self.mIpAddressLbl.setBuddy(self.mIpAddressEdit)
+      self.mNameLbl.setBuddy(self.mNameEdit)
+      self.mClassLbl.setBuddy(self.mClassEdit)
 
       self.retranslateUi(EnsembleViewBase)
       QtCore.QMetaObject.connectSlotsByName(EnsembleViewBase)
@@ -153,8 +158,10 @@ class Ui_EnsembleViewBase(object):
       EnsembleViewBase.setTabOrder(self.mAddBtn,self.mRemoveBtn)
       EnsembleViewBase.setTabOrder(self.mRemoveBtn,self.mNameEdit)
       EnsembleViewBase.setTabOrder(self.mNameEdit,self.mHostnameEdit)
-      EnsembleViewBase.setTabOrder(self.mHostnameEdit,self.mIpAddressEdit)
+      EnsembleViewBase.setTabOrder(self.mHostnameEdit,self.mClassEdit)
+      EnsembleViewBase.setTabOrder(self.mClassEdit,self.mIpAddressEdit)
       EnsembleViewBase.setTabOrder(self.mIpAddressEdit,self.mCurrentOsEdit)
+      EnsembleViewBase.setTabOrder(self.mCurrentOsEdit,self.mSettingsTableView)
 
    def retranslateUi(self, EnsembleViewBase):
       EnsembleViewBase.setWindowTitle(QtGui.QApplication.translate("EnsembleViewBase", "Ensemble View", None, QtGui.QApplication.UnicodeUTF8))
@@ -168,15 +175,15 @@ class Ui_EnsembleViewBase(object):
       self.mAddBtn.setShortcut(QtGui.QApplication.translate("EnsembleViewBase", "Ctrl+A", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveBtn.setToolTip(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveBtn.setWhatsThis(QtGui.QApplication.translate("EnsembleViewBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Remove selected cluster node.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Remove", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveBtn.setShortcut(QtGui.QApplication.translate("EnsembleViewBase", "Delete", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRemoveBtn.setText(QtGui.QApplication.translate("EnsembleViewBase", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRemoveBtn.setShortcut(QtGui.QApplication.translate("EnsembleViewBase", "Del", None, QtGui.QApplication.UnicodeUTF8))
       self.mNodeGroup.setTitle(QtGui.QApplication.translate("EnsembleViewBase", "Node Settings", None, QtGui.QApplication.UnicodeUTF8))
-      self.mHostnameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Hostname:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mOtherLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Other:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mHostnameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Hostname:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mOtherLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Other:", None, QtGui.QApplication.UnicodeUTF8))
       self.mCurrentOsLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Current OS:", None, QtGui.QApplication.UnicodeUTF8))
       self.mIpAddressLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "IP Address:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mNameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Name:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mClassLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "Class:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNameLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Name:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mClassLbl.setText(QtGui.QApplication.translate("EnsembleViewBase", "&Class:", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

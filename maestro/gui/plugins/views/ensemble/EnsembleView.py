@@ -46,15 +46,23 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
        This model contains data for all nodes in the ensemble, but only
        displays it for the currenly selected node.
    """
-   def __init__(self, parent=None):
+   def __init__(self, ensemble, parent=None):
       QtCore.QAbstractTableModel.__init__(self, parent)
 
       # Constuct a dictonary to keep track of the node settings for all nodes.
       self.mNodeSettings = {}
       self.mSelectedNode = None
+      self.mEnsemble = ensemble
+
+      # Connect the new ensemble.
+      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
 
       # Register to receive a signal when a node reports it's settings.
       env().mEventManager.connect("*", "ensemble.report_settings", self.onReportSettings)
+
+   def onNodeChanged(self, node):
+      if self.mSelectedNode == node:
+         self.emit(QtCore.SIGNAL("modelReset()"))
 
    def onReportSettings(self, nodeId, settings):
       """ Slot that gets called when a node reports it's settings. """
@@ -208,15 +216,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       #self.treeView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
    def onGetLog(self):
-      #current_index = self.mClusterListView.currentIndex()
-      current_indexes = self.mClusterListView.selectionModel().selectedIndexes()
-      if len(current_indexes) > 0:
-         assert len(current_indexes) == 1
-         current_index = current_indexes[0]
-         selected_node = self.mEnsembleModel.data(current_index, QtCore.Qt.UserRole)
+      selected_node = self.__getSelectedNode()
+      if selected_node is not None:
          env = maestro.core.Environment()
          env.mEventManager.emit(selected_node.getId(), "ensemble.get_log")
-         print "Selected node: [%s][%s]" % (selected_node, selected_node.getId())
 
    def onReportLog(self, nodeId, debugList):
       node = self.mEnsemble.getNodeById(nodeId)
@@ -261,8 +264,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # If an ensemble already exists, disconnect it.
       if self.mEnsemble is not None:
-         self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
-         self.disconnect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
@@ -270,8 +272,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       if self.mEnsemble is not None:
          # Connect the new ensemble.
-         self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"), self.onEnsembleChanged)
-         self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged(QString)"), self.onNodeChanged)
+         self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
 
       # Create a model for our ListView
       self.mEnsembleModel = EnsembleModel.EnsembleModel(self.mEnsemble)
@@ -279,13 +280,13 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # If selection model already exists then disconnect signal
       if self.mClusterListView.selectionModel() is not None:
          QtCore.QObject.disconnect(self.mClusterListView.selectionModel(),
-            QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
+            QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onNodeSelected)
 
       # Set the model.
       self.mClusterListView.setModel(self.mEnsembleModel)
 
       # Create a settings model and pass it to the view.
-      self.mNodeSettingsModel = NodeSettingsModel()
+      self.mNodeSettingsModel = NodeSettingsModel(self.mEnsemble)
       self.mSettingsTableView.setModel(self.mNodeSettingsModel)
 
       # Tell the both columns to split the availible space.
@@ -294,7 +295,42 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # Connect new selection model
       QtCore.QObject.connect(self.mClusterListView.selectionModel(),
-         QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onNodeSelected)
+         QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)"), self.onNodeSelected)
+
+   def __getSelectedIndex(self):
+      """ Helper method that returns the currently selected index. """
+
+      # Get a list of all selected indexes. There should be zero or one since
+      # we only support single selection mode.
+      selected_indexes = self.mClusterListView.selectionModel().selectedIndexes()
+      if len(selected_indexes) > 0:
+         assert len(selected_indexes) == 1
+         selected_index = selected_indexes[0]
+         return selected_index
+      return QtCore.QModelIndex()
+
+   def __getSelectedNode(self):
+      """ Helper method that returns the currently selected node. """
+      if self.mEnsembleModel is None:
+         return None
+
+      # Get a list of all selected indexes. There should be zero or one since
+      # we only support single selection mode.
+      selected_indexes = self.mClusterListView.selectionModel().selectedIndexes()
+      if len(selected_indexes) > 0:
+         assert len(selected_indexes) == 1
+         selected_index = selected_indexes[0]
+         # Get the current node out of the model
+         selected_node = self.mEnsembleModel.data(selected_index, QtCore.Qt.UserRole)
+         #XXX: Sanity check. Remove for optimization,
+         assert isinstance(selected_node, Ensemble.ClusterNode)
+         return selected_node
+      return None
+
+   def onNodeChanged(self, node):
+      selected_node = self.__getSelectedNode()
+      if selected_node is not None and selected_node == node:
+         self.refreshNodeSettings()
 
    def onRefresh(self):
       """ Slot that requests information about all nodes in the Ensemble. """
@@ -310,17 +346,28 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """ Called when user presses the add button. """
       new_node = self.mEnsemble.createNode()
       num_nodes = self.mEnsemble.getNumNodes()
-      new_node_index = self.mEnsembleModel.index(num_nodes-1)
-      self.mClusterListView.setCurrentIndex(new_node_index)
+      new_index = self.mEnsembleModel.index(num_nodes-1)
+
+      # Select the newly created node.
+      self.mClusterListView.selectionModel().select(new_index,
+         QtGui.QItemSelectionModel.ClearAndSelect)
+      # Set the current so that keyboard navigation works as we would expect.
+      self.mClusterListView.setCurrentIndex(new_index)
+
+      # Must update fields because the selection might not actually
+      # appear to be different if the QModelIndex's value does not change.
+      self.updateFields()
+      self.refreshNodeSettings()
+
+      # Give the name edit the focus to allow user to type things quickly.
       self.mNameEdit.setFocus()
       self.mNameEdit.selectAll()
 
    def onRemove(self):
       """ Called when user presses the remove button. """
-      current_index = self.mClusterListView.currentIndex()
-      if self.mEnsembleModel is not None:
-         node = self.mEnsembleModel.data(current_index, QtCore.Qt.UserRole)
-
+      old_row = self.__getSelectedIndex().row()
+      node = self.__getSelectedNode()
+      if node is not None:
          # Ask the user if they are sure.
          reply = QtGui.QMessageBox.question(None, "Delete Node",
             "Are you sure you want to delete %s?" % node.getName(),
@@ -329,22 +376,32 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          # If they say yes, go ahead and do it.
          if reply == QtGui.QMessageBox.Yes:
             self.mEnsemble.removeNode(node)
-      # Update fields to reflect that we removed a node.
-      self.updateFields()
-      self.onNodeSelected(self.mClusterListView.currentIndex(), current_index)
+
+         # Create a reasonable model index to select.
+         new_row = min(old_row, self.mEnsemble.getNumNodes()-1)
+         new_index = self.mEnsembleModel.index(new_row)
+         # Select the new model index.
+         self.mClusterListView.selectionModel().select(new_index,
+            QtGui.QItemSelectionModel.ClearAndSelect)
+
+         # Set the current so that keyboard navigation works as we would expect.
+         self.mClusterListView.setCurrentIndex(new_index)
+
+         # Must update fields because the selection might not actually
+         # appear to be different if the QModelIndex's value does not change.
+         self.updateFields()
+         self.refreshNodeSettings()
+         # Give focus back to the list view to allow quick modifications.
+         self.mClusterListView.setFocus()
 
    def onNodeSettingsChanged(self):
       """ Slot that is called when the user has finished editing a
           field in the node settings.
       """
-      if self.mEnsembleModel is None:
-         return
-
       # Get the currently selected node.
-      selected_node = self.mEnsembleModel.data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
-
-      # Can't get a change if a node is not selected
-      assert not None == selected_node
+      selected_node = self.__getSelectedNode()
+      if selected_node is None:
+         return
 
       modified = False
       # Process changes
@@ -359,61 +416,36 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          modified = True
 
       if self.mHostnameEdit.isModified():
-         # Disconnect and try to connect to new hostname later..
-         try:
-            ip_address = selected_node.getIpAddress()
-            env = maestro.core.Environment()
-            env.mEventManager.disconnectFromNode(ip_address)
-         except:
-            # Do nothing
-            pass
-
          # Set the new hostname.
          selected_node.setHostname(str(self.mHostnameEdit.text()))
          self.mHostnameEdit.setModified(False)
          modified = True
 
-         # Try to connect to new hostname.
-         self.mEnsemble.refreshConnections()
-
       # Only update gui if something really changed.
       if modified:
          self.updateFields()
          self.refreshNodeSettings()
-         # Both models could have incorrect data since the name
-         # or id could have changed.
-         self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
-         self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
-         # Inform everyone that the node changed.
-         self.mEnsemble.emit(QtCore.SIGNAL("nodeChanged"), selected_node)
    
    def onNodeSelected(self, selected, deselected):
       """ Slot that is called when a cluster node is selected. """
-      # Get the currently selected node and save it.
-      selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
-      self.updateFields()
       # Refresh all node information.
+      self.updateFields()
       self.refreshNodeSettings()
+      # Get the currently selected node and save it.
+      selected_node = self.__getSelectedNode()
       # Refresh the settings model.
       self.mNodeSettingsModel.setSelectedNode(selected_node)
-      self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
-      self.mSettingsTableView.setModel(None)
-      self.mSettingsTableView.setModel(self.mNodeSettingsModel)
-      self.mSettingsTableView.reset()
 
    def updateFields(self):
+      """ Fills in the node information for the currently selected node. This
+          gets called whenever a new node is selected in the list.
       """
-      Fills in the node information for the currently selected node. This gets called
-      whenever a new node is selected in the list.
-      """
-
       # Clear all information
       self.mNameEdit.clear()
+      self.mClassEdit.clear()
       self.mHostnameEdit.clear()
-      self.mCurrentOsEdit.clear()
-      self.mIpAddressEdit.clear()
 
-      selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
+      selected_node = self.__getSelectedNode()
       # Early out if there is no node selected.
       if selected_node is not None:      
          # Set node information that we know
@@ -422,37 +454,21 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          self.mHostnameEdit.setText(selected_node.getHostname())
 
    def refreshNodeSettings(self):
-      selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
+      """ Refresh data that is dependent on resolving an IP or getting
+          data from the remote node. These will change when a node's
+          connection status changes.
+      """
+      # Clear all information.
+      self.mIpAddressEdit.clear()
+      self.mCurrentOsEdit.clear()
+
+      selected_node = self.__getSelectedNode()
       # Early out if there is no node selected.
-      if selected_node is not None and isinstance(selected_node, Ensemble.ClusterNode):
+      if selected_node is not None:
          # Get IP address
-         try:
-            self.mIpAddressEdit.setText(selected_node.getIpAddress())
-         except:
-            self.mIpAddressEdit.setText('Unknown')
+         ip_address = selected_node.getIpAddress()
+         # Turn the IP address into a string so that None is valid.
+         self.mIpAddressEdit.setText(str(ip_address))
 
          # Get the name of the current platform.
          self.mCurrentOsEdit.setText(selected_node.getPlatformName())
-         
-   def onNodeChanged(self, nodeId):
-      """ Slot that is called when a node's state changes. If the currently
-          selected node changes, we need to update the target list and the
-          current default target.
-
-          @param nodeId: The id of the node that changed.
-      """
-      selected_node = self.mClusterListView.model().data(self.mClusterListView.currentIndex(), QtCore.Qt.UserRole)
-      if selected_node is not None and \
-         isinstance(selected_node, Ensemble.ClusterNode) and \
-         nodeId == selected_node.getId():
-         self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
-         self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
-         self.refreshNodeSettings()
-
-   def onEnsembleChanged(self):
-      """ Called when the cluster control has connected to another node. """
-      self.mEnsembleModel.emit(QtCore.SIGNAL("modelReset()"))
-      self.mNodeSettingsModel.emit(QtCore.SIGNAL("modelReset()"))
-      
-      # Refresh the information about the node.
-      self.refreshNodeSettings()
