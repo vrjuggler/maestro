@@ -57,7 +57,11 @@ class OutputTabWidget(QtGui.QTabWidget):
       QtGui.QTabWidget.__init__(self, parent)
       self.mEnsemble = None
       self.mTabMap = {}
-      self.mEditMap = {}
+
+      # Setup a custom context menu callback.
+      self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+      self.connect(self, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+         self.onContextMenu)
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
@@ -83,24 +87,48 @@ class OutputTabWidget(QtGui.QTabWidget):
 
       self.reset()
 
+   def onContextMenu(self, point):
+      """ Create a pop-up menu listing all valid operations for selection. """
+      # Get the currently selected node.
+      temp_callbacks = []
+
+
+      log_widget = None
+      current_tab = self.currentWidget()
+      if current_tab is not None:
+         for (tab, sa, lw) in self.mTabMap.values():
+            if current_tab == tab:
+               log_widget = lw
+               break
+
+      if log_widget is not None:
+         attach_action = QtGui.QAction(self.tr("Attach To Bottom"), self)
+         attach_action.setCheckable(True)
+         attach_action.setChecked(log_widget.attachToBottom())
+         # Create a menu
+         menu = QtGui.QMenu("Scroll", self)
+         menu.addAction(attach_action)
+         self.connect(attach_action, QtCore.SIGNAL("toggled(bool)"), log_widget.setAttachToBottom)
+         menu.exec_(self.mapToGlobal(point))
+         self.disconnect(attach_action, QtCore.SIGNAL("toggled(bool)"), log_widget.setAttachToBottom)
+
    def onNodeAdded(self, node, index):
       self.addOutputTab(node, index)
 
    def onNodeRemoved(self, node, index):
       self.removeTab(index)
       del self.mTabMap[node]
-      del self.mEditMap[node]
 
    def onNodeChanged(self, node):
       if self.mTabMap.has_key(node):
-         tab_index = self.indexOf(self.mTabMap[node])
+         (tab, scroll_area, log_widget) = self.mTabMap[node]
+         tab_index = self.indexOf(tab)
          self.setTabText(tab_index, node.getName())
 
    def reset(self):
       for i in xrange(self.count()):
          self.removeTab(0)
       self.mTabMap = {}
-      self.mEditMap = {}
          
       for i in xrange(len(self.mEnsemble.mNodes)):
          node = self.mEnsemble.mNodes[i]
@@ -110,8 +138,11 @@ class OutputTabWidget(QtGui.QTabWidget):
       try:
          node = self.mEnsemble.getNodeById(nodeId)
          if node is not None:
-            textedit = self.mEditMap[node]
-            textedit.append(output)
+            (tab, scroll_area, log_widget) = self.mTabMap[node]
+            log_widget.append(output)
+            if log_widget.attachToBottom():
+               min_size = log_widget.minimumSize()
+               scroll_area.ensureVisible(0, min_size.height())
       except KeyError:
          print "ERROR: OutputTabWidget.onOutput: Got output for [%s] when we do not have a tab for it." % (nodeId)
 
@@ -128,8 +159,6 @@ class OutputTabWidget(QtGui.QTabWidget):
       # Ensure that we do not already have a tab for this node.
       if self.mTabMap.has_key(node):
          raise AttributeError("OutputTabWidget: [%s] already has a tab." % node.getName())
-      if self.mEditMap.has_key(node):
-         raise AttributeError("OutputTabWidget: [%s] already has a textedit widget." % node.getName())
 
       tab = QtGui.QWidget()
       tab.setObjectName("tab")
@@ -146,8 +175,7 @@ class OutputTabWidget(QtGui.QTabWidget):
       
       self.insertTab(index, tab, node.getName())
       
-      self.mTabMap[node] = tab
-      self.mEditMap[node] = log_widget
+      self.mTabMap[node] = (tab, scroll_area, log_widget)
 
 class NodeLogger:
    def __init__(self):

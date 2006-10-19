@@ -40,7 +40,14 @@ class LogWidget(QtGui.QWidget):
       self.__listLines = QtCore.QStringList()
       self.__maxLines = 400
       self.__maxLen = 0
-      
+      self.__attachToBottom = True
+
+   def attachToBottom(self):
+      return self.__attachToBottom
+
+   def setAttachToBottom(self, val):
+      self.__attachToBottom = val
+
    def preferredBackgroundColor(self):
       """
       Reimplemented to return colorgroup().base().
