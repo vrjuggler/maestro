@@ -338,6 +338,8 @@ GlobalPropertyMap['flag'] = Property('Flag', '--newflag')
 GlobalPropertyMap['key'] = Property('Key', 'NEW_ENV_VAR')
 GlobalPropertyMap['type'] = Property('Choice Type', 'one',
                                     {'Check Boxes':'any', 'Radio Buttons':'one', 'ComboBox':'one_cb'})
+GlobalPropertyMap['value_type'] = Property('Value Type', 'string',
+                                    {'String':'string', 'Integer':'int', 'File':'file'})
 
 import copy
 
@@ -739,14 +741,16 @@ class GlobalOptionItem(Node):
       self.mColor = QtGui.QColor(182, 131, 189, 191)
 
 class ChoiceItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'type', 'hidden', 'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'type',
+                                    'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
       self.mColor = QtGui.QColor(76, 122, 255, 191)
 
 class GroupItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden', 'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden',
+                                    'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Group"
@@ -762,21 +766,25 @@ class RefItem(Node):
       self.mColor = QtGui.QColor(76, 255, 235, 191)
 
 class ArgItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'flag', 'hidden', 'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'flag',
+                                    'value_type', 'hidden', 'selected',
+                                    'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Argument"
       self.mColor = QtGui.QColor(255, 67, 67, 191)
 
 class EnvVarItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'key', 'hidden', 'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'key',
+                                    'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
       self.mColor = QtGui.QColor(255, 253, 117, 191)
 
 class CommandItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden', 'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden',
+                                    'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Command"
@@ -784,7 +792,8 @@ class CommandItem(Node):
       self.mColor = QtGui.QColor(139, 69, 19, 191)
 
 class CwdItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden', 'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden',
+                                    'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Current Working Directory"

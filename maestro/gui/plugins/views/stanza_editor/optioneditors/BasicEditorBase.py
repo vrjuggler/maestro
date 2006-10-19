@@ -24,36 +24,42 @@ from PyQt4 import QtCore, QtGui
 class Ui_BasicEditorBase(object):
    def setupUi(self, BasicEditorBase):
       BasicEditorBase.setObjectName("BasicEditorBase")
-      BasicEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,235,169).size()).expandedTo(BasicEditorBase.minimumSizeHint()))
+      BasicEditorBase.resize(QtCore.QSize(QtCore.QRect(0,0,241,168).size()).expandedTo(BasicEditorBase.minimumSizeHint()))
 
-      self.gridlayout = QtGui.QGridLayout(BasicEditorBase)
-      self.gridlayout.setMargin(9)
-      self.gridlayout.setSpacing(6)
-      self.gridlayout.setObjectName("gridlayout")
+      self.vboxlayout = QtGui.QVBoxLayout(BasicEditorBase)
+      self.vboxlayout.setMargin(9)
+      self.vboxlayout.setSpacing(6)
+      self.vboxlayout.setObjectName("vboxlayout")
 
-      self.mAttribTable = QtGui.QTableView(BasicEditorBase)
-      self.mAttribTable.setObjectName("mAttribTable")
-      self.gridlayout.addWidget(self.mAttribTable,2,0,1,2)
+      self.hboxlayout = QtGui.QHBoxLayout()
+      self.hboxlayout.setMargin(0)
+      self.hboxlayout.setSpacing(6)
+      self.hboxlayout.setObjectName("hboxlayout")
 
-      self.mValueEdit = QtGui.QLineEdit(BasicEditorBase)
-      self.mValueEdit.setObjectName("mValueEdit")
-      self.gridlayout.addWidget(self.mValueEdit,0,1,1,1)
+      self.mValueLabel = QtGui.QLabel(BasicEditorBase)
+      self.mValueLabel.setObjectName("mValueLabel")
+      self.hboxlayout.addWidget(self.mValueLabel)
+
+      self.mValueEditor = QtGui.QLineEdit(BasicEditorBase)
+      self.mValueEditor.setObjectName("mValueEditor")
+      self.hboxlayout.addWidget(self.mValueEditor)
+      self.vboxlayout.addLayout(self.hboxlayout)
 
       self.mAttribLbl = QtGui.QLabel(BasicEditorBase)
       self.mAttribLbl.setObjectName("mAttribLbl")
-      self.gridlayout.addWidget(self.mAttribLbl,1,0,1,1)
+      self.vboxlayout.addWidget(self.mAttribLbl)
 
-      self.mValueLbl = QtGui.QLabel(BasicEditorBase)
-      self.mValueLbl.setObjectName("mValueLbl")
-      self.gridlayout.addWidget(self.mValueLbl,0,0,1,1)
+      self.mAttribTable = QtGui.QTableView(BasicEditorBase)
+      self.mAttribTable.setObjectName("mAttribTable")
+      self.vboxlayout.addWidget(self.mAttribTable)
 
       self.retranslateUi(BasicEditorBase)
       QtCore.QMetaObject.connectSlotsByName(BasicEditorBase)
 
    def retranslateUi(self, BasicEditorBase):
       BasicEditorBase.setWindowTitle(QtGui.QApplication.translate("BasicEditorBase", "Basic Editor", None, QtGui.QApplication.UnicodeUTF8))
+      self.mValueLabel.setText(QtGui.QApplication.translate("BasicEditorBase", "Value:", None, QtGui.QApplication.UnicodeUTF8))
       self.mAttribLbl.setText(QtGui.QApplication.translate("BasicEditorBase", "Attributes:", None, QtGui.QApplication.UnicodeUTF8))
-      self.mValueLbl.setText(QtGui.QApplication.translate("BasicEditorBase", "Value:", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

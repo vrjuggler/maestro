@@ -18,10 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys
+import sys 
 from PyQt4 import QtCore, QtGui
 
 import maestro.core
+from maestro.gui import helpers
 
 import BasicEditorBase
 
@@ -50,7 +51,6 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
 
    def setupUi(self, widget):
       BasicEditorBase.Ui_BasicEditorBase.setupUi(self, widget)
-      self.connect(self.mValueEdit, QtCore.SIGNAL("editingFinished()"), self.onValueChanged)
       print type(QtGui.QAbstractItemView.AllEditTriggers)
       print type(~QtGui.QAbstractItemView.CurrentChanged)
       print type(QtGui.QAbstractItemView.AllEditTriggers & ~QtGui.QAbstractItemView.CurrentChanged)
@@ -62,7 +62,24 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       self.mAttribTable.setEditTriggers(triggers)
       self.mAttribTable.setTabKeyNavigation(True)
 
+      # Remove the dummy editor, but leave the label.
+      if self.mValueEditor is not None:
+         self.hboxlayout.removeWidget(self.mValueEditor)
+         self.hboxlayout.removeWidget(self.mValueLabel)
+         self.mValueEditor.setParent(None)
+         self.mValueLabel.setParent(None)
+         self.mValueEditor = None
+
    def setOption(self, option):
+      if self.mValueEditor is not None:
+         self.mValueEditor.cleanup()
+         self.hboxlayout.removeWidget(self.mValueEditor)
+         self.hboxlayout.removeWidget(self.mValueLabel)
+         self.mValueEditor.setParent(None)
+         self.mValueLabel.setParent(None)
+         self.disconnect(self.mValueEditor, QtCore.SIGNAL("valueChanged"), self.onValueChanged)
+         self.mValueEditor = None
+
       self.mOption = option
       self.mAttribModel = AttribModel(option)
       self.mAttribTable.setModel(self.mAttribModel)
@@ -72,33 +89,36 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       self.mAttribDelegate = AttribDelegate()
       self.mAttribTable.setItemDelegate(self.mAttribDelegate)
 
-      text = self.mOption.mElement.text
+      items_with_cdata = ['arg', 'env_var', 'command', 'cwd']
+      if self.mOption.mElement.tag in items_with_cdata:
+         data_type = self.mOption.mElement.get('value_type', 'string')
+         if 'string' == data_type:
+            self.mValueEditor = helpers.StringEditor(self)
+         elif 'file' == data_type:
+            self.mValueEditor = helpers.FileEditor(self)
+         else:
+            self.mValueEditor = helpers.StringEditor(self)
+         self.connect(self.mValueEditor, QtCore.SIGNAL("valueChanged"), self.onValueChanged)
 
-      if text is not None:
-         text = text.strip()
-         self.mValueEdit.setText(text)
-      else:
-         self.mValueEdit.setText('')
+         text = self.mOption.mElement.text
+         if text is not None:
+            text = text.strip()
+            self.mValueEditor.setValue(text)
+         else:
+            self.mValueEditor.setText('')
 
-      # Only add the value editor for items that make sense.
-      if self.mOption.mElement.tag in ['application', 'global_option',
-                                       'choice', 'group']:
-         self.mValueEdit.setParent(None)
-         self.mValueLbl.setParent(None)
-      elif self.mValueEdit.parent() is None:
-         self.mValueEdit.setParent(self)
-         self.mValueLbl.setParent(self)
-         self.gridlayout.addWidget(self.mValueEdit,0,1,1,1)
-         self.gridlayout.addWidget(self.mValueLbl,0,0,1,1)
+         # Place the line edit into the form.
+         self.mValueEditor.setParent(self)
+         self.mValueLabel.setParent(self)
+         self.hboxlayout.addWidget(self.mValueLabel)
+         self.hboxlayout.addWidget(self.mValueEditor)
 
-   def onValueChanged(self):
+   def onValueChanged(self, value):
       if self.mOption is not None:
-         edit_text = str(self.mValueEdit.text())
-         edit_text = edit_text.strip()
-         if edit_text == '':
+         if value == '':
             self.mOption.mElement.text = None
          else:
-            self.mOption.mElement.text = edit_text
+            self.mOption.mElement.text = value
 
 class AttribModel(QtCore.QAbstractTableModel):
    def __init__(self, item, parent=None):
