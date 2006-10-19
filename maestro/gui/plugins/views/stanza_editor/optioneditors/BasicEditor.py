@@ -68,6 +68,10 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       self.mAttribTable.setModel(self.mAttribModel)
       self.mAttribTable.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mAttribTable.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+
+      self.mAttribDelegate = AttribDelegate()
+      self.mAttribTable.setItemDelegate(self.mAttribDelegate)
+
       text = self.mOption.mElement.text
 
       if text is not None:
@@ -131,6 +135,11 @@ class AttribModel(QtCore.QAbstractTableModel):
       if self.mOption is not None:
          if role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
             return self.mOption.data(index, role)
+      # Return the Property for the given row.
+      if role == QtCore.Qt.UserRole:
+         if len(self.mOption.mPropertyMap) > index.row():
+            return self.mOption.mPropertyMap.items()[index.row()]
+         return None
 
       return QtCore.QVariant()
 
@@ -142,6 +151,88 @@ class AttribModel(QtCore.QAbstractTableModel):
                self.emit(QtCore.SIGNAL("dataChanged(int)"), index.row())
                return True
       return False
+
+class AttribDelegate(QtGui.QItemDelegate):
+   """ ItemDelegate that allows us to use a QComboBox to choose a boot target. """
+   def __init__(self, parent = None):
+      QtGui.QItemDelegate.__init__(self, parent)
+
+   def createEditor(self, parent, option, index):
+      """ Create a QComboBox with the correct potential values.
+
+          @param parent: Parent that we should use when creating a widget.
+          @param option: Widget options.
+          @param index: QModelIndex of the cell that we are editing.
+      """
+
+      if 1 == index.column():
+         # Get the property map for the option.
+         (prop_name, prop) = index.model().data(index, QtCore.Qt.UserRole)
+
+         # If the property exists and has potential values.
+         if prop is not None and prop.values is not None:
+            # Create a combobox
+            cb = QtGui.QComboBox(parent)
+            cb.setFrame(False)
+            # Fill the combobox with all of the display names.
+            for disp_name in prop.values.keys():
+               cb.addItem(disp_name)
+            return cb
+
+      return QtGui.QItemDelegate.createEditor(self, parent, option, index)
+
+   def setEditorData(self, widget, index):
+      """ Set the state of the widget to reflect the model.
+
+          @param widget: Widget created in createEditor()
+          @param index: QModelIndex for the cell that we are editing.
+      """
+
+      if 1 == index.column():
+         # Get the property map for the option.
+         (prop_name, prop) = index.model().data(index, QtCore.Qt.UserRole)
+
+         # If the property exists and has potential values.
+         if prop is not None and prop.values is not None:
+            # Get the current value of the attribute and convert it to a python string.
+            value = index.model().data(index, QtCore.Qt.EditRole)
+            value = str(value.toString())
+
+            # Find the index of the potential value that matches the current value.
+            # NOTE: This is -1 if the value is not valid.
+            value_index = prop.getValueIndex(value)
+            # Select the correct index so that the combobox is selecting the current value.
+            widget.setCurrentIndex(value_index)
+
+      # If we do not have a property with potential values lists, do the default.
+      QtGui.QItemDelegate.setEditorData(self, widget, index)
+
+   def setModelData(self, widget, model, index):
+      """ Set the correct data in the model from the editor.
+
+          @param widget: Widget created in createEditor.
+          @param model: ItemModel that we are editing.
+          @param index: QModelIndex for the cell that we are editing.
+      """
+      if 1 == index.column():
+         # Get the property for this attribute.
+         (prop_name, prop) = index.model().data(index, QtCore.Qt.UserRole)
+         # If this property has potential values.
+         if prop is not None and prop.values is not None:
+            # Get the currently selected combobox item.
+            current_index = widget.currentIndex()
+            # Check the bounds of the potential values.
+            if len(prop.values) > current_index:
+               # Get the real value instead of the display value.
+               value = prop.values.values()[current_index]
+               # Set the real value in the model.
+               index.model().setData(index, QtCore.QVariant(value), QtCore.Qt.EditRole)
+               return
+
+      QtGui.QItemDelegate.setModelData(self, widget, model, index)
+
+   def updateEditorGeometry(self, editor, option, index):
+      editor.setGeometry(option.rect)
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)

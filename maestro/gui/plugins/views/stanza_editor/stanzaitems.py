@@ -57,7 +57,10 @@ def buildItem(tagOrElm):
    cls = tag2Class[tag]
 
    if elm is None:
-      elm=ET.Element(tag, cls.getDefaultAttribs())
+      attribs = {}
+      for (k, prop) in cls.mPropertyMap.iteritems():
+         attribs[k] = prop.default
+      elm=ET.Element(tag, attribs)
 
    item = cls(elm)
    return item
@@ -282,14 +285,74 @@ class Edge(QtGui.QGraphicsItem):
       self.mHotRect.moveCenter(sp)
       return self.mHotRect.contains(self.destPoint)
 
-AllAttribName = ['Name', 'Label', 'Class']
-AllAttrib = ['name', 'label', 'class']
-HSAttribName = ['Hidden', 'Selected']
-HSAttrib = ['hidden', 'selected']
-HESAttribName = ['Hidden', 'Editable', 'Selected']
-HESAttrib = ['hidden', 'editable', 'selected']
+class Property:
+   """ Encapsulates all information about item attributes including display
+       label, default value, and potential values. This allows the user to
+       not have to deal with the cryptic xml attributes names and values.
+   """
+   def __init__(self, label, default="", values=None):
+      self.label = label
+      self.default = default
+      self.values = values
+
+   def getDisplayName(self, value):
+      """ Return the human readable display name for the given value. For
+          example it will turn "one_cb" -> "ComboBox"      
+      """
+      if self.values is not None:
+         for (n, v) in self.values.iteritems():
+            if v == value:
+               return n
+         # If property hase potential values listed and we don't match it
+         # then we know that the value is invalid.
+         #XXX: This is not always the case since a attribute might not be set at all,
+         #     in this case it will be filled with the default at some point. Either
+         #     way value check should probably happen somewhere else.
+         #print "WARNING: Invalid value [%s] for property [%s]" % (value, self.label)
+      return value
+
+   def getValueIndex(self, value):
+      """ Get the index of the given value in the dictonary of potential values.
+          Returns -1 if value is not a valid potential value.
+      """
+      i = 0
+      for v in self.values.values():
+         if v == value:
+            return i
+         i += 1
+      return -1
+
+# Define all common properties.
+GlobalPropertyMap = {}
+GlobalPropertyMap['name'] = Property('Name', 'Unknown')
+GlobalPropertyMap['labal'] = Property('Label', 'Unknown')
+GlobalPropertyMap['class'] = Property('Class', '')
+GlobalPropertyMap['hidden'] = Property('Hidden', 'false',
+                                      {'False':'false', 'True': 'true'})
+GlobalPropertyMap['selected'] = Property('Selected', 'true',
+                                        {'True':'true', 'False':'false'})
+GlobalPropertyMap['editable'] = Property('Editable', 'true',
+                                        {'True':'true', 'False':'false'})
+GlobalPropertyMap['id'] = Property('ID', '')
+GlobalPropertyMap['flag'] = Property('Flag', '--newflag')
+GlobalPropertyMap['key'] = Property('Key', 'NEW_ENV_VAR')
+GlobalPropertyMap['type'] = Property('Choice Type', 'one',
+                                    {'Check Boxes':'any', 'Radio Buttons':'one', 'ComboBox':'one_cb'})
+
+import copy
+
+def buildPropertyMap(attributeList):
+   """ Given a list of properties, return a dictonary containing all
+       (attribute, Property) pairs.
+   """
+   prop_map = {}
+   for attrib in attributeList:
+      if GlobalPropertyMap.has_key(attrib):
+         prop_map[attrib] = copy.deepcopy(GlobalPropertyMap[attrib])
+   return prop_map
 
 class Node(QtGui.QGraphicsItem):
+   mPropertyMap = {}
    def __init__(self, elm=None, graphWidget=None):
       QtGui.QGraphicsItem.__init__(self)
       self.newPos = QtCore.QPointF()
@@ -311,8 +374,6 @@ class Node(QtGui.QGraphicsItem):
       self.mElement = elm
 
       # Editing attributes.
-      self.mAttribNameList = {}
-      self.mAttribList = {}
       self.mTitle = "Node"
 
       # Tree structure attributes.
@@ -323,14 +384,8 @@ class Node(QtGui.QGraphicsItem):
       self.inEdgeList = []
       self.outEdgeList = []
 
-   def getDefaultAttribs():
-      return {'name':'Unknown',
-              'label':'Unknown',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
-   
+      self.mPropertyMap = self.__class__.mPropertyMap
+
    def acceptNewParent(self, newParent):
       """ Returns true if the given parent is valid for ourself and
           we are not already connected.
@@ -635,220 +690,115 @@ class Node(QtGui.QGraphicsItem):
          QtGui.QGraphicsItem.dropEvent(self, event)
 
    def dataCount(self):
-      return len(self.mAttribList)
-
-   def tryStrToBool(self, value):
-      assert type(value) == types.StringType
-      if value.lower() == 'true':
-         return True
-      elif value.lower() == 'false':
-         return False
-      # This limits string values.
-      elif value == '1':
-         return True
-      elif value == '0':
-         return False
-      return value
-
-   def tryBoolToStr(self, value):
-      if type(value) == types.BooleanType:
-         if value == "True":
-            return 'true'
-         return 'false'
-      assert type(value) == types.StringType
-      return value
+      return len(self.mPropertyMap)
 
    def data(self, index, role):
       if index.isValid() and self.mElement is not None:
          if role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
             if 0 == index.column():
-               if len(self.mAttribNameList) > index.row():
-                  return QtCore.QVariant(self.mAttribNameList[index.row()])
+               if len(self.mPropertyMap) > index.row():
+                  return QtCore.QVariant(self.mPropertyMap.values()[index.row()].label)
             if 1 == index.column():
-               if index.row() < len(self.mAttribList):
-                  value = self.mElement.get(self.mAttribList[index.row()], '')
-                  #XXX: This is proving to be a pretty large hack.
-                  value = self.tryStrToBool(value)
-                  return QtCore.QVariant(value)
+               if index.row() < len(self.mPropertyMap):
+                  value = self.mElement.get(self.mPropertyMap.keys()[index.row()], '')
+                  if role == QtCore.Qt.EditRole:
+                     return QtCore.QVariant(value)
+                  elif QtCore.Qt.DisplayRole == role:
+                     prop = self.mPropertyMap.values()[index.row()]
+                     return QtCore.QVariant(prop.getDisplayName(value))
+                     
       return QtCore.QVariant()
 
    def setData(self, index, value, role):
       if index.isValid() and self.mElement is not None:
          assert role == QtCore.Qt.EditRole
          assert 1 == index.column()
-         if index.row() < len(self.mAttribList):
+         if index.row() < len(self.mPropertyMap):
             str_val = str(value.toString())
-            #XXX: This is proving to be a pretty large hack.
-            real_val = self.tryBoolToStr(str_val)
-            key = self.mAttribList[index.row()]
+            key = self.mPropertyMap.keys()[index.row()]
             # Names can not contain spaces.
             if 'name' == key:
-               real_val = real_val.replace(' ', '')
-            self.mElement.set(key, real_val)
+               str_val = str_val.replace(' ', '')
+            self.mElement.set(key, str_val)
             self.update()
             return True
       return False
 
 class AppItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Application"
       self.mColor = QtGui.QColor(182, 131, 189, 191)
-      self.mAttribNameList = AllAttribName
-      self.mAttribList = AllAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewApplication',
-              'label':'New Application',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'false'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class GlobalOptionItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Global Option"
       self.mColor = QtGui.QColor(182, 131, 189, 191)
-      self.mAttribNameList = AllAttribName
-      self.mAttribList = AllAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewGlobalOption',
-              'label':'New Global Option'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class ChoiceItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'type', 'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
       self.mColor = QtGui.QColor(76, 122, 255, 191)
-      self.mAttribNameList = AllAttribName + HSAttribName
-      self.mAttribList = AllAttrib + HSAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewChoice',
-              'label':'New Choice',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class GroupItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Group"
       # Green
       self.mColor = QtGui.QColor(76, 255, 69, 191)
-      self.mAttribNameList = AllAttribName + HSAttribName
-      self.mAttribList = AllAttrib + HSAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewGroup',
-              'label':'New Group',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class RefItem(Node):
+   mPropertyMap = {}
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Reference"
       # Cyan 
       self.mColor = QtGui.QColor(76, 255, 235, 191)
-      self.mAttribNameList = ['ID']
-      self.mAttribList = ['id']
-
-   def getDefaultAttribs():
-      return {'name':'NewReference',
-              'id':'*'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class ArgItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'flag', 'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Argument"
       self.mColor = QtGui.QColor(255, 67, 67, 191)
-      self.mAttribNameList = AllAttribName + ['Flag'] + HESAttribName
-      self.mAttribList = AllAttrib + ['flag'] + HESAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewArgument',
-              'label':'New Argument',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true',
-              'flag':''}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class EnvVarItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'key', 'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
       self.mColor = QtGui.QColor(255, 253, 117, 191)
-      self.mAttribNameList = AllAttribName + ['Key'] + HESAttribName
-      self.mAttribList = AllAttrib + ['key'] + HESAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewEnvVar',
-              'label':'New EnvVar',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true',
-              'key':'NEW_ENV_VAR'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class CommandItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Command"
       # Brown
       self.mColor = QtGui.QColor(139, 69, 19, 191)
-      self.mAttribNameList = AllAttribName + HESAttribName
-      self.mAttribList = AllAttrib + HESAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewCommand',
-              'label':'New Command',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class CwdItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Current Working Directory"
       # Pink
       self.mColor = QtGui.QColor(255, 76, 190, 191)
-      self.mAttribNameList = AllAttribName + HESAttribName
-      self.mAttribList = AllAttrib + HESAttrib
-
-   def getDefaultAttribs():
-      return {'name':'NewCwd',
-              'label':'New Cwd',
-              'class':'',
-              'hidden':'false',
-              'selected':'true',
-              'editable':'true'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
 
 class OverrideItem(Node):
+   mPropertyMap = buildPropertyMap(['id'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Override"
       # Dark Orange
       self.mColor = QtGui.QColor(255, 110, 0, 191)
       # This could have any number of attribs.
-      self.mAttribNameList = ['ID']
-      self.mAttribList = ['id']
 
    def acceptNewParent(self, newParent):
       """ Returns true if the given parent is valid for ourself and
@@ -858,20 +808,13 @@ class OverrideItem(Node):
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
-   def getDefaultAttribs():
-      return {'name':'NewOverride',
-              'id':'*',
-              'flag':'--newflag'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
-
 class AddItem(Node):
+   mPropertyMap = {}
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Add"
       # Tan
       self.mColor = QtGui.QColor(255, 173, 111, 191)
-      self.mAttribNameList = []
-      self.mAttribList = []
 
    def acceptNewParent(self, newParent):
       """ Returns true if the given parent is valid for ourself and
@@ -881,19 +824,13 @@ class AddItem(Node):
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
 
-   def getDefaultAttribs():
-      return {'name':'NewAdd',
-              'label':'New Add'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
-
 class RemoveItem(Node):
+   mPropertyMap = buildPropertyMap(['id'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Remove"
       # Light blue
       self.mColor = QtGui.QColor(76, 228, 255, 191)
-      self.mAttribNameList = ['ID']
-      self.mAttribList = ['id']
 
    def acceptNewParent(self, newParent):
       """ Returns true if the given parent is valid for ourself and
@@ -902,9 +839,3 @@ class RemoveItem(Node):
       if newParent is None or newParent.mElement is None or newParent is self:
          return False
       return isinstance(newParent, RefItem) and not self.isConnectedTo(newParent)
-
-   def getDefaultAttribs():
-      return {'name':'NewRemove',
-              'id':'*'}
-   getDefaultAttribs = staticmethod(getDefaultAttribs)
-
