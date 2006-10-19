@@ -246,8 +246,9 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          print "   Final Cmd [%s]" % (total_command)
          print "   Cwd       [%s]" % (cwd)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
+         env.mEventManager.localEmit(node.getId(), "launch.output", "Command [%s]" % (total_command))
 
-         env.mEventManager.emit(ip_address, "launch.run_command", total_command, cwd, env_map)
+         env.mEventManager.emit(node.getId(), "launch.run_command", total_command, cwd, env_map)
 
    def _resetAppState(self):
       """ Resets the information associated with the selected application. """
