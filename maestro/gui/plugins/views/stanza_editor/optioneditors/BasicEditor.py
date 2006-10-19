@@ -35,7 +35,8 @@ class BasicEditorPlugin(maestro.core.IOptionEditorPlugin):
    getName = staticmethod(getName)
 
    def getOptionType():
-      return ['application', 'choice', 'group', 'arg', 'env_var', 'command', 'cwd']
+      return ['application', 'global_option', 'choice',
+              'group', 'arg', 'env_var', 'command', 'cwd']
    getOptionType = staticmethod(getOptionType)
 
    def getEditorWidget(self, option):
@@ -75,7 +76,9 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       else:
          self.mValueEdit.setText('')
 
-      if self.mOption.mElement.tag in ['application', 'choice', 'group']:
+      # Only add the value editor for items that make sense.
+      if self.mOption.mElement.tag in ['application', 'global_option',
+                                       'choice', 'group']:
          self.mValueEdit.setParent(None)
          self.mValueLbl.setParent(None)
       elif self.mValueEdit.parent() is None:
