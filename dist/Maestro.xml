@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+   <mime-type type="application/x-maestro-ensemble">
+      <comment>Maestro ensemble</comment>
+      <glob pattern="*.ensem"/>
+      <glob pattern="*.ensemble"/>
+      <magic>
+         <match offset="1" type="string" value="&lt;ensemble&gt;"/>
+      </magic>
+   </mime-type>
+
+   <mime-type type="application/x-maestro-stanza">
+      <comment>Maestro stanza</comment>
+      <glob pattern="*.stanza"/>
+      <magic>
+         <match offset="1" type="string" value="&lt;stanza&gt;"/>
+      </magic>
+   </mime-type>
+</mime-info>

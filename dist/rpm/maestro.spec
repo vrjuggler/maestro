@@ -109,6 +109,9 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_prefix}/lib/maestro-%{version}/Maestro.py*
 %{_prefix}/lib/maestro-%{version}/maestro/gui
 %{_prefix}/lib/maestro-%{version}/stanzas
+%{_prefix}/share/applications/maestro*.desktop
+%{_prefix}/share/mime
+%{_prefix}/share/pixmaps
 
 %files server
 %defattr(-, root, root)
@@ -118,6 +121,18 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_prefix}/lib/maestro-%{version}/maestrod.py*
 %{_prefix}/lib/maestro-%{version}/mkpem
 %{_prefix}/lib/maestro-%{version}/maestro/daemon
+
+%post gui
+ensemble_str='application/x-maestro-ensemble=maestro-ensemble.desktop'
+stanza_str='application/x-maestro-stanza=maestro-stanza.desktop'
+echo $ensemble_str >> /usr/share/applications/defaults.list
+echo $stanza_str >> /usr/share/applications/defaults.list
+update-mime-database
+
+%postun gui
+cat /usr/share/applications/defaults.list | grep -v x-maestro > /usr/share/applications/defaults.list.tmp
+mv /usr/share/applications/defaults.list.tmp /usr/share/applications/defaults.list
+update-mime-database
 
 %post server
 /sbin/chkconfig --add maestrod

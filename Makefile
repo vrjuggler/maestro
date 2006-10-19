@@ -25,15 +25,22 @@ confdir=	/etc
 svcdir=		$(confdir)/init.d
 bindir=		$(prefix)/bin
 sbindir=	$(prefix)/sbin
-datadir=	$(prefix)/share/$(PKG)
-docdir=		$(prefix)/share/doc/$(PKG)
+datadir=	$(prefix)/share
+appdatadir=	$(datadir)/$(PKG)
+docdir=		$(datadir)/doc/$(PKG)
 appdir=		$(prefix)/lib/$(PKG)
+mimedir=	$(datadir)/mime
+siteappdir=	$(datadir)/applications
+icondir=	$(datadir)/pixmaps
 
 install:
 	@mkdir -p $(bindir)
 	@mkdir -p $(sbindir)
 	@mkdir -p $(appdir)
 	@mkdir -p $(confdir)
+	@mkdir -p $(mimedir)/packages
+	@mkdir -p $(siteappdir)
+	@mkdir -p $(icondir)
 	tar --exclude .svn -cvf - maestro | tar -C $(appdir) -xpf -
 	install -m 0755 maestrod.py $(appdir)
 	install -m 0755 Maestro.py $(appdir)
@@ -46,6 +53,10 @@ install:
 	install -m 0755 script/mkpem $(appdir)
 	tar --exclude .svn -cvf - stanzas | tar -C $(appdir) -xpf -
 	install -m 0644 maestrod.xcfg $(confdir)
+	install -m 0644 dist/Maestro.xml $(mimedir)/packages
+	install -m 0644 dist/maestro-ensemble.desktop $(siteappdir)
+	install -m 0644 dist/maestro-stanza.desktop $(siteappdir)
+	install -m 0644 maestro/gui/images/maestro_icon.png $(icondir)/maestro.png
 ifeq ($(OS), Linux)
 	@mkdir -p $(svcdir)
 	install -m 0755 dist/maestrod $(svcdir)
