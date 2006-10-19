@@ -41,6 +41,8 @@ class LogWidget(QtGui.QWidget):
       self.__maxLines = 400
       self.__maxLen = 0
       self.__attachToBottom = True
+      # Use a fixed width font.
+      self.setFont(QtGui.QFont('Courier'))
 
    def attachToBottom(self):
       return self.__attachToBottom
@@ -67,7 +69,7 @@ class LogWidget(QtGui.QWidget):
       x = 2
       y = height
       p = QtGui.QPainter(self)
-      
+
       for line in self.__listLines:
          p.drawText(x, y, line)
          y += height
