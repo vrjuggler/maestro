@@ -72,6 +72,7 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       if self.mStanzaEditorToolbar is None:
          self.mStanzaEditorToolbar = QtGui.QToolBar("Stanza Toolbar", mainWindow)
          self.mStanzaEditorToolbar.addWidget(self.widget.mNewAppBtn)
+         self.mStanzaEditorToolbar.addWidget(self.widget.mNewGlobalOptBtn)
          self.mStanzaEditorToolbar.addWidget(self.widget.mLayoutBtn)
          self.mStanzaEditorToolbar.addWidget(self.widget.mNoDragBtn)
          self.mStanzaEditorToolbar.addWidget(self.widget.mScrollDragBtn)
@@ -80,7 +81,7 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
 #      if self.mStanzaSearchToolbar is None:
 #         self.mStanzaSearchToolbar = QtGui.QToolBar("Stanza Search Toolbar", mainWindow)
 #         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationLbl)
-#         self.mStanzaSearchToolbar.addWidget(self.widget.mApplicationCB)
+#         self.mStanzaSearchToolbar.addWidget(self.widget.mStanzaCB)
 #         self.mStanzaSearchToolbar.addWidget(self.widget.mClassLine)
 #         self.mStanzaSearchToolbar.addWidget(self.widget.mClassFilterLbl)
 #         self.mStanzaSearchToolbar.addWidget(self.widget.mOperatingSystemCB)
@@ -596,36 +597,36 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
    def __fillApplicationCB(self):
       env = maestro.core.Environment()
-      app_elms = []
+      stanza_elms = []
       for stanza in env.mStanzaStore.mStanzas.values():
          for item in stanza:
             if ('application' == item.tag or
                 'global_option' == item.tag):
-               app_elms.append(item)
+               stanza_elms.append(item)
 
-      #self.mApplications = env.mStanzaStore.findApplications()
-      self.mApplications = app_elms
-      self.mApplicationCB.clear()
-      for app in self.mApplications:
+      #self.mStanzas = env.mStanzaStore.findApplications()
+      self.mStanzas = stanza_elms
+      self.mStanzaCB.clear()
+      for app in self.mStanzas:
          label = app.get('label', None)
          if label is None:
             label = app.get('name', None)
          assert(label is not None)
-         self.mApplicationCB.addItem(label)
+         self.mStanzaCB.addItem(label)
 
-      # If we have applications, then show the first one.
-      if len(self.mApplications) > 0:
-         self.mApplicationCB.setCurrentIndex(0)
-         self.onApplicationSelected(0)
+      # If we have stanzas, then show the first one.
+      if len(self.mStanzas) > 0:
+         self.mStanzaCB.setCurrentIndex(0)
+         self.onStanzaSelected(0)
 
-   def onApplicationSelected(self, index):
-      app = self.mApplications[index]
+   def onStanzaSelected(self, index):
+      stanza = self.mStanzas[index]
 
       if self.mScene is not None:
          self.disconnect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
 
       # Create scene from applications.
-      self.mScene = StanzaScene(app, self)
+      self.mScene = StanzaScene(stanza, self)
       
       self.connect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
 
@@ -670,15 +671,25 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.mGraphicsView.fitInView(extents, QtCore.Qt.KeepAspectRatio)
 
    def onNewApplication(self):
-      (app_name, ok) = QtGui.QInputDialog.getText(self, "Application Name",
-         "What is the name of the new application?")
+      self._createStanza('Aplication Name',
+                         'What is the name of the new application?',
+                         'application')
+
+   def onNewGlobalOption(self):
+      self._createStanza('Global Option Name',
+                         'What is the name of the new global option?',
+                         'global_option')
+
+   def _createStanza(self, queryTitle, queryText, eltType):
+      (name, ok) = QtGui.QInputDialog.getText(self, queryTitle, queryText)
       if not ok:
          return
-      app_name = str(app_name)
-      app_name_no_spaces = app_name.replace(' ', '')
 
-      app_element = ET.Element('application', {'name': app_name_no_spaces,
-                                               'label': app_name})
+      name = str(name)
+      name_no_spaces = name.replace(' ', '')
+
+      element = ET.Element(eltType, {'name'  : name_no_spaces,
+                                     'label' : name})
 
       dialog = ChooseStanzaDialog.ChooseStanzaDialog(self,
                                                      self.mStanzaStartDir)
@@ -694,7 +705,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          env = maestro.core.Environment()
          if env.mStanzaStore.mStanzas.has_key(stanza_filename):
             stanza = env.mStanzaStore.mStanzas[stanza_filename]
-            stanza.append(app_element)
+            stanza.append(element)
          elif os.path.exists(stanza_filename):
             try:
                env.mStanzaStore.loadStanzas(stanza_filename)
@@ -704,21 +715,21 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
                   (stanza_filename, ex.strerror))
                return
             stanza = env.mStanzaStore.mStanzas[stanza_filename]
-            stanza.append(app_element)
+            stanza.append(element)
          else:
             stanza = ET.Element('stanza', {})
-            stanza.append(app_element)
+            stanza.append(element)
             env.mStanzaStore.mStanzas[stanza_filename] = stanza
             # Attempt to save the new file
             env.mStanzaStore.saveStanza(stanza, stanza_filename)
-         # Update the GUI to include the new application.
-         self.updateGui()
-         new_app_index = self.mApplicationCB.findText(app_name)
-         if new_app_index > 0:
-            self.mApplicationCB.setCurrentIndex(new_app_index)
-            #self.onApplicationSelected(0)
 
-            
+         # Update the GUI to include the new stanza.
+         self.updateGui()
+         new_index = self.mStanzaCB.findText(name)
+         if new_index > 0:
+            self.mStanzaCB.setCurrentIndex(new_index)
+            #self.onStanzaSelected(0)
+
    def setupUi(self, widget):
       StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
 
@@ -727,6 +738,9 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Hook up the new application action.
       self.connect(self.mNewApplicationAction, QtCore.SIGNAL("triggered()"), self.onNewApplication)
       self.mNewAppBtn.setDefaultAction(self.mNewApplicationAction)
+      self.connect(self.mNewGlobalOptionAction, QtCore.SIGNAL("triggered()"),
+                   self.onNewGlobalOption)
+      self.mNewGlobalOptBtn.setDefaultAction(self.mNewGlobalOptionAction)
 
       zoom_icon = QtGui.QIcon(":/Maestro/StanzaEditor/images/zoom-extents.png")
       self.mZoomExtentsAction = QtGui.QAction(zoom_icon, self.tr("Zoom Extents"), self)
@@ -758,7 +772,8 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.connect(self.mClassFilterCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onClassFilterChanged)
 
       # Register for a signal when an application is selected.
-      self.connect(self.mApplicationCB, QtCore.SIGNAL("currentIndexChanged(int)"), self.onApplicationSelected)
+      self.connect(self.mStanzaCB, QtCore.SIGNAL("currentIndexChanged(int)"),
+                   self.onStanzaSelected)
 
       # Generate icons.
       klasses = [ChoiceItem, GroupItem, ArgItem, EnvVarItem, CommandItem,

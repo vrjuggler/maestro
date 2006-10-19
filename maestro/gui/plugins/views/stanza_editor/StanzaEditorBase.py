@@ -113,6 +113,12 @@ class Ui_StanzaEditorBase(object):
       self.mNewAppBtn.setObjectName("mNewAppBtn")
       self.hboxlayout.addWidget(self.mNewAppBtn)
 
+      self.mNewGlobalOptBtn = QtGui.QToolButton(self.mToolGroupBox)
+      self.mNewGlobalOptBtn.setIcon(QtGui.QIcon(":/Maestro/images/stanza_global_new.png"))
+      self.mNewGlobalOptBtn.setIconSize(QtCore.QSize(24,24))
+      self.mNewGlobalOptBtn.setObjectName("mNewGlobalOptBtn")
+      self.hboxlayout.addWidget(self.mNewGlobalOptBtn)
+
       self.mLayoutBtn = QtGui.QToolButton(self.mToolGroupBox)
       self.mLayoutBtn.setIcon(QtGui.QIcon(":/Maestro/StanzaEditor/images/layout.png"))
       self.mLayoutBtn.setIconSize(QtCore.QSize(24,24))
@@ -154,15 +160,15 @@ class Ui_StanzaEditorBase(object):
       self.mApplicationLbl.setObjectName("mApplicationLbl")
       self.hboxlayout.addWidget(self.mApplicationLbl)
 
-      self.mApplicationCB = QtGui.QComboBox(self.mToolGroupBox)
+      self.mStanzaCB = QtGui.QComboBox(self.mToolGroupBox)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(3),QtGui.QSizePolicy.Policy(0))
       sizePolicy.setHorizontalStretch(0)
       sizePolicy.setVerticalStretch(0)
-      sizePolicy.setHeightForWidth(self.mApplicationCB.sizePolicy().hasHeightForWidth())
-      self.mApplicationCB.setSizePolicy(sizePolicy)
-      self.mApplicationCB.setObjectName("mApplicationCB")
-      self.hboxlayout.addWidget(self.mApplicationCB)
+      sizePolicy.setHeightForWidth(self.mStanzaCB.sizePolicy().hasHeightForWidth())
+      self.mStanzaCB.setSizePolicy(sizePolicy)
+      self.mStanzaCB.setObjectName("mStanzaCB")
+      self.hboxlayout.addWidget(self.mStanzaCB)
 
       self.mClassLine = QtGui.QFrame(self.mToolGroupBox)
       self.mClassLine.setFrameShape(QtGui.QFrame.VLine)
@@ -210,6 +216,10 @@ class Ui_StanzaEditorBase(object):
       self.mNewApplicationAction.setIcon(QtGui.QIcon(":/Maestro/images/stanza_new.png"))
       self.mNewApplicationAction.setObjectName("mNewApplicationAction")
 
+      self.mNewGlobalOptionAction = QtGui.QAction(StanzaEditorBase)
+      self.mNewGlobalOptionAction.setIcon(QtGui.QIcon(":/Maestro/images/stanza_global_new.png"))
+      self.mNewGlobalOptionAction.setObjectName("mNewGlobalOptionAction")
+
       self.retranslateUi(StanzaEditorBase)
       QtCore.QMetaObject.connectSlotsByName(StanzaEditorBase)
 
@@ -219,6 +229,8 @@ class Ui_StanzaEditorBase(object):
       StanzaEditorBase.setStatusTip(QtGui.QApplication.translate("StanzaEditorBase", "Stanza Editor", None, QtGui.QApplication.UnicodeUTF8))
       self.mNewAppBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "New Application", None, QtGui.QApplication.UnicodeUTF8))
       self.mNewAppBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewGlobalOptBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "New Global Option", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewGlobalOptBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mLayoutBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Layout", None, QtGui.QApplication.UnicodeUTF8))
       self.mLayoutBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "Layout", None, QtGui.QApplication.UnicodeUTF8))
       self.mNoDragBtn.setToolTip(QtGui.QApplication.translate("StanzaEditorBase", "Select Mode", None, QtGui.QApplication.UnicodeUTF8))
@@ -231,6 +243,7 @@ class Ui_StanzaEditorBase(object):
       self.mZoomExtentsBtn.setText(QtGui.QApplication.translate("StanzaEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mApplicationLbl.setText(QtGui.QApplication.translate("StanzaEditorBase", "Application:", None, QtGui.QApplication.UnicodeUTF8))
       self.mNewApplicationAction.setText(QtGui.QApplication.translate("StanzaEditorBase", "New Application", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewGlobalOptionAction.setText(QtGui.QApplication.translate("StanzaEditorBase", "New Global Option", None, QtGui.QApplication.UnicodeUTF8))
 
 
 
