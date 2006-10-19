@@ -905,62 +905,6 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       b.setDown(False)
       b.update()
 
-class ItemTableModel(QtCore.QAbstractTableModel):
-   def __init__(self, item=None, parent=None):
-      QtCore.QAbstractTableModel.__init__(self, parent)
-      self.mItem = item
-
-   def setItem(self, item):
-      self.mItem = item
-      self.reset()
-      begin = self.index(0, 0)
-      end = self.index(self.rowCount()-1, self.columnCount()-1)
-      self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), begin, end)
-
-   def rowCount(self, parent=QtCore.QModelIndex()):
-      if self.mItem is not None:
-         return self.mItem.dataCount()
-      return 0
-
-   def columnCount(self, parent=QtCore.QModelIndex()):
-      return 2
-
-   def headerData(self, section, orientation, role = QtCore.Qt.DisplayRole):
-      if orientation == QtCore.Qt.Vertical:
-         return QtCore.QVariant()
-      elif role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
-         if 0 == section:
-            return QtCore.QVariant("Name")
-         elif 1 == section:
-            return QtCore.QVariant("Value")
-      return QtCore.QVariant()
-
-   def flags(self, index):
-      if not index.isValid():
-         return None
-      flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
-      if 1 == index.column():
-         flags |= QtCore.Qt.ItemIsEditable
-      return flags
-
-   def data(self, index, role):
-      if self.mItem is not None:
-         if role == QtCore.Qt.EditRole or QtCore.Qt.DisplayRole == role:
-            return self.mItem.data(index, role)
-
-      return QtCore.QVariant()
-
-   def setData(self, index, value, role):
-      if self.mItem is not None:
-         if role == QtCore.Qt.EditRole:
-            if self.mItem.setData(index, value, role):
-               self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
-               self.emit(QtCore.SIGNAL("dataChanged(int)"), index.row())
-               return True
-      return False
-
-
-
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
    random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
@@ -969,6 +913,7 @@ if __name__ == "__main__":
    maestro.core.const.STANZA_PATH = \
       [pj(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'stanzas')]
    maestro.core.const.PLUGIN_DIR = pj(os.path.dirname(__file__), '.')
+   maestro.core.const.APP_NAME = 'maestro'
    #maestro.core.const.STANZA_PATH = [pj(os.getcwd(), os.path.dirname(__file__))]
    env = maestro.core.Environment()
    env.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
