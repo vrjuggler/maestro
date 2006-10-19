@@ -73,6 +73,10 @@ class LaunchService(maestro.core.IServicePlugin):
       self.mProcess = None
       self.mLogger = logging.getLogger('maestrod.LaunchService')
 
+   cmd_space_re        = re.compile(' ')
+   single_quote_cmd_re = re.compile(r"'([^']+)'")
+   double_quote_cmd_re = re.compile(r'"([^"]+)"')
+
    def registerCallbacks(self):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "launch.run_command", self.onRunCommand)
@@ -112,8 +116,46 @@ class LaunchService(maestro.core.IServicePlugin):
          self.evaluateEnvVars(envMap)
          command = self.expandEnv(command, envMap)[0]
 
-         #if sys.platform.startswith("win"):
-         #   command = '"' + command.strip("'"'"') + '"'
+         match_obj = self.cmd_space_re.search(command)
+
+         # If command contains spaces, ensure that it is wrapped in double
+         # quotes.
+         # NOTE: For Windows, what will happen is that the command will be
+         # run as ""command" <args>". This is valid behavior because the
+         # command gets executed within a command shell where that quoting
+         # indicates a special interpretation. Specifically, it applies to
+         # this part of the output from running 'cmd /?':
+         #
+         #    If /C or /K is specified, then the remainder of the command line
+         #    after the switch is processed as a command line, where the
+         #    following logic is used to process quote (") characters:
+         # 
+         #        1. [...]
+         #
+         #        2. Otherwise, old behavior is to see if the first character
+         #           is a quote character and if so, strip the leading
+         #           character and remove the last quote character on the
+         #           command line, preserving any text after the last quote
+         #           character.
+         #
+         # This behavior is why we are using double quotes rather than single
+         # quotes for wrapping command. For non-Windows platforms, using
+         # double quotes allows shell variable interpolation when the command
+         # gets executed (since it is run within a /bin/sh process).
+         if match_obj is not None:
+            match_obj = self.single_quote_cmd_re.search(command)
+
+            # If command is enclosed in single quotes, change them to double
+            # quotes.
+            if match_obj:
+               command = '"%s"' % match_obj.group(1)
+            else:
+               match_obj = self.double_quote_cmd_re.search(command)
+
+               # If command is not enclosed in single quotes or double quotes,
+               # wrap it in double quotes.
+               if match_obj is None:
+                  command = '"%s"' % command
 
          if cwd is not None:
             cwd = self.expandEnv(cwd, envMap)[0]
