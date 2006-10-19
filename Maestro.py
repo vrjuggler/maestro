@@ -197,6 +197,10 @@ def main():
       reactor.stop()
       reactor.runUntilCurrent()
       logging.shutdown()
+      sys.exit(0)
+   except SystemExit:
+      # Do nothing
+      pass
    except Exception, ex:
       global error_str
       error_str = ''
@@ -206,7 +210,6 @@ def main():
       error_file = maestro.util.PseudoFileOut(appendErr)
       traceback.print_exc(file=error_file)
       QtGui.QMessageBox.critical(None, "Error", "Error: %s\n%s" % (ex,error_str))
-   sys.exit(0)
 
 if __name__ == '__main__':
    main()
