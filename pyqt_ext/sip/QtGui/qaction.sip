@@ -30,6 +30,8 @@ class QAction : QObject
 %End
 
 public:
+    enum MenuRole { NoRole, TextHeuristicRole, ApplicationSpecificRole, AboutQtRole,
+                    AboutRole, PreferencesRole, QuitRole };
     explicit QAction(QObject *parent /TransferThis/);
     QAction(const QString &text, QObject *parent /TransferThis/);
     QAction(const QIcon &icon, const QString &text, QObject *parent /TransferThis/);
@@ -74,6 +76,10 @@ public:
 
     void activate(QAction::ActionEvent event);
     bool showStatusText(QWidget *widget = 0);
+
+    void setMenuRole(MenuRole menuRole);
+    MenuRole menuRole() const;
+
     QWidget *parentWidget() const;
 
 protected:
