@@ -105,7 +105,7 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
             text = text.strip()
             self.mValueEditor.setValue(text)
          else:
-            self.mValueEditor.setText('')
+            self.mValueEditor.setValue('')
 
          # Place the line edit into the form.
          self.mValueEditor.setParent(self)
