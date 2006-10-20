@@ -90,8 +90,8 @@ class Ui_ChooseStanzaDialogBase(object):
       self.pushButton.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "OK", None, QtGui.QApplication.UnicodeUTF8))
       self.pushButton_2.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
       self.mBrowseBtn.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "Browse", None, QtGui.QApplication.UnicodeUTF8))
-      self.mNewStanzaRB.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "New Stanza", None, QtGui.QApplication.UnicodeUTF8))
-      self.mExistingStazaRB.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "Existing Stanza", None, QtGui.QApplication.UnicodeUTF8))
+      self.mNewStanzaRB.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "Create Stanza", None, QtGui.QApplication.UnicodeUTF8))
+      self.mExistingStazaRB.setText(QtGui.QApplication.translate("ChooseStanzaDialogBase", "Add to Stanza", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

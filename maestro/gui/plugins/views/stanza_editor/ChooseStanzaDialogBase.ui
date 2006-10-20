@@ -79,14 +79,14 @@
    <item row="1" column="0" >
     <widget class="QRadioButton" name="mNewStanzaRB" >
      <property name="text" >
-      <string>New Stanza</string>
+      <string>Create Stanza</string>
      </property>
     </widget>
    </item>
    <item row="0" column="0" >
     <widget class="QRadioButton" name="mExistingStazaRB" >
      <property name="text" >
-      <string>Existing Stanza</string>
+      <string>Add to Stanza</string>
      </property>
      <property name="checked" >
       <bool>true</bool>
