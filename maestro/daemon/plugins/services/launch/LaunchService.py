@@ -87,7 +87,7 @@ class LaunchService(maestro.core.IServicePlugin):
       def merge(d1, d2):
          for k in d2.keys():
             if d1.has_key(k):
-               if d1[v].find(os.path.pathsep) != -1:
+               if d1[k].find(os.path.pathsep) != -1:
                   d1[k] = d1[k] + os.path.pathsep + d2[k]
                else:
                   d1[k] += d2[k]
