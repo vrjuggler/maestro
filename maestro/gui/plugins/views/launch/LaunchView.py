@@ -391,7 +391,9 @@ class Sheet(QtGui.QWidget):
 
    def setParentEnabled(self, val):
       self.setEnabled(val)
+      print "setParentEnabled:", val
       if self.mButtonWidget is not None:
+         print "update parent widget [%s] [%s]" % (self.mObj.mLabel, val)
          self.mButtonWidget.setEnabled(val)
 
 class ChoiceSheetCB(Sheet):
@@ -519,8 +521,7 @@ class GroupSheet(Sheet):
    def setEnabled(self, val, including=False):
       Sheet.setEnabled(self, val)
       for w in self.mChildSheets:
-         if w.mObj.mSelected:
-            w.setParentEnabled(val)
+         w.setParentEnabled(val)
    
    def setupUi(self, buttonType = NO_BUTTON):
       assert not self.mObj.mHidden
@@ -637,6 +638,11 @@ class ValueSheet(Sheet):
          else:
             self.mValueEditor = helpers.StringEditor(self)
          self.connect(self.mValueEditor, QtCore.SIGNAL("valueChanged"), self.onValueChanged)
+
+         # If our editor has a layout, make sure it does not take up too much space.
+         if self.mValueEditor.layout() is not None:
+            self.mValueEditor.layout().setMargin(1)
+            self.mValueEditor.layout().setSpacing(1)
 
          text = self.mObj.mValue
          if text is not None:
