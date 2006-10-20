@@ -325,7 +325,7 @@ class Property:
 # Define all common properties.
 GlobalPropertyMap = {}
 GlobalPropertyMap['name'] = Property('Name', 'Unknown')
-GlobalPropertyMap['labal'] = Property('Label', 'Unknown')
+GlobalPropertyMap['label'] = Property('Label', 'Unknown')
 GlobalPropertyMap['class'] = Property('Class', '')
 GlobalPropertyMap['hidden'] = Property('Hidden', 'false',
                                       {'False':'false', 'True': 'true'})
@@ -767,8 +767,8 @@ class RefItem(Node):
 
 class ArgItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'flag',
-                                    'value_type', 'hidden', 'selected',
-                                    'enabled'])
+                                    'value_type', 'editable', 'hidden',
+                                    'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Argument"
@@ -776,15 +776,16 @@ class ArgItem(Node):
 
 class EnvVarItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'key',
-                                    'hidden', 'selected', 'enabled'])
+                                    'editable', 'hidden', 'selected',
+                                    'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
       self.mColor = QtGui.QColor(255, 253, 117, 191)
 
 class CommandItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden',
-                                    'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'editable',
+                                    'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Command"
@@ -792,8 +793,8 @@ class CommandItem(Node):
       self.mColor = QtGui.QColor(139, 69, 19, 191)
 
 class CwdItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden',
-                                    'selected', 'enabled'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'editable',
+                                    'hidden', 'selected', 'enabled'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Current Working Directory"
