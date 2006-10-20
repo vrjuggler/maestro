@@ -24,8 +24,8 @@ SetCompressor bzip2
 
 # MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "infiscape_maestro.ico"
-!define MUI_UNICON "infiscape_maestro.ico"
+!define MUI_ICON "maestro_install.ico"
+!define MUI_UNICON "maestro_uninstall.ico"
 
 # Welcome page
 !insertmacro MUI_PAGE_WELCOME
