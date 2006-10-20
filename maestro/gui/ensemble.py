@@ -26,6 +26,8 @@ import maestro.core
 const = maestro.core.const
 LOCAL = maestro.core.EventManager.EventManager.LOCAL
 import socket, types
+import LoginDialog
+
 
 def makeEnsemble(file):
    tree = ET.ElementTree(file=file)
@@ -35,6 +37,9 @@ class Ensemble(QtCore.QObject):
    """ Contains information about a cluster of nodes. """
    def __init__(self, xmlTree, fileName=None, parent=None):
       QtCore.QObject.__init__(self, parent)
+
+      self.mDisallowedNodes   = []
+      self.mConnectInProgress = {}
 
       # Store filename to save to later.
       self.mFilename = fileName
@@ -46,7 +51,7 @@ class Ensemble(QtCore.QObject):
       self.mElement = self.mElementTree.getroot()
       assert self.mElement.tag == "ensemble"
 
-      self.mLogger = logging.getLogger("maestro.Ensemble")
+      self.mLogger = logging.getLogger("maestro.gui.ensemble")
 
       # Parse all node settings
       self.mNodes = []
@@ -141,14 +146,27 @@ class Ensemble(QtCore.QObject):
          try:
             # Attempt to get the IP address from the hostname.
             ip_address = node.getIpAddress()
-            # If node is not connected, attempt to connect.
-            if ip_address is not None \
-               and not env.mEventManager.isConnected(ip_address):
+
+            # If node is available for a connection attempt, go ahead and try
+            # to connect.
+            if ip_address is not None and self._canAttemptConnection(ip_address):
+               # Connection is now in progress. Do not reattempt again until
+               # this becomes false.
+               self.mConnectInProgress[ip_address] = True
                deferred = env.mEventManager.connectToNode(ip_address)
                deferred.addCallback(self.onConnection, ip_address)
                deferred.addErrback(self.onConnectError, ip_address)
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
+
+   def _canAttemptConnection(self, nodeId):
+      if not self.mConnectInProgress.has_key(nodeId):
+         self.mConnectInProgress[nodeId] = False
+
+      env = maestro.core.Environment()
+      return not self.mConnectInProgress[nodeId] and \
+             not env.mEventManager.isConnected(nodeId) and \
+             not nodeId in self.mDisallowedNodes
 
    def onConnection(self, result, nodeId):
       self.__refreshIpMap()
@@ -160,11 +178,57 @@ class Ensemble(QtCore.QObject):
             self.emit(QtCore.SIGNAL("connectionMade"), node)
             self.emit(QtCore.SIGNAL("nodeChanged"), node)
 
+      # Connection to nodeId has completed (and succeeded).
+      self.mConnectInProgress[nodeId] = False
       return result
 
    def onConnectError(self, failure, nodeId):
-      self.mLogger.error("Failed to connect to %s: %s" % \
-                            (nodeId, str(failure.value)))
+      reason = str(failure.value)
+      self.mLogger.error("Failed to connect to %s: %s" % (nodeId, reason))
+
+      if 'twisted.cred.error.LoginFailed' in failure.parents:
+         # Temporarily disallow connection attempts to nodeId.
+         self.mDisallowedNodes.append(nodeId)
+
+         if 'twisted.cred.error.UnauthorizedLogin' in failure.parents:
+            result = \
+               QtGui.QMessageBox.critical(
+                  None, 'Unauthorized Login',
+                  'Login to %s failed!\n%s\nReauthenticate?' % (nodeId, reason),
+                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                  QtGui.QMessageBox.Yes
+               )
+
+            # If the user selected the "Yes" button, then open the login
+            # dialog box again so that s/he can reauthenticate.
+            if result == QtGui.QMessageBox.Yes:
+               self.mDisallowedNodes.remove(nodeId)
+               dlg = LoginDialog.LoginDialog()
+               dlg.exec_()
+               env = maestro.core.Environment()
+               env.mEventManager.setCredentials(dlg.getLoginInfo())
+         # If login was deined, give the user the option of retrying. Denied
+         # login may not necessarily require reauthentication.
+         elif 'twisted.cred.error.LoginDenied' in falure.parents:
+            result = \
+               QtGui.QMessageBox.critical(
+                  None, 'Unauthorized Login',
+                  'Login to %s was denied!\n%s\nRetry?' % (nodeId, reason),
+                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                  QtGui.QMessageBox.Yes
+               )
+
+            # If the user selected the "Yes" button, remove nodeId from
+            # self.mDisallowedNodes so that another connection attempt can be
+            # made.
+            if result == QtGui.QMessageBox.Yes:
+               self.mDisallowedNodes.remove(nodeId)
+         # Otherwise, allow more connection attempts to nodeId to occur.
+         else:
+            self.mDisallowedNodes.remove(nodeId)
+
+      # Connection to nodeId has completed (and failed).
+      self.mConnectInProgress[nodeId] = False
 
    def onLostConnection(self, msgFrom, nodeId):
       """ Slot that is called when a connection is lost to a node.
