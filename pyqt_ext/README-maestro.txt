@@ -29,7 +29,7 @@ Windows
 
 In the PyQt 4 snapshot source tree:
 
-   ren sip sip-off
+   move sip sip-off
 
 or
 
