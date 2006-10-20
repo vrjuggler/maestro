@@ -117,7 +117,6 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       # Load a reboot/reload icon
       reboot_icon = QtGui.QIcon(":/Maestro/images/reboot.png")
-      reload_icon = QtGui.QIcon(":/Maestro/images/reload.png")
 
       # Create action to reboot the selected node.
       self.mRebootNodeAction = QtGui.QAction(reboot_icon, self.tr("Reboot Node"), self)
@@ -128,7 +127,8 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.connect(self.mRebootClusterAction, QtCore.SIGNAL("triggered()"), self.onRebootCluster)
 
       # Create action to refresh targets for all nodes.
-      self.mRefreshAction = QtGui.QAction(reload_icon, self.tr("Refresh Boot Targetsr"), self)
+      self.mRefreshAction = QtGui.QAction(self.tr("Refresh"), self)
+      self.mRefreshAction.setToolTip(self.tr("Refresh Boot Targets"))
       self.connect(self.mRefreshAction, QtCore.SIGNAL("triggered()"), self.onRefresh)
 
       # Set the default action for the target selection buttons.

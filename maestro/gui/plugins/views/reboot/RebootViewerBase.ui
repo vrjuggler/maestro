@@ -105,10 +105,10 @@
      <item>
       <widget class="QToolButton" name="mRefreshBtn" >
        <property name="text" >
-        <string>...</string>
+        <string>Refresh</string>
        </property>
        <property name="icon" >
-        <iconset resource="../../../MaestroResource.qrc" >:/Maestro/images/reload.png</iconset>
+        <iconset/>
        </property>
        <property name="iconSize" >
         <size>
