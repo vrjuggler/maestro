@@ -198,8 +198,8 @@ def main():
             print "Trying to load file: ", opts.ensemble
             # Parse XML file.
             element_tree = ET.ElementTree(file=opts.ensemble)
-            ensemble = ensemble.Ensemble(element_tree, fileName=opts.ensemble)
-            m.setEnsemble(ensemble)
+            m.setEnsemble(ensemble.Ensemble(element_tree,
+                                            fileName = opts.ensemble))
          except IOError, ex:
             element_tree = None
             QtGui.QMessageBox.critical(None, "Error",
