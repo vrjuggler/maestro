@@ -26,6 +26,7 @@ import maestro.core
 const = maestro.core.const
 from maestro.core import Stanza
 LOCAL = maestro.core.EventManager.EventManager.LOCAL
+from maestro.gui import helpers
 
 import os.path
 pj = os.path.join
@@ -357,7 +358,11 @@ class Sheet(QtGui.QWidget):
       QtGui.QWidget.__init__(self, parent)
       
       self.mObj = obj
+      # The title widget is a reference to a widget that we can
+      # set text on in order to display an option's label.
       self.mTitleWidget = None
+      # The button widget is either a refernece to a radiobutton,
+      # checkbox, or None
       self.mButtonWidget = None
 
    def _buildButton(self, buttonType):
@@ -368,8 +373,8 @@ class Sheet(QtGui.QWidget):
          button = QtGui.QCheckBox(self)
 
       if button is not None:
-         self.connect(button, QtCore.SIGNAL("toggled(bool)"), self.onToggled)
          button.setChecked(self.mObj.mSelected)
+         self.connect(button, QtCore.SIGNAL("toggled(bool)"), self.onToggled)
       return button
 
    def setTitle(self, text):
@@ -378,10 +383,14 @@ class Sheet(QtGui.QWidget):
    def onToggled(self, val):
       print "Setting [%s] selected: %s" % (self.mObj.getName(), val)
       self.mObj.mSelected = val
+      self.setEnabled(val)
    
    def setEnabled(self, val):
       if self.mTitleWidget is not None:
          self.mTitleWidget.setEnabled(val)
+
+   def setParentEnabled(self, val):
+      self.setEnabled(val)
       if self.mButtonWidget is not None:
          self.mButtonWidget.setEnabled(val)
 
@@ -392,92 +401,106 @@ class ChoiceSheetCB(Sheet):
       self.mObj = obj
       self.mSelectedFrame = None
       self.mSelectedObject = None
-      self.mSavedEnableState = False
 
    def setEnabled(self, val):
+      """ Override to ensure that if we are showing our chosen child that
+          its enabled state is correct.
+      """
       Sheet.setEnabled(self, val)
-      if mSelectedFrame is not None:
-         mSelectedFrame.setEnabled(val)
-         mSavedEnableState = val
+      print "CB enabled: ", val
+      self.mChoice.setEnabled(val)
+      if self.mSelectedFrame is not None:
+         self.mSelectedFrame.setParentEnabled(val)
 
    def setupUi(self, buttonType = NO_BUTTON):
-      if NO_BUTTON == buttonType:
-         self.mTitleWidget = QtGui.QLabel(self)
-      else:
-         self.mButtonWidget = self._buildButton(buttonType)
-         self.mTitleWidget = QtGui.QLabel(self)
-         self.mLayout.addWidget(self.mButtonWidget)
+      print "Starting with CB.setupUI()"
+      # Create all layouts and link them together.
+      self.vboxlayout = QtGui.QVBoxLayout(self)
+      self.vboxlayout.setMargin(1)
+      self.vboxlayout.setSpacing(1)
+      self.hboxlayout1 = QtGui.QHBoxLayout()
+      self.hboxlayout1.setMargin(1)
+      self.hboxlayout1.setSpacing(1)
+      self.hboxlayout2 = QtGui.QHBoxLayout()
+      self.hboxlayout2.setMargin(1)
+      self.hboxlayout2.setSpacing(1)
+      self.vboxlayout.addLayout(self.hboxlayout1)
+      self.vboxlayout.addLayout(self.hboxlayout2)
 
-      self.gridlayout = QtGui.QGridLayout(self)
-      self.gridlayout.setMargin(1)
-      self.gridlayout.setSpacing(1)
-      self.gridlayout.setObjectName("gridlayout")
-      
-      self.mTitleWidget.setObjectName("mChoiceLabel")
+      # If we are a child of a choice, then we need to have
+      # a choice button.
+      if NO_BUTTON != buttonType:
+         self.mButtonWidget = self._buildButton(buttonType)
+         self.hboxlayout1.addWidget(self.mButtonWidget)
+
+      # Create a title widget.
+      self.mTitleWidget = QtGui.QLabel(self)
       self.mTitleWidget.setText(self.mObj.mLabel + ": ")
-      self.gridlayout.addWidget(self.mTitleWidget,0,0,1,2)
-      
+      self.hboxlayout1.addWidget(self.mTitleWidget)
+
+      # Create a spacer to force our child selection to be indented.
       spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
-      self.gridlayout.addItem(spacerItem,0,0,1,1)
-      
+      self.hboxlayout2.addItem(spacerItem)
+
+      # Create a choice combo box that contains all possible choices.
       self.mChoice = QtGui.QComboBox(self)
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
       sizePolicy.setHorizontalStretch(0)
       sizePolicy.setVerticalStretch(0)
       self.mChoice.setSizePolicy(sizePolicy)
-      
-      self.mChoice.setObjectName("mChoice")
-      self.gridlayout.addWidget(self.mChoice,0,2,1,1)
+      self.hboxlayout1.addWidget(self.mChoice)
 
-      self._fillCombo()
-      self.connect(self.mChoice, QtCore.SIGNAL("activated(int)"), self.choiceSelected)
+      # Connect to a signal so that we know the user selected a different
+      # choice from the combo box.
+      self.connect(self.mChoice, QtCore.SIGNAL("currentIndexChanged(int)"), self.onChoiceChanged)
 
-   def _fillCombo(self):
-      selected_index = 0
+      # Fill in the combo box with the possible choices. This will cause the
+      # first choice that has 'selected' set to true be the current selection.
+      self.__fillCombo()
+      self.setEnabled(self.mObj.mSelected)
+
+   def __fillCombo(self):
+      selected_index = -1
       i = 0
       for c in self.mObj.mChildren:
          self.mChoice.addItem(c.getName())
-         if c.mSelected:
+         if selected_index < 0 and c.mSelected:
             selected_index = i
          i += 1
-   
-      if len(self.mObj.mChildren) > 0:
-         self.mChoice.setCurrentIndex(selected_index)
-         self._setChoice(selected_index)
-      else:
-         QtGui.QMessageBox.critical(self.parentWidget(), "Fatal Error",
-                                    "No choices defined!")
-         QApplication.exit(0)
+      # Select the first child option that had it's selected attribute
+      # set to true. If no children were selected, then use -1 which
+      # lets Qt decide what to choose.
+      self.mChoice.setCurrentIndex(selected_index)
 
-   def choiceSelected(self):
-     self._setChoice(self.mChoice.currentIndex())
-
-   def _setChoice(self, index):
+   def onChoiceChanged(self, index):
+      # If there was a past selection, set its selected flag to False
+      # and reset our reference.
       if self.mSelectedObject is not None:
          self.mSelectedObject.mSelected = False
          self.mSelectedObject = None
 
+      # If the past selection has not hidden and it's frame was displayed,
+      # remove the frame from the widget and mark it for deletion.
       if self.mSelectedFrame is not None:
          self.layout().removeWidget(self.mSelectedFrame)
          self.mSelectedFrame.deleteLater()
+         self.mSelectedFrame = None
 
-      self.mSelectedFrame = None
-      # XXX: Add error testing
+      # If the selected index is not valid don't add anything.
+      if index >= len(self.mObj.mChildren):
+         return
+
+      # Get the new selected option, keep a reference to it and record
+      # that it is now selected.
       obj = self.mObj.mChildren[index]
       self.mSelectedObject = obj
-      self.mSelectedObject.mSelected = True
-      if obj is not None and not obj.mHidden:
-         if isPointless(obj):
-            mSelectedFrame = None
-         else:
+      if self.mSelectedObject is not None:
+         self.mSelectedObject.mSelected = True
+         if not self.mSelectedObject.mHidden and not isPointless(self.mSelectedObject):
             self.mSelectedFrame = _buildWidget(obj)
-            #self.mSelectedFrame.setEnabled(self.mSavedEnableState)
+            self.mSelectedFrame.setEnabled(self.mTitleWidget.isEnabled())
             self.mSelectedFrame.setParent(self)
-            #self.mSelectedFrame.setEnabled(True)
-            self.gridlayout.addWidget(self.mSelectedFrame,1,1,1,2)
-            #self.mSelectedFrame.show()
-            self.gridlayout.update()
-
+            self.hboxlayout2.addWidget(self.mSelectedFrame)
 
 class GroupSheet(Sheet):
    def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
@@ -496,13 +519,9 @@ class GroupSheet(Sheet):
    def setEnabled(self, val, including=False):
       Sheet.setEnabled(self, val)
       for w in self.mChildSheets:
-         w.setEnabled(val)
+         if w.mObj.mSelected:
+            w.setParentEnabled(val)
    
-   def onToggled(self, val):
-      Sheet.onToggled(self, val)
-      for s in self.mChildSheets:
-         s.setEnabled(val)
-
    def setupUi(self, buttonType = NO_BUTTON):
       assert not self.mObj.mHidden
 
@@ -511,6 +530,7 @@ class GroupSheet(Sheet):
          self.hboxlayout = QtGui.QHBoxLayout(self)
          # If we have a selection button, then use it.
          self.hboxlayout.addWidget(self.mTitleWidget)
+         self.setEnabled(self.mObj.mSelected)
       else:
          self.mTitleWidget = QtGui.QLabel(self)
          self.mButtonWidget = self._buildButton(buttonType)
@@ -531,6 +551,8 @@ class GroupSheet(Sheet):
          self.gridlayout.addWidget(self.mTitleWidget,0,1,1,2)
          self.gridlayout.addItem(spacerItem,1,1,1,1)
          self.gridlayout.addLayout(self.mChildrenLayout,1,2,1,1)
+
+         self.setEnabled(self.mObj.mSelected)
 
          self._fillForm()
       self.setTitle(self.mObj.mLabel)
@@ -559,24 +581,19 @@ class ChoiceSheet(GroupSheet):
          # button next to it.
          if self.mObj.mChoiceType == Stanza.ONE:
             w = _buildWidget(c, RADIO_BUTTON)
+            # Get the selection button that is used for the child/choice.
+            btn = w.mButtonWidget
+            # Add child button to button group if we have single selection.
+            self.mButtonGroup.addButton(btn)
          elif self.mObj.mChoiceType == Stanza.ANY:
             w = _buildWidget(c, CHECK_BUTTON)
          else:
             w = _buildWidget(c, NO_BUTTON)
-         
-         # Get the selection button that is used for the child/choice.
-         btn = w.mButtonWidget
-
-         # Add child button to button group if we have single selection.
-         if self.mObj.mChoiceType == Stanza.ONE \
-               and btn is not None:
-            self.mButtonGroup.addButton(btn)
 
          # Add child option to ourself.
          self.mChildSheets.append(w)
          w.setParent(self)
          self.mChildrenLayout.addWidget(w)
-
 
 def isPointless(obj):
    """ If we are not in ADVANCED user mode, an object is not hidden, and
@@ -599,14 +616,12 @@ class ValueSheet(Sheet):
       self.mLayout.setMargin(1)
       self.mLayout.setSpacing(1)
 
-      if NO_BUTTON == buttonType:
-         self.mTitleWidget = QtGui.QLabel(self)
-      else:
+      if NO_BUTTON != buttonType:
          self.mButtonWidget = self._buildButton(buttonType)
-         self.mTitleWidget = QtGui.QLabel(self)
          self.mLayout.addWidget(self.mButtonWidget)
-      self.mLayout.addWidget(self.mTitleWidget)
 
+      self.mTitleWidget = QtGui.QLabel(self)
+      self.mLayout.addWidget(self.mTitleWidget)
 
       # Create editor if we want to allow the user to edit the value
       # or we are in advanced mode.
@@ -614,11 +629,24 @@ class ValueSheet(Sheet):
       env = maestro.core.Environment()
       user_mode = env.settings.getUserMode()
       if (self.mObj.mEditable or const.ADVANCED == user_mode):
-         self.mValueEditor = QtGui.QLineEdit(self)
-         self.mValueEditor.setText(self.mObj.mValue)
-         self.mValueEditor.setEnabled(self.mObj.mEditable)
+         data_type = self.mObj.mDataType
+         if 'string' == data_type:
+            self.mValueEditor = helpers.StringEditor(self)
+         elif 'file' == data_type:
+            self.mValueEditor = helpers.FileEditor(self)
+         else:
+            self.mValueEditor = helpers.StringEditor(self)
+         self.connect(self.mValueEditor, QtCore.SIGNAL("valueChanged"), self.onValueChanged)
+
+         text = self.mObj.mValue
+         if text is not None:
+            text = text.strip()
+            self.mValueEditor.setValue(text)
+         else:
+            self.mValueEditor.setValue('')
+
          self.mLayout.addWidget(self.mValueEditor)
-         self.connect(self.mValueEditor, QtCore.SIGNAL("editingFinished()"),self.onEdited)
+      self.setEnabled(self.mObj.mSelected)
 
    def onToggled(self, val):
       Sheet.onToggled(self, val)
@@ -628,10 +656,10 @@ class ValueSheet(Sheet):
 
    def setEnabled(self, val, including=False):
       Sheet.setEnabled(self, val)
-      enable = val and self.mObj.mEditable
-      if self.mValueEditor:
+      if self.mValueEditor is not None:
+         enable = val and self.mObj.mEditable
          self.mValueEditor.setEnabled(enable)
 
-   def onEdited(self):
+   def onValueChanged(self):
       if self.mValueEditor:
          self.mObj.mValue = str(self.mValueEditor.text())

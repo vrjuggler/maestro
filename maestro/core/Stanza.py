@@ -48,6 +48,8 @@ class TreeItem:
          # XXX: Currently self.mSelected is checked in the traversal to determine if we should include the option.
          self.mSelected = True
 
+      self.mDataType = xmlElt.get('value_type', 'string')
+
       elts = xmlElt.getchildren()
       if elts is not None:
          for i in xrange(len(elts)):
