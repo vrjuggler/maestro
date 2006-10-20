@@ -22,7 +22,6 @@ from PyQt4 import QtGui, QtCore
 import RebootViewerBase
 import maestro.core
 const = maestro.core.const
-from maestro.core import Ensemble
 
 class RebootInfo:
    def __init__(self, targets = [], default = -1, timeout = -1):

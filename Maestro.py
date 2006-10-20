@@ -65,7 +65,7 @@ const.STANZA_PATH = [pj(const.EXEC_DIR, 'stanzas'),
 print const.STANZA_PATH
 
 const.MAESTRO_GUI = True
-from maestro.core import Ensemble
+from maestro.gui import ensemble
 
 import maestro.gui as gui
 import maestro.gui.Maestro
@@ -198,7 +198,7 @@ def main():
             print "Trying to load file: ", opts.ensemble
             # Parse XML file.
             element_tree = ET.ElementTree(file=opts.ensemble)
-            ensemble = Ensemble.Ensemble(element_tree, fileName=opts.ensemble)
+            ensemble = ensemble.Ensemble(element_tree, fileName=opts.ensemble)
             m.setEnsemble(ensemble)
          except IOError, ex:
             element_tree = None

@@ -35,7 +35,7 @@ import AboutDialogBase
 import maestro
 import maestro.core
 const = maestro.core.const
-from maestro.core import Ensemble
+import ensemble
 LOCAL = maestro.core.EventManager.EventManager.LOCAL
 
 import elementtree.ElementTree as ET
@@ -409,7 +409,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             # Parse XML ensemble file. This provides the initial set of cluster
             # nodes.
             element_tree = ET.ElementTree(file=ensemble_filename)
-            ensemble = Ensemble.Ensemble(xmlTree=element_tree,
+            ensemble = ensemble.Ensemble(xmlTree=element_tree,
                                          fileName=ensemble_filename)
             self.setEnsemble(ensemble)
             self.statusBar().showMessage("Opened ensemble %s"%ensemble_filename)
@@ -509,8 +509,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       elm = ET.Element('ensemble')
       element_tree = ET.ElementTree(element=elm)
-      ensemble = Ensemble.Ensemble(element_tree)
-      self.setEnsemble(ensemble)
+      self.setEnsemble(ensemble.Ensemble(element_tree))
       self.statusBar().showMessage("Created new ensemble")
 
    def onSaveStanzas(self):

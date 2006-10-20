@@ -22,7 +22,7 @@ import EnsembleViewBase
 import maestro.core
 const = maestro.core.const
 env = maestro.core.Environment
-from maestro.core import Ensemble
+from maestro.gui import ensemble
 from maestro.gui import EnsembleModel
 
 class EnsembleViewPlugin(maestro.core.IViewPlugin):
@@ -327,7 +327,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          # Get the current node out of the model
          selected_node = self.mEnsembleModel.data(selected_index, QtCore.Qt.UserRole)
          #XXX: Sanity check. Remove for optimization,
-         assert isinstance(selected_node, Ensemble.ClusterNode)
+         assert isinstance(selected_node, ensemble.ClusterNode)
          return selected_node
       return None
 

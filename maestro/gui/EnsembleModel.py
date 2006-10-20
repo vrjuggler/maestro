@@ -21,7 +21,7 @@ from PyQt4 import QtCore, QtGui
 import maestro.core
 const = maestro.core.const
 
-from maestro.core import Ensemble
+import ensemble
 
 class EnsembleModel(QtCore.QAbstractListModel):
    ensemble_mime_type = 'application/maestro-cluster-nodes'
