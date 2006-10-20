@@ -604,9 +604,20 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
                 'global_option' == item.tag):
                stanza_elms.append(item)
 
+      # Save the currently selected stanza item text. This will be compared
+      # against the labels in stanza_elms in order to change self.mStanzaCB
+      # back to the previously selected item.
+      cur_text = str(self.mStanzaCB.currentText())
+
       #self.mStanzas = env.mStanzaStore.findApplications()
       self.mStanzas = stanza_elms
       self.mStanzaCB.clear()
+
+      # If cur_text is not found among the labels for stanza items in
+      # stanza_elms, then Item 0 will be the one selected in self.mStanzaCB.
+      new_index = 0
+      i = 0
+
       for app in self.mStanzas:
          label = app.get('label', None)
          if label is None:
@@ -614,10 +625,19 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          assert(label is not None)
          self.mStanzaCB.addItem(label)
 
-      # If we have stanzas, then show the first one.
+         # If label matches cur_text, then we have found the new index of
+         # the previously selected item.
+         # XXX: This fails in the case when two stanza items have the same
+         # label.
+         if label == cur_text:
+            new_index = i
+
+         i += 1
+
+      # If we have stanzas, then show the one indicated by new_index.
       if len(self.mStanzas) > 0:
-         self.mStanzaCB.setCurrentIndex(0)
-         self.onStanzaSelected(0)
+         self.mStanzaCB.setCurrentIndex(new_index)
+         self.onStanzaSelected(new_index)
 
    def onStanzaSelected(self, index):
       stanza = self.mStanzas[index]

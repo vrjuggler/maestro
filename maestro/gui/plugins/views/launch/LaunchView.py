@@ -131,17 +131,38 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
    def buildLaunchGui(self):
       """ Fills in the application panel. """
+      # Save the currently selected application item text. This will be
+      # compared against the application names in self.mApplications in order
+      # to change self.mAppComboBox back to the previously selected item.
+      cur_text = str(self.mAppComboBox.currentText())
+
       self.mAppComboBox.clear()
 
       env = maestro.core.Environment()
       self.mApplications = env.mStanzaStore.getApplications()
 
+      # If cur_text is not found among the namesl for applications in
+      # self.mApplications, then Item 0 will be the one selected in
+      # self.mAppComboBox.
+      new_index = 0
+      i = 0
+
       for s in self.mApplications:
-         self.mAppComboBox.addItem(s.getName())
-   
+         name = s.getName()
+         self.mAppComboBox.addItem(name)
+
+         # If name matches cur_text, then we have found the new index of
+         # the previously selected item.
+         # XXX: This fails in the case when two applicatios have the same
+         # name.
+         if name == cur_text:
+            new_index = i
+
+         i += 1
+
       if len(self.mApplications) > 0:
-         self.mAppComboBox.setCurrentIndex(0)
-         self._setApplication(0)
+         self.mAppComboBox.setCurrentIndex(new_index)
+         self._setApplication(new_index)
       else:
          QtGui.QMessageBox.critical(self.parentWidget(), "Fatal Error",
                                     "No applications defined!")
