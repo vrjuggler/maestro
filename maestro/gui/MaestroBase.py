@@ -103,17 +103,17 @@ class Ui_MaestroBase(object):
       self.menubar.setGeometry(QtCore.QRect(0,0,557,29))
       self.menubar.setObjectName("menubar")
 
-      self.menuHelp = QtGui.QMenu(self.menubar)
-      self.menuHelp.setObjectName("menuHelp")
-
       self.menuFile = QtGui.QMenu(self.menubar)
       self.menuFile.setObjectName("menuFile")
+
+      self.menuOpen = QtGui.QMenu(self.menuFile)
+      self.menuOpen.setObjectName("menuOpen")
 
       self.menuNew = QtGui.QMenu(self.menuFile)
       self.menuNew.setObjectName("menuNew")
 
-      self.menuOpen = QtGui.QMenu(self.menuFile)
-      self.menuOpen.setObjectName("menuOpen")
+      self.menuHelp = QtGui.QMenu(self.menubar)
+      self.menuHelp.setObjectName("menuHelp")
       MaestroBase.setMenuBar(self.menubar)
 
       self.statusbar = QtGui.QStatusBar(MaestroBase)
@@ -146,6 +146,7 @@ class Ui_MaestroBase(object):
 
       self.mAboutAction = QtGui.QAction(MaestroBase)
       self.mAboutAction.setIcon(QtGui.QIcon(":/Maestro/images/infiscape.png"))
+      self.mAboutAction.setMenuRole(QtGui.QAction.AboutRole)
       self.mAboutAction.setObjectName("mAboutAction")
 
       self.mLoadStanzaAction = QtGui.QAction(MaestroBase)
@@ -166,6 +167,7 @@ class Ui_MaestroBase(object):
 
       self.mExitAction = QtGui.QAction(MaestroBase)
       self.mExitAction.setIcon(QtGui.QIcon(":/Maestro/images/exit.png"))
+      self.mExitAction.setMenuRole(QtGui.QAction.QuitRole)
       self.mExitAction.setObjectName("mExitAction")
 
       self.mSaveEnsembleAsAction = QtGui.QAction(MaestroBase)
@@ -176,10 +178,9 @@ class Ui_MaestroBase(object):
 
       self.mSaveStanzaAsAction = QtGui.QAction(MaestroBase)
       self.mSaveStanzaAsAction.setObjectName("mSaveStanzaAsAction")
-      self.menuHelp.addAction(self.mAboutAction)
-      self.menuNew.addAction(self.mCreateNewEnsembleAction)
       self.menuOpen.addAction(self.mLoadEnsembleAction)
       self.menuOpen.addAction(self.mLoadStanzaAction)
+      self.menuNew.addAction(self.mCreateNewEnsembleAction)
       self.menuFile.addSeparator()
       self.menuFile.addAction(self.menuNew.menuAction())
       self.menuFile.addAction(self.menuOpen.menuAction())
@@ -192,6 +193,7 @@ class Ui_MaestroBase(object):
       self.menuFile.addAction(self.mArchiveLogsAction)
       self.menuFile.addSeparator()
       self.menuFile.addAction(self.mExitAction)
+      self.menuHelp.addAction(self.mAboutAction)
       self.menubar.addAction(self.menuFile.menuAction())
       self.menubar.addAction(self.menuHelp.menuAction())
       self.mToolbar.addAction(self.mLoadEnsembleAction)
@@ -203,22 +205,26 @@ class Ui_MaestroBase(object):
 
    def retranslateUi(self, MaestroBase):
       MaestroBase.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Maestro Client by Infiscape", None, QtGui.QApplication.UnicodeUTF8))
-      self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
       self.menuFile.setTitle(QtGui.QApplication.translate("MaestroBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
-      self.menuNew.setTitle(QtGui.QApplication.translate("MaestroBase", "New", None, QtGui.QApplication.UnicodeUTF8))
       self.menuOpen.setTitle(QtGui.QApplication.translate("MaestroBase", "Open", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuNew.setTitle(QtGui.QApplication.translate("MaestroBase", "New", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
       self.mToolbar.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Maestro Toolbar", None, QtGui.QApplication.UnicodeUTF8))
       self.mLogWindow.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Log Window", None, QtGui.QApplication.UnicodeUTF8))
       self.mLoadEnsembleAction.setText(QtGui.QApplication.translate("MaestroBase", "Ensemble", None, QtGui.QApplication.UnicodeUTF8))
       self.mAboutAction.setText(QtGui.QApplication.translate("MaestroBase", "About", None, QtGui.QApplication.UnicodeUTF8))
       self.mLoadStanzaAction.setText(QtGui.QApplication.translate("MaestroBase", "Stanza", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveEnsembleAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Ensemble", None, QtGui.QApplication.UnicodeUTF8))
-      self.mSaveStanzasAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Stanzas", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveStanzasAction.setText(QtGui.QApplication.translate("MaestroBase", "Save All Stanzas", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveStanzasAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Logs", None, QtGui.QApplication.UnicodeUTF8))
+      self.mArchiveLogsAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
       self.mExitAction.setText(QtGui.QApplication.translate("MaestroBase", "Exit", None, QtGui.QApplication.UnicodeUTF8))
+      self.mExitAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveEnsembleAsAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Ensemble As...", None, QtGui.QApplication.UnicodeUTF8))
       self.mCreateNewEnsembleAction.setText(QtGui.QApplication.translate("MaestroBase", "New Ensemble", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveStanzaAsAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Stanza As...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveStanzaAsAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Shift+S", None, QtGui.QApplication.UnicodeUTF8))
 
 
 
