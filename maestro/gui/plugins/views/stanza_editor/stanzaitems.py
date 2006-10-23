@@ -43,7 +43,6 @@ def buildItem(tagOrElm):
                 'add':AddItem,
                 'remove':RemoveItem,
                 'override':OverrideItem}
-   print type(tagOrElm)
    if types.StringType == type(tagOrElm):
       tag = tagOrElm
       elm = None

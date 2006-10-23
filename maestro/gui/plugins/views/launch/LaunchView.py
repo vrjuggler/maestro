@@ -185,7 +185,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       for c in self.mSelectedApp.mChildren:
          # All top level objects are selected by default.
          c.mSelected = True
-         print "C: [%s] [%s]" % (c, isPointless(c))
          if not c.mHidden and not isPointless(c):
             sh = _buildWidget(c)
             sh.setParent(self.mAppFrame);
@@ -407,7 +406,6 @@ class ChoiceSheetCB(Sheet):
          self.mSelectedFrame.setEnabled(val)
 
    def setupUi(self, buttonType = NO_BUTTON):
-      print "Starting with CB.setupUI()"
       # Create all layouts and link them together.
       self.vboxlayout = QtGui.QVBoxLayout(self)
       self.vboxlayout.setMargin(1)
@@ -788,13 +786,4 @@ class EnvListSheet(Sheet):
       else:
          current_value = str(widget.currentText())
 
-      print "Current changed [%s][%s][%s][%s]" % (widget, index, keyElm, current_value)
       self.mObj.mCurrentValues[key] = current_value
-
-      # Connect to a signal so that we know the user selected a different
-      # choice from the combo box.
-      #self.connect(self.mChoice, QtCore.SIGNAL("currentIndexChanged(int)"), self.onChoiceChanged)
-
-      # Fill in the combo box with the possible choices. This will cause the
-      # first choice that has 'selected' set to true be the current selection.
-      #self.__fillCombo()

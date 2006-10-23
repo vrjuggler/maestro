@@ -813,11 +813,12 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
 
       # Generate icons.
       klasses = [ChoiceItem, GroupItem, ArgItem, EnvVarItem, CommandItem,
-                 CwdItem, RefItem, OverrideItem, AddItem, RemoveItem]
+                 CwdItem, RefItem, OverrideItem, AddItem, RemoveItem, EnvListItem]
       btn_labels = ['Choice', 'Group', 'Argument', 'Env Variable', 'Command',
-                    'Cwd', 'Reference', 'Override', 'Add Options', 'Remove Option']
+                    'Cwd', 'Reference', 'Override', 'Add Options', 'Remove Option',
+                    'Env List']
       tags = ['choice', 'group', 'arg', 'env_var', 'command', 'cwd', 'ref',
-              'override', 'add', 'remove']
+              'override', 'add', 'remove', 'env_list']
       self.mItemBtnCBs = []
       self.mItemToolButtons = []
 
