@@ -113,7 +113,6 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          for i in xrange(ensemble.getNumNodes()):
             node = ensemble.getNode(i)
             id = node.getId()
-            print "*** id=", id
             self.mNodeChooser.addItem(node.getHostname(), QtCore.QVariant(id))
             self.mSettings[id] = DesktopSettings()
 
