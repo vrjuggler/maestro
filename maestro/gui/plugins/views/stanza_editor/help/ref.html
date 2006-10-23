@@ -1,2 +1,29 @@
-<H1><center>Reference</center></H1>
-Reference: A reference allows reuse of a structural item in another stanza. References can be refined by using add, remove, and override operations. A reference has an identifier that uniquely describes what XML element in another stanza is being referenced.
+<h1><div align="center">Reference</div></h1>
+<p>A reference allows reuse of a structural item in another stanza. References
+can be refined by using add, remove, and override operations as the children.
+A reference has an identifier that uniquely describes what XML element in
+another stanza is being referenced. This identifier is formed using a syntax
+similar to XPath, though it is <em>not</em> XPath. The path has a root and
+children that are separated by the <code class="literal">/</code> character,
+and a reference identifier must include both. In other words, referencing
+only the root is not valid. The root node itself may have a namespace that is
+used to assist with creating unique identifiers. For example, two root nodes
+might be <code class="literal">site1:VrJugglerOptions</code> and
+<code class="literal">site2:VrJugglerOptions</code> where
+<code class="literal">site1</code> and <code class="literal">site2</code> (the
+namespaces) are common identifiers for two different VR installations in the
+same organization.</p>
+<p>The reference identifier is used for matching purposes within the
+collection of all known stanzas. To perform this matching, the identifier can
+utilize the Python regular expression syntax. For those users not familiar
+with regular expressions, simpler shell-style glob patterns are allowed.
+For example, valid paths (those containing a root and references to one or
+more children) from our example above might be
+<code class="literal">site1:VrJugglerOptions/*</code> or
+<code class="literal">site1:VrJugglerOptions/Input*</code>. To index within a
+collection of matches returned by a pattern, the syntax is to use the
+<code class="literal">@</code> symbol followed by a zero-based integer index.
+For example, <code class="literal">site1:VrJugglerOptions/Input*@2</code>
+would extract the third child under
+<code class="literal">site1:VrJugglerOptions</code> whose name matches
+<code class="literal">Input*</code>.</p>

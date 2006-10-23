@@ -1,2 +1,13 @@
 <H1><center>Remove</center></H1>
-A remove operation deletes a child of the referenced structural item.
+A remove operation deletes a child of the referenced structural item.  The
+reference identifier uses the same path syntax as its parent reference, but
+the path in this case is relative to the parent. In the event that the path
+matches multiple nodes, the individually matched roots can be matched using
+the <code class="literal">@</code> indexing syntax. For example, if the
+parent reference identifier
+<code class="literal">site1:VrJugglerOptions/Input*</code> matches
+<code class="literal">site1:VrJugglerOptions/InputGlove</code>,
+<code class="literal">site1:VrJugglerOptions/InputJoystick</code> and
+<code class="literal">site1:VrJugglerOptions/InputWand</code>, the second of
+those can be removed by using <code class="literal">@1</code> as the
+identifier.

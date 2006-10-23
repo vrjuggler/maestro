@@ -1,0 +1,20 @@
+<h1><div align="center">Environment Variable List</div></h1>
+<p>A list of environment variables. In some cases, an application may use a
+large collection of environment variables, and creating individual environment
+variable items in the stanza can be quite tedious. Instead, an environment
+variable list can be used to capture multiple environment variables in one
+place. Each environment variable in the list is made up of a (the name of the
+environment variable) and zero or more values. If the stanza author allows the
+user to change the value of the environment variable, multi-valued variables
+will be presented using a combo box or an editable combo box when
+appropriate.</p>
+<p>The environment variables in the list are applied to the run-time
+environment <em>of the application</em> on each of the remote nodes when the
+application is launched. Environment variable values can reference other
+environment variables using the syntax
+<code class="literal">${ENV_VAR_NAME}</code> where
+<code class="varname">ENV_VAR_NAME</code> is the name of the other environment
+variable. Be careful not to introduce circular references, however, because
+this will result in an infinite loop on the server side when trying to resolve
+the references.
+</p>
