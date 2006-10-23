@@ -51,9 +51,6 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
 
    def setupUi(self, widget):
       BasicEditorBase.Ui_BasicEditorBase.setupUi(self, widget)
-      print type(QtGui.QAbstractItemView.AllEditTriggers)
-      print type(~QtGui.QAbstractItemView.CurrentChanged)
-      print type(QtGui.QAbstractItemView.AllEditTriggers & ~QtGui.QAbstractItemView.CurrentChanged)
       triggers = QtGui.QAbstractItemView.DoubleClicked |        \
                  QtGui.QAbstractItemView.CurrentChanged |       \
                  QtGui.QAbstractItemView.SelectedClicked |      \
