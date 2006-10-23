@@ -31,7 +31,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>October 20, 2006</pubdate>
+      <pubdate>October 24, 2006</pubdate>
    </bookinfo>
 
    <preface>
@@ -548,24 +548,81 @@ Certificate information:
 
          <para>Releases of Maestro are distributed in various ways. The source
          is packaged up as compressed <command>tar</command>(1) archives and
-         as ZIP archives. For Linux distributions that use the Red Hat Package
-         Manager (RPM) for package management, .rpm files are prepared. The
-         Maestro RPMs are not specific to any distribution or Python version,
-         but the dependencies are. As such, it is important to get the right
-         dependencies for the Linux distribution where Maestro will be
-         used.</para>
+         as ZIP archives. On UNIX-based operating systems, a simple makefile
+         is provided for installing into <filename>/usr</filename> or into a
+         user-specific prefix. This makefile has very limited capabilities and
+         currently exists primarily to help out automated packaging tools such
+         as <command>rpmbuild</command>(1). Nevertheless, to use this makefile
+         to install into /usr, simply run the folllowing from the root of the
+         Maestro source tree using GNU Make:</para>
 
-         <section>
-            <title><command>maestrod</command> Installation</title>
+         <screen>make install</screen>
 
-            <para></para>
-         </section>
+         <para>To install Maestro into a different location (such as
+         <filename>/usr/local</filename>), run the following instead:</para>
 
-         <section>
-            <title><application>Maestro GUI</application> Installation</title>
+         <screen>make prefix=/usr/local confdir=/usr/local/etc install</screen>
 
-            <para></para>
-         </section>
+         <para>For Linux distributions that use the Red Hat Package Manager
+         (RPM) for package management, <filename>.rpm</filename> files are
+         prepared. The Maestro RPMs are not specific to any distribution or
+         Python version, but the dependencies are. As such, it is important to
+         get the right dependencies for the Linux distribution where Maestro
+         will be used. There are four or five RPMs depending on whether the
+         documentation RPM was built, and they are as follows:</para>
+
+         <orderedlist>
+            <listitem>
+               <para><filename>maestro-base</filename>: The
+               <literal>maestro</literal>, <literal>maestro.core</literal>,
+               and <literal>maestro.util</literal> packages.</para>
+            </listitem>
+
+            <listitem>
+               <para><filename>maestro-gui</filename>:
+               <filename>Maestro.py</filename>, the
+               <filename>maestro/gui</filename> tree, and
+               <filename>/usr/bin/maestro</filename> (requires
+               <filename>maestro-base</filename>).</para>
+            </listitem>
+
+            <listitem>
+               <para><filename>maestro-server</filename>:
+               <filename>maestrod.py</filename>, the
+               <filename>maestro/daemon</filename> tree,
+               <filename>/usr/sbin/maestrod</filename>, and
+               <filename>/etc/init.d/maestrod</filename> (requires
+               <filename>maestro-base</filename>).</para>
+            </listitem>
+
+            <listitem>
+               <para><filename>maestro</filename>: Optional umbrella package
+               that requires <filename>maestro-base</filename>,
+               <filename>maestro-gui</filename>, and
+               <filename>maestro-server</filename>.</para>
+            </listitem>
+
+            <listitem>
+               <para><filename>maestro-doc</filename>: This documentation
+               rendered to HTML and PDF.</para>
+            </listitem>
+         </orderedlist>
+
+         <para>On <productname class="registered">Microsoft
+         Windows</productname>, an automated installer is provided. Currently,
+         this installer includes all the dependencies
+         <emphasis>except</emphasis> Python and <ulink
+         url="http://pywin32.sourceforge.net/">pywin32</ulink>. These must be
+         installed separately before Maestro is installed.</para>
+
+         <important>
+            <para>In order to use the installation wizard, Python 2.4 is
+            required. It is hoped that this limitation will be fixed in a
+            future release. If the installation wizard is not used and Maestro
+            is installed manually, then Python 2.4 or Python 2.5 is
+            recommended. Remember that all dependencies must be built using
+            the same version of Python.</para>
+         </important>
       </section>
    </chapter>
 
@@ -1743,9 +1800,24 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
             (optionally) the <productname class="registered">Microsoft
             Windows</productname> domain for the user who will be launching
             applications on the cluster. At this time, the login information
-            must be the same for all nodes of the cluster, and a user cannot
+            must be the same for all nodes of the ensemble, and a user cannot
             authenticate as a different person without restarting the
             <application>Maestro GUI</application>.</para>
+
+            <sidebar>
+               <para>Once the user enters his or her password, the
+               authentication process starts for each of the nodes, and it
+               continues asynchronously while the GUI is in use until login
+               completes on all the nodes in the ensemble. If login access is
+               denied on a node, the user will be presented with a dialog box
+               asking him or her if reauthentication should be performed. If a
+               node cannot be contacted for logging in, the process will be
+               reattempted in the background periodically until it succeeds.
+               Furthermore, if a server node goes down and comes back up after
+               login takes place, the user will be reauthenticated with the
+               server automatically without any further necessary action on
+               the part of the user.</para>
+            </sidebar>
 
             <para>Its main interface panel has three parts: a tool bar, the
             viewer panel, and the log window. The tool bar contains buttons
@@ -2008,8 +2080,8 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </indexterm>
 
                <para>The Reboot Viewer allows the GUI user to reboot
-               individual nodes of the cluster or all the nodes of the cluster
-               with the click of a button. When possible<footnote>
+               individual nodes of the ensemble or all the nodes of the
+               ensemble with the click of a button. When possible<footnote>
                      <para>Information about how to set up the Reboot Service
                      was provided earlier in <xref
                      linkend="section.maestrod.settings.reboot" />.</para>
@@ -2038,7 +2110,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </indexterm>
 
                <para>The Process Viewer provides a view of all the processes
-               currently running on the cluster as well as a means to
+               currently running on the ensemble as well as a means to
                terminate individual processes. In conjunction with the
                Resource Viewer<indexterm>
                      <primary>viewers</primary>
@@ -2064,8 +2136,8 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                <para>When first loaded, the Process Viewer displays nothing.
                To populate the process list, click the
                <guibutton>Refresh</guibutton> button. Queries will be sent to
-               each of the cluster nodes requesting the instantaneous state of
-               the running processes. To update the list, click the
+               each of the ensemble nodes requesting the instantaneous state
+               of the running processes. To update the list, click the
                <guibutton>Refresh</guibutton> button again. To kill a process,
                right-click on it and select <menuchoice>
                      <shortcut>
@@ -2090,11 +2162,11 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </indexterm>
 
                <para>The Resource Viewer shows the current state of resource
-               consumption on each of the nodes in the cluster using graphs.
+               consumption on each of the nodes in the ensemble using graphs.
                Currently, the resources tracked are CPU and memory usage, and
                the graphs show this usage as a percentage of the total
                available. When the Resource Viewer is first loaded, it shows
-               all the nodes of the cluster in a static state. Clicking the
+               all the nodes of the ensemble in a static state. Clicking the
                <guibutton>Refresh</guibutton> button will get an instantaneous
                snapshot of the resource usage. To get continuous updates,
                right-click on a node and select the desired update rate from
@@ -2118,18 +2190,18 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
 
                <para>The Desktop Viewer is where users can control the state
                of screen savers and display power management on the nodes of
-               the cluster. At the top of the view, there is a pull-down menu
-               listing all the nodes of the cluster as well as an item labeled
-               <guilabel>All</guilabel> indicating all cluster nodes. By
-               selecting an individual node from this menu, the screen saver
-               usage can be enabled or disabled (disabling the screen saver
-               implies that display power management should be disabled). A
-               running screen saver can be terminated by clicking the
-               <guibutton>Stop Screen Saver</guibutton> button. This button
-               also has the effect of unblanking a display and waking up a
-               sleeping display if power management is still active. After
-               clicking this button, the screen saver and power management are
-               both disabled.</para>
+               the ensemble. At the top of the view, there is a pull-down menu
+               listing all the nodes of the ensemble as well as an item
+               labeled <guilabel>All</guilabel> indicating all ensemble nodes.
+               By selecting an individual node from this menu, the screen
+               saver usage can be enabled or disabled (disabling the screen
+               saver implies that display power management should be
+               disabled). A running screen saver can be terminated by clicking
+               the <guibutton>Stop Screen Saver</guibutton> button. This
+               button also has the effect of unblanking a display and waking
+               up a sleeping display if power management is still active.
+               After clicking this button, the screen saver and power
+               management are both disabled.</para>
 
                <important>
                   <para>Unlocking a locked display on <productname
@@ -2137,7 +2209,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                   currently supported. Thus far, no workaround has been found
                   for this limitation, so it is important to avoid enabling
                   password protection for the screen saver of the user logged
-                  on to the individual cluster nodes running <productname
+                  on to the individual ensemble nodes running <productname
                   class="registered">Microsoft Windows</productname>. This
                   limitation does not exist on Linux as long as XScreenSaver
                   is being used by the logged on user (if a user is logged on
@@ -2146,7 +2218,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
 
                <para>An in-development capability of the Desktop Viewer is the
                ability to change the desktop background image (also known as
-               desktop wallpaper) of nodes of the cluster. This can be useful
+               desktop wallpaper) of nodes of the ensemble. This can be useful
                in cases where it is necessary to distinguish between nodes on
                the display surface while no application is running or when it
                is necessary to get all nodes to use the same wallpaper. To
@@ -2184,12 +2256,12 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </indexterm>
 
                <para>The Settings Viewer allows the user to browse information
-               about each of the nodes in the current cluster configuration.
-               It displays the computer host name, its IP address, the up
-               time, and low-level details about the running operating system.
-               To see the information for a node, simply click on its name in
-               the left panel containing the list of cluster nodes. This
-               viewer serves another purpose as the ensemble editor<indexterm>
+               about each of the nodes in the current ensemble. It displays
+               the computer host name, its IP address, the up time, and
+               low-level details about the running operating system. To see
+               the information for a node, simply click on its name in the
+               left panel containing the list of ensemble nodes. This viewer
+               serves another purpose as the ensemble editor<indexterm>
                      <primary>ensemble</primary>
 
                      <secondary>editing</secondary>
@@ -2327,8 +2399,8 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                <secondary>elements</secondary>
 
                <tertiary><sgmltag>&lt;cluster_node&gt;</sgmltag></tertiary>
-            </indexterm> elements. The &lt;cluster_node&gt; elements have
-         three attributes: <literal>class</literal>,
+            </indexterm> elements. The <sgmltag>&lt;cluster_node&gt;</sgmltag>
+         elements have three attributes: <literal>class</literal>,
          <literal>hostname</literal>, and <literal>name</literal>. The
          <literal>class</literal> is a comma-separated list of identifiers
          indicating the role of the node in the cluster, and it comes into
@@ -2346,8 +2418,8 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
 
             <programlisting>&lt;?xml version="1.0" ?&gt;
 &lt;ensemble&gt;
-   &lt;cluster_node class="" hostname="timmy" name="timmy" /&gt;
-   &lt;cluster_node class="" hostname="smalls" name="smalls" /&gt;
+   &lt;cluster_node class="" hostname="node0" name="Node 0" /&gt;
+   &lt;cluster_node class="" hostname="node1" name="Node 1" /&gt;
 &lt;/ensemble&gt;</programlisting>
          </example>
 
@@ -2369,14 +2441,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                <guimenu>File</guimenu>
 
                <guimenuitem>Save Ensemble</guimenuitem>
-            </menuchoice> menu item or the <guibutton>Save
-         Ensemble</guibutton> tool bar button. As of this writing, there is
-         not currently a <menuchoice>
-               <guimenu>File</guimenu>
-
-               <guimenuitem>Save Ensemble As...</guimenuitem>
-            </menuchoice> item, but that will likely be added in a future
-         release.</para>
+            </menuchoice> menu item.</para>
 
          <indexterm class="endofrange" startref="index.file.ensemble.edit"></indexterm>
 
@@ -2448,86 +2513,6 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          <application>Maestro GUI</application> and resized independently as
          necessary.</para>
 
-         <para>In the stanza editor, there is a tool bar containing all the
-         information that can go into a stanza. The tool bar items are as
-         follows:</para>
-
-         <itemizedlist>
-            <listitem>
-               <para><guibutton>Choice</guibutton>: Creates a structural item
-               containing a list of choices, either mutually exclusive or not.
-               Choices can encompass one or more groups, one or more other
-               choices, one or more arguments, and/or one or more environment
-               variables.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Group</guibutton>: Creates a structural
-               grouping of related items. Groups can encompass other groups,
-               choices, arguments, and/or environment variables.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Argument</guibutton>: An argument describes a
-               command line argument to an application. This may or may not
-               have a flag, but it always has a value.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Env Variable</guibutton>: An environment
-               variable describes a setting that is applied to the execution
-               environment of the application.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Command</guibutton>: A command is what
-               actually gets executed when the application is launched.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Cwd</guibutton>: The current working directory
-               identifies where in the file system the command will be
-               executed. This does not have to be the same as the directory
-               containing the command since the command can be specified using
-               an absolute path.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Reference</guibutton>: A reference allows
-               reuse of a structural item in another stanza. References can be
-               refined by using add, remove, and override operations. A
-               reference has an identifier that uniquely describes what XML
-               element in another stanza is being referenced.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Override</guibutton>: An override changes a
-               detail of a referenced structural item. This can include XML
-               attributes and the CDATA of the referenced element.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Add Options</guibutton>: An add operation
-               extends a referenced structural item by defining further
-               structural items such as groups, choices, arguments, and
-               environment variables. The exact result of the add operation
-               depends on what structural item is being referenced.</para>
-            </listitem>
-
-            <listitem>
-               <para><guibutton>Remove Option</guibutton>: A remove operation
-               deletes a child of the referenced structural item.</para>
-            </listitem>
-         </itemizedlist>
-
-         <para>To add any one of these to the stanza being edited, click the
-         desired tool bar item and drag it to the stanza editor canvas. At
-         that point, connections can be made between the new structural item
-         and existing items. The attributes of the item can be edited in the
-         dockable panel at the bottom of the stanza editor.</para>
-
-         <indexterm class="endofrange" startref="index.file.stanza.edit"></indexterm>
-
          <para>Application developers would create a stanza file for their
          application when the application is deployed for use at a site that
          is already running Maestro. The site-specific details (such as what
@@ -2538,7 +2523,240 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          applications than writing a custom launch solution for each
          site.</para>
 
-         <indexterm class="endofrange" startref="index.file.stanza"></indexterm>
+         <indexterm class="endofrange" startref="index.file.stanza.edit"></indexterm>
+
+         <section>
+            <title>Stanza Items</title>
+
+            <para>In the stanza editor, there is a tool bar containing all the
+            information that can go into a stanza. The tool bar items are as
+            follows:</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><guibutton>Command</guibutton>: A command is what
+                  actually gets executed when the application is launched. The
+                  command path should <emphasis>not</emphasis> be enclosed in
+                  quotes even when it contains spaces because the Maestro
+                  Launch Service<indexterm>
+                        <primary>services</primary>
+
+                        <secondary>launch</secondary>
+                     </indexterm> will handle using correct quoting when
+                  necessary. The executed command can be varied on each node
+                  of the cluster using the <literal>class</literal> attribute.
+                  For example, on a cluster that mixes <productname
+                  class="registered">Microsoft Windows</productname> and
+                  Linux, a command might be <filename>C:\Program
+                  Files\Software\myprog.exe</filename> on some nodes and
+                  <filename>/usr/local/bin/myprog</filename> on others. In
+                  this case, two commands are needed for the two variations
+                  with the former using <quote>Windows XP</quote> as its class
+                  and the latter using <quote>Linux.</quote> Refer to <xref
+                  linkend="section.stanza.item.class" /> for more information
+                  about the use of classes in Maestro stanzas.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Cwd</guibutton>: The current working
+                  directory identifies where in the file system the command
+                  will be executed. This does not have to be the same as the
+                  directory containing the command since the command can be
+                  specified using an absolute path. As with the command, this
+                  path can vary based on classification of the various cluster
+                  nodes.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Env Variable</guibutton>: [Deprecated—use
+                  environment variable lists instead] An environment variable
+                  describes a setting that is applied to the execution
+                  environment of the application. It is made up of a key (the
+                  name of the environment variable) and a value. These
+                  settings are applied to the run-time environment
+                  <emphasis>of the application</emphasis> on each of the
+                  remote nodes when the application is launched. Environment
+                  variable values can reference other environment variables
+                  using the syntax <literal>${ENV_VAR_NAME}</literal> where
+                  <varname>ENV_VAR_NAME</varname> is the name of the other
+                  environment variable. Be careful not to introduce circular
+                  references, however, because this will result in an infinite
+                  loop on the server side when trying to resolve the
+                  references.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Env List</guibutton>: A list of environment
+                  variables. In some cases, an application may use a large
+                  collection of environment variables, and creating individual
+                  environment variable items in the stanza can be quite
+                  tedious. Instead, an environment variable list can be used
+                  to capture multiple environment variables in one place. Each
+                  environment variable in the list is made up of a (the name
+                  of the environment variable) and zero or more values. If the
+                  stanza author allows the user to change the value of the
+                  environment variable, multi-valued variables will be
+                  presented using a combo box or an editable combo box when
+                  appropriate.</para>
+
+                  <para>The environment variables in the list are applied to
+                  the run-time environment <emphasis>of the
+                  application</emphasis> on each of the remote nodes when the
+                  application is launched. Environment variable values can
+                  reference other environment variables using the syntax
+                  <literal>${ENV_VAR_NAME}</literal> where
+                  <varname>ENV_VAR_NAME</varname> is the name of the other
+                  environment variable. Be careful not to introduce circular
+                  references, however, because this will result in an infinite
+                  loop on the server side when trying to resolve the
+                  references.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Argument</guibutton>: An argument describes
+                  a command line argument to an application. This may or may
+                  not have a flag (such as <option>-f</option> or
+                  <option>--flag</option>), but it always has a value.
+                  Arguments cannot have children but instead are the children
+                  of groups and choices. Ultimately, these are what get passed
+                  to the launched application based on the decisions of the
+                  user in the Launch Viewer. Argument values can reference
+                  environment variables defined in the stanza.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Choice</guibutton>: Creates a structural
+                  item containing a list of choices, either mutually exclusive
+                  or not. Choices can encompass one or more groups, one or
+                  more other choices, one or more arguments, and/or one or
+                  more environment variables. When using a mutually exclusive
+                  choice, either radio buttons or a combo box (also known as a
+                  pull-down menu) can be used for showing the options. Which
+                  type to use is up to the stanza author, but authors should
+                  keep in mind that combo boxes are much better when there are
+                  many (more than three or four) possible options.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Group</guibutton>: Creates a structural
+                  association of related items. Groups can encompass other
+                  groups, choices, arguments, and/or environment variables.
+                  Groups are often used as children of choices when further
+                  nesting of choices is required. Another common usage is to
+                  collect fixed settings behind a common facade. For example,
+                  if there are four VR Juggler configuration files required
+                  for a four-wall flexible wall projection system, two groups
+                  may be <quote>Walls Open</quote> and <quote>Walls
+                  Closed.</quote> These groups need not display that they are
+                  referencing four VR Juggler configuration files and can
+                  instead be identified in the Launch Viewer<indexterm>
+                        <primary>viewers</primary>
+
+                        <secondary>launch</secondary>
+                     </indexterm> as simply <guilabel>Walls Open</guilabel>
+                  and <guilabel>Walls Closed</guilabel>.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Reference</guibutton>: A reference allows
+                  reuse of a structural item in another stanza. References can
+                  be refined by using add, remove, and override operations as
+                  the children. A reference has an identifier that uniquely
+                  describes what XML element in another stanza is being
+                  referenced. This identifier is formed using a syntax similar
+                  to <ulink url="http://www.w3.org/TR/xpath">XPath</ulink>,
+                  though it is <emphasis>not</emphasis> XPath. The path has a
+                  root and children that are separated by the
+                  <literal>/</literal> character, and a reference identifier
+                  must include both. In other words, referencing only the root
+                  is not valid. The root node itself may have a namespace that
+                  is used to assist with creating unique identifiers. For
+                  example, two root nodes might be
+                  <literal>site1:VrJugglerOptions</literal> and
+                  <literal>site2:VrJugglerOptions</literal> where
+                  <literal>site1</literal> and <literal>site2</literal> (the
+                  namespaces) are common identifiers for two different VR
+                  installations in the same organization.</para>
+
+                  <para>The reference identifier is used for matching purposes
+                  within the collection of all known stanzas. To perform this
+                  matching, the identifier can utilize the Python regular
+                  expression syntax. For those users not familiar with regular
+                  expressions, simpler shell-style glob patterns are allowed.
+                  For example, valid paths (those containing a root and
+                  references to one or more children) from our example above
+                  might be <literal>site1:VrJugglerOptions/*</literal> or
+                  <literal>site1:VrJugglerOptions/Input*</literal>. To index
+                  within a collection of matches returned by a pattern, the
+                  syntax is to use the <literal>@</literal> symbol followed by
+                  a zero-based integer index. For example,
+                  <literal>site1:VrJugglerOptions/Input*@2</literal> would
+                  extract the third child under
+                  <literal>site1:VrJugglerOptions</literal> whose name matches
+                  <literal>Input*</literal>.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Override</guibutton>: An override changes a
+                  detail of a referenced structural item. This can include XML
+                  attributes and the CDATA of the referenced element. The
+                  overriding is based on the same identifier syntax as a
+                  reference identifier, although the path is now relative to
+                  the root of the referenced item(s). One possible use of
+                  overrides is to change how a collection of site-wide
+                  arguments are passed in to an application. For example, a
+                  site may have many VR Juggler configuration files required
+                  to launch applications. In the site's global options, these
+                  files are described as arguments with no flag, but some
+                  applications require a command line option to identify the
+                  meaning of an argument. Those cases can be handled by
+                  overriding the <literal>flag</literal> attribute on all the
+                  arguments for VR Juggler options in the case of the
+                  applications that require it.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Add Options</guibutton>: An add operation
+                  extends a referenced structural item by defining more
+                  children such as groups, choices, arguments, and environment
+                  variables. The exact result of the add operation depends on
+                  what structural item is being referenced. Additions can be
+                  in the form of choices, groups, environment variables,
+                  environment variable lists, and/or arguments.</para>
+               </listitem>
+
+               <listitem>
+                  <para><guibutton>Remove Option</guibutton>: A remove
+                  operation deletes a child of the referenced structural item.
+                  The reference identifier uses the same path syntax as its
+                  parent reference, but the path in this case is relative to
+                  the parent. In the event that the path matches multiple
+                  nodes, the individually matched roots can be matched using
+                  the <literal>@</literal> indexing syntax. For example, if
+                  the parent reference identifier
+                  <literal>site1:VrJugglerOptions/Input*</literal> matches
+                  <literal>site1:VrJugglerOptions/InputGlove</literal>,
+                  <literal>site1:VrJugglerOptions/InputJoystick</literal> and
+                  <literal>site1:VrJugglerOptions/InputWand</literal>, the
+                  second of those can be removed by using
+                  <literal>@1</literal> as the identifier.</para>
+               </listitem>
+            </itemizedlist>
+
+            <para>To add any one of these to the stanza being edited, click
+            the desired tool bar item and drag it to the stanza editor canvas.
+            At that point, connections can be made between the new structural
+            item and existing items. The attributes of the item can be edited
+            in the dockable panel at the bottom of the stanza editor.</para>
+         </section>
+
+         <section id="section.stanza.item.class">
+            <title>Stanza Item Classes</title>
+
+            <para></para>
+
+            <indexterm class="endofrange" startref="index.file.stanza"></indexterm>
+         </section>
       </section>
    </chapter>
 
@@ -2552,8 +2770,8 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
             <primary>services</primary>
          </indexterm>
 
-         <para>Services are plug-ins that are loaded by maestrod when it
-         starts. It scans the directory
+         <para>Services are plug-ins that are loaded by
+         <command>maestrod</command> when it starts. It scans the directory
          <filename>maestro/daemon/plugins/services</filename> in the Maestro
          installation directory (henceforth referred to as
          <filename>&lt;MAESTRODIR&gt;</filename>) at startup to discover what
