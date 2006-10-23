@@ -42,6 +42,14 @@
     <ref id="expand:VRJugglerBasic/DisplaySystem">
       <remove id="Simulator"/>
     </ref>
+    <ref id="expand:MiscOptions/*">
+      <!-- Remove FakeJoystick -->
+      <remove id="@2"/>
+      <!-- Remove the stereo view from the left wall -->
+      <remove id="./Left/View/Stereo"/>
+      <!-- Remove the floor views -->
+      <remove id="./Floor/View/*"/>
+    </ref>
   </application>
   <application name="OverrideAllFlags">
     <ref id="expand:VRJugglerBasic/*">
@@ -78,4 +86,39 @@
       </add>
       <remove id="G0-Arg0"/>
    -->
+  <global_option name="MiscOptions">
+    <arg name="LinuxJoystick" flag="-j" class="Linux">joydev.jconf</arg>
+    <arg name="WindowsJoystick" flag="-j" class="Windows XP">directinput.jconf</arg>
+    <arg name="FakeJoystick" flag="-j" class="Other">fake.jconf</arg>
+    <choice name="Walls">
+      <group name="Left">
+        <choice name="View">
+          <arg name="Stereo" flag="-j">left.stereo.jconf</arg>
+          <arg name="LeftEye" flag="-j">left.left-eye.jconf</arg>
+          <arg name="RightEye" flag="-j">left.right-eye.jconf</arg>
+        </choice>
+      </group>
+      <group name="Right">
+        <choice name="View">
+          <arg name="Stereo" flag="-j">right.stereo.jconf</arg>
+          <arg name="LeftEye" flag="-j">right.left-eye.jconf</arg>
+          <arg name="RightEye" flag="-j">right.right-eye.jconf</arg>
+        </choice>
+      </group>
+      <group name="Front">
+        <choice name="View">
+          <arg name="Stereo" flag="-j">front.stereo.jconf</arg>
+          <arg name="LeftEye" flag="-j">front.left-eye.jconf</arg>
+          <arg name="RightEye" flag="-j">front.right-eye.jconf</arg>
+        </choice>
+      </group>
+      <group name="Floor">
+        <choice name="View">
+          <arg name="Stereo" flag="-j">floor.stereo.jconf</arg>
+          <arg name="LeftEye" flag="-j">floor.left-eye.jconf</arg>
+          <arg name="RightEye" flag="-j">floor.right-eye.jconf</arg>
+        </choice>
+      </group>
+    </choice>
+  </global_option>
 </stanza>

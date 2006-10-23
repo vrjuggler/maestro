@@ -215,9 +215,27 @@ class StanzaStore:
                         self._expand(new_child, elm)
          elif 'remove' == command.tag:
             id_path = command.get('id')
-            for f in found:
-               elms = self._find(f, id_path)
-               self._removeDescendents(f, elms)
+            roots = found
+
+            # If the ID path for this remove command starts with the '@'
+            # operator, then it is in index into the items found through the
+            # dereferencing operation. In that case, we know exactly which
+            # item in roots to use.
+            if id_path.startswith('@'):
+               match_obj = re.match(r'@(\d+)/?(.*)', id_path)
+
+               # Protect against bad data.
+               try:
+                  roots = [found[int(match_obj.group(1))]]
+               except IndexError, ex:
+                  print "Index %s is invalid: %s" % (match_obj.group(1),
+                                                     str(ex))
+                  continue
+
+               id_path = match_obj.group(2)
+
+            elms = self._find(roots, id_path)
+            self._removeDescendents(parent, elms)
 
    def _replaceAttrib(self, roots, attribName, newValue):
       commonAttribs = ['label', 'class',' hidden', 'selected']
