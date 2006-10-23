@@ -326,90 +326,12 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
    def _setChoice(self, index):
       node_id = self.getCurrentNodeID()
+
+      # When we are displaying the state for all the nodes, we use a tri-state
+      # check box.
+      self.mSaverEnabledBox.setTristate(node_id == '*')
+
       self._queryState(node_id)
-
-      if node_id == '*':
-         # When we are displaying the state for all the nodes, we use a
-         # tri-state check box. This is more complicated.
-         self.mSaverEnabledBox.setTristate(True)
-
-#         img_file = ''
-#         img_key  = ''
-#
-#         # Make an initial guess at what the checked state should be for
-#         # the screen saver enabled box. This is done by finding the first
-#         # node ID in self.mSettings that isn't '*' and using its value.
-#         for id in self.mSettings.keys():
-#            if id != '*':
-#               data     = self.mSettings[id]
-#               img_file = data.getBackgroundImageFile()
-#               img_key  = data.getBackgroundImageCacheKey()
-#
-#               if data.usesScreenSaver():
-#                  self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
-#               else:
-#                  self.mSaverEnabledBox.setCheckState(QtCore.Qt.Unchecked)
-#               break
-#
-#         # Now determine if the screen saver enabled check box should be in
-#         # the partially checked state by searching for the first node whose
-#         # screen saver use state does not match the current state of
-#         # self.mSaverEnabledBox.
-#         cur_state = self.mSaverEnabledBox.checkState()
-#         for id in self.mSettings.keys():
-#            if id != '*':
-#               uses_saver = self.mSettings[id].usesScreenSaver()
-#
-#               # If the current node is using a screen saver but the box is
-#               # in the unchecked state, change it to the partially checked
-#               # state.
-#               if uses_saver and cur_state == QtCore.Qt.Unchecked:
-#                  self.mSaverEnabledBox.setCheckState(
-#                     QtCore.Qt.PartiallyChecked
-#                  )
-#                  break
-#               # If the current node is not using a screen saver but the box
-#               # is in the checked state, change it to the partially checked
-#               # state.
-#               elif not uses_saver and cur_state == QtCore.Qt.Checked:
-#                  self.mSaverEnabledBox.setCheckState(
-#                     QtCore.Qt.PartiallyChecked
-#                  )
-#                  break
-#
-#         # Check to see if all the nodes are using the same background image.
-#         # We determine this by comparing the image file name for each node's
-#         # settings with the value in img_file (as set above). If any one
-#         # node is using a different background image, then we will display
-#         # nothing for the background image.
-#         for id in self.mSettings.keys():
-#            if id != '*':
-#               data = self.mSettings[id]
-#               if data.getBackgroundImageFile() != img_file:
-#                  img_file = ''
-#                  img_key  = ''
-#                  break
-#
-#         if img_file == '':
-#            self.mBgImageLbl.setText("<< Multiple >>")
-#            self.mBgImgFileText.setText("")
-#         else:
-#            self._setBackgroundImage(img_file, self.mImageCache[img_key])
-      else:
-         self.mSaverEnabledBox.setTristate(False)
-
-#         print self.getCurrentNodeID()
-#         data = self.mSettings[self.getCurrentNodeID()]
-#
-#         if data.usesScreenSaver():
-#            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Checked)
-#         else:
-#            self.mSaverEnabledBox.setCheckState(QtCore.Qt.Unchecked)
-#
-#         self._setBackgroundImage(
-#            data.getBackgroundImageFile(),
-#            self.mImageCache[data.getBackgroundImageCacheKey()]
-#         )
 
    def _setBackgroundImage(self, imgFile, imgData):
       self.mBgImgFileText.setText(imgFile)
