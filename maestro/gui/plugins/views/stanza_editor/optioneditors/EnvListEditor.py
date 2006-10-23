@@ -184,13 +184,12 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
             self.mMatchesList.addItem(name)
 
    def onAddKeyClicked(self, checked=False):
-      (text, ok) = QtGui.QInputDialog.getText(self, "New Key",
-         "What is the key for the new environment variable?")
-
-      if ok:
-         key = str(text)
-         ET.SubElement(self.mOption.mElement, 'key', value=key)
-         self.mKeyListModel.emit(QtCore.SIGNAL("modelReset()"))
+      ET.SubElement(self.mOption.mElement, 'key', value="NEW_KEY")
+      self.mKeyListModel.emit(QtCore.SIGNAL("modelReset()"))
+      new_row = self.mKeyListModel.rowCount()-1
+      new_index = self.mKeyListModel.index(new_row)
+      self.mKeysList.setCurrentIndex(new_index)
+      self.mKeysList.edit(new_index)
 
    def onRemoveKeyClicked(self, checked=False):
       current_index = self.mKeysList.currentIndex()
@@ -208,14 +207,13 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       if self.mValueModel is None:
          return
 
-      (text, ok) = QtGui.QInputDialog.getText(self, "New Value",
-         "What is the name of this value?")
-
-      if ok:
-         label = str(text)
-         key_elm = self.mValueModel.mKeyElement
-         ET.SubElement(key_elm, 'value', label=label, value='')
-         self.mValueModel.emit(QtCore.SIGNAL("modelReset()"))
+      key_elm = self.mValueModel.mKeyElement
+      ET.SubElement(key_elm, 'value', label="New Value", value='')
+      self.mValueModel.emit(QtCore.SIGNAL("modelReset()"))
+      new_row = self.mValueModel.rowCount()-1
+      new_index = self.mValueModel.index(new_row, 0)
+      self.mValuesTable.setCurrentIndex(new_index)
+      self.mValuesTable.edit(new_index)
 
    def onRemoveValueClicked(self, checked=False):
       if self.mValueModel is None:

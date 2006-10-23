@@ -27,7 +27,7 @@
      <property name="childrenCollapsible" >
       <bool>false</bool>
      </property>
-     <widget class="QWidget" name="" >
+     <widget class="QWidget" name="layoutWidget" >
       <layout class="QGridLayout" >
        <property name="margin" >
         <number>0</number>
@@ -71,11 +71,14 @@
          <property name="icon" >
           <iconset resource="../../../../MaestroResource.qrc" >:/Maestro/images/edit_remove.png</iconset>
          </property>
+         <property name="shortcut" >
+          <string/>
+         </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="" >
+     <widget class="QWidget" name="layoutWidget" >
       <layout class="QGridLayout" >
        <property name="margin" >
         <number>0</number>
@@ -115,6 +118,9 @@
          </property>
          <property name="icon" >
           <iconset resource="../../../../MaestroResource.qrc" >:/Maestro/images/edit_remove.png</iconset>
+         </property>
+         <property name="shortcut" >
+          <string>Delete</string>
          </property>
         </widget>
        </item>
