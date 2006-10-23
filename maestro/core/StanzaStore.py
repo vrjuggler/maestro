@@ -24,7 +24,6 @@ import maestro.core
 import elementtree.ElementTree as ET
 import Stanza
 import xml.dom.minidom
-from PyQt4 import QtGui
 
 xpath_tokenizer = re.compile(
    "(\.\.|\(\)|[/.*\(\)@=])|((?:\{[^}]+\})?[^/\(\)@=\s]+)|\s+"
