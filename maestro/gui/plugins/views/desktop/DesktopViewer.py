@@ -102,7 +102,6 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.mNodeChooser.clear()
       self.mNodeChooser.addItem('All Nodes', QtCore.QVariant('*'))
       self.mSettings = {}
-      self.mSettings['*'] = DesktopSettings()
 
       # Clear current state when settings ensemble.
       self._setBackgroundImage('', None)
@@ -293,6 +292,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       if not self.mSettings.has_key(nodeId):
          print "WARNING: Got data for a node that was not in ensemble file."
          return
+
       data = self.mSettings[nodeId]
       cur_file_name = data.getBackgroundImageFile()
 
@@ -305,11 +305,23 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          cur_node_id = self.getCurrentNodeID()
          if cur_node_id == nodeId:
             self.mBgImgFileText.setText(fileName)
+         elif '*' == cur_node_id:
+            multiple = False
+            for (node, data) in self.mSettings.items():
+               if node != nodeId and data.getBackgroundImageFile() != fileName:
+                  multiple = True
+                  break
+
+            if not multiple:
+               self.mBgImgFileText.setText(fileName)
+            else:
+               self.mBgImgFileText.setText("")
 
    def onReportBackgroundImageData(self, nodeId, imgData):
       if not self.mSettings.has_key(nodeId):
          print "WARNING: Got data for a node that was not in ensemble file."
          return
+
       data = self.mSettings[nodeId]
       img_data_str = ''.join(imgData)
       img_digest = self._storeImage(img_data_str)
@@ -318,6 +330,18 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       cur_node_id = self.getCurrentNodeID()
       if cur_node_id == nodeId:
          self._setBackgroundImage(data.getBackgroundImageFile(), img_data_str)
+      elif '*' == cur_node_id:
+         multiple = False
+         for (node, data) in self.mSettings.items():
+            if node != nodeId and data.getBackgroundImageCacheKey() != img_digest:
+               multiple = True
+               break
+
+         if not multiple:
+            self._setBackgroundImage(data.getBackgroundImageFile(),
+                                     img_data_str)
+         else:
+            self.mBgImageLbl.setText("<< Multiple >>")
 
    def _storeImage(self, imgDataStr):
       img_digest = md5.new(imgDataStr).digest()
