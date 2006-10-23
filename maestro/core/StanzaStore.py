@@ -367,7 +367,7 @@ class StanzaStore:
             assert(state == OPERATOR)
             state = ID
          # Non-operator
-         elif t[1] is not '':
+         elif t[1] != '':
             assert(state == ID)
             children = []
             for e in cur_elts:
