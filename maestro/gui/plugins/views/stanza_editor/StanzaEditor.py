@@ -311,7 +311,7 @@ class StanzaScene(QtGui.QGraphicsScene):
                      old_dest.setParent(None)
                   event.accept()
       else:
-         # Record the old focus so that we can decide it focus has changed.
+         # Record the old focus so that we can decide if focus has changed.
          old_focus = self.focusItem()
          QtGui.QGraphicsScene.mousePressEvent(self, event)
          new_focus = self.focusItem()
@@ -402,6 +402,10 @@ class StanzaScene(QtGui.QGraphicsScene):
             if tag not in ['add', 'remove', 'override']:
                item.setParent(self.mRootItem)
             item.update()
+
+            # Make the newly added item the selected item in the scene.
+            self.setFocusItem(item)
+            self.emit(QtCore.SIGNAL("itemSelected(QGraphicsItem*)"), item)
 
          self.update(self.sceneRect())
       #elif event.mimeData().hasFormat("maestro/create-link"):
