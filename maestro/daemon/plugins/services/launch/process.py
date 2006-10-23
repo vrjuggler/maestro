@@ -1206,8 +1206,10 @@ class ProcessOpen(Process):
             os.setuid(pw_entry[2])
 
             os.dup2(fdChildStdinRd, 0)
+            # For Maestro's usage, we have stderr and stdout go to the same
+            # pipe.
             os.dup2(fdChildStdoutWr, 1)
-            os.dup2(fdChildStderrWr, 2)
+            os.dup2(fdChildStdoutWr, 2)
             self._runChildOnUnix()
         # parent
         self._pid = pid
@@ -1323,8 +1325,10 @@ class ProcessOpen(Process):
             si.dwFlags = win32process.STARTF_USESHOWWINDOW
             si.wShowWindow = 0 # SW_HIDE
             si.hStdInput = hChildStdinRd
+            # For Maestro's usage, we have stderr and stdout go to the same
+            # pipe.
             si.hStdOutput = hChildStdoutWr
-            si.hStdError = hChildStderrWr
+            si.hStdError = hChildStdoutWr
             si.dwFlags |= win32process.STARTF_USESTDHANDLES
 
             cmd = _fixupCommand(cmd, self._env)
@@ -1637,8 +1641,10 @@ class ProcessProxy(Process):
         pid = os.fork()
         if pid == 0: # child
             os.dup2(fdChildStdinRd, 0)
+            # For Maestro's usage, we have stderr and stdout go to the same
+            # pipe.
             os.dup2(fdChildStdoutWr, 1)
-            os.dup2(fdChildStderrWr, 2)
+            os.dup2(fdChildStdoutWr, 2)
             self._runChildOnUnix()
         # parent
         self._pid = pid
@@ -1769,8 +1775,10 @@ class ProcessProxy(Process):
             si.dwFlags = win32process.STARTF_USESHOWWINDOW
             si.wShowWindow = 0 # SW_HIDE
             si.hStdInput = hChildStdinRd
+            # For Maestro's usage, we have stderr and stdout go to the same
+            # pipe.
             si.hStdOutput = hChildStdoutWr
-            si.hStdError = hChildStderrWr
+            si.hStdError = hChildStdoutWr
             si.dwFlags |= win32process.STARTF_USESTDHANDLES
 
             cmd = _fixupCommand(cmd, self._env)
