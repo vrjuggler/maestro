@@ -118,9 +118,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
             self.mNodeChooser.addItem(node.getHostname(), QtCore.QVariant(id))
             self.mSettings[id] = DesktopSettings()
 
-      # XXX: We should call this if we can't count on the ensembleChanged() signal.
+      # XXX: We should call this if we can't count on the ensembleChanged()
+      # signal.
       #self.widget.refresh()
-
 
    def refresh(self):
       # Mark this view as being dirty, meaning that it needs to refresh its
@@ -228,8 +228,11 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       if not self.mSettings.has_key(nodeId):
          print "WARNING: Got data for a node that was not in ensemble file."
          return
+
       self.mSettings[nodeId].setUsesScreenSaver(usesSaver)
       cur_node_id = self.getCurrentNodeID()
+
+      self.mSaverEnabledBox.blockSignals(True)
 
       if nodeId == cur_node_id:
          if usesSaver:
@@ -283,6 +286,8 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
                self.mSaverEnabledBox.setCheckState(QtCore.Qt.PartiallyChecked)
 
          self.mReportCount += 1
+
+      self.mSaverEnabledBox.blockSignals(False)
 
    def onReportBackgroundImageFile(self, nodeId, fileName):
       if not self.mSettings.has_key(nodeId):
