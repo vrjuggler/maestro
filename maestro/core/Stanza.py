@@ -72,6 +72,8 @@ class TreeItem:
                obj = Cwd(elts[i], self, i)
             elif elts[i].tag == "env_var":
                obj = EnvVar(elts[i], self, i)
+            elif elts[i].tag == "env_list":
+               obj = EnvList(elts[i], self, i)
             else:
                print "Don't know how to build a [%s]" % elts[i].tag
 
@@ -167,9 +169,18 @@ class OptionVisitor:
          elif isinstance(option, EnvVar):
             if self.mEnvVars.has_key(option.mKey):
                print "WARNING: Multiple values for [%s] selected." % (option.mKey)
+               # XXX: Why aren't we using os.path.pathsep here?
                self.mEnvVars[option.mKey] = self.mEnvVars[option.mKey] + ":" + option.mValue
             else:
                self.mEnvVars[option.mKey] = option.mValue
+         elif isinstance(option, EnvList):
+            for (k,v) in option.mCurrentValues.iteritems():
+               if self.mEnvVars.has_key(k):
+                  # XXX: Why aren't we using os.path.pathsep here?
+                  print "WARNING: Multiple values for [%s] selected." % (k)
+                  self.mEnvVars[k] = self.mEnvVars[k] + ":" + v
+               else:
+                  self.mEnvVars[k] = v
 
       return CONTINUE
 
@@ -364,3 +375,38 @@ class EnvVar(TreeItem):
    def __repr__(self):
       return "<EnvVar: label: %s class: %s key: %s value: %s >"\
                % (self.mLabel, self.mClass, self.mKey, self.mValue)
+
+class EnvList(TreeItem):
+   def __init__(self, xmlElt, parent, row):
+      TreeItem.__init__(self, xmlElt, parent, row)
+
+      self.mClass = xmlElt.get("class", "")
+      self.mLabel = xmlElt.get("label", "")
+
+      # Can the user edit the options value
+      self.mEditable = str2bool(xmlElt.get("editable", "false"), False)
+
+      # Can the user see the command value
+      self.mHidden = str2bool(xmlElt.get("hidden", "false"), False)
+      self.mElement = xmlElt
+
+      self.mCurrentValues = {}
+      for elm in self.mElement[:]:
+         key = elm.get('value', None)
+         selected = elm.get('selected', 0)
+         if key is not None and len(elm) > 0:
+            if selected >= len(elm):
+               selected = 0
+            value = elm[selected].get('value', '')
+            self.mCurrentValues[key] = value
+
+   def getName(self):
+      return self.mLabel
+
+   def getValue(self):
+      return self.mValue
+
+   def __repr__(self):
+      return "<EnvList: label: %s class: %s>"\
+               % (self.mLabel, self.mClass)
+

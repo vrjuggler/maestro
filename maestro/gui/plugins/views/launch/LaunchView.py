@@ -185,6 +185,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       for c in self.mSelectedApp.mChildren:
          # All top level objects are selected by default.
          c.mSelected = True
+         print "C: [%s] [%s]" % (c, isPointless(c))
          if not c.mHidden and not isPointless(c):
             sh = _buildWidget(c)
             sh.setParent(self.mAppFrame);
@@ -345,6 +346,10 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
    elif isinstance(obj, Stanza.EnvVar):
       #print "Building EnvVar Sheet... ", name
       widget = ValueSheet(obj, buttonType)
+      widget.setupUi(buttonType)
+      widget.setTitle(obj.mLabel)
+   elif isinstance(obj, Stanza.EnvList):
+      widget = EnvListSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
    else:
@@ -605,6 +610,9 @@ class ChoiceSheet(GroupSheet):
          if isinstance(w, GroupSheet) and not c.mSelected:
             for child in w.mChildSheets:
                child.setEnabled(False)
+         if isinstance(w, EnvListSheet) and not c.mSelected:
+            for child in w.mChildWidgets:
+               child.setEnabled(False)
 
          # Add child option to ourself.
          self.mChildSheets.append(w)
@@ -624,7 +632,10 @@ def isPointless(obj):
    """
    env = maestro.core.Environment()
    user_mode = env.settings.getUserMode()
-   return (const.ADVANCED != user_mode and not obj.mHidden and not obj.mEditable)
+   return (const.ADVANCED != user_mode and      \
+           not obj.__class__ in [Stanza.EnvList] and    \
+           not obj.mHidden and                  \
+           not obj.mEditable)
 
 
 class ValueSheet(Sheet):
@@ -686,3 +697,104 @@ class ValueSheet(Sheet):
    def onValueChanged(self, editorText):
       if self.mValueEditor is not None:
          self.mObj.mValue = editorText
+
+
+class EnvListSheet(Sheet):
+   def __init__(self, obj, buttonType = NO_BUTTON, parent = None):
+      Sheet.__init__(self, obj, buttonType, parent)
+      self.mCallbacks = []
+      self.mChildWidgets = []
+
+   def onToggled(self, val):
+      Sheet.onToggled(self, val)
+
+      # Disable all children frames.
+      for w in self.mChildWidgets:
+         w.setEnabled(val)
+
+   def setupUi(self, buttonType = NO_BUTTON):
+      # Create all layouts and link them together.
+      self.vboxlayout = QtGui.QVBoxLayout(self)
+      self.vboxlayout.setMargin(1)
+      self.vboxlayout.setSpacing(1)
+      self.hboxlayout1 = QtGui.QHBoxLayout()
+      self.hboxlayout1.setMargin(1)
+      self.hboxlayout1.setSpacing(1)
+
+      self.gridlayout = QtGui.QGridLayout()
+      self.gridlayout.setMargin(1)
+      self.gridlayout.setSpacing(1)
+      self.vboxlayout.addLayout(self.hboxlayout1)
+      self.vboxlayout.addLayout(self.gridlayout)
+
+      # If we are a child of a choice, then we need to have
+      # a choice button.
+      if NO_BUTTON != buttonType:
+         self.mButtonWidget = self._buildButton(buttonType)
+         self.hboxlayout1.addWidget(self.mButtonWidget)
+
+      # Create a title widget.
+      self.mTitleWidget = QtGui.QLabel(self)
+      self.mTitleWidget.setText(self.mObj.mLabel + ": ")
+      self.hboxlayout1.addWidget(self.mTitleWidget)
+
+      # Create a spacer to force our child selection to be indented.
+      spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Minimum)
+      self.gridlayout.addItem(spacerItem, 0,0,1,1)
+
+      row = 0
+      for key_elm in self.mObj.mElement[:]:
+         choice = QtGui.QComboBox(self)
+         sp = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+         choice.setSizePolicy(sp)
+
+         # Set all child choices to have our editable flag.
+         choice.setEditable(self.mObj.mEditable)
+
+         label = QtGui.QLabel(self)
+         label.setText(key_elm.get('value', ''))
+         self.gridlayout.addWidget(label, row,1,1,1)
+         self.gridlayout.addWidget(choice, row,2,1,1)
+
+         # Keep references to child widgets to dis/en-able things.
+         self.mChildWidgets.append(choice)
+         self.mChildWidgets.append(label)
+
+         # Build up a list of all selectable values.
+         for val in key_elm[:]:
+            choice.addItem(val.get('label', ''))
+
+         # Find a valid selected value.
+         try:
+            selected_index = int(key_elm.get('selected', '0'))
+         except ValueError:
+            selected_index = -1
+
+         if selected_index >= choice.count():
+            selected_index = -1
+
+         # Set the current selected item and register signals.
+         choice.setCurrentIndex(selected_index)
+         set_current = lambda index, w=choice, e=key_elm: self.onChoiceChanged(w, index, e)
+         self.mCallbacks.append(set_current)
+         self.connect(choice, QtCore.SIGNAL("currentIndexChanged(int)"), set_current)
+
+         row += 1
+
+   def onChoiceChanged(self, widget, index, keyElm):
+      key = keyElm.get('value')
+      if index < len(keyElm):
+         current_value = keyElm[index].get('value', '')
+      else:
+         current_value = str(widget.currentText())
+
+      print "Current changed [%s][%s][%s][%s]" % (widget, index, keyElm, current_value)
+      self.mObj.mCurrentValues[key] = current_value
+
+      # Connect to a signal so that we know the user selected a different
+      # choice from the combo box.
+      #self.connect(self.mChoice, QtCore.SIGNAL("currentIndexChanged(int)"), self.onChoiceChanged)
+
+      # Fill in the combo box with the possible choices. This will cause the
+      # first choice that has 'selected' set to true be the current selection.
+      #self.__fillCombo()
