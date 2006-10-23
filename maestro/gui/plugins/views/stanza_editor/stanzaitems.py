@@ -132,8 +132,6 @@ class Edge(QtGui.QGraphicsItem):
       line = QtCore.QLineF(self.mapFromItem(self.source, 0, 0),
                            self.mapFromItem(self.dest, 0, 0))
 
-      self.removeFromIndex()
-
       intersect_point = intersect(line, self.source.sceneBoundingRect())
       if intersect_point is not None:
          #print "point: (%s, %s)" % (intersect_point.x(), intersect_point.y())
@@ -151,13 +149,6 @@ class Edge(QtGui.QGraphicsItem):
          self.destPoint = intersect_point
       else:
          self.destPoint = line.p2()
-
-      self.addToIndex()
-
-   Type = QtGui.QGraphicsItem.UserType + 2
-
-   def type(self):
-      return self.Type
 
    def shape(self):
       """ Returns the shape of this item as a QPainterPath in local
@@ -522,11 +513,6 @@ class Node(QtGui.QGraphicsItem):
       edges.extend(self.inEdgeList)
       edges.extend(self.outEdgeList)
       return edges
-
-   Type = QtGui.QGraphicsItem.UserType + 1
-
-   def type(self):
-      return self.Type
 
    def calculateForces(self):
       if self.scene() is None or self.scene().mouseGrabberItem() is self:
