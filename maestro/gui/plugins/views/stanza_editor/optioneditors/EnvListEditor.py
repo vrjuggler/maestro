@@ -74,10 +74,41 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       self.mRemoveValueBtn.setEnabled(False)
       self.mRemoveKeyBtn.setEnabled(False)
 
+      self.mKeysList.installEventFilter(self)
+      self.mValuesTable.installEventFilter(self)
+
       # Connect to selection signals.
       QtCore.QObject.connect(self.mKeysList,
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onKeySelected)
 
+      # Create a shortcut that will give the keys list focus.
+      self.mKeyShortcut = QtGui.QShortcut("Ctrl+K", self)
+      QtCore.QObject.connect(self.mKeyShortcut,
+         QtCore.SIGNAL("activated()"), self.mKeysList, QtCore.SLOT("setFocus()"))
+
+      # Create a shortcut that will give the values table focus.
+      self.mValueShortcut = QtGui.QShortcut("Ctrl+V", self)
+      QtCore.QObject.connect(self.mValueShortcut,
+         QtCore.SIGNAL("activated()"), self.mValuesTable, QtCore.SLOT("setFocus()"))
+
+   def eventFilter(self, obj, event):
+      if event.type() == QtCore.QEvent.KeyPress:
+         if event.matches(QtGui.QKeySequence.Delete):
+            if obj == self.mKeysList:
+               self.onRemoveKeyClicked()
+               return True
+            elif obj == self.mValuesTable:
+               self.onRemoveValueClicked()
+               return True
+         elif event.matches(QtGui.QKeySequence.New):
+            if obj == self.mKeysList:
+               self.onAddKeyClicked()
+               return True
+            elif obj == self.mValuesTable:
+               self.onAddValueClicked()
+               return True
+      # standard event processing
+      return QtCore.QObject.eventFilter(self, obj, event)
 
    def setOption(self, option):
       """ Updates the current state of the application with the given option.
@@ -199,9 +230,17 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
             "You must select a key before you can delete it.")
          return
 
-      self.mOption.mElement.remove(current_key)
-      self.mKeyListModel.emit(QtCore.SIGNAL("modelReset()"))
-      self.mKeysList.setCurrentIndex(QtCore.QModelIndex())
+      # Ask the user if they are sure.
+      reply = QtGui.QMessageBox.question(None, "Remove Key",
+         "Are you sure you want to remove key %s?" % current_key.get('value', ''),
+         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+         QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+
+      # If they say yes, go ahead and do it.
+      if reply == QtGui.QMessageBox.Yes:
+         self.mOption.mElement.remove(current_key)
+         self.mKeyListModel.emit(QtCore.SIGNAL("modelReset()"))
+         self.mKeysList.setCurrentIndex(QtCore.QModelIndex())
 
    def onAddValueClicked(self, checked=False):
       if self.mValueModel is None:
@@ -225,10 +264,20 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
          QtGui.QMessageBox.information(None, "Value Delete",
             "You must select a value before you can delete it.")
          return
-
+      
       key_elm = self.mValueModel.mKeyElement
-      del key_elm[current_index.row()]
-      self.mValueModel.emit(QtCore.SIGNAL("modelReset()"))
+      value_elm = key_elm[current_index.row()]
+
+      # Ask the user if they are sure.
+      reply = QtGui.QMessageBox.question(None, "Remove Value",
+         "Are you sure you want to remove value %s?" % value_elm.get('label', ''),
+         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+         QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+
+      # If they say yes, go ahead and do it.
+      if reply == QtGui.QMessageBox.Yes:
+         del key_elm[current_index.row()]
+         self.mValueModel.emit(QtCore.SIGNAL("modelReset()"))
 
 class KeyListModel(QtCore.QAbstractListModel):
    key_mime_type = 'application/maestro-envlist-key'
