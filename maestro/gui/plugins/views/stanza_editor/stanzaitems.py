@@ -132,6 +132,8 @@ class Edge(QtGui.QGraphicsItem):
       line = QtCore.QLineF(self.mapFromItem(self.source, 0, 0),
                            self.mapFromItem(self.dest, 0, 0))
 
+      self.prepareGeometryChange()
+
       intersect_point = intersect(line, self.source.sceneBoundingRect())
       if intersect_point is not None:
          #print "point: (%s, %s)" % (intersect_point.x(), intersect_point.y())
