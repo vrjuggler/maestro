@@ -36,6 +36,7 @@ def buildItem(tagOrElm):
                 'choice':ChoiceItem,
                 'arg':ArgItem,
                 'env_var':EnvVarItem,
+                'env_list':EnvListItem,
                 'command':CommandItem,
                 'cwd':CwdItem,
                 'ref':RefItem,
@@ -770,6 +771,16 @@ class EnvVarItem(Node):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
       self.mColor = QtGui.QColor(255, 253, 117, 191)
+
+class EnvListItem(Node):
+   mPropertyMap = buildPropertyMap(['name', 'label', 'class',
+                                    'editable', 'hidden', 'selected',
+                                    'enabled'])
+   def __init__(self, elm=None, graphWidget=None):
+      Node.__init__(self, elm, graphWidget)
+      self.mTitle = "Environment Variable"
+      self.mColor = QtGui.QColor(255, 253, 117, 191)
+
 
 class CommandItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'editable',
