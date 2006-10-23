@@ -34,7 +34,7 @@ class EnvListEditorPlugin(maestro.core.IOptionEditorPlugin):
       self.mEditor = EnvListEditor()
 
    def getName():
-      return "Override Editor"
+      return "Environment Var List Editor"
    getName = staticmethod(getName)
 
    def getOptionType():
