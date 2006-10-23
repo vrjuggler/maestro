@@ -114,8 +114,9 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
 
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-         os.execle(self.mCmd, self.mCmd, 's', saver_flag, env)
-         os.execle(self.mCmd, self.mCmd, dpms_flag, env)
+         os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, 's', saver_flag, env)
+         os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, dpms_flag, env)
+         os._exit(0)
 
       (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
 
@@ -125,9 +126,11 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
          procutil.changeToUserName(avatar.mCredentials['username'])
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
-         os.execle(self.mCmd, self.mCmd, 's', 'off', env)
-         os.execle(self.mCmd, self.mCmd, 's', 'reset', env)
-         os.execle(self.mCmd, self.mCmd, 'dpms', 'force', 'on', env)
-         os.execle(self.mCmd, self.mCmd, '-dpms', env)
+         os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, 's', 'off', env)
+         os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, 's', 'reset', env)
+         os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, 'dpms', 'force', 'on',
+                    env)
+         os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, '-dpms', env)
+         os._exit(0)
 
       (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
