@@ -318,6 +318,14 @@ class StanzaStore:
       return all_elements
 
    def _find(self, root, path):
+      '''
+      Searches for elements matching the given path description under the
+      given root(s). The type of root can be either a single
+      ElementTree.Element object or a list of ElementTree.Element objects.
+
+      @param root One or more roots to search.
+      @param path The path to search under the given root.
+      '''
       # Handle extra cases where we are referencing local element.
       if path == '.':
          path = ''
@@ -328,7 +336,12 @@ class StanzaStore:
       # Tokenize the entire path.
       tokens = xpath_tokenizer.findall(path)
 
-      cur_elts = [root]
+      # If root is a list, then we have been given multiple roots to search.
+      if type(root) is list:
+         cur_elts = root
+      # Otherwise, we make a list out of the single root.
+      else:
+         cur_elts = [root]
 
       OPERATOR = 0
       ID = 1
