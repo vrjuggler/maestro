@@ -483,6 +483,7 @@ class GraphWidget(QtGui.QGraphicsView):
 class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
+      self.mStanzas = []
       self.mScene = None
       self.setupUi(self)
       #self.timerId = 0
@@ -603,6 +604,16 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             if ('application' == item.tag or
                 'global_option' == item.tag):
                stanza_elms.append(item)
+
+      # If the list of stanzas has not changed since the last time
+      # self.mStanzaCB was updated, then we do not need to do any more work.
+      # This works because ElementTree Element equality comparisons test for
+      # reference equality. A change to an element in env.mStanzaStore would
+      # occur through reloading a file, and that would cause a new Element
+      # object to be created. In that case, we would want to refresh the
+      # layout.
+      if stanza_elms == self.mStanzas:
+         return
 
       # Save the currently selected stanza item text. This will be compared
       # against the labels in stanza_elms in order to change self.mStanzaCB
