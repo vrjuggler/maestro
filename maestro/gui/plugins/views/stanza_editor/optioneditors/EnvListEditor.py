@@ -428,7 +428,7 @@ class ValueTableModel(QtCore.QAbstractTableModel):
          return QtCore.QVariant()
 
       # Get the child option.
-      assert index.row() < len(self.mKeyElement)
+      assert index.row() <= len(self.mKeyElement)
       value_elm = self.mKeyElement[index.row()]
 
       # Return the name of the child option.
