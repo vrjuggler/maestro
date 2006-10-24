@@ -45,6 +45,30 @@ class EnvListEditorPlugin(maestro.core.IOptionEditorPlugin):
       self.mEditor.setOption(option)
       return self.mEditor
 
+class EventFilter(QtCore.QObject):
+   def __init__(self, editor, parent=None):
+      QtCore.QObject.__init__(self, parent)
+      self.mEditor = editor
+
+   def eventFilter(self, obj, event):
+      if event.type() == QtCore.QEvent.KeyPress:
+         if event.matches(QtGui.QKeySequence.Delete):
+            if obj == self.mEditor.mKeysList:
+               self.mEditor.onRemoveKeyClicked()
+               return True
+            elif obj == self.mEditor.mValuesTable:
+               self.mEditor.onRemoveValueClicked()
+               return True
+         elif event.matches(QtGui.QKeySequence.New):
+            if obj == self.mEditor.mKeysList:
+               self.mEditor.onAddKeyClicked()
+               return True
+            elif obj == self.mEditor.mValuesTable:
+               self.mEditor.onAddValueClicked()
+               return True
+      # standard event processing
+      return QtCore.QObject.eventFilter(self, obj, event)
+
 class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -74,32 +98,16 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       self.mRemoveValueBtn.setEnabled(False)
       self.mRemoveKeyBtn.setEnabled(False)
 
-      # XXX: For some reason this causes a segmentation fault on exit.
-      #self.mKeysList.installEventFilter(self)
-      #self.mValuesTable.installEventFilter(self)
+      # XXX: Quick hack because using self as an event filter causes a segmentation fault on exit.
+      self.mEventFilter = EventFilter(self)
+      self.mKeysList.installEventFilter(self.mEventFilter)
+      self.mValuesTable.installEventFilter(self.mEventFilter)
 
       # Connect to selection signals.
       QtCore.QObject.connect(self.mKeysList,
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onKeySelected)
 
-   def eventFilter(self, obj, event):
-      if event.type() == QtCore.QEvent.KeyPress:
-         if event.matches(QtGui.QKeySequence.Delete):
-            if obj == self.mKeysList:
-               self.onRemoveKeyClicked()
-               return True
-            elif obj == self.mValuesTable:
-               self.onRemoveValueClicked()
-               return True
-         elif event.matches(QtGui.QKeySequence.New):
-            if obj == self.mKeysList:
-               self.onAddKeyClicked()
-               return True
-            elif obj == self.mValuesTable:
-               self.onAddValueClicked()
-               return True
-      # standard event processing
-      return QtCore.QObject.eventFilter(self, obj, event)
+
 
    def setOption(self, option):
       """ Updates the current state of the application with the given option.
