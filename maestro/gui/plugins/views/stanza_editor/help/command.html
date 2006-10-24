@@ -1,12 +1,12 @@
 <h1><div align="center">Command</div></h1>
-A command is what actually gets executed when the application is launched. The
-command path should <em>not</em> be enclosed in quotes even when it contains
-spaces because the Maestro Launch Service will handle using correct quoting
-when necessary. The executed command can be varied on each node of the
+<p>A command is what actually gets executed when the application is launched.
+The command path should <em>not</em> be enclosed in quotes even when it
+contains spaces because the Maestro Launch Service will handle using correct
+quoting when necessary. The executed command can be varied on each node of the
 cluster using the <code class="literal">class</code> attribute. For example,
 on a cluster that mixes Microsoft Windows&reg; and Linux, a command might be
 <code class="filename">C:\Program Files\Software\myprog.exe</code> on some
 nodes and <code class="filename">/usr/local/bin/myprog</code> on others. In
 this case, two commands are needed for the two variations with the former
 using &#8220;Windows XP&#8221; as its class and the latter using
-&#8220;Linux.&#8221;
+&#8220;Linux.&#8221;</p>
