@@ -121,7 +121,6 @@ class Ui_EnvListEditorBase(object):
       self.mAddValueBtn.setText(QtGui.QApplication.translate("EnvListEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveValueBtn.setToolTip(QtGui.QApplication.translate("EnvListEditorBase", "Remove the currently selected value.", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveValueBtn.setText(QtGui.QApplication.translate("EnvListEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRemoveValueBtn.setShortcut(QtGui.QApplication.translate("EnvListEditorBase", "Del", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

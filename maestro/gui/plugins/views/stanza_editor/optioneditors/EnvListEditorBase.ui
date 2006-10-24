@@ -131,9 +131,6 @@
          <property name="icon" >
           <iconset resource="../../../../MaestroResource.qrc" >:/Maestro/images/edit_remove.png</iconset>
          </property>
-         <property name="shortcut" >
-          <string>Del</string>
-         </property>
         </widget>
        </item>
        <item row="1" column="0" colspan="3" >

@@ -242,6 +242,16 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
          self.mKeyListModel.emit(QtCore.SIGNAL("modelReset()"))
          self.mKeysList.setCurrentIndex(QtCore.QModelIndex())
 
+         # Create a reasonable model index to select.
+         new_row = min(current_index.row(), self.mKeyListModel.rowCount()-1)
+         new_index = self.mKeyListModel.index(new_row)
+         # Select the new model index.
+         self.mKeysList.selectionModel().select(new_index,
+            QtGui.QItemSelectionModel.ClearAndSelect)
+
+         # Set the current so that keyboard navigation works as we would expect.
+         self.mKeysList.setCurrentIndex(new_index)
+
    def onAddValueClicked(self, checked=False):
       if self.mValueModel is None:
          return
@@ -278,6 +288,16 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       if reply == QtGui.QMessageBox.Yes:
          del key_elm[current_index.row()]
          self.mValueModel.emit(QtCore.SIGNAL("modelReset()"))
+
+         # Create a reasonable model index to select.
+         new_row = min(current_index.row(), self.mValueModel.rowCount()-1)
+         new_index = self.mValueModel.index(new_row, 0)
+         # Select the new model index.
+         self.mValuesTable.selectionModel().select(new_index,
+            QtGui.QItemSelectionModel.ClearAndSelect)
+
+         # Set the current so that keyboard navigation works as we would expect.
+         self.mValuesTable.setCurrentIndex(new_index)
 
 class KeyListModel(QtCore.QAbstractListModel):
    key_mime_type = 'application/maestro-envlist-key'
