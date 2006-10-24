@@ -725,6 +725,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def closeEvent(self, event):
       self.__closeLoggers()
+      #env = maestro.core.Environment()
+      # Check to ensure the user does not have pending changes.
+      #env.mStanzaStore.checkForStanzaChanges()
       QtGui.QMainWindow.closeEvent(self, event)
 
    def __closeLoggers(self):

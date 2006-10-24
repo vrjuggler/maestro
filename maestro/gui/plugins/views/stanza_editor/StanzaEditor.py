@@ -964,4 +964,6 @@ if __name__ == "__main__":
    widget = StanzaEditor()
    widget.updateGui()
    widget.show()
-   sys.exit(app.exec_())
+   result = app.exec_()
+   env.mStanzaStore.checkForStanzaChanges()
+   sys.exit(result)

@@ -22,7 +22,6 @@ import maestro.util.plugin
 import maestro.util.mixins
 import maestro.core
 import EventManager
-import StanzaStore
 
 class Environment(maestro.util.mixins.Singleton):
    """ The main environment/namespace for the Maestro.
@@ -61,6 +60,7 @@ class Environment(maestro.util.mixins.Singleton):
          print "  %s : %s"%(name,p)
 
       if maestro.core.const.MAESTRO_GUI:
+         import StanzaStore
          # Create a stanza store and scan for files.
          self.mStanzaStore = StanzaStore.StanzaStore()
          if opts.stanzas:

@@ -19,6 +19,9 @@
 import os, sys, copy, types
 pj = os.path.join
 import re
+import md5
+
+from PyQt4 import QtCore, QtGui
 
 import maestro.core
 import elementtree.ElementTree as ET
@@ -35,6 +38,7 @@ def null_progress_cb(p,s):
 class StanzaStore:
    def __init__(self):
       self.mStanzas = {}
+      self.mStanzaDigests = {}
 
    def scan(self, progressCB=None):
       if not progressCB:
@@ -77,6 +81,11 @@ class StanzaStore:
             stanza_elm = ET.ElementTree(file=file_name).getroot()
             self.mStanzas[file_name] = stanza_elm
 
+            # Store a digest to ensure we save changes.
+            stanza_str = ET.tostring(stanza_elm)
+            stanza_digest = md5.new(stanza_str).digest()
+            self.mStanzaDigests[file_name] = stanza_digest
+
       self._expandCmdLine()
 
    def saveAll(self):
@@ -86,6 +95,11 @@ class StanzaStore:
    def saveStanza(self, stanza, fileName):
       try:
          stanza_str = ET.tostring(stanza)
+
+         # Update digests
+         stanza_digest = md5.new(stanza_str).digest()
+         self.mStanzaDigests[fileName] = stanza_digest
+
          lines = [l.strip() for l in stanza_str.splitlines()]
          stanza_str = ''.join(lines)
          dom = xml.dom.minidom.parseString(stanza_str)
@@ -96,8 +110,24 @@ class StanzaStore:
       except IOError, ex:
          QtGui.QMessageBox.critical(None, "Error",
             "Failed to save stanza file %s: %s" % \
-            (file_name, ex.strerror))
+            (fileName, ex.strerror))
          return False
+
+   def checkForStanzaChanges(self):
+      for file_name, stanza in self.mStanzas.iteritems():
+         stanza_str = ET.tostring(stanza)
+         stanza_digest = md5.new(stanza_str).digest()
+         if not self.mStanzaDigests.has_key(file_name) or \
+            self.mStanzaDigests[file_name] != stanza_digest:
+            # Ask the user if they are sure.
+            reply = QtGui.QMessageBox.question(None, "Unsaved Stanza",
+               "You have unsaved changes to %s. Do you want to save it?" % file_name,
+               QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+               QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+
+            # If they say yes, go ahead and do it.
+            if reply == QtGui.QMessageBox.Yes:
+               self.saveStanza(stanza, file_name)
 
    def findApplications(self):
       """ Returns all unexpanded application elements. """
