@@ -62,7 +62,13 @@
           </sizepolicy>
          </property>
          <property name="text" >
-          <string>Key:</string>
+          <string>&amp;Key:</string>
+         </property>
+         <property name="textFormat" >
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="buddy" >
+          <cstring>mKeysList</cstring>
          </property>
         </widget>
        </item>
@@ -103,7 +109,13 @@
           </sizepolicy>
          </property>
          <property name="text" >
-          <string>Values:</string>
+          <string>&amp;Values:</string>
+         </property>
+         <property name="textFormat" >
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="buddy" >
+          <cstring>mValuesTable</cstring>
          </property>
         </widget>
        </item>

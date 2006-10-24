@@ -60,6 +60,7 @@ class Ui_EnvListEditorBase(object):
       sizePolicy.setVerticalStretch(0)
       sizePolicy.setHeightForWidth(self.mKeyLbl.sizePolicy().hasHeightForWidth())
       self.mKeyLbl.setSizePolicy(sizePolicy)
+      self.mKeyLbl.setTextFormat(QtCore.Qt.PlainText)
       self.mKeyLbl.setObjectName("mKeyLbl")
       self.gridlayout.addWidget(self.mKeyLbl,0,0,1,1)
 
@@ -83,6 +84,7 @@ class Ui_EnvListEditorBase(object):
       sizePolicy.setVerticalStretch(0)
       sizePolicy.setHeightForWidth(self.mValuesLbl.sizePolicy().hasHeightForWidth())
       self.mValuesLbl.setSizePolicy(sizePolicy)
+      self.mValuesLbl.setTextFormat(QtCore.Qt.PlainText)
       self.mValuesLbl.setObjectName("mValuesLbl")
       self.gridlayout1.addWidget(self.mValuesLbl,0,0,1,1)
 
@@ -100,6 +102,8 @@ class Ui_EnvListEditorBase(object):
       self.mValuesTable.setObjectName("mValuesTable")
       self.gridlayout1.addWidget(self.mValuesTable,1,0,1,3)
       self.vboxlayout.addWidget(self.mSplitter)
+      self.mKeyLbl.setBuddy(self.mKeysList)
+      self.mValuesLbl.setBuddy(self.mValuesTable)
 
       self.retranslateUi(EnvListEditorBase)
       QtCore.QMetaObject.connectSlotsByName(EnvListEditorBase)
@@ -113,10 +117,10 @@ class Ui_EnvListEditorBase(object):
       EnvListEditorBase.setWindowTitle(QtGui.QApplication.translate("EnvListEditorBase", "EnvVar List Editor", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddKeyBtn.setToolTip(QtGui.QApplication.translate("EnvListEditorBase", "Add a new environment variable to the list.", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddKeyBtn.setText(QtGui.QApplication.translate("EnvListEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mKeyLbl.setText(QtGui.QApplication.translate("EnvListEditorBase", "Key:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mKeyLbl.setText(QtGui.QApplication.translate("EnvListEditorBase", "&Key:", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveKeyBtn.setToolTip(QtGui.QApplication.translate("EnvListEditorBase", "Remove the currently selected environment variable.", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveKeyBtn.setText(QtGui.QApplication.translate("EnvListEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mValuesLbl.setText(QtGui.QApplication.translate("EnvListEditorBase", "Values:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mValuesLbl.setText(QtGui.QApplication.translate("EnvListEditorBase", "&Values:", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddValueBtn.setWhatsThis(QtGui.QApplication.translate("EnvListEditorBase", "Add a potential value for the environment varible.", None, QtGui.QApplication.UnicodeUTF8))
       self.mAddValueBtn.setText(QtGui.QApplication.translate("EnvListEditorBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveValueBtn.setToolTip(QtGui.QApplication.translate("EnvListEditorBase", "Remove the currently selected value.", None, QtGui.QApplication.UnicodeUTF8))

@@ -81,16 +81,6 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       QtCore.QObject.connect(self.mKeysList,
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onKeySelected)
 
-      # Create a shortcut that will give the keys list focus.
-      self.mKeyShortcut = QtGui.QShortcut("Ctrl+K", self)
-      QtCore.QObject.connect(self.mKeyShortcut,
-         QtCore.SIGNAL("activated()"), self.mKeysList, QtCore.SLOT("setFocus()"))
-
-      # Create a shortcut that will give the values table focus.
-      self.mValueShortcut = QtGui.QShortcut("Ctrl+V", self)
-      QtCore.QObject.connect(self.mValueShortcut,
-         QtCore.SIGNAL("activated()"), self.mValuesTable, QtCore.SLOT("setFocus()"))
-
    def eventFilter(self, obj, event):
       if event.type() == QtCore.QEvent.KeyPress:
          if event.matches(QtGui.QKeySequence.Delete):
