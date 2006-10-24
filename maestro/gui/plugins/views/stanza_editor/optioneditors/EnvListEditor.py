@@ -74,8 +74,9 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       self.mRemoveValueBtn.setEnabled(False)
       self.mRemoveKeyBtn.setEnabled(False)
 
-      self.mKeysList.installEventFilter(self)
-      self.mValuesTable.installEventFilter(self)
+      # XXX: For some reason this causes a segmentation fault on exit.
+      #self.mKeysList.installEventFilter(self)
+      #self.mValuesTable.installEventFilter(self)
 
       # Connect to selection signals.
       QtCore.QObject.connect(self.mKeysList,
