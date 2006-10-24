@@ -27,7 +27,8 @@ import math
 import os.path
 pj = os.path.join
 
-sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
+if __name__ == "__main__":
+   sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
 import maestro.core
 import maestro.core.Stanza
 from maestro.util import xplatform
@@ -942,6 +943,8 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       b.update()
 
 if __name__ == "__main__":
+   import maestro.core.StanzaStore
+
    app = QtGui.QApplication(sys.argv)
    random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
 
