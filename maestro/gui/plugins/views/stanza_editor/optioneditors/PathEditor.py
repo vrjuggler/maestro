@@ -111,8 +111,6 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
           @param text: Text that was selected.
       """
-      env = maestro.core.Environment()
-
       # Convert the path from a QString into a python string.
       new_path = str(text)
       old_path = self.mOption.mElement.get('id', '')
@@ -180,7 +178,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       self.mPathCB.addItem(current_path)
 
       # Add a reasonable default.
-      if current_path is not '*/*':
+      if current_path != '*/*':
          self.mPathCB.addItem('*/*')
 
       # Keep a list of namespaces around so we don't add duplicates.
@@ -203,7 +201,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
             # Add an item in the combobox if the child has a name.
             child_name = child.get('name', None)
             if child_name is None:
-               print "WARNING: %s has no name." % elm
+               print "WARNING: %s has no name." % child
             else:
                self.mPathCB.addItem(namespace + child_name + '/*')
 
@@ -216,8 +214,6 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
           @param text: Text that was selected.
       """
-      env = maestro.core.Environment()
-
       # Convert the path from a QString into a python string.
       new_path = str(text)
       old_path = self.mOption.mElement.get('id', '')

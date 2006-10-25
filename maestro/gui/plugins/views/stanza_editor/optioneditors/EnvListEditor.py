@@ -22,10 +22,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 
 import maestro.core
-
 import EnvListEditorBase
-import helpers
-
 import elementtree.ElementTree as ET
 
 class EnvListEditorPlugin(maestro.core.IOptionEditorPlugin):
@@ -114,7 +111,6 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
 
           @param option: Option that we are operating on.
       """
-      env = maestro.core.Environment()
       assert(option is not None)
       self.mOption = option
 
@@ -150,71 +146,6 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       self.mAddValueBtn.setEnabled(current_key is not None)
       self.mRemoveValueBtn.setEnabled(current_key is not None)
       self.mRemoveKeyBtn.setEnabled(current_key is not None)
-
-   def __fillComboBox(self):
-      """ Helper method that fills the combobox with all possible sub-options.
-      """
-      # Clear the current combobox.
-      self.mPathCB.clear()
-
-      # Add current filter.
-      current_path = self.mOption.mElement.get('id', '')
-      if current_path != '':
-         self.mPathCB.addItem(current_path)
-
-      # Add a reasonable default.
-      if current_path != '*':
-         self.mPathCB.addItem('*')
-
-      # Get all options paths under our referenced elements.
-      paths = helpers.getPathsUnderOptions(self.mReferencedElements)
-
-      # Add each path to the combobox.
-      for path in paths:
-         self.mPathCB.addItem(path)
-
-   def onPathSelected(self, text):
-      """ Slot that is called when the user either selects a value from the
-          combobox or types their own.
-
-          @param text: Text that was selected.
-      """
-      env = maestro.core.Environment()
-
-      # Convert the path from a QString into a python string.
-      new_path = str(text)
-      old_path = self.mOption.mElement.get('id', '')
-
-      # If the path has changed, update the element and match lists.
-      if new_path != old_path:
-         self.mOption.mElement.set('id', new_path)
-         self.__fillMatchList()
-
-   def __fillMatchList(self):
-      """ Helper method that fills the match list with all options
-          that match the current filter.
-      """
-      env = maestro.core.Environment()
-
-      # Clear the current match list.
-      self.mMatchesList.clear()
-
-      # Get current search filter path.
-      current_path = self.mOption.mElement.get('id', '')
-
-      # Find all matching elements using the stanza store.
-      all_matches = []
-      for elm in self.mReferencedElements:
-         matches = env.mStanzaStore._find(elm, current_path)
-         all_matches.extend(matches)
-
-      # For each match, get a list of all decendents.
-      for match in all_matches:
-         name_list = []
-         helpers.makeOptionNameList(match, '', name_list)
-         # Add names of descendents to list.
-         for name in name_list:
-            self.mMatchesList.addItem(name)
 
    def onAddKeyClicked(self, checked=False):
       ET.SubElement(self.mOption.mElement, 'key', value="NEW_KEY")

@@ -111,8 +111,6 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
 
           @param text: Text that was selected.
       """
-      env = maestro.core.Environment()
-
       # Convert the path from a QString into a python string.
       new_path = str(text)
       old_path = self.mOption.mElement.get('id', '')
