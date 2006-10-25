@@ -127,17 +127,17 @@ ensemble_str='application/x-maestro-ensemble=maestro-ensemble.desktop'
 stanza_str='application/x-maestro-stanza=maestro-stanza.desktop'
 echo $ensemble_str >> /usr/share/applications/defaults.list
 echo $stanza_str >> /usr/share/applications/defaults.list
-update-mime-database
+update-mime-database /usr/share/mime >/dev/null 2>&1
 
 %postun gui
 cat /usr/share/applications/defaults.list | grep -v x-maestro > /usr/share/applications/defaults.list.tmp
 mv /usr/share/applications/defaults.list.tmp /usr/share/applications/defaults.list
-update-mime-database
+update-mime-database /usr/share/mime >/dev/null 2>&1
 
 %post server
 /sbin/chkconfig --add maestrod
-/sbin/chkconfig --level 34 maestro off
-/sbin/chkconfig --level 5 maestro on
+/sbin/chkconfig --level 34 maestrod off
+/sbin/chkconfig --level 5 maestrod on
 
 %postun server
 /sbin/service maestrod stop
