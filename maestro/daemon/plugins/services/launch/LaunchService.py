@@ -87,10 +87,12 @@ class LaunchService(maestro.core.IServicePlugin):
       def merge(d1, d2):
          for k in d2.keys():
             if d1.has_key(k):
+               # XXX: Is the the correct behavior?
+               # If there is a path seperator, then extend it. Otherwise
+               # we don't do anything that has the effect that we override
+               # the value.
                if d1[k].find(os.path.pathsep) != -1:
                   d1[k] = d1[k] + os.path.pathsep + d2[k]
-               else:
-                  d1[k] += d2[k]
             else:
                d1[k] = d2[k]
 
