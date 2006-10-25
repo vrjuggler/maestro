@@ -86,7 +86,6 @@ class IBootPlugin(maestro.util.plugin.Plugin):
    
    def getTargets(self):
       not_implemented()
-   getTargets = staticmethod(getTargets)
 
    def getDefault(self):
       not_implemented()
