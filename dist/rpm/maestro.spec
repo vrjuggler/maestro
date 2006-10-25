@@ -4,7 +4,7 @@
 
 # Spec file for Maestro.
 %define name    maestro
-%define version 0.2.0
+%define version 0.3.0
 %define release 1
 
 # Change to 0 to disable building documentation.

@@ -21,7 +21,7 @@
 # package file
 
 __build__   = 1
-__version__ = '0.2.0.%d' % __build__
+__version__ = '0.3.0.%d' % __build__
 __date__    = ' '.join('$Date$'.split()[1:3])
 __author__  = 'Infiscape Corporation'
 __doc__     = '''This is Maestro.  For information regarding Maestro see:
