@@ -477,7 +477,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          return
 
       # Get the filename for our ensemble.
-      filename = self.mEnsemble.mFilename
+      ensemble_filename = self.mEnsemble.mFilename
 
       # If the ensemble does not have a filename, we have to use save as.
       if ensemble_filename is None:
