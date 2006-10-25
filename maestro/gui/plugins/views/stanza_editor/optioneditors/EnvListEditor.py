@@ -127,6 +127,9 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       self.mKeyListModel = KeyListModel(self.mOption)
       self.mKeysList.setModel(self.mKeyListModel)
 
+      self.mValueModel = None
+      self.mValuesTable.setModel(None)
+
       # Connect new selection model
       QtCore.QObject.connect(self.mKeysList.selectionModel(),
          QtCore.SIGNAL("currentChanged(QModelIndex,QModelIndex)"), self.onKeySelected)
