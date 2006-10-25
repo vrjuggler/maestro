@@ -19,16 +19,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, random, traceback
-from PyQt4 import QtCore, QtGui
-
-import StanzaEditorBase
-import math
-
 import os.path
 pj = os.path.join
 
 if __name__ == "__main__":
    sys.path.append( pj(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
+
+from PyQt4 import QtCore, QtGui
+
+import StanzaEditorBase
+import math
+
 import maestro.core
 import maestro.core.Stanza
 from maestro.util import xplatform
