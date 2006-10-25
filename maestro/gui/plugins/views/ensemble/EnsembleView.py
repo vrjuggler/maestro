@@ -440,6 +440,14 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Refresh the settings model.
       self.mNodeSettingsModel.setSelectedNode(selected_node)
 
+      #XXX: Quick workaround.
+      self.mSettingsTableView.setModel(self.mNodeSettingsModel)
+
+      # Tell the both columns to split the availible space.
+      self.mSettingsTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mSettingsTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+
+
    def updateFields(self):
       """ Fills in the node information for the currently selected node. This
           gets called whenever a new node is selected in the list.

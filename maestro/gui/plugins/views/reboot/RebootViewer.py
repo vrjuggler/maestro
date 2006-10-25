@@ -177,8 +177,10 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
       ri = RebootInfo(targets, defaultTargetIndex, timeout)
       self.mRebootInfoMap[nodeId] = ri
-      #self.emit(QtCore.SIGNAL("nodeChanged(QString)"), nodeId)
-      self.mNodeTableView.reset()
+      self.mNodeTableView.setModel(self.mRebootModel)
+      # Tell the both columns to split the availible space.
+      self.mNodeTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+      self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
    def onNodeContextMenu(self, point):
       """ Create a pop-up menu listing all valid operations for selection. """
