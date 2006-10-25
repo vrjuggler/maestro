@@ -730,7 +730,7 @@ class GlobalOptionItem(Node):
 
 class ChoiceItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'type',
-                                    'hidden', 'selected', 'enabled'])
+                                    'hidden', 'selected', 'editable'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Choice"
@@ -738,7 +738,7 @@ class ChoiceItem(Node):
 
 class GroupItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'hidden',
-                                    'selected', 'enabled'])
+                                    'selected', 'editable'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Group"
@@ -756,7 +756,7 @@ class RefItem(Node):
 class ArgItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'flag',
                                     'value_type', 'editable', 'hidden',
-                                    'selected', 'enabled'])
+                                    'selected'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Argument"
@@ -764,8 +764,7 @@ class ArgItem(Node):
 
 class EnvVarItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'key',
-                                    'editable', 'hidden', 'selected',
-                                    'enabled'])
+                                    'editable', 'hidden', 'selected'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
@@ -773,8 +772,7 @@ class EnvVarItem(Node):
 
 class EnvListItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class',
-                                    'editable', 'hidden', 'selected',
-                                    'enabled'])
+                                    'editable', 'hidden', 'selected'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Environment Variable"
@@ -783,7 +781,7 @@ class EnvListItem(Node):
 
 class CommandItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'editable',
-                                    'hidden', 'selected', 'enabled'])
+                                    'hidden', 'selected'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Command"
@@ -792,7 +790,7 @@ class CommandItem(Node):
 
 class CwdItem(Node):
    mPropertyMap = buildPropertyMap(['name', 'label', 'class', 'editable',
-                                    'hidden', 'selected', 'enabled'])
+                                    'hidden', 'selected'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Current Working Directory"
