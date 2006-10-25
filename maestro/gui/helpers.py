@@ -49,12 +49,19 @@ class FileEditor(QtGui.QWidget):
       self.mBrowseBtn.setText("Browse...")
       self.hboxlayout.addWidget(self.mBrowseBtn)
       self.connect(self.mBrowseBtn, QtCore.SIGNAL("clicked()"), self.onBrowse)
+      self.connect(self.mLineEdit, QtCore.SIGNAL("editingFinished()"), self.onValueChanged)
 
    def cleanup(self):
       self.disconnect(self.mBrowseBtn, QtCore.SIGNAL("clicked()"), self.onBrowse)
+      self.disconnect(self.mLineEdit, QtCore.SIGNAL("editingFinished()"), self.onValueChanged)
 
    def setValue(self, value):
       self.mLineEdit.setText(value)
+
+   def onValueChanged(self):
+      edit_text = str(self.mLineEdit.text())
+      edit_text = edit_text.strip()
+      self.emit(QtCore.SIGNAL("valueChanged"), edit_text)
 
    def onBrowse(self, checked=False):
       # If the current file's directory exists, start in it. Otherwise
@@ -76,5 +83,6 @@ class FileEditor(QtGui.QWidget):
       #     exists? In some cases the file may not be accessible to the launching
       #     computer.
       filename = str(filename)
-      self.mLineEdit.setText(filename.strip())
-      self.emit(QtCore.SIGNAL("valueChanged"), filename)
+      if filename is not None and filename != '':
+         self.mLineEdit.setText(filename.strip())
+         self.emit(QtCore.SIGNAL("valueChanged"), filename)
