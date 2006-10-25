@@ -56,7 +56,7 @@ class LogWidget(QtGui.QWidget):
       
       @return preferred background colour (QColor)
       """
-      return self.colorGroup().base()
+      return self.palette().base().color()
       
    def paintEvent(self, evt):
       """

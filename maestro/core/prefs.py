@@ -69,7 +69,7 @@ class Preferences:
       else:
          raise KeyError, '%s is not a child of the root' % item
 
-   def __setitem__(self, item):
+   def __setitem__(self, key, value):
       # TODO: Implement me!
       pass
 

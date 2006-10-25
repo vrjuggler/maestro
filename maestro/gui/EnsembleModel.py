@@ -21,8 +21,6 @@ from PyQt4 import QtCore, QtGui
 import maestro.core
 const = maestro.core.const
 
-import ensemble
-
 class EnsembleModel(QtCore.QAbstractListModel):
    ensemble_mime_type = 'application/maestro-cluster-nodes'
 
@@ -35,8 +33,6 @@ class EnsembleModel(QtCore.QAbstractListModel):
       # Connect the new ensemble.
       self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"), self.onEnsembleChanged)
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
-
-      env = maestro.core.Environment()
 
    def onNodeChanged(self, node):
       """ Slot that is called when a node's state changes. If the currently
@@ -120,7 +116,6 @@ class EnsembleModel(QtCore.QAbstractListModel):
 
       for index in indexes:
          if index.isValid():
-            node = self.mEnsemble.getNode(index.row())
             node_list_str += str(index.row()) + ','
       node_list_str = node_list_str.rstrip(',')
 

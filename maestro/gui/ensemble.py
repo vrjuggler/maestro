@@ -29,10 +29,6 @@ import socket, types
 import LoginDialog
 
 
-def makeEnsemble(file):
-   tree = ET.ElementTree(file=file)
-   ensemble = Ensemble.Ensemble(tree)
-
 class Ensemble(QtCore.QObject):
    """ Contains information about a cluster of nodes. """
    def __init__(self, xmlTree, fileName=None, parent=None):
@@ -69,10 +65,6 @@ class Ensemble(QtCore.QObject):
       env = maestro.core.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.connect(LOCAL, "connectionLost", self.onLostConnection)
-
-   def save(self, file=None):
-      if file is None:
-         file = self.mFilename
 
    def disconnectFromEventManager(self):
       # Unregister to receive signals from all nodes about their current os.
@@ -171,7 +163,6 @@ class Ensemble(QtCore.QObject):
    def onConnection(self, result, nodeId):
       self.__refreshIpMap()
       # Tell the new node to report its os.
-      env = maestro.core.Environment()
       self.mLogger.info("We are now connected to %s" % nodeId)
       for node in self.mNodes:
          if node.getId() == nodeId:
@@ -209,7 +200,7 @@ class Ensemble(QtCore.QObject):
                env.mEventManager.setCredentials(dlg.getLoginInfo())
          # If login was deined, give the user the option of retrying. Denied
          # login may not necessarily require reauthentication.
-         elif 'twisted.cred.error.LoginDenied' in falure.parents:
+         elif 'twisted.cred.error.LoginDenied' in failure.parents:
             result = \
                QtGui.QMessageBox.critical(
                   None, 'Unauthorized Login',
