@@ -164,10 +164,6 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       if len(self.mApplications) > 0:
          self.mAppComboBox.setCurrentIndex(new_index)
          self._setApplication(new_index)
-      else:
-         QtGui.QMessageBox.critical(self.parentWidget(), "Fatal Error",
-                                    "No applications defined!")
-         QtCore.QApplication.exit(0)
 
    def _setApplication(self, index):
       if self.mSelectedApp != None:
@@ -512,17 +508,21 @@ class GroupSheet(Sheet):
          w.setEnabled(val)
 
    def setupUi(self, buttonType = NO_BUTTON):
-      assert not self.mObj.mHidden
+      # XXX: Look into this.
+      #assert not self.mObj.mHidden
+
+      self.mButtonWidget = self._buildButton(buttonType)
 
       # If all of our children are hidden we can use a much less complicated layout.
       if self.mChildrenHidden:
          self.mTitleWidget = QtGui.QLabel(self)
          self.hboxlayout = QtGui.QHBoxLayout(self)
+         if self.mButtonWidget is not None:
+            self.hboxlayout.addWidget(self.mButtonWidget)
          self.hboxlayout.addWidget(self.mTitleWidget)
       else:
          # Create the title and button widgets.
          self.mTitleWidget = QtGui.QLabel(self)
-         self.mButtonWidget = self._buildButton(buttonType)
 
          # Create all layouts and limit their borders.
          self.hboxlayout1 = QtGui.QHBoxLayout()
@@ -591,8 +591,9 @@ class ChoiceSheet(GroupSheet):
             w = _buildWidget(c, RADIO_BUTTON)
             # Get the selection button that is used for the child/choice.
             btn = w.mButtonWidget
-            # Add child button to button group if we have single selection.
-            self.mButtonGroup.addButton(btn)
+            if btn is not None:
+               # Add child button to button group if we have single selection.
+               self.mButtonGroup.addButton(btn)
             
             if c.mSelected == True:
                if selected_btn is not None:
