@@ -20,7 +20,6 @@ from PyQt4 import QtGui, QtCore
 import ResourceViewBase
 import maestro
 import maestro.core
-import os
 
 from SimpleGraph import Scale, Curve
 
@@ -90,11 +89,11 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
          else:
             title = "%.1f secs" % i
          action = QtGui.QAction(self.tr(title), self.mResourceTable)
-         callable = lambda time=i:self.onChangeReportTime(time)
-         self.connect(action, QtCore.SIGNAL("triggered()"), callable)
+         cb = lambda time=i:self.onChangeReportTime(time)
+         self.connect(action, QtCore.SIGNAL("triggered()"), cb)
          self.mResourceTable.addAction(action)
          self.mActions.append(action)
-         self.mActionCallables.append(callable)
+         self.mActionCallables.append(cb)
 
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)
 
@@ -216,7 +215,7 @@ class GraphDelegate(QtGui.QItemDelegate):
             QtGui.qDrawPlainRect(painter, option.rect, option.palette.highlight().color(), 1)
 
          # Draw the percentage as text.
-         text_width = max(option.fontMetrics.width(''), option.fontMetrics.width("100%")) + 6;
+         #text_width = max(option.fontMetrics.width(''), option.fontMetrics.width("100%")) + 6;
          overlay_text = ("%.2f " % data[-1]) + "%"
          style = QtGui.QApplication.style()
          align_flags = QtCore.Qt.AlignHorizontal_Mask | QtCore.Qt.TextSingleLine
@@ -258,7 +257,7 @@ class ResourceModel(QtCore.QAbstractTableModel):
          if ip_addr is not None and not self.mNodeDataMap.has_key(ip_addr):
             all_resources = []
             for r in self.mDataSizes:
-               resource_history = [0 for i in xrange(r)]
+               resource_history = [0] * r
                all_resources.append(resource_history)
             self.mNodeDataMap[ip_addr] = all_resources
 
@@ -274,7 +273,7 @@ class ResourceModel(QtCore.QAbstractTableModel):
       if not self.mNodeDataMap.has_key(ipAddr):
          all_resources = []
          for r in self.mDataSizes:
-            resource_history = [0 for i in xrange(r)]
+            resource_history = [0] * r
             all_resources.append(resource_history)
          self.mNodeDataMap[ipAddr] = all_resources
 

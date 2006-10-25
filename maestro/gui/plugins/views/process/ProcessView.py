@@ -71,10 +71,7 @@ class CaseInsensitiveSortProxyModel(QtGui.QSortFilterProxyModel):
          return l.toTime() < r.toTime()
       elif l.type() == QtCore.QVariant.DateTime:
          return l.toDateTime() < r.toDateTime()
-      else:
-         return l.toString().toLower() < r.toString().toLower()
-
-      return false;
+      return l.toString().toLower() < r.toString().toLower()
 
 class Proc:
    def __init__(self, nodeId, nodeName, name, pid, ppid, user, start, fullCmd):

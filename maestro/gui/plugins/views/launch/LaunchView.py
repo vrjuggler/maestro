@@ -16,11 +16,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys
 from PyQt4 import QtGui, QtCore
 import LaunchViewBase
 import HelpDialogBase
-import elementtree.ElementTree as ET
 
 import maestro.core
 const = maestro.core.const
@@ -95,7 +93,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
    def onHelpClicked(self, checked=False):
       if self.mSelectedApp.mHelpUrl is not None and \
-         self.mSelectedApp.mHelpUrl is not '':
+         self.mSelectedApp.mHelpUrl != '':
          # Load help HTML data. This searches the application execution
          # directory and all the directories listed in const.STANZA_PATH.
          file_path = pj(const.EXEC_DIR, self.mSelectedApp.mHelpUrl)
@@ -106,18 +104,18 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
                   break
 
          if os.path.exists(file_path):
-            file = QtCore.QFile(file_path)
-            if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+            help_file = QtCore.QFile(file_path)
+            if not help_file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
                QtGui.QMessageBox.warning(self.parentWidget(), "I/O Error",
                                          "Cannot read file '%s':\n%s." % \
-                                            (file_path, file.errorString()))
+                                            (file_path, help_file.errorString()))
             else:
-               stream = QtCore.QTextStream(file)
+               stream = QtCore.QTextStream(help_file)
                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                dialog = HelpDialog(self)
                dialog.mHelpBrowser.setHtml(stream.readAll())
                QtGui.QApplication.restoreOverrideCursor()
-               file.close()
+               help_file.close()
                dialog.exec_()
          else:
             QtGui.QMessageBox.warning(
@@ -595,7 +593,7 @@ class ChoiceSheet(GroupSheet):
                # Add child button to button group if we have single selection.
                self.mButtonGroup.addButton(btn)
             
-            if c.mSelected == True:
+            if c.mSelected:
                if selected_btn is not None:
                   print "WARNING: A mutually exclusive choice can not have two options selected."
                else:

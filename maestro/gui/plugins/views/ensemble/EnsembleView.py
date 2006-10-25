@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, socket
 from PyQt4 import QtGui, QtCore
 import EnsembleViewBase
 import maestro.core
@@ -348,6 +347,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
    def onAdd(self):
       """ Called when user presses the add button. """
+      # Create a new node that is stored in the ensemble.
       new_node = self.mEnsemble.createNode()
       num_nodes = self.mEnsemble.getNumNodes()
       new_index = self.mEnsembleModel.index(num_nodes-1)

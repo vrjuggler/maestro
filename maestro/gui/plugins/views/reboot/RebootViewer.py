@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, socket
 from PyQt4 import QtGui, QtCore
 
 import RebootViewerBase
@@ -46,7 +45,6 @@ class RebootInfo:
 
    def setTargets(self, targets):
       self.mTargets = targets
-      self.emit(QtCore.SIGNAL("targetsChanged(QList)"), self.mTargets)
 
    def getTargets(self):
       return self.mTargets
@@ -309,8 +307,7 @@ class RebootDelegate(QtGui.QItemDelegate):
       """
 
       if 1 == index.column():
-         # Get current selected node.
-         node = index.model().data(index, QtCore.Qt.UserRole)
+         # Get RebootInfo for selected node.
          reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
          # Create a TargetModel for the selected node.
          self.mTargetModel = TargetModel(reboot_info)
@@ -337,8 +334,7 @@ class RebootDelegate(QtGui.QItemDelegate):
       """
 
       if 1 == index.column():
-         # Get the node that we are editing.
-         node = index.model().data(index, QtCore.Qt.UserRole)
+         # Get RebootInfo for node that we are editing.
          reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
 
          # Get current boot target tuple.
@@ -348,8 +344,7 @@ class RebootDelegate(QtGui.QItemDelegate):
          if target_index > 0:
             widget.setCurrentIndex(target_index)
       elif 2 == index.column():
-         # Get the node that we are editing.
-         node = index.model().data(index, QtCore.Qt.UserRole)
+         # Get RebootInfo for node that we are editing.
          reboot_info = index.model().data(index, QtCore.Qt.UserRole+1)
          widget.setValue(reboot_info.mTimeout)
       else:

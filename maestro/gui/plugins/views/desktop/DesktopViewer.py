@@ -112,9 +112,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
          for i in xrange(ensemble.getNumNodes()):
             node = ensemble.getNode(i)
-            id = node.getId()
-            self.mNodeChooser.addItem(node.getHostname(), QtCore.QVariant(id))
-            self.mSettings[id] = DesktopSettings()
+            node_id = node.getId()
+            self.mNodeChooser.addItem(node.getHostname(), QtCore.QVariant(node_id))
+            self.mSettings[node_id] = DesktopSettings()
 
       # XXX: We should call this if we can't count on the ensembleChanged()
       # signal.
