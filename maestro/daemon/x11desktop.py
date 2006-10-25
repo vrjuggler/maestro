@@ -63,7 +63,12 @@ def addAuthority(user, xauthCmd, xauthFile):
    # output from running 'xauth list'.
    (child_stdout, child_stdin) = \
       popen2.popen2('%s -f %s list' % (xauthCmd, xauthFile))
-   host_str = '%s/unix' % os.environ['HOSTNAME']
+   (temp_stdout, temp_stdin) = popen2.popen2('/bin/hostname')
+   hostname = temp_stdout.readline()
+   hostname = hostname.strip()
+   temp_stdout.close()
+   temp_stdin.close()
+   host_str = '%s/unix' % hostname
    line = child_stdout.readline()
    child_stdout.close()
    child_stdin.close()
