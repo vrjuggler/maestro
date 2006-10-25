@@ -18,13 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, math, random, types
+import sys, math, types
 from PyQt4 import QtCore, QtGui
 
 import os.path
 pj = os.path.join
 sys.path.append( pj(os.path.dirname(__file__), ".."))
-import maestro.core
 
 import elementtree.ElementTree as ET
 
@@ -632,7 +631,7 @@ class Node(QtGui.QGraphicsItem):
 
       # Draw the node label.
       if option is not None:
-         text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.title())) + 6;
+         #text_width = max(option.fontMetrics.width(''), option.fontMetrics.width(self.title())) + 6;
          style = QtGui.QApplication.style()
          align_flags = QtCore.Qt.AlignHCenter | QtCore.Qt.TextWordWrap
          style.drawItemText(painter, option.rect, align_flags, option.palette, True, self.title())

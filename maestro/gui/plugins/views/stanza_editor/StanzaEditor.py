@@ -431,15 +431,26 @@ class GraphWidget(QtGui.QGraphicsView):
 
    def keyPressEvent(self, event):
       key = event.key()
-      if key == QtCore.Qt.Key_Up:
-         self.centerNode.moveBy(0, -20)
-      elif key == QtCore.Qt.Key_Down:
-         self.centerNode.moveBy(0, 20)
-      elif key == QtCore.Qt.Key_Left:
-         self.centerNode.moveBy(-20, 0)
-      elif key == QtCore.Qt.Key_Right:
-         self.centerNode.moveBy(20, 0)
-      elif key == QtCore.Qt.Key_Plus:
+
+      focus_item = self.scene().focusItem()
+      if focus_item is not None:
+         if key == QtCore.Qt.Key_Up:
+            focus_item.moveBy(0, -20)
+            focus_item.itemChange(QtGui.QGraphicsItem.ItemPositionChange,
+               QtCore.QVariant())
+         elif key == QtCore.Qt.Key_Down:
+            focus_item.moveBy(0, 20)
+            focus_item.itemChange(QtGui.QGraphicsItem.ItemPositionChange,
+               QtCore.QVariant())
+         elif key == QtCore.Qt.Key_Left:
+            focus_item.moveBy(-20, 0)
+            focus_item.itemChange(QtGui.QGraphicsItem.ItemPositionChange,
+               QtCore.QVariant())
+         elif key == QtCore.Qt.Key_Right:
+            focus_item.moveBy(20, 0)
+            focus_item.itemChange(QtGui.QGraphicsItem.ItemPositionChange,
+               QtCore.QVariant())
+      if key == QtCore.Qt.Key_Plus:
          self.scaleView(1.2)
       elif key == QtCore.Qt.Key_Minus:
          self.scaleView(1 / 1.2)
@@ -904,15 +915,15 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       # Load help HTML data.
       file_name = item.mElement.tag + ".html"
       file_path = pj(os.path.dirname(__file__), 'help', file_name)
-      file = QtCore.QFile(file_path)
-      if not file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+      help_file = QtCore.QFile(file_path)
+      if not help_file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
          print "Cannot read file %s:\n%s." % (file_path, file.errorString())
       else:
-         stream = QtCore.QTextStream(file)
+         stream = QtCore.QTextStream(help_file)
          QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
          self.mHelpWidget.setHtml(stream.readAll())
          QtGui.QApplication.restoreOverrideCursor()
-      file.close()
+      help_file.close()
 
    def keyPressEvent(self, event):
       key = event.key()
@@ -936,7 +947,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       drag.setPixmap(pixmap)
       #drag.setHotSpot(event.pos()) 
 
-      result = drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
+      drag.start(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction)
 
       # XXX Force the button back up. We have to do this as a result of
       #     the drag behavior. Don't really know why though.

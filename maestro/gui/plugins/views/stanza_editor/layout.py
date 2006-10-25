@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import sys, math, random
+import math, random
 from PyQt4 import QtCore
 
 import maestro.core
@@ -80,7 +80,7 @@ class ConcentricLayout(maestro.core.IGraphicsSceneLayout):
          azimutIndex = n % nodesPerCircle
          azimut = azimutIndex * self.azimutDelta;
 
-         circleIndex = 1 + ( n / nodesPerCircle )
+         circleIndex = 1 + ( float(n) / nodesPerCircle )
          cx = math.sin(math.radians(azimut)) * ( circleIndex * self.circleInterval )
          cy = math.cos(math.radians(azimut)) * ( circleIndex * self.circleInterval );
          node.setPos(center.x() + cx, center.y() + cy)
@@ -100,16 +100,16 @@ class ColimaconLayout(maestro.core.IGraphicsSceneLayout):
 
    def layout(self, scene):
       center = scene.sceneRect().center()
-      nodesPerCircle = 360 / self.azimutDelta;
+      #nodesPerCircle = 360 / self.azimutDelta;
 
       nodes = _getNodes(scene)
 
       n = 0
       for node in nodes:
-         azimutIndex = ( n % nodesPerCircle );
+         #azimutIndex = ( n % nodesPerCircle );
          azimut = n * self.azimutDelta;
 
-         circleIndex = 1 + ( n / nodesPerCircle );
+         #circleIndex = 1 + ( float(n) / nodesPerCircle );
          cx = math.sin(math.radians(azimut)) * ( math.log(1.0 + n ) * 10 * self.circleInterval );
          cy = math.cos(math.radians(azimut)) * ( math.log(1.0 + n ) * 10 * self.circleInterval );
          node.setPos(center.x() + cx, center.y() + cy)
@@ -117,7 +117,6 @@ class ColimaconLayout(maestro.core.IGraphicsSceneLayout):
 
          n += 1
 
-NONE = 0
 HORIZONTAL = 1
 VERTICAL = 2
 
@@ -134,7 +133,6 @@ class DirectedTreeLayout(maestro.core.IGraphicsSceneLayout):
    getName = staticmethod(getName)
       
    def layout(self, scene):
-      center = scene.sceneRect().center()
       # Reset the graph nodes positions (If position are not resetted, nodes are all considered
       # already placed
       _resetNodesPositions(scene)
