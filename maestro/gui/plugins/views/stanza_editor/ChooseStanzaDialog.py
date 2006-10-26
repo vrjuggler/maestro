@@ -110,10 +110,12 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
             "Stanza (*.stanza)", "", QtGui.QFileDialog.DontConfirmOverwrite
          )
 
-      if new_file is not None and new_file != '':
-         if not new_file.endswith('.stanza'):
-            new_file = new_file + '.stanza'
-         self.mNewStanzaEdit.setText(new_file)
+      if new_file is not None:
+         new_file = str(new_file)
+         if new_file != '':
+            if not new_file.endswith('.stanza'):
+               new_file = new_file + '.stanza'
+            self.mNewStanzaEdit.setText(new_file)
 
    def getFilename(self):
       if self.mExistingStazaRB.isChecked():
