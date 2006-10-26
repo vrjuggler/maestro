@@ -27,7 +27,7 @@ def getPathsUnderOptions(referencedElms):
    return path_list
 
 def __getPathsUnderOption(currentList, currentPath, elm):
-   my_path = currentPath + elm.get('name')
+   my_path = currentPath + elm.get('name','')
    currentList.append(my_path)
    children = elm[:]
    if len(children) > 0:
