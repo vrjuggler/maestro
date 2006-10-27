@@ -316,9 +316,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       for name, cls in self.mViewPlugins.iteritems():
          self.addView(name)
 
-      QtCore.QObject.connect(self.mToolboxButtonGroup,
-                             QtCore.SIGNAL("buttonClicked(int)"),
-                             self.mStack, QtCore.SLOT("setCurrentIndex(int)"))
+#      QtCore.QObject.connect(self.mToolboxButtonGroup,
+#                             QtCore.SIGNAL("buttonClicked(int)"),
+#                             self.mStack, QtCore.SLOT("setCurrentIndex(int)"))
       QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
                              self.viewChanged)
       QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
@@ -336,20 +336,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                "Could not find view named %s. You can selected from one "\
                "of the following %s. We will default to the first view %s."\
                % (env.mCmdOpts.view, view_names, view_names[0]))
-
-
-      # Set the default button to display
-      btn = self.mToolboxButtonGroup.buttons()[start_view_index]
-      btn.click()
-
-      # Set the stack widget's current width to be the one associated with
-      # the clicked button. This has to be done after the loaded views are
-      # initialized since this results in the view plug-in being activated.
-      # In other words, we do not want a view plug-in to be activated before
-      # it is initialized.
-      self.mStack.setCurrentIndex(self.mToolboxButtonGroup.id(btn))
-
-      assert(self.mCurViewPlugin is not None)
 
       # Timer to refresh pyro connections to nodes.
       self.refreshTimer = QtCore.QTimer()
@@ -539,13 +525,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
-      self.mToolboxButtonGroup = QtGui.QButtonGroup()
-      self.mToolbox.setBackgroundRole(QtGui.QPalette.Mid)
-
-      # Force the toolbox to be while
-      new_palette = QtGui.QPalette(self.palette())
-      new_palette.setColor(QtGui.QPalette.Mid, QtGui.QColor(QtCore.Qt.white))
-      self.mToolbox.setPalette(new_palette)
+      # Clear out all test data in list view and stack.
+      self.mViewList.clear()
+      self.mStack.removeWidget(self.mOldPage)
 
       self.connect(self.mArchiveLogsAction, QtCore.SIGNAL("triggered()"),
                    self.onArchiveLogs)
@@ -565,20 +547,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onLoadStanza)
       self.connect(self.mAboutAction, QtCore.SIGNAL("triggered()"),
                    self.onAbout)
+      self.connect(self.mViewList, QtCore.SIGNAL("currentRowChanged(int)"),
+                   self.mStack, QtCore.SLOT("setCurrentIndex(int)"))
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
-      self.vboxlayout1.addWidget(self.mOutputTab)
-
-      # Make the toolbox a scroll area.
-      self.mToolboxScrollArea = QtGui.QScrollArea()
-      self.gridlayout.addWidget(self.mToolboxScrollArea, 0,0,2,1)
-      self.mToolboxScrollArea.setWidget(self.mToolbox)
-      self.mToolboxScrollArea.setWidgetResizable(True)
-      sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-      sizePolicy.setHorizontalStretch(0)
-      sizePolicy.setVerticalStretch(0)
-      self.mToolboxScrollArea.setSizePolicy(sizePolicy)
-
+      self.vboxlayout.addWidget(self.mOutputTab)
 
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
@@ -650,25 +623,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          # Add the view widget to the GUI.
          index = self.mStack.addWidget(new_view_widget)
 
-         btn = QtGui.QToolButton(self.mToolbox)
-         btn.setIcon(new_icon)
-         btn.setAutoRaise(True)
-         btn.setCheckable(True)
-
-         # Steal ToolTip, StatusTip, and copy WhatsThis from ViewWidget.
-         btn.setToolTip(new_view_widget.toolTip())
-         btn.setStatusTip(new_view_widget.statusTip())
-         btn.setWhatsThis(new_view_widget.whatsThis())
-         new_view_widget.setToolTip('')
-         new_view_widget.setStatusTip('')
-
-         # Set a minimum size on the button.
-         btn.setMinimumSize(QtCore.QSize(40,40))
-         btn.setIconSize(QtCore.QSize(40,40))
-
-         # Insert the new button into the toolbox and it's QButtonGroup.
-         self.mToolbox.layout().insertWidget(self.mToolbox.layout().count()-1, btn)
-         self.mToolboxButtonGroup.addButton(btn, index)
+         # Create a new list item for the view.
+         list_item = QtGui.QListWidgetItem(new_icon, new_view.getName())
+         list_item.setTextAlignment(QtCore.Qt.AlignCenter)
+         self.mViewList.addItem(list_item)
 
          # Keep track of widgets to remove them later
          self.mActiveViewPlugins[pluginTypeName] = [new_view, new_view_widget]
