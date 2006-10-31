@@ -84,21 +84,40 @@ def process_command_line():
    Maestro by Infiscape
    """
 
-   parser = OptionParser(usage="%prog [options] [ensemble]", version="0.1", description=prog_desc)
-   parser.add_option("-e","--ensemble", type="string",
-                     help="Ensemble file to load")
-   parser.add_option("-s","--stanza", action="append", type="string",
-                     help="Load a specific stanza.", dest="stanzas")
-   parser.add_option("-v","--view", type="string",
-                     help="Start with a given view active.")
-   parser.add_option("-o","--override", action="append", type="string",
-                     help="Start with a given view active.", dest="overrides")
+   parser = OptionParser(usage = "%prog [ options ... ] [ensemble] [stanza]",
+                         version = maestro.__version__,
+                         description = prog_desc)
+   parser.add_option("-e", "--ensemble", type = "string",
+                     help = "the ensemble to load")
+   parser.add_option("-s", "--stanza", action = "append", type = "string",
+                     help = "load only the named stanza", dest = "stanzas")
+   parser.add_option("-v", "--view", type = "string",
+                     help = "display the identified view when the GUI opens")
+   parser.add_option("-o", "--override", action = "append", type = "string",
+                     help = "override stanza settings", dest = "overrides")
 
    (opts, pos_args) = parser.parse_args()
 
-   # For backwards compatability.
-   if len(pos_args) > 0 and opts.ensemble is None:
-      opts.ensemble = pos_args[0]
+   # For easy use from application launchers where it is not always
+   # convenient to specify command line parameters.
+   if len(pos_args) > 0:
+      if opts.stanzas is None:
+         opts.stanzas = []
+
+      for a in pos_args:
+         try:
+            # Positional arguments are supposed to be XML files. We determine
+            # what type of file it is by loading it and looking at the type of
+            # the root element.
+            tree = ET.ElementTree(file = a)
+            type = tree.getroot().tag
+
+            if 'ensemble' == type:
+               opts.ensemble = a
+            elif 'stanza' == type:
+               opts.stanzas.append(a)
+         except IOError, ex:
+            pass
 
    return opts
 

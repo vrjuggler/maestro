@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=Maestro Cluster Management GUI
 Comment=Use, maintain, and control a cluster of computers from a single GUI
-Exec=maestro -e %f
+Exec=maestro %F
 Terminal=true
-MimeType=application/x-maestro-ensemble
+MimeType=application/x-maestro-ensemble;application/x-maestro-stanza
 Icon=maestro
 Type=Application
 Categories=Application;System

@@ -109,7 +109,7 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_prefix}/lib/maestro-%{version}/Maestro.py*
 %{_prefix}/lib/maestro-%{version}/maestro/gui
 %{_prefix}/lib/maestro-%{version}/stanzas
-%{_prefix}/share/applications/maestro*.desktop
+%{_prefix}/share/applications/maestro.desktop
 %{_prefix}/share/mime
 %{_prefix}/share/pixmaps
 
@@ -123,8 +123,8 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_prefix}/lib/maestro-%{version}/maestro/daemon
 
 %post gui
-ensemble_str='application/x-maestro-ensemble=maestro-ensemble.desktop'
-stanza_str='application/x-maestro-stanza=maestro-stanza.desktop'
+ensemble_str='application/x-maestro-ensemble=maestro.desktop'
+stanza_str='application/x-maestro-stanza=maestro.desktop'
 echo $ensemble_str >> /usr/share/applications/defaults.list
 echo $stanza_str >> /usr/share/applications/defaults.list
 update-mime-database /usr/share/mime >/dev/null 2>&1

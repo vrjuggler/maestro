@@ -54,8 +54,7 @@ install:
 	tar --exclude .svn -cvf - stanzas | tar -C $(appdir) -xpf -
 	install -m 0644 maestrod.xcfg $(confdir)
 	install -m 0644 dist/Maestro.xml $(mimedir)/packages
-	install -m 0644 dist/maestro-ensemble.desktop $(siteappdir)
-	install -m 0644 dist/maestro-stanza.desktop $(siteappdir)
+	install -m 0644 dist/maestro.desktop $(siteappdir)
 	install -m 0644 maestro/gui/images/maestro_icon.png $(icondir)/maestro.png
 ifeq ($(OS), Linux)
 	@mkdir -p $(svcdir)
