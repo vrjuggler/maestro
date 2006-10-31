@@ -150,7 +150,14 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
    def setupUi(self, widget):
       PathEditorBase.Ui_PathEditorBase.setupUi(self, widget)
-      self.connect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
+      self.connect(self.mPathCB,
+                   QtCore.SIGNAL("currentIndexChanged(QString)"),
+                   self.onPathSelected)
+      line_edit = self.mPathCB.lineEdit()
+      self.connect(line_edit, QtCore.SIGNAL("editingFinished()"),
+                   self.onPathSet)
+      self.connect(line_edit, QtCore.SIGNAL("returnPressed()"),
+                   self.onPathSet)
 
    def setOption(self, option):
       """ Updates the current state of the application with the given option.
@@ -207,6 +214,13 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
    no_space_path_re = re.compile(r'^\S+$')
    valid_path_re    = re.compile(r'^(\w+:|)\S+/\S+$')
+
+   def onPathSet(self):
+      '''
+      Slot invoked when the path editing completes. This happens when the
+      combo box loses focus or when the users presses <ENTER>.
+      '''
+      self.onPathSelected(self.mPathCB.currentText())
 
    def onPathSelected(self, text):
       """ Slot that is called when the user either selects a value from the
