@@ -49,6 +49,9 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
+      self.mStringEditor = None
+      self.mIntegerEditor = None
+      self.mFileEditor = None
 
    def setupUi(self, widget):
       BasicEditorBase.Ui_BasicEditorBase.setupUi(self, widget)
@@ -61,6 +64,7 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       self.mAttribTable.setTabKeyNavigation(True)
 
       # Remove the dummy editor, but leave the label.
+      # XXX: Can't this be done using self._removeValueEditor()?
       if self.mValueEditor is not None:
          self.hboxlayout.removeWidget(self.mValueEditor)
          self.hboxlayout.removeWidget(self.mValueLabel)
@@ -70,12 +74,7 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
 
    def setOption(self, option):
       if self.mValueEditor is not None:
-         self.mValueEditor.cleanup()
-         self.hboxlayout.removeWidget(self.mValueEditor)
-         self.hboxlayout.removeWidget(self.mValueLabel)
-         self.mValueEditor.setParent(None)
-         self.mValueLabel.setParent(None)
-         self.disconnect(self.mValueEditor, QtCore.SIGNAL("valueChanged"), self.onValueChanged)
+         self._removeValueEditor()
          self.mValueEditor = None
 
       self.mOption = option
@@ -85,18 +84,15 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
       self.mAttribTable.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
       self.mAttribDelegate = AttribDelegate()
+      self.connect(self.mAttribDelegate,
+                   QtCore.SIGNAL("valueTypeChanged(QString)"),
+                   self.onValueTypeChanged)
       self.mAttribTable.setItemDelegate(self.mAttribDelegate)
 
       items_with_cdata = ['arg', 'env_var', 'command', 'cwd']
       if self.mOption.mElement.tag in items_with_cdata:
          data_type = self.mOption.mElement.get('value_type', 'string')
-         if 'string' == data_type:
-            self.mValueEditor = helpers.StringEditor(self)
-         elif 'file' == data_type:
-            self.mValueEditor = helpers.FileEditor(self)
-         else:
-            self.mValueEditor = helpers.StringEditor(self)
-         self.connect(self.mValueEditor, QtCore.SIGNAL("valueChanged"), self.onValueChanged)
+         self.mValueEditor = self._getValueEditor(data_type)
 
          text = self.mOption.mElement.text
          if text is not None:
@@ -106,10 +102,43 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
             self.mValueEditor.setValue('')
 
          # Place the line edit into the form.
-         self.mValueEditor.setParent(self)
-         self.mValueLabel.setParent(self)
-         self.hboxlayout.addWidget(self.mValueLabel)
-         self.hboxlayout.addWidget(self.mValueEditor)
+         self._addValueEditor()
+
+   def _getValueEditor(self, dataType):
+      if 'string' == dataType:
+         if self.mStringEditor is None:
+            self.mStringEditor = helpers.StringEditor(self)
+         editor = self.mStringEditor
+      elif 'file' == dataType:
+         if self.mFileEditor is None:
+            self.mFileEditor = helpers.FileEditor(self)
+         editor = self.mFileEditor
+      else:
+         if self.mStringEditor is None:
+            self.mStringEditor = helpers.StringEditor(self)
+         editor = self.mStringEditor
+
+      return editor
+
+   def _addValueEditor(self):
+      self.mValueEditor.blockSignals(False)
+      self.mValueEditor.setParent(self)
+      self.mValueLabel.setParent(self)
+      self.hboxlayout.addWidget(self.mValueLabel)
+      self.hboxlayout.addWidget(self.mValueEditor)
+      self.connect(self.mValueEditor, QtCore.SIGNAL("valueChanged"),
+                   self.onValueChanged)
+
+   def _removeValueEditor(self):
+      assert(self.mValueEditor is not None)
+      self.mValueEditor.clearFocus()
+      self.mValueEditor.blockSignals(True)
+      self.hboxlayout.removeWidget(self.mValueEditor)
+      self.hboxlayout.removeWidget(self.mValueLabel)
+      self.mValueEditor.setParent(None)
+      self.mValueLabel.setParent(None)
+      self.disconnect(self.mValueEditor, QtCore.SIGNAL("valueChanged"),
+                      self.onValueChanged)
 
    def onValueChanged(self, value):
       if self.mOption is not None:
@@ -117,6 +146,27 @@ class BasicEditor(QtGui.QWidget, BasicEditorBase.Ui_BasicEditorBase):
             self.mOption.mElement.text = None
          else:
             self.mOption.mElement.text = value
+
+   def onValueTypeChanged(self, valueType):
+      new_editor = self._getValueEditor(valueType)
+
+      # If the value editor for the new value type is not the same object as
+      # the one currently in use, perform a switch.
+      if self.mValueEditor is not new_editor:
+         cur_value = ''
+
+         # If the current value editor is not None, get its current value and
+         # remove it from the UI.
+         if self.mValueEditor is not None:
+            cur_value = self.mValueEditor.getValue()
+            self.mValueEditor.setValue('')
+            self._removeValueEditor()
+
+         # Set up the new value editor and set its value to what its
+         # predecessor held.
+         self.mValueEditor = new_editor
+         self.mValueEditor.setValue(cur_value)
+         self._addValueEditor()
 
 class AttribModel(QtCore.QAbstractTableModel):
    def __init__(self, item, parent=None):
@@ -245,6 +295,11 @@ class AttribDelegate(QtGui.QItemDelegate):
                value = prop.values.values()[current_index]
                # Set the real value in the model.
                index.model().setData(index, QtCore.QVariant(value), QtCore.Qt.EditRole)
+
+               if 'value_type' == prop_name:
+                  self.emit(QtCore.SIGNAL("valueTypeChanged(QString)"),
+                            QtCore.QString(value))
+
                return
 
       QtGui.QItemDelegate.setModelData(self, widget, model, index)

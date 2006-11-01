@@ -34,6 +34,9 @@ class StringEditor(QtGui.QLineEdit):
    def setValue(self, value):
       self.setText(value)
 
+   def getValue(self):
+      return self.text()
+
    def onValueChanged(self):
       edit_text = str(self.text())
       edit_text = edit_text.strip()
@@ -57,6 +60,9 @@ class FileEditor(QtGui.QWidget):
 
    def setValue(self, value):
       self.mLineEdit.setText(value)
+
+   def getValue(self):
+      return self.mLineEdit.text()
 
    def onValueChanged(self):
       edit_text = str(self.mLineEdit.text())
