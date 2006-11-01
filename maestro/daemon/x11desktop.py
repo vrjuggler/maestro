@@ -59,17 +59,43 @@ def addAuthority(user, xauthCmd, xauthFile):
    assumed that the user is logged on to the local workstation, and the
    authority should not be removed later using removeAuthority().
    '''
+   (temp_stdout, temp_stdin) = popen2.popen2('/bin/hostname')
+
+   # Read the output from /bin/hostname. Protect against EINTR just in case.
+   done = False
+   while not done:
+      try:
+         hostname = temp_stdout.readline().strip()
+         done = True
+      except IOError, ex:
+         if ex.errno == errno.EINTR:
+            continue
+         else:
+            raise
+
+   temp_stdout.close()
+   temp_stdin.close()
+
+   host_str = '%s/unix' % hostname
+
    # Pull out the system X authority key. It will be the first line of the
    # output from running 'xauth list'.
    (child_stdout, child_stdin) = \
       popen2.popen2('%s -f %s list' % (xauthCmd, xauthFile))
-   (temp_stdout, temp_stdin) = popen2.popen2('/bin/hostname')
-   hostname = temp_stdout.readline()
-   hostname = hostname.strip()
-   temp_stdout.close()
-   temp_stdin.close()
-   host_str = '%s/unix' % hostname
-   line = child_stdout.readline()
+
+   # Read the output from running the above xauth command. Protect against
+   # EINTR just in case.
+   done = False
+   while not done:
+      try:
+         line = child_stdout.readline()
+         done = True
+      except IOError, ex:
+         if ex.errno == errno.EINTR:
+            conetinue
+         else:
+            raise
+
    child_stdout.close()
    child_stdin.close()
 
