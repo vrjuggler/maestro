@@ -79,6 +79,7 @@ Section "!Maestro Core" SecCore
   SectionIn RO
   SetOverwrite ifnewer
   SetOutPath "$INSTDIR\maestro\core"
+  File maestro\LICENSE.txt
   File /r /x .svn maestro\maestro\core\*
   SetOutPath "$INSTDIR\maestro\util"
   File /r /x .svn maestro\maestro\util\*
@@ -101,7 +102,7 @@ Section "Maestro GUI" SecGUI
   File /r /x .svn maestro\stanzas\* 
 
   SetOutPath "$INSTDIR"
-  File maestro\cluster.ensem maestro\LICENSE.txt maestro\Maestro.py maestro\maestrod.py maestro\maestrod.xcfg maestro\server.pem
+  File maestro\cluster.ensem maestro\Maestro.py maestro\maestro.xcfg
   File infiscape_maestro.ico ensemble.ico stanza.ico
   File /r gui_deps\*
 
@@ -133,7 +134,7 @@ Section "Maestro Service" SecService
   SetOutPath "$INSTDIR\maestro\daemon"
   File /r /x .svn maestro\maestro\daemon\*
   SetOutPath "$INSTDIR"
-  File maestro\maestrod.py
+  File maestro\maestrod.py maestro\maestrod.xcfg maestro\server.pem
 SectionEnd
 
 Section "Maestro Documentation" SecDoc

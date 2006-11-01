@@ -105,6 +105,7 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 
 %files gui
 %defattr(-, root, root)
+/etc/maestro.xcfg
 %{_bindir}/maestro
 %{_prefix}/lib/maestro-%{version}/Maestro.py*
 %{_prefix}/lib/maestro-%{version}/maestro/gui

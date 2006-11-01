@@ -28,15 +28,15 @@ class Preferences:
       self.mFile = file
       self.mRoot = ET.parse(file)
 
-   def create(self, prefsFile, rootToken):
+   def create(prefsFile, rootToken):
       '''
       Creates an empty preferences structure and saves it to the named file.
       If this preferences object already held a preferences structure, it
       is lost. The given preferences file name is stored for later use.
       '''
-      self.mFile = prefsFile
-      self.mRoot = ET.Element(rootToken)
-      self.save(prefsFile)
+      Preferences.writeTree(prefsFile, ET.Element(rootToken))
+
+   create = staticmethod(create)
 
    def save(self, prefsFile = None):
       '''
@@ -48,12 +48,17 @@ class Preferences:
          if prefsFile is None:
             prefsFile = self.mFile
 
-         cfg_text = ET.tostring(self.mRoot)
-         dom = xml.dom.minidom.parseString(cfg_text)
-         output_file = file(prefsFile, 'w')
-         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
-         output_file.close()
+         Preferences.writeTree(prefsFile, self.mRoot)
 
+   def writeTree(prefsFile, root):
+      cfg_text = ET.tostring(root)
+      dom = xml.dom.minidom.parseString(cfg_text)
+      output_file = file(prefsFile, 'w')
+      output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+      output_file.close()
+
+   writeTree = staticmethod(writeTree)
+      
    def __getitem__(self, item):
       '''
       Searches for the identified item under the root of the preferences

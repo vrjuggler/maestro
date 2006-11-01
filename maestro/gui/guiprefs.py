@@ -19,8 +19,71 @@
 import maestro.core
 import maestro.core.prefs
 
+from PyQt4 import QtGui
 
-class GuiPrefs(maestro.core.prefs.Preferences):
+
+class GuiPrefs:
+   def __init__(self):
+      self.mSitePrefs = maestro.core.prefs.Preferences()
+      self.mUserPrefs = maestro.core.prefs.Preferences()
+
+   def load(self, siteFile, userFile):
+      if siteFile is not None:
+         try:
+            self.mSitePrefs.load(siteFile)
+         except IOError, ex:
+            QtGui.QMessageBox.warning(
+               None, "Warning",
+               "Failed to read site-wide settings file %s: %s" % \
+                  (siteFile, ex.strerror)
+            )
+
+      if userFile is not None:
+         try:
+            self.mUserPrefs.load(userFile)
+         except IOError, ex:
+            QtGui.QMessageBox.warning(
+               None, "Warning",
+               "Failed to read user preferences file %s: %s" % \
+                  (userFile, ex.strerror)
+            )
+
+   def create(prefsFile, rootToken):
+      maestro.core.prefs.create(prefsFile, rootToken)
+
+   create = staticmethod(create)
+
+   def save(self, siteFile = None, userFile = None):
+      self.mSitePrefs.save(siteFile)
+      self.mUserPrefs.save(userFile)
+
+   def __getitem__(self, item):
+      try:
+         return self.mUserPrefs[item]
+      except KeyError:
+         return self.mSitePrefs[item]
+
+   def __setitem__(self, key, value):
+      # TODO: Implement me!
+      pass
+
+   def __iter__(self):
+      return self.mUserPrefs.__iter__() + self.mSitePrefs.__iter__()
+
+   def has_key(self, item):
+      return self.mUserPrefs.has_key(item) or self.mSitePrefs.has_key(item)
+
+   def get(self, item, default = None):
+      if self.mUserPrefs.has_key(item):
+         value = self.mUserPrefs.get(item, default)
+      else:
+         value = self.mSitePrefs.get(item, default)
+
+      return value
+
+   def keys(self):
+      return self.mUserPrefs.keys() + self.mSitePrefs.keys()
+
    def getUserMode(self):
       '''
       Returns the user mode as an integer value.

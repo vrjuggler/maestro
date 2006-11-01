@@ -23,7 +23,7 @@ try:
 except:
    pass
 
-import sys, os, os.path, time, traceback
+import sys, os, os.path, time, traceback, re
 
 exec_dir = os.path.dirname(__file__)
 
@@ -48,21 +48,11 @@ qt4reactor.install(app)
 from twisted.internet import reactor
 import elementtree.ElementTree as ET
 
-stanza_path_env = []
-if os.environ.has_key('STANZA_PATH'):
-   stanza_path_env = os.environ['STANZA_PATH'].split(os.path.pathsep)
-
 import maestro.core
 const = maestro.core.const
 const.APP_NAME = 'maestro'
 const.EXEC_DIR = exec_dir
 const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'plugins')
-const.STANZA_PATH = [pj(const.EXEC_DIR, 'stanzas'),
-                     pj(xplatform.getUserAppDir(const.APP_NAME), 'stanzas'),
-                     pj(xplatform.getSiteAppDir(const.APP_NAME), 'stanzas')] + \
-                    stanza_path_env
-
-print const.STANZA_PATH
 
 const.MAESTRO_GUI = True
 from maestro.gui import ensemble
@@ -121,6 +111,34 @@ def process_command_line():
 
    return opts
 
+gEnvVarRegexBraces = re.compile(r'\${(\w+)}')
+
+def expandEnv(value):
+   '''
+   Expands the environment variables referneced in value using os.environ.
+   '''
+   if value is None:
+      return
+
+   start_pos = 0
+   match = gEnvVarRegexBraces.search(value, start_pos)
+
+   while match is not None:
+      env_var = match.group(1)
+      env_var_ex = re.compile(r'\${%s}' % env_var)
+
+      if os.environ.has_key(env_var):
+         new_value = env_var_ex.sub(os.environ[env_var].replace('\\', '\\\\'),
+                                    value)
+         value = new_value
+      # If env_var does not exist in os.environ, then we skip it.
+      else:
+         start_pos = match.end(1)
+
+      match = gEnvVarRegexBraces.search(value, start_pos)
+
+   return value
+
 def main():
    # --- Process command line options ---- #
    opts = process_command_line()
@@ -150,38 +168,102 @@ def main():
       splash.showMessage("Loading Maestro by Infiscape")
       app.processEvents()
 
+      if os.environ.has_key('MAESTRO_CFG'):
+         site_cfg_file_path = os.environ['MAESTRO_CFG']
+      else:
+         site_cfg_file_path = os.path.join(const.EXEC_DIR, 'maestro.xcfg')
+
       # All platforms use the same name for the Maestro client settings, but
       # the file comes from a platform-specific location.
-      cfg_file_name = 'maestro.xml'
-      data_dir      = None
+      user_cfg_file_name = 'maestro.xml'
+      user_data_dir = None
 
-      data_dir = xplatform.getUserAppDir(const.APP_NAME)
-      if data_dir is not None:
-         if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
+      user_data_dir = xplatform.getUserAppDir(const.APP_NAME)
+      if user_data_dir is not None:
+         if not os.path.exists(user_data_dir):
+            os.makedirs(user_data_dir)
 
-         cfg_file_path = os.path.join(data_dir, cfg_file_name)
+         user_cfg_file_path = os.path.join(user_data_dir, user_cfg_file_name)
       else:
-         cfg_file_path = cfg_file_name
+         user_cfg_file_path = user_cfg_file_name
 
       gui_settings = gui.guiprefs.GuiPrefs()
 
-      if not os.path.exists(cfg_file_path):
+      if not os.path.exists(user_cfg_file_path):
          try:
-            gui_settings.create(cfg_file_path, 'maestro')
+            gui.guiprefs.GuiPrefs.create(user_cfg_file_path, 'maestro')
          except IOError, ex:
             QtGui.QMessageBox.warning(None, "Warning",
                                       "Failed to create preferences file: %s: %s" \
-                                         (cfg_file_path, ex.strerror))
-            cfg_file_path = None
+                                         (user_cfg_file_path, ex.strerror))
+            user_cfg_file_path = None
 
-      try:
-         if cfg_file_path is not None:
-            gui_settings.load(cfg_file_path)
-      except IOError, ex:
-         QtGui.QMessageBox.warning(None, "Warning",
-                                   "Failed to read preferences file %s: %s" % \
-                                      (cfg_file_path, ex.strerror))
+      gui_settings.load(site_cfg_file_path, user_cfg_file_path)
+
+      user_stanza_path = None
+
+      # If the GUI settings include a user stanza path setting, pull it out to
+      # go at the begining of the stanza search path.
+      user_stanza_path = gui_settings.get('user_stanza_path', None)
+      if user_stanza_path is not None:
+         user_stanza_path = user_stanza_path.split(os.path.pathsep)
+
+      site_stanza_path = None
+
+      # If the GUI settings include a site-wide stanza path setting, pull it
+      # out to go after the user-specific stanza path.
+      site_stanza_path = gui_settings.get('site_stanza_path', None)
+      if site_stanza_path is not None:
+         site_stanza_path = site_stanza_path.split(os.path.pathsep)
+
+      if user_stanza_path is None:
+         user_stanza_path = []
+      if site_stanza_path is None:
+         site_stanza_path = []
+
+      # Set the base stanza search path. This looks in the user-specified
+      # directories first and then in the site-wide directory list.
+      stanza_path = user_stanza_path + site_stanza_path
+
+      # Default to using the built-in stanza search path (see below).
+      use_builtin_stanza_path = True
+
+      # Determine whether the use of the built-in stanza search path has been
+      # disabled.
+      if gui_settings.has_key('use_builtin_stanza_path'):
+         value = gui_settings['use_builtin_stanza_path']
+         if value.lower() == 'false' or value == '0':
+            use_builtin_stanza_path = False
+
+      if use_builtin_stanza_path:
+         # The remaining ordering of stanza search paths is the same as it
+         # has been since the stanza search path feature was inroduced.
+         stanza_path.append(os.path.join(const.EXEC_DIR, 'stanzas'))
+         stanza_path.append(
+            os.path.join(xplatform.getUserAppDir(const.APP_NAME), 'stanzas')
+         )
+         stanza_path.append(
+            os.path.join(xplatform.getSiteAppDir(const.APP_NAME), 'stanzas')
+         )
+
+      # Always check to see if the environment variable STANZA_PATH is set.
+      # If it is, append its value to stanza_path.
+      stanza_path_env = []
+      if os.environ.has_key('STANZA_PATH'):
+         stanza_path.extend(os.environ['STANZA_PATH'].split(os.path.pathsep))
+
+      for i in xrange(len(stanza_path)):
+         stanza_path[i] = expandEnv(stanza_path[i])
+
+      # Finally, set the stanza path that will be used for the lifetime of
+      # the Maestro GUI application.
+      const.STANZA_PATH = stanza_path
+      print const.STANZA_PATH
+
+      # If no ensemble has been specified yet, check to see if the GUI
+      # settings contains a default ensemble to use.
+      if opts.ensemble is None and gui_settings.has_key('default_ensemble'):
+         opts.ensemble = expandEnv(gui_settings['default_ensemble'])
 
       def splashProgressCB(percent, message):
          splash.showMessage("%3.0f%% %s"%(percent*100,message))
