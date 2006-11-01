@@ -43,7 +43,7 @@ class TreeItem:
       else:
          if selected is not None:
             print "WARNING: [%s][%s] You should not specify a selected attribute unless the "\
-                   "options parent is a choice." % (xmlElt.tag, xmlElt.get("label", xmlElt.text))
+                   "option's parent is a choice." % (xmlElt.tag, xmlElt.get("label", xmlElt.text))
             #assert (selected is None)
          # XXX: Currently self.mSelected is checked in the traversal to determine if we should include the option.
          self.mSelected = True
