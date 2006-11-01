@@ -25,11 +25,16 @@ import maestro.core
 
 class WindowsPowercfgPlugin(maestro.core.ISaverPlugin):
    id_re          = re.compile(r'^Numerical ID\s+(\d+)')
-   monitor_off_re = re.compile(r'^Turn off monitor \(AC\)\s+(\w.*)$')
+   monitor_off_re = re.compile(r'^Turn off monitor \(AC\)\s+(\w.*)\s*$')
+   off_time_re    = re.compile(r'After (\d+) \w+\s*$')
 
    def __init__(self):
       maestro.core.ISaverPlugin.__init__(self)
       self.mConfigID = 0
+
+      # Set the default time (in minutes) that will be passed to powercfg.exe
+      # when re-enabling AC power management for the monitor.
+      self.mACOffTime = 20
 
       lines = self._readOutput('/query')
 
@@ -37,7 +42,25 @@ class WindowsPowercfgPlugin(maestro.core.ISaverPlugin):
          match = self.id_re.match(l)
          if match is not None:
             self.mConfigID = int(match.group(1))
-            break
+            continue
+
+         match = self.monitor_off_re.match(l)
+         if match is not None:
+            # If a power off time is currently set, use that as the default
+            # for self.mACOffTime. This allows us to restore users back to
+            # what they had been using without requiring them to configure
+            # anything.
+            match = self.off_time_re.search(l)
+            if match is not None:
+               self.mACOffTime = int(match.group(1))
+
+            continue
+
+      env = maestro.core.Environment()
+
+      if env.settings.has_key('powercfg/ac_off_time') and \
+         env.settings.get('powercfg/ac_off_time') is not None:
+         self.mACOffTime = int(env.settings['powercfg/ac_off_time'])
 
    def getName():
       return 'powercfg'
@@ -67,7 +90,7 @@ class WindowsPowercfgPlugin(maestro.core.ISaverPlugin):
 
    def setSaverEnabled(self, avatar, enabled):
       if enabled:
-         time = 20
+         time = self.mACOffTime
       else:
          time = 0
 
