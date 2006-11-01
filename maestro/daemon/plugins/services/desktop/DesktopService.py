@@ -38,8 +38,9 @@ class DesktopService(maestro.core.IServicePlugin):
       # "xset,xscreensaver" to indicate the use of the xset and xscreensaver
       # plug-ins or just "windows" to indicate the use of the Windows
       # plug-in).
-      if env.settings.has_key('saver_types'):
-         saver_types = env.settings.get('saver_types', '').lower().split(',')
+      if env.settings.has_key('saver_types') and \
+         env.settings.get('saver_types') is not None:
+         saver_types = env.settings.get('saver_types').lower().split(',')
       else:
          # On Windows, default to using the standard screen saver management
          # plug-ins.
