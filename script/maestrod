@@ -1,4 +1,6 @@
 #!/bin/sh
 
 maestro_dir="@MAESTRO_DIR@"
+MAESTROD_CFG="@MAESTROD_CONFDIR@/maestrod.xcfg"
+export MAESTROD_CFG
 python "$maestro_dir/maestrod.py" $*

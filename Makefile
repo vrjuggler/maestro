@@ -46,9 +46,9 @@ install:
 	install -m 0755 Maestro.py $(appdir)
 	@files=`find $(appdir) -name \*.py | xargs echo | awk '{ for ( i = 1; i <= NF - 1; i++ ) { print "\"" $$i "\", "; } print "\"" $$NF "\"" }'` ; \
            python -c "import distutils.util as du ; du.byte_compile([$$files]); du.byte_compile([$$files], 1)"
-	cat script/maestrod | sed -e 's|@MAESTRO_DIR@|$(appdir)|' > $(sbindir)/maestrod
+	cat script/maestrod | sed -e 's|@MAESTRO_DIR@|$(appdir)|' -e 's|@MAESTROD_CONFDIR@|$(confdir)|' > $(sbindir)/maestrod
 	chmod 0755 $(sbindir)/maestrod
-	cat script/maestro | sed -e 's|@MAESTRO_DIR@|$(appdir)|' > $(bindir)/maestro
+	cat script/maestro | sed -e 's|@MAESTRO_DIR@|$(appdir)|' -e 's|@MAESTRO_CONFDIR@|$(confdir)|' > $(bindir)/maestro
 	chmod 0755 $(bindir)/maestro
 	install -m 0755 script/mkpem $(appdir)
 	tar --exclude .svn -cvf - stanzas | tar -C $(appdir) -xpf -

@@ -104,10 +104,10 @@ class MaestroServer:
 
       server_settings = ServerSettings()
 
-      settings_file = os.path.join(const.EXEC_DIR, 'maestrod.xcfg')
-
-      if not os.path.exists(settings_file):
-         settings_file = '/etc/maestrod.xcfg'
+      if os.environ.has_key('MAESTROD_CFG'):
+         settings_file = os.environ['MAESTROD_CFG']
+      else:
+         settings_file = os.path.join(const.EXEC_DIR, 'maestrod.xcfg')
 
       try:
          server_settings.load(settings_file)

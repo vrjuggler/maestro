@@ -1,4 +1,6 @@
 #!/bin/sh
 
 maestro_dir="@MAESTRO_DIR@"
+MAESTRO_CFG="@MAESTRO_CONFDIR@/maestro.xcfg"
+export MAESTRO_CFG
 python "$maestro_dir/Maestro.py" $*
