@@ -31,7 +31,7 @@ import StanzaEditorBase
 import math
 
 import maestro.core
-import maestro.core.Stanza
+import maestro.gui.stanza
 from maestro.util import xplatform
 import maestro.gui.MaestroResource
 
@@ -216,7 +216,7 @@ class StanzaScene(QtGui.QGraphicsScene):
       failed = parentFailed
       if not failed:
          item_class_str = item.mElement.get('class', '')
-         failed = not maestro.core.Stanza.classMatch(self.mClassFilterList, item_class_str)
+         failed = not maestro.gui.stanza.classMatch(self.mClassFilterList, item_class_str)
 
       item.mEnabled = not failed
 
@@ -530,7 +530,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       self.mClassFilterCB.addItem("master")
       self.mClassFilterCB.addItem("slave")
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       self.mOptionEditorPlugins = env.mPluginManager.getPlugins(
          plugInType=maestro.core.IOptionEditorPlugin, returnNameDict=True)
 
@@ -614,7 +614,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       pass
 
    def __fillApplicationCB(self):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       stanza_elms = []
       for stanza in env.mStanzaStore.mStanzas.values():
          for item in stanza:
@@ -751,7 +751,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          # that same directory.
          self.mStanzaStartDir = os.path.dirname(stanza_filename)
 
-         env = maestro.core.Environment()
+         env = maestro.gui.Environment()
          if env.mStanzaStore.mStanzas.has_key(stanza_filename):
             stanza = env.mStanzaStore.mStanzas[stanza_filename]
             stanza.append(element)
@@ -955,7 +955,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       b.update()
 
 if __name__ == "__main__":
-   import maestro.core.StanzaStore
+   import maestro.gui.stanzastore
 
    app = QtGui.QApplication(sys.argv)
    random.seed(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
@@ -966,8 +966,8 @@ if __name__ == "__main__":
    maestro.core.const.PLUGIN_DIR = pj(os.path.dirname(__file__), '.')
    maestro.core.const.APP_NAME = 'maestro'
    #maestro.core.const.STANZA_PATH = [pj(os.getcwd(), os.path.dirname(__file__))]
-   env = maestro.core.Environment()
-   env.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
+   env = maestro.gui.Environment()
+   env.mStanzaStore = maestro.gui.stanzastore.StanzaStore()
    env.mStanzaStore.scan()
    # -- Plugin manager -- #
    env.mPluginManager = maestro.util.plugin.PluginManager()

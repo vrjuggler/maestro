@@ -106,7 +106,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
          QtGui.QMenu.exec_(self.mResourceTable.actions(), self.mResourceTable.mapToGlobal(point));
 
    def onChangeReportTime(self, reportTime):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       
       selected_indices = self.mResourceTable.selectedIndexes()
       if 0 == len(selected_indices):
@@ -130,7 +130,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       if self.mEnsemble is not None:
          self.mEnsemble.refreshConnections()
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit("*", "settings.get_usage")
       env.mEventManager.emit("*", "settings.get_mem_usage")
       
@@ -155,7 +155,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       self.mResourceTable.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
       self.mResourceTable.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect("*", "settings.mem_usage", self.reportMemUsage)
       env.mEventManager.connect("*", "settings.cpu_usage", self.reportCpuUsage)
 

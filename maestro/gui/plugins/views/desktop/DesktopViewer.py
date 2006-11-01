@@ -77,7 +77,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self.connect(self.mNodeChooser, QtCore.SIGNAL("activated(int)"),
                    self.nodeSelected)
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect('*', 'desktop.report_saver_use',
                                 self.onReportSaverUse)
       env.mEventManager.connect('*', 'desktop.report_bg_image_file',
@@ -141,7 +141,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
    def _queryState(self, nodeId):
       self.mReportCount = 0
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(nodeId, 'desktop.get_saver_use')
       env.mEventManager.emit(nodeId, 'desktop.get_bg_image_file')
       env.mEventManager.emit(nodeId, 'desktop.get_bg_image_data')
@@ -160,7 +160,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
    def onToggleScreenSaver(self, val):
       node_id = self.getCurrentNodeID()
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_toggle', val)
 
    def onBackgroundEdited(self):
@@ -207,7 +207,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       file_obj.close()
       data_list = pbhelpers.string2list(data_str)
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(nodeId, 'desktop.set_background', fileName,
                              data_list, debug = False)
 
@@ -218,7 +218,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
 
    def onStopScreenSaver(self):
       node_id = self.getCurrentNodeID()
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(node_id, 'desktop.saver_stop')
       self.refresh()
 

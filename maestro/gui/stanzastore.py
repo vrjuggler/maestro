@@ -25,7 +25,7 @@ from PyQt4 import QtCore, QtGui
 
 import maestro.core
 import elementtree.ElementTree as ET
-import Stanza
+import stanza
 import xml.dom.minidom
 
 xpath_tokenizer = re.compile(
@@ -148,12 +148,13 @@ class StanzaStore:
       # Fully expand all applications.
       for elm in app_elms:
          expanded = self.expand(elm)
-         app = Stanza.Application(expanded)
+         app = stanza.Application(expanded)
          apps.append(app)
       return apps
 
    def _expandCmdLine(self):
-      env = maestro.core.Environment()
+      import maestro.gui
+      env = maestro.gui.Environment()
       if env.mCmdOpts is None or not env.mCmdOpts.overrides:
          return
 

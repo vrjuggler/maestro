@@ -142,7 +142,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       if self.mEnsemble is not None:
          self.mEnsemble.refreshConnections()
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit("*", "process.get_procs")
 
       if self.mProcessModel is not None:
@@ -180,7 +180,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       """ Terminates all currently selected processes. """
       nodes_to_refresh = []
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       for selected_index in self.mProcessTable.selectedIndexes():
          # Only handle selected indices in the first column since we only
          # need to terminate once for each row.
@@ -227,7 +227,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       self.connect(selection_model,
          QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.onSelectionChanged)
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect("*", "process.procs", self.onReportProcs)
 
 class ProcessModel(QtCore.QAbstractTableModel):

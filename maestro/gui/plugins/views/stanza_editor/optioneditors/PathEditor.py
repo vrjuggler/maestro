@@ -64,7 +64,7 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
           @param option: Option that we are operating on.
       """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       assert(option is not None)
       self.mOption = option
       parent = self.mOption.mParent
@@ -124,7 +124,7 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       """ Helper method that fills the match list with all options
           that match the current filter.
       """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
 
       # Clear the current match list.
       self.mMatchesList.clear()
@@ -176,7 +176,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       """ Helper method that fills the combobox with all current applications
           and global options.
       """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       # Clear combobox and add a default item.
       self.mPathCB.clear()
 
@@ -259,7 +259,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
       """ Helper method that fills the match list with all application
           and global option elements that match the filter.
       """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
 
       # Clear the current match list.
       self.mMatchesList.clear()

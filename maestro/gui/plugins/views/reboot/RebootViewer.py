@@ -79,7 +79,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mRebootInfoMap = {}
       self.mRebootModel = None
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect("*", "reboot.report_info", self.onReportTargets)
 
    def setupUi(self, widget):
@@ -233,7 +233,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
 
    def onRefresh(self):
       """ Slot that reboots the entire cluster. """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit("*", "reboot.get_info")
 
    def onRebootNode(self):
@@ -245,7 +245,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
             QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
             QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
          if reply == QtGui.QMessageBox.Yes:
-            env = maestro.core.Environment()
+            env = maestro.gui.Environment()
             env.mEventManager.emit(node.getId(), "reboot.reboot")
 
    def onRebootCluster(self):
@@ -255,34 +255,34 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
          QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
       if reply == QtGui.QMessageBox.Yes:
-         env = maestro.core.Environment()
+         env = maestro.gui.Environment()
          env.mEventManager.emit("*", "reboot.reboot")
 
    def onSetTargetToLinux(self):
       """ Slot that makes the selected node reboot to Linux. """
       node = self.__getSelectedNode()
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(node.getId(), "reboot.switch_os", const.LINUX)
 
    def onSetTargetToWindows(self):
       """ Slot that makes the selected node reboot to Windows. """
       node = self.__getSelectedNode()
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(node.getId(), "reboot.switch_os", const.WINXP)
 
    def onSetAllTargetsToLinux(self):
       """ Slot that makes all nodes reboot to Linux. """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit("*", "reboot.switch_os", const.LINUX)
 
    def onSetAllTargetsToWindows(self):
       """ Slot that makes all nodes reboot to Windows. """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit("*", "reboot.switch_os", const.WINXP)
 
    def onTargetTriggered(self, node_id, index, title):
       """ Slot called by the context menu that causes the default target to change. """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit(node_id, "reboot.set_default_target", index, title)
 
    def onRebootModelChanged(self, start_index, end_index):
@@ -371,7 +371,7 @@ class RebootDelegate(QtGui.QItemDelegate):
          if not current_target == new_target:
             (title, os, target_index) = new_target
             # Tell the selected node to change it's default target.
-            env = maestro.core.Environment()
+            env = maestro.gui.Environment()
             env.mEventManager.emit(node.getId(), "reboot.set_default_target", target_index, title)
       elif 2 == index.column():
          # Get the node that we are editing.
@@ -381,7 +381,7 @@ class RebootDelegate(QtGui.QItemDelegate):
          print "TIMEOUT: ", timeout
          if not timeout == reboot_info.mTimeout:
             # Tell the selected node to change it's default target.
-            env = maestro.core.Environment()
+            env = maestro.gui.Environment()
             env.mEventManager.emit(node.getId(), "reboot.set_timeout", timeout)
       else:
          QtGui.QItemDelegate.setModelData(self, widget, model, index)

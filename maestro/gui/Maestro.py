@@ -64,7 +64,7 @@ class OutputTabWidget(QtGui.QTabWidget):
       self.connect(self, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
          self.onContextMenu)
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect("*", "launch.output", self.onOutput)
 
       # Listen for launch signal so that we can clear all log windows
@@ -186,7 +186,7 @@ class OutputTabWidget(QtGui.QTabWidget):
 class NodeLogger:
    def __init__(self):
       self.mLoggers = {}
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect("*", "launch.output", self.onAppOutput)
 
    def setEnsemble(self, ensemble):
@@ -243,7 +243,7 @@ class OutputFileLogger(NodeLogger):
       return self.mFiles
 
    def getLogDir():
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       if env.settings.has_key('logdir'):
          logdir = env.settings['logdir']
       else:
@@ -310,7 +310,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mEnsembleStartDir = None
 
    def init(self):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       self.mCurViewPlugin = None
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
       for name, cls in self.mViewPlugins.iteritems():
@@ -345,7 +345,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
-         env = maestro.core.Environment()
+         env = maestro.gui.Environment()
          # Close all connections.
          # NOTE: This will cause events to be fired before we disconnect
          # from the event manager on the next line.
@@ -499,7 +499,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.statusBar().showMessage("Created new ensemble")
 
    def onSaveStanzas(self):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mStanzaStore.saveAll()
       self.statusBar().showMessage("All stanzas saved")
       
@@ -515,7 +515,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       if os.path.exists(ensemble_filename):
          try:
-            env = maestro.core.Environment()
+            env = maestro.gui.Environment()
             env.mStanzaStore.loadStanzas(ensemble_filename, printCB)
          except IOError, ex:
             QtGui.QMessageBox.critical(None, "Error",
@@ -592,7 +592,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          zip_file.close()
 
    def onExit(self):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.closeAllConnections()
       self.close()
       QtGui.QApplication.exit(0)
@@ -683,13 +683,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def closeEvent(self, event):
       self.__closeLoggers()
-      #env = maestro.core.Environment()
+      #env = maestro.gui.Environment()
       # Check to ensure the user does not have pending changes.
       #env.mStanzaStore.checkForStanzaChanges()
       QtGui.QMainWindow.closeEvent(self, event)
 
    def __closeLoggers(self):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       clean = True
       if env.settings.has_key('clean_logfiles'):
          cleanup_str = env.settings.get('clean_logfiles','true').lower()

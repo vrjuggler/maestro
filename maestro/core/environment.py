@@ -14,10 +14,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import os, os.path, socket
+import os.path, socket
 pj = os.path.join
 
-import maestro
 import maestro.util.plugin
 import maestro.util.mixins
 import maestro.core
@@ -35,8 +34,6 @@ class Environment(maestro.util.mixins.Singleton):
          self.mPluginManager = None
          self.settings = None
          self.mCmdOpts = None
-         self.mViewPluginsHolder = None
-         self.mStanzaStore = None
 
    def initialize(self, settings, opts=None, progressCB=None):
       """ Initialize the environment. """
@@ -58,16 +55,3 @@ class Environment(maestro.util.mixins.Singleton):
       print "Environment found plugins: "      
       for (name,p) in plugins.iteritems():
          print "  %s : %s"%(name,p)
-
-      if maestro.core.const.MAESTRO_GUI:
-         import StanzaStore
-         # Create a stanza store and scan for files.
-         self.mStanzaStore = StanzaStore.StanzaStore()
-         if opts.stanzas:
-            self.mStanzaStore.loadStanzas(opts.stanzas, progressCB)
-         else:
-            self.mStanzaStore.scan(progressCB)
-      
-      # -- Initialize the plugin holders -- #
-      #self.mViewPluginsHolder = lucid.core.ViewPluginsHolder()
-      #self.mViewPluginsHolder.scan()

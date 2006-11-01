@@ -61,7 +61,7 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
       # Connect the browse button.
       self.connect(self.mBrowseBtn, QtCore.SIGNAL("clicked()"), self.onBrowse)
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       for stanza_file in env.mStanzaStore.mStanzas.keys():
          self.mStanzaList.addItem(stanza_file)
 

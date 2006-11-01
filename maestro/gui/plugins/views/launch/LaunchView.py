@@ -22,7 +22,7 @@ import HelpDialogBase
 
 import maestro.core
 const = maestro.core.const
-from maestro.core import Stanza
+from maestro.gui import stanza
 LOCAL = maestro.core.EventManager.EventManager.LOCAL
 from maestro.gui import helpers
 
@@ -137,7 +137,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
       self.mAppComboBox.clear()
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       self.mApplications = env.mStanzaStore.getApplications()
 
       # If cur_text is not found among the namesl for applications in
@@ -190,7 +190,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          sh.show()
 
    def onTerminateApp(self):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.emit("*", "launch.terminate")
       # Send a signal to the local GUI indicating that we have terminated a process.
       env.mEventManager.localEmit(LOCAL, "launch.terminate")
@@ -202,7 +202,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       if self.mEnsemble is None:
          return
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       # Send a signal to the local GUI indicating that we have launched process.
       env.mEventManager.localEmit(LOCAL, "launch.launch")
 
@@ -216,8 +216,8 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
                "%s is not connected." % node.getName())
             continue
             
-         option_visitor = Stanza.OptionVisitor(node.getClassList())
-         Stanza.traverse(self.mSelectedApp, option_visitor)
+         option_visitor = stanza.OptionVisitor(node.getClassList())
+         stanza.traverse(self.mSelectedApp, option_visitor)
          print option_visitor.mArgs
          print option_visitor.mCommands
          print option_visitor.mCwds
@@ -301,7 +301,7 @@ CHECK_BUTTON = 2
 def _buildWidget(obj, buttonType = NO_BUTTON):
    name = obj.getName()
    widget = None
-   if isinstance(obj, Stanza.Application):
+   if isinstance(obj, stanza.Application):
       pass
    #   print "Building Application Sheet... ", name
    #   sh = QtGui.QLabel(self)
@@ -310,38 +310,38 @@ def _buildWidget(obj, buttonType = NO_BUTTON):
    #elif isinstance(obj, LauncherModel.GlobalOption):
    #   pass
    #   print "Building Global Option Sheet... ", name
-   elif isinstance(obj, Stanza.Group):
+   elif isinstance(obj, stanza.Group):
       #print "Building Group Sheet... ", name
       widget = GroupSheet(obj, buttonType)
       widget.setupUi(buttonType)
-   elif isinstance(obj, Stanza.Choice):
+   elif isinstance(obj, stanza.Choice):
       #print "Building Choice Sheet... ", name
-      if obj.mChoiceType == Stanza.ONE_CB:
+      if obj.mChoiceType == stanza.ONE_CB:
          widget = ChoiceSheetCB(obj, buttonType)
       else:
          widget = ChoiceSheet(obj, buttonType)
       widget.setupUi(buttonType)
-   elif isinstance(obj, Stanza.Arg):
+   elif isinstance(obj, stanza.Arg):
       #print "Building Arg Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
-   elif isinstance(obj, Stanza.Command):
+   elif isinstance(obj, stanza.Command):
       #print "Building Command Sheet... ", name
       widget = ValueSheet(obj)
       widget.setupUi(buttonType)
       widget.setTitle("Command")
-   elif isinstance(obj, Stanza.Cwd):
+   elif isinstance(obj, stanza.Cwd):
       #print "Building CWD Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle("Current Working Directory")
-   elif isinstance(obj, Stanza.EnvVar):
+   elif isinstance(obj, stanza.EnvVar):
       #print "Building EnvVar Sheet... ", name
       widget = ValueSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
-   elif isinstance(obj, Stanza.EnvList):
+   elif isinstance(obj, stanza.EnvList):
       widget = EnvListSheet(obj, buttonType)
       widget.setupUi(buttonType)
       widget.setTitle(obj.mLabel)
@@ -585,7 +585,7 @@ class ChoiceSheet(GroupSheet):
       for c in self.mObj.mChildren:
          # Create the correct type of sheet for our child. Placing a selection
          # button next to it.
-         if self.mObj.mChoiceType == Stanza.ONE:
+         if self.mObj.mChoiceType == stanza.ONE:
             w = _buildWidget(c, RADIO_BUTTON)
             # Get the selection button that is used for the child/choice.
             btn = w.mButtonWidget
@@ -598,7 +598,7 @@ class ChoiceSheet(GroupSheet):
                   print "WARNING: A mutually exclusive choice can not have two options selected."
                else:
                   selected_btn = btn
-         elif self.mObj.mChoiceType == Stanza.ANY:
+         elif self.mObj.mChoiceType == stanza.ANY:
             w = _buildWidget(c, CHECK_BUTTON)
          else:
             w = _buildWidget(c, NO_BUTTON)
@@ -616,7 +616,7 @@ class ChoiceSheet(GroupSheet):
          w.setParent(self)
          self.mChildrenLayout.addWidget(w)
 
-      if self.mObj.mChoiceType == Stanza.ONE:
+      if self.mObj.mChoiceType == stanza.ONE:
          if selected_btn is None and len(self.mButtonGroup.buttons()) > 0:
             selected_btn = self.mButtonGroup.buttons()[0]
          if selected_btn is not None:
@@ -627,10 +627,10 @@ def isPointless(obj):
        not editable then there is no point displaying it unless it is
        in a choice.
    """
-   env = maestro.core.Environment()
+   env = maestro.gui.Environment()
    user_mode = env.settings.getUserMode()
    return (const.ADVANCED != user_mode and      \
-           not obj.__class__ in [Stanza.EnvList] and    \
+           not obj.__class__ in [stanza.EnvList] and    \
            not obj.mHidden and                  \
            not obj.mEditable)
 
@@ -657,7 +657,7 @@ class ValueSheet(Sheet):
       # Create editor if we want to allow the user to edit the value
       # or we are in advanced mode.
       self.mValueEditor = None
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       user_mode = env.settings.getUserMode()
       if (self.mObj.mEditable or const.ADVANCED == user_mode):
          data_type = self.mObj.mDataType

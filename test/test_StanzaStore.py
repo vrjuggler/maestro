@@ -2,7 +2,7 @@ import os, sys
 pj = os.path.join
 sys.path.append( pj(os.path.dirname(__file__), ".."))
 import unittest
-import maestro.core.StanzaStore
+import maestro.gui.stanzastore
 import maestro.core
 const = maestro.core.const
 const.STANZA_PATH = [pj(os.path.dirname(__file__), "data")]
@@ -11,7 +11,7 @@ import elementtree.ElementTree as ET
 
 class StanzaStoreTest(unittest.TestCase):
    def setUp(self):
-      self.mStanzaStore = maestro.core.StanzaStore.StanzaStore()
+      self.mStanzaStore = maestro.gui.stanzastore.StanzaStore()
       self.mStanzaStore.scan()
 
 #   def testScan(self):
@@ -133,7 +133,7 @@ class StanzaStoreTest(unittest.TestCase):
 
       # NOTE: This test assumes that env.mCmdOpts was None
       #       when self.mStanzaStore.scan() was called.
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       d = DummyOptions()
       setattr(d, 'overrides',
          ["expand:ChangeFilename/File?flag=-j&cdata=new_file.xmlsoe"])

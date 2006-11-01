@@ -62,13 +62,13 @@ class Ensemble(QtCore.QObject):
       #      to make each node generate a signal when it's OS changed and
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.connect(LOCAL, "connectionLost", self.onLostConnection)
 
    def disconnectFromEventManager(self):
       # Unregister to receive signals from all nodes about their current os.
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.mEventManager.disconnect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.disconnect(LOCAL, "connectionLost", self.onLostConnection)
 
@@ -131,7 +131,7 @@ class Ensemble(QtCore.QObject):
    def refreshConnections(self):
       """Try to connect to all nodes."""
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
 
       # Iterate over nodes and try to connect to nodes that are not connected.
       for node in self.mNodes:
@@ -155,7 +155,7 @@ class Ensemble(QtCore.QObject):
       if not self.mConnectInProgress.has_key(nodeId):
          self.mConnectInProgress[nodeId] = False
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       return not self.mConnectInProgress[nodeId] and \
              not env.mEventManager.isConnected(nodeId) and \
              not nodeId in self.mDisallowedNodes
@@ -196,7 +196,7 @@ class Ensemble(QtCore.QObject):
                self.mDisallowedNodes.remove(nodeId)
                dlg = LoginDialog.LoginDialog()
                dlg.exec_()
-               env = maestro.core.Environment()
+               env = maestro.gui.Environment()
                env.mEventManager.setCredentials(dlg.getLoginInfo())
          # If login was deined, give the user the option of retrying. Denied
          # login may not necessarily require reauthentication.
@@ -284,7 +284,7 @@ class Ensemble(QtCore.QObject):
          self.mNodes.remove(node)
          self.disconnect(node, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
          self.mElement.remove(node.mElement)
-         env = maestro.core.Environment()
+         env = maestro.gui.Environment()
          self.emit(QtCore.SIGNAL("nodeRemoved"), node, old_index)
          self.emit(QtCore.SIGNAL("ensembleChanged"))
 
@@ -334,7 +334,7 @@ class ClusterNode(QtCore.QObject):
          self.emit(QtCore.SIGNAL("nodeChanged"), self)
       
    def setHostname(self, newHostname):
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       if self.mIpAddress is not None and env.mEventManager.isConnected(self.mIpAddress):
          env.mEventManager.disconnectFromNode(self.mIpAddress)
 

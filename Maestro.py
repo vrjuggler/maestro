@@ -55,9 +55,9 @@ const.EXEC_DIR = exec_dir
 const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'plugins')
 
 const.MAESTRO_GUI = True
-from maestro.gui import ensemble
 
 import maestro.gui as gui
+import maestro.gui.ensemble as ensemble
 import maestro.gui.Maestro
 import maestro.gui.LoginDialog
 import maestro.gui.guiprefs
@@ -269,7 +269,7 @@ def main():
          splash.showMessage("%3.0f%% %s"%(percent*100,message))
          app.processEvents()   
 
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       env.initialize(gui_settings, opts, splashProgressCB)
 
       # Create a log in dialog.

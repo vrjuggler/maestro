@@ -20,9 +20,9 @@ from PyQt4 import QtGui, QtCore
 import EnsembleViewBase
 import maestro.core
 const = maestro.core.const
-env = maestro.core.Environment
 from maestro.gui import ensemble
 from maestro.gui import EnsembleModel
+env = maestro.gui.Environment
 
 class EnsembleViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
@@ -168,8 +168,8 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.setupUi(self)
       self.mEnsemble = None
       self.mEnsembleModel = None
-      env = maestro.core.Environment()
-      env.mEventManager.connect("*", "ensemble.report_log", self.onReportLog)
+      env().mEventManager.connect("*", "ensemble.report_log",
+                                  self.onReportLog)
 
    def setupUi(self, widget):
       """
@@ -217,8 +217,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
    def onGetLog(self):
       selected_node = self.__getSelectedNode()
       if selected_node is not None:
-         env = maestro.core.Environment()
-         env.mEventManager.emit(selected_node.getId(), "ensemble.get_log")
+         env().mEventManager.emit(selected_node.getId(), "ensemble.get_log")
 
    def onReportLog(self, nodeId, debugList):
       node = self.mEnsemble.getNodeById(nodeId)
@@ -341,9 +340,9 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
          self.mEnsemble.lookupIpAddrs()
          self.mEnsemble.refreshConnections()
 
-      env = maestro.core.Environment()
-      env.mEventManager.emit("*", "ensemble.get_os")
-      env.mEventManager.emit("*", "ensemble.get_settings")
+      environ = env()
+      environ.mEventManager.emit("*", "ensemble.get_os")
+      environ.mEventManager.emit("*", "ensemble.get_settings")
 
    def onAdd(self):
       """ Called when user presses the add button. """

@@ -60,7 +60,7 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
 
           @param option: Option that we are operating on.
       """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
       assert(option is not None)
       self.mOption = option
       parent = self.mOption.mParent
@@ -124,7 +124,7 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
       """ Helper method that fills the match list with all options
           that match the current filter.
       """
-      env = maestro.core.Environment()
+      env = maestro.gui.Environment()
 
       # Clear the current match list.
       self.mMatchesList.clear()
