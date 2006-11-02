@@ -40,12 +40,22 @@ class StanzaStore:
       self.mStanzas = {}
       self.mStanzaDigests = {}
 
+   def clearStanzas(self):
+      '''
+      Wipes out the current collection of loaded stanzas.
+      '''
+      self.mStanzas = {}
+
    def scan(self, progressCB=None):
+      '''
+      Scans for stanza files using the directories named in
+      maestro.core.const.STANZA_PATH.
+
+      @note This does not clear the current collection of stanzas. To cause
+            that to happen, invoke clearStanzas() first.
+      '''
       if not progressCB:
          progressCB = null_progress_cb
-
-      # Clear all old stanza files.
-      self.mStanzas = {}
 
       # We'll say that reading the N stanza directories totals up to 1% of
       # the overall work.
