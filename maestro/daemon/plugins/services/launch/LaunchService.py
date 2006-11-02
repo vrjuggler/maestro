@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -51,7 +51,7 @@ class OutputThread(threading.Thread):
             #   self.mLaunchService.mLogger.debug("line: " + stderr_line)
             #   env.mEventManager.emit("*", "launch.output", stderr_line)
             #   check_done = False
-               
+
             # Other wise check to see if the process is still running.
             else:
                if not self.mLaunchService.isProcessRunning():
@@ -107,8 +107,6 @@ class LaunchService(maestro.core.IServicePlugin):
 
          #self.mLogger.debug("Original env: " + str(envMap))
 
-
-
          # Expand all environment variables.
          # XXX: Do we really need to do this in all cases. The operating system
          #      should be able to do this for us. Except we are not using cross
@@ -129,7 +127,7 @@ class LaunchService(maestro.core.IServicePlugin):
          #    If /C or /K is specified, then the remainder of the command line
          #    after the switch is processed as a command line, where the
          #    following logic is used to process quote (") characters:
-         # 
+         #
          #        1. [...]
          #
          #        2. Otherwise, old behavior is to see if the first character
@@ -208,7 +206,7 @@ class LaunchService(maestro.core.IServicePlugin):
       running = self.isProcessRunning()
       env = maestro.core.Environment()
       env.mEventManager.emit("*", "launch.report_is_running", running)
-      
+
    def isProcessRunning(self):
       try:
          # poll to see if is process still running
