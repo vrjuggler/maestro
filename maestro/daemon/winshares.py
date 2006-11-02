@@ -96,7 +96,12 @@ def updateShares(avatar):
    logger.info('\n=== Map network drives ===')
    # Map user's home directory.
    user_info = win32net.NetUserGetInfo(dc_name, user_name, 4)
-   mapNetworkDrive(user_info['home_dir_drive'], user_info['home_dir'])
+   try:
+      if user_info['home_dir_drive'] != '' and user_info['home_dir'] != '':
+         mapNetworkDrive(user_info['home_dir_drive'], user_info['home_dir'])
+   except KeyError, ke:
+      logger.error(ke)
+
 
    # Map user's persistent network drives.
    try:
