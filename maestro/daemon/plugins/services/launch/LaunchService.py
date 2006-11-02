@@ -267,14 +267,13 @@ class LaunchService(maestro.core.IServicePlugin):
       return (value, replaced)
 
    def evaluateEnvVars(self, envMap):
-      sEnvVarRegexBraces = re.compile('\${(\w+)}')
       replaced = 1
       while replaced > 0:
          self.mLogger.debug("replaced: " + str(replaced))
          replaced = 0
          for k, v in envMap.iteritems():
             self.mLogger.debug("Trying to match: " + v)
-            match = sEnvVarRegexBraces.search(v)
+            match = self.sEnvVarRegexBraces.search(v)
             if match is not None:
                self.mLogger.debug("Trying to replace env vars in " + str(v))
                (v, r) = self.expandEnv(v, envMap, k)
