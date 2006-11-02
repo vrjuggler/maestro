@@ -20,6 +20,9 @@
 import re
 import sys, os, os.path, threading, time
 
+if not sys.platform.startswith("win"):
+   import pwd
+
 import maestro.core
 import process
 import logging
@@ -107,8 +110,38 @@ class LaunchService(maestro.core.IServicePlugin):
 
          #self.mLogger.debug("Original env: " + str(envMap))
 
+         # Ensure that common environment variables that may be referenced in
+         # command or the current working directory are set according to the
+         # user execution environment rather than the daemon execution
+         # environment.
+         # TODO: What about Windows?
+         if not sys.platform.startswith('win'):
+            user_name = avatar.mCredentials['username']
+            pwent     = pwd.getpwnam(user_name)
+
+            envMap['HOME']     = pwent[5]
+            envMap['USER']     = user_name
+            envMap['LOG_NAME'] = user_name
+
+         # Merge our environment with the local environment.
+         # XXX: This might not give us what we think it does because on UNIX
+         #      os.environ is bound when the service starts. This will happen
+         #      before many things get set up in the environment, $HOSTNAME
+         #      for example is not defined yet. On Windows it should give
+         #      us the System Environment.
+         merge(envMap, os.environ)
+
+         # No need to do this since we are merging the entire os.environ.
+         if sys.platform.startswith("win"):
+            envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+         # XXX: We should not assume that a non-Windows platform is running
+         # the X Window System.
+         else:
+            envMap['DISPLAY']    = os.environ['DISPLAY']
+            envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
+
          # Expand all environment variables.
-         # XXX: Do we really need to do this in all cases. The operating system
+         # XXX: Do we really need to do this in all cases? The operating system
          #      should be able to do this for us. Except we are not using cross
          #      platform envvar syntax.
          self.evaluateEnvVars(envMap)
@@ -161,23 +194,6 @@ class LaunchService(maestro.core.IServicePlugin):
          #self.mLogger.info("Running command: " + command)
          self.mLogger.debug("Working Dir: " + str(cwd))
          self.mLogger.debug("Translated env: " + str(envMap))
-
-         # Merge our environment with the local environment.
-         # XXX: This might not give us what we think it does because on UNIX
-         #      os.environ is bound when the service starts. This will happen
-         #      before many things get set up in the environment, $HOSTNAME
-         #      for example is not defined yet. On Windows it should give
-         #      us the System Environment.
-         merge(envMap, os.environ)
-
-         # No need to do this since we are merging the entire os.environ.
-         if sys.platform.startswith("win"):
-            envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
-         # XXX: We should not assume that a non-Windows platform is running
-         # the X Window System.
-         else:
-            envMap['DISPLAY']    = os.environ['DISPLAY']
-            envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
 
          self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
                                              env = envMap, avatar = avatar)
