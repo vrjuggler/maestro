@@ -28,43 +28,37 @@ import process
 import logging
 
 class OutputThread(threading.Thread):
-   def __init__(self, launchService):
+   def __init__(self, launchService, stream):
       threading.Thread.__init__(self)
       self.mLaunchService = launchService
+      self.mStream = stream
 
    def run(self):
       sys.stdout.flush()
-      #return
+
       try:
          env = maestro.core.Environment()
          env.mEventManager.emit("*", "launch.report_is_running", True)
          while self.mLaunchService.mProcess is not None: # and  self.mLaunchService.isProcessRunning():
             # Try to get output from process.
-            stdout_line = self.mLaunchService.mProcess.stdout.read(4096)
-            #stderr_line = self.mLaunchService.mProcess.stderr.read(4096)
-            stderr_line = ""
+            line = self.mStream.read(4096)
             check_done = True
             # If we got something back then send it across the network.
-            if stdout_line is not None and stdout_line != "":
-               self.mLaunchService.mLogger.debug("line: " + stdout_line)
-               env.mEventManager.emit("*", "launch.output", stdout_line, debug=False)
+            if line is not None and line != "":
+               self.mLaunchService.mLogger.debug("line: " + line)
+               env.mEventManager.emit("*", "launch.output", line,
+                                      debug = False)
                check_done = False
-
-            #if stderr_line is not None and stderr_line != "":
-            #   self.mLaunchService.mLogger.debug("line: " + stderr_line)
-            #   env.mEventManager.emit("*", "launch.output", stderr_line)
-            #   check_done = False
-
             # Other wise check to see if the process is still running.
             else:
                if not self.mLaunchService.isProcessRunning():
                   print "Process is not running."
-                  if stdout_line == "" and stderr_line == "":
+                  if line == "":
                      print "Both stdout and stderr are empty"
                      break
             time.sleep(0.1)
 
-         self.mLaunchService.mLogger.info("Process is not longer running.")
+         self.mLaunchService.mLogger.info("Process is no longer running.")
          env.mEventManager.emit("*", "launch.report_is_running", False)
          self.mLaunchService.mProcess = None
       except Exception, ex:
@@ -202,11 +196,12 @@ class LaunchService(maestro.core.IServicePlugin):
          self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
                                              env = envMap, avatar = avatar)
 
-         self.mOutputThread = OutputThread(self)
+         self.mStdoutThread = OutputThread(self, self.mProcess.stdout)
+         #self.mStderrThread = OutputThread(self, self.mProcess.stderr)
          print "BEFORE THREAD START"
          sys.stdout.flush()
-         self.mOutputThread.start()
-         #self.mOutputThread.join()
+         self.mStdoutThread.start()
+         #self.mStderrThread.start()
          print "AFTER THREAD START"
          sys.stdout.flush()
          return True
