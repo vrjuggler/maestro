@@ -92,7 +92,7 @@ def addAuthority(user, xauthCmd, xauthFile):
          done = True
       except IOError, ex:
          if ex.errno == errno.EINTR:
-            conetinue
+            continue
          else:
             raise
 
