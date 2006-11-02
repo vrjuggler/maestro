@@ -50,8 +50,13 @@ from elementtree.ElementTree import parse
 
 if os.name == 'nt':
    import win32api, win32event, win32serviceutil, win32service, win32security
+   import win32net, win32profile
+   import pywintypes
    import ntsecuritycon, win32con
    import maestro.daemon.windesktop as windesktop
+   import maestro.daemon.winshares as winshares
+   import maestro.util.registry as registry
+
 # XXX: We should not assume that a non-Windows platform is running the
 # X Window System.
 else:
@@ -176,6 +181,8 @@ if os.name == 'nt':
                                                               50000, 10)
 
       def SvcStop(self):
+         sys.stdout = self.savedOut
+         sys.stderr = self.savedErr
          import servicemanager
          self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
 
@@ -190,9 +197,15 @@ if os.name == 'nt':
       def SvcDoRun(self):
          import servicemanager
 
+         def null_output(text):
+            pass
+
+         self.savedOut = sys.stdout
+         self.savedErr = sys.stderr
+
          # Create file like objects to get all stdout and stderr.
-         sys.stdout = maestro.util.PseudoFileOut(writeOut)
-         sys.stderr = maestro.util.PseudoFileErr(writeErr)
+         sys.stdout = maestro.util.PseudoFileOut(null_output)
+         sys.stderr = maestro.util.PseudoFileErr(null_output)
 
          formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
          self.mNtEvent.setLevel(logging.INFO)
@@ -233,6 +246,8 @@ class UserPerspective(pb.Avatar):
       self.mWinsta     = None
       self.mDesktop    = None
 
+      self.mLogger = logging.getLogger('UserPerspective')
+
    def perspective_registerCallback(self, nodeId, obj):
       env = maestro.core.Environment()
       env.mEventManager.remote_registerCallback(nodeId, obj)
@@ -271,6 +286,51 @@ class UserPerspective(pb.Avatar):
                                         win32con.LOGON32_PROVIDER_DEFAULT)
          self.mUserHandle = user
 
+
+
+         # Get name of domain controller.
+         try:
+            dc_name = win32net.NetGetDCName()
+         except:
+            dc_name = None
+
+         user_info_4=win32net.NetUserGetInfo(dc_name, creds['username'], 4)
+         profilepath=user_info_4['profile']
+         # LoadUserProfile apparently doesn't like an empty string
+         if not profilepath:
+            profilepath=None
+
+         try:
+            # Leave Flags in since 2.3 still chokes on some types of optional keyword args
+            self.mUserProfile = win32profile.LoadUserProfile(self.mUserHandle,
+               {'UserName':creds['username'], 'Flags':0, 'ProfilePath':profilepath})
+            self.mLogger.info("Loaded profile %s" % profilepath)
+         except pywintypes.error, error:
+            self.mLogger.error("Error loading profile: %s"%error)
+
+
+         win32security.ImpersonateLoggedOnUser(self.mUserHandle)
+
+         # Map user's persistent network drives.
+         try:
+            user_reg = registry.RegistryDict(win32con.HKEY_CURRENT_USER)
+            self.mLogger.info("FIRST User Reg: %s"%user_reg['Environment'])
+            for k,v in user_reg['Network'].iteritems():
+               drive = k + ':'
+               self.mLogger.info("DRIVE: %s"%drive)
+               #mapNetworkDrive(drive, v['RemotePath'])
+            user_reg.close()
+         except KeyError, ke:
+            self.mLogger.error(ke)
+
+         env=win32profile.CreateEnvironmentBlock(self.mUserHandle, False)
+         self.mLogger.info("ENV: %s"%env)
+         win32security.RevertToSelf()
+
+
+         # Setup correct windows shares.
+         winshares.updateShares(self)
+
          # Get the PySID object for user's logon ID.
          tic = win32security.GetTokenInformation(user,
                                                  ntsecuritycon.TokenGroups)
@@ -294,8 +354,6 @@ class UserPerspective(pb.Avatar):
       # XXX: We should not assume that a non-Windows platform is running the
       # X Window System.
       else:
-         import socket
-
          env = maestro.core.Environment()
          user_name = creds['username']
          (display_name, has_key) = \
@@ -333,6 +391,14 @@ class UserPerspective(pb.Avatar):
 
          self.mWinsta.CloseWindowStation()
          self.mDesktop.CloseDesktop()
+
+         # Unload the user's profile.
+         try:
+            # Leave Flags in since 2.3 still chokes on some types of optional keyword args
+            win32profile.UnloadUserProfile(self.mUserHandle, self.mUserProfile)
+            self.mLogger.info("Unloaded profile.")
+         except pywintypes.error, error:
+            self.mLogger.error("Error unloading profile: %s"%error)
 
          self.mUserSID = None
          self.mUserHandle.Close()
