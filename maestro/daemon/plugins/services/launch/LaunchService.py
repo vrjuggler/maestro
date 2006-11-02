@@ -117,11 +117,15 @@ class LaunchService(maestro.core.IServicePlugin):
          # TODO: What about Windows?
          if not sys.platform.startswith('win'):
             user_name = avatar.mCredentials['username']
-            pwent     = pwd.getpwnam(user_name)
 
-            envMap['HOME']     = pwent[5]
-            envMap['USER']     = user_name
-            envMap['LOG_NAME'] = user_name
+            # Do not overwrite settings that were provided as part of the
+            # command execution request.
+            if not envMap.has_key('HOME'):
+               envMap['HOME'] = pwd.getpwnam(user_name)[5]
+            if not envMap.has_key('USER'):
+               envMap['USER'] = user_name
+            if not envMap.has_key('LOG_NAME'):
+               envMap['LOG_NAME'] = user_name
 
          # Merge our environment with the local environment.
          # XXX: This might not give us what we think it does because on UNIX
