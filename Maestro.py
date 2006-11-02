@@ -82,6 +82,16 @@ def process_command_line():
    parser.add_option("-s", "--stanza", action = "append", type = "string",
                      help = "load the named stanza (multiple allowed)",
                      dest = "stanzas")
+   parser.add_option("-l", "--launch-only", type = "string",
+                     metavar = "APP_NAME",
+                     help = "allow launching of only the named application")
+   # NOTE: Ensuring that the file named using this argument is an absolute
+   # path is not done until the lookup in the stanza store is actually
+   # performed. The idea is to keep the detail of using absolute paths
+   # encapsulated inside the StanzaStore class.
+   parser.add_option("-L", "--launch-all-from", type = "string",
+                     metavar = "STANZA_FILE",
+                     help = "allow launching of only the applications in the identified stanza file")
    parser.add_option("-v", "--view", type = "string",
                      help = "display the identified view when the GUI opens")
    parser.add_option("-o", "--override", action = "append", type = "string",

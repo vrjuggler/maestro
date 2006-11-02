@@ -139,20 +139,30 @@ class StanzaStore:
             if reply == QtGui.QMessageBox.Yes:
                self.saveStanza(stanza, file_name)
 
-   def findApplications(self):
+   def findApplications(self, stanzaFile = None):
       """ Returns all unexpanded application elements. """
       app_elms = []
 
+      if stanzaFile is not None:
+         stanzaFile = os.path.abspath(stanzaFile)
+
+      if stanzaFile is None:
+         stanza_list = self.mStanzas.values()
+      elif self.mStanzas.has_key(stanzaFile):
+         stanza_list = [self.mStanzas[stanzaFile]]
+      else:
+         stanza_list = []
+
       # Look in all stanza files for any children with an application tag.
-      for stanza in self.mStanzas.values():
+      for stanza in stanza_list:
          for item in stanza:
            if 'application' == item.tag:
               app_elms.append(item)
       return app_elms
 
-   def getApplications(self):
+   def getApplications(self, stanzaFile = None):
       """ Returns expanded application objects. """
-      app_elms = self.findApplications()
+      app_elms = self.findApplications(stanzaFile)
 
       apps = []
       # Fully expand all applications.

@@ -138,7 +138,18 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.mAppComboBox.clear()
 
       env = maestro.gui.Environment()
-      self.mApplications = env.mStanzaStore.getApplications()
+      self.mApplications = []
+
+      if env.mCmdOpts.launch_only is not None:
+         apps = env.mStanzaStore.getApplications()
+         for a in apps:
+            if a.getName() == env.mCmdOpts.launch_only:
+               self.mApplications.append(a)
+      elif env.mCmdOpts.launch_all_from is not None:
+         self.mApplications = \
+            env.mStanzaStore.getApplications(env.mCmdOpts.launch_all_from)
+      else:
+         self.mApplications = env.mStanzaStore.getApplications()
 
       # If cur_text is not found among the namesl for applications in
       # self.mApplications, then Item 0 will be the one selected in
