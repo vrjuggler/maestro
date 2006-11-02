@@ -372,10 +372,13 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       node = self.__getSelectedNode()
       if node is not None:
          # Ask the user if they are sure.
-         reply = QtGui.QMessageBox.question(None, "Delete Node",
+         reply = QtGui.QMessageBox.question(
+            self.parentWidget(), "Delete Node",
             "Are you sure you want to delete %s?" % node.getName(),
             QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-            QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+            QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape
+         )
+
          # If they say yes, go ahead and do it.
          if reply == QtGui.QMessageBox.Yes:
             self.mEnsemble.removeNode(node)

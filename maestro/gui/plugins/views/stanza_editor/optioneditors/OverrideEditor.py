@@ -154,8 +154,10 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
          attrib = self.mOption.mElement.attrib
          key = str(text)
          if attrib.has_key(key):
-            QtGui.QMessageBox.information(None, "Override Exists",
-               "Override %s already exists."%key)
+            QtGui.QMessageBox.information(
+               self.parentWidget(), "Override Exists",
+               "Override %s already exists." % key
+            )
          else:
             attrib[key] = ""
             self.mOverrideModel.emit(QtCore.SIGNAL("modelReset()"))
@@ -163,8 +165,10 @@ class OverrideEditor(QtGui.QWidget, OverrideEditorBase.Ui_OverrideEditorBase):
    def onRemoveClicked(self, checked=False):
       selected_indices = self.mOverrideTableView.selectedIndexes()
       if 0 == len(selected_indices):
-         QtGui.QMessageBox.information(None, "Override Delete",
-            "You must select a group of overrides before you can delete them.")
+         QtGui.QMessageBox.information(
+            self.parentWidget(), "Override Delete",
+            "You must select a group of overrides before you can delete them."
+         )
       
       for selected_index in selected_indices:
          # Only handle selected indices in the first column since we only

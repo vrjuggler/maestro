@@ -159,15 +159,21 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       current_index = self.mKeysList.currentIndex()
       current_key = self.mKeyListModel.data(current_index, QtCore.Qt.UserRole)
       if current_key is None:
-         QtGui.QMessageBox.information(None, "Key Delete",
-            "You must select a key before you can delete it.")
+         QtGui.QMessageBox.information(
+            self.parentWidget(), "Key Delete",
+            "You must select a key before you can delete it."
+         )
          return
 
       # Ask the user if they are sure.
-      reply = QtGui.QMessageBox.question(None, "Remove Key",
-         "Are you sure you want to remove key %s?" % current_key.get('value', ''),
-         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-         QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+      reply = \
+         QtGui.QMessageBox.question(
+            self.parentWidget(), "Remove Key",
+            "Are you sure you want to remove key %s?" % \
+               current_key.get('value', ''),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape
+         )
 
       # If they say yes, go ahead and do it.
       if reply == QtGui.QMessageBox.Yes:
@@ -204,18 +210,24 @@ class EnvListEditor(QtGui.QWidget, EnvListEditorBase.Ui_EnvListEditorBase):
       current_index = self.mValuesTable.currentIndex()
       current_value = self.mValueModel.data(current_index, QtCore.Qt.UserRole)
       if current_value is None:
-         QtGui.QMessageBox.information(None, "Value Delete",
-            "You must select a value before you can delete it.")
+         QtGui.QMessageBox.information(
+            self.parentWidget(), "Value Delete",
+            "You must select a value before you can delete it."
+         )
          return
       
       key_elm = self.mValueModel.mKeyElement
       value_elm = key_elm[current_index.row()]
 
       # Ask the user if they are sure.
-      reply = QtGui.QMessageBox.question(None, "Remove Value",
-         "Are you sure you want to remove value %s?" % value_elm.get('label', ''),
-         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-         QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+      reply = \
+         QtGui.QMessageBox.question(
+            self.parentWidget(), "Remove Value",
+            "Are you sure you want to remove value %s?" % \
+               value_elm.get('label', ''),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape
+         )
 
       # If they say yes, go ahead and do it.
       if reply == QtGui.QMessageBox.Yes:

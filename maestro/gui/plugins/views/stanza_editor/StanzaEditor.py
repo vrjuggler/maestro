@@ -343,15 +343,21 @@ class StanzaScene(QtGui.QGraphicsScene):
          if isinstance(item, Node):
             # Don't let the user delete application items.
             if item.mElement.tag == 'application':
-               QtGui.QMessageBox.warning(None, "Can't Delete Application Item",
-               "You can not delete an application item from the graph."
-               "If you want to delete an application use the toolbar at the top of the screen")
+               QtGui.QMessageBox.warning(
+                  self.parent(), "Cannot Delete Application Item",
+                  "Deleting application items from the graph is not allowed.\n" \
+                  "To delete an application, use the toolbar at the top of the window."
+               )
             else:
                # Ask the user if they are sure.
-               reply = QtGui.QMessageBox.question(None, "Delete %s" % item.mElement.get('label', item.mElement.tag),
-                  "Are you sure you want to delete %s?" % item.mElement.get('label', item.mElement.tag),
+               reply = QtGui.QMessageBox.question(
+                  self.parent(),
+                  "Delete %s" % item.mElement.get('label', item.mElement.tag),
+                  "Are you sure you want to delete %s?" % \
+                     item.mElement.get('label', item.mElement.tag),
                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                  QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+                  QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape
+               )
                # If they say yes, go ahead and do it.
                if reply == QtGui.QMessageBox.Yes:
                   item.setParent(None)
@@ -759,9 +765,11 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             try:
                env.mStanzaStore.loadStanzas(stanza_filename)
             except IOError, ex:
-               QtGui.QMessageBox.critical(None, "Error",
+               QtGui.QMessageBox.critical(
+                  self.parentWidget(), "Error",
                   "Failed to load stanza file %s: %s" % \
-                  (stanza_filename, ex.strerror))
+                     (stanza_filename, ex.strerror)
+               )
                return
             stanza = env.mStanzaStore.mStanzas[stanza_filename]
             stanza.append(element)

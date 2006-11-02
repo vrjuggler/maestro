@@ -332,9 +332,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          if view_names.count(env.mCmdOpts.view) > 0:
             start_view_index = view_names.index(env.mCmdOpts.view)
          else:
-            QtGui.QMessageBox.information(None, "View Not Found ",
-               "Could not find view named %s. You can selected from one "\
-               "of the following %s. We will default to the first view %s."\
+            QtGui.QMessageBox.information(
+               self, "View Not Found ",
+               "Could not find view named %s. You can selected from one " \
+               "of the following:\n%s\nDefaulting to the first view (%s)."\
                % (env.mCmdOpts.view, view_names, view_names[0]))
 
       # Timer to refresh pyro connections to nodes.
@@ -405,14 +406,16 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             # start out in that same directory.
             self.mEnsembleStartDir = os.path.dirname(ensemble_filename)
          except IOError, ex:
-            QtGui.QMessageBox.critical(None, "Error",
+            QtGui.QMessageBox.critical(
+               self, "Error",
                "Failed to load ensemble file %s: %s" % \
-               (ensemble_filename, ex.strerror))
+                  (ensemble_filename, ex.strerror)
+            )
 
    def onSaveEnsembleAs(self):
       if self.mEnsemble is None:
-         QtGui.QMessageBox.information(None, "Save Ensemble",
-            "There is currently no Ensemble open.")
+         QtGui.QMessageBox.information(self, "Save Ensemble",
+                                       "There is currently no Ensemble open.")
          return
 
       if self.mEnsemble.mFilename is not None:
@@ -452,14 +455,16 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          output_file.close()
          self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
       except IOError, ex:
-         QtGui.QMessageBox.critical(None, "Error",
+         QtGui.QMessageBox.critical(
+            self, "Error",
             "Failed to save ensemble file %s: %s" % \
-            (ensemble_filename, ex.strerror))
+               (ensemble_filename, ex.strerror)
+         )
 
    def onSaveEnsemble(self):
       if self.mEnsemble is None:
-         QtGui.QMessageBox.information(None, "Save Ensemble",
-            "There is currently no Ensemble open.")
+         QtGui.QMessageBox.information(self, "Save Ensemble",
+                                       "There is currently no Ensemble open.")
          return
 
       # Get the filename for our ensemble.
@@ -480,7 +485,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          output_file.close()
          self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
       except IOError, ex:
-         QtGui.QMessageBox.critical(None, "Error",
+         QtGui.QMessageBox.critical(self, "Error",
             "Failed to save ensemble file %s: %s" % \
             (ensemble_filename, ex.strerror))
 
@@ -518,9 +523,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             env = maestro.gui.Environment()
             env.mStanzaStore.loadStanzas(ensemble_filename, printCB)
          except IOError, ex:
-            QtGui.QMessageBox.critical(None, "Error",
-               "Failed to read stanza file %s: %s" % \
-               (ensemble_filename, ex.strerror))
+            QtGui.QMessageBox.critical(
+               self, "Error",
+               "Failed to read ensemble file %s: %s" % \
+                  (ensemble_filename, ex.strerror)
+            )
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
