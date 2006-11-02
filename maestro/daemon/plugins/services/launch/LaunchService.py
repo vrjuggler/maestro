@@ -227,6 +227,8 @@ class LaunchService(maestro.core.IServicePlugin):
             raise
       return False
 
+   sEnvVarRegexBraces = re.compile('\${(\w+)}')
+
    def expandEnv(self, value, envMap, key = None):
       """
       Expands a single entry in out environment map.
@@ -234,11 +236,9 @@ class LaunchService(maestro.core.IServicePlugin):
       if value is None:
          return
 
-      sEnvVarRegexBraces = re.compile('\${(\w+)}')
-
       start_pos = 0
       replaced = 0
-      match = sEnvVarRegexBraces.search(value, start_pos)
+      match = self.sEnvVarRegexBraces.search(value, start_pos)
 
       while match is not None:
          self.mLogger.debug("1")
@@ -262,7 +262,7 @@ class LaunchService(maestro.core.IServicePlugin):
             # Could not find env_var in either map so skip it for now.
             start_pos = match.end(1)
 
-         match = sEnvVarRegexBraces.search(value, start_pos)
+         match = self.sEnvVarRegexBraces.search(value, start_pos)
 
       return (value, replaced)
 
