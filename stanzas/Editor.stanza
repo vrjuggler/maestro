@@ -32,8 +32,8 @@
       </choice>
       <ref id="editor:Global1/*">
          <add id="">
-            <group name="Powerwall" label="Powerwall">
-               <arg flag="-j" name="base" label="Powerwall Arg">
+            <group label="Powerwall" name="Powerwall">
+               <arg flag="-j" label="Powerwall Arg" name="base">
                   powerwall.jconf
                </arg>
             </group>
@@ -43,12 +43,12 @@
       </ref>
    </application>
    <global_option name="Global1">
-      <arg name="Arg0" label="Arg 0"/>
-      <group name="Group0" label="Group 0">
-         <cwd name="Cwd0" label="Cwd 0"/>
-         <choice name="Choice0" label="Choice 0" type="one">
-            <arg name="SubArg0" label="Sub Arg 0"/>
-            <arg name="SubArg1" label="Sub Arg 1"/>
+      <arg label="Arg 0" name="Arg0"/>
+      <group label="Group 0" name="Group0">
+         <cwd label="Cwd 0" name="Cwd0"/>
+         <choice label="Choice 0" name="Choice0" type="one">
+            <arg label="Sub Arg 0" name="SubArg0"/>
+            <arg label="Sub Arg 1" name="SubArg1"/>
          </choice>
       </group>
    </global_option>
