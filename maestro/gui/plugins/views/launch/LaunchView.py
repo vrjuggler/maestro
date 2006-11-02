@@ -141,13 +141,26 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.mApplications = []
 
       if env.mCmdOpts.launch_only is not None:
+         name = env.mCmdOpts.launch_only
          apps = env.mStanzaStore.getApplications()
          for a in apps:
-            if a.getName() == env.mCmdOpts.launch_only:
+            if a.getName() == name:
                self.mApplications.append(a)
+
+         if len(self.mApplications) == 0:
+            QtGui.QMessageBox.warning(
+               self.parentWidget(), "No Applications Found",
+               "No applications named '%s' were found!" % name
+            )
       elif env.mCmdOpts.launch_all_from is not None:
-         self.mApplications = \
-            env.mStanzaStore.getApplications(env.mCmdOpts.launch_all_from)
+         file = env.mCmdOpts.launch_all_from
+         self.mApplications = env.mStanzaStore.getApplications(file)
+
+         if len(self.mApplications) == 0:
+            QtGui.QMessageBox.warning(
+               self.parentWidget(), "No Applications Found",
+               "No applications found in the stanza file\n'%s'!" % file
+            )
       else:
          self.mApplications = env.mStanzaStore.getApplications()
 
