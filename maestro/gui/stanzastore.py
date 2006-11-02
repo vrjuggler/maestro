@@ -86,7 +86,7 @@ class StanzaStore:
       num_files = len(stanzaFiles)
       for (i, f) in zip(xrange(num_files), stanzaFiles):
          file_name = os.path.abspath(f)
-         if os.path.exists(file_name):
+         if os.path.exists(file_name) and not self.mStanzas.has_key(file_name):
             progressCB(i/num_files, "Loading file: %s"%file_name)
             stanza_elm = ET.ElementTree(file=file_name).getroot()
             self.mStanzas[file_name] = stanza_elm
