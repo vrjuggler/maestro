@@ -286,8 +286,6 @@ class UserPerspective(pb.Avatar):
                                         win32con.LOGON32_PROVIDER_DEFAULT)
          self.mUserHandle = user
 
-
-
          # Get name of domain controller.
          try:
             dc_name = win32net.NetGetDCName()
@@ -307,26 +305,6 @@ class UserPerspective(pb.Avatar):
             self.mLogger.info("Loaded profile %s" % profilepath)
          except pywintypes.error, error:
             self.mLogger.error("Error loading profile: %s"%error)
-
-
-         win32security.ImpersonateLoggedOnUser(self.mUserHandle)
-
-         # Map user's persistent network drives.
-         try:
-            user_reg = registry.RegistryDict(win32con.HKEY_CURRENT_USER)
-            self.mLogger.info("FIRST User Reg: %s"%user_reg['Environment'])
-            for k,v in user_reg['Network'].iteritems():
-               drive = k + ':'
-               self.mLogger.info("DRIVE: %s"%drive)
-               #mapNetworkDrive(drive, v['RemotePath'])
-            user_reg.close()
-         except KeyError, ke:
-            self.mLogger.error(ke)
-
-         env=win32profile.CreateEnvironmentBlock(self.mUserHandle, False)
-         self.mLogger.info("ENV: %s"%env)
-         win32security.RevertToSelf()
-
 
          # Setup correct windows shares.
          winshares.updateShares(self)
