@@ -80,7 +80,8 @@ def process_command_line():
    parser.add_option("-e", "--ensemble", type = "string",
                      help = "the ensemble to load")
    parser.add_option("-s", "--stanza", action = "append", type = "string",
-                     help = "load only the named stanza", dest = "stanzas")
+                     help = "load the named stanza (multiple allowed)",
+                     dest = "stanzas")
    parser.add_option("-v", "--view", type = "string",
                      help = "display the identified view when the GUI opens")
    parser.add_option("-o", "--override", action = "append", type = "string",

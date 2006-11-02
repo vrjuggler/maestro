@@ -31,10 +31,11 @@ class GuiEnvironment(env.Environment):
 
       # Create a stanza store and scan for files.
       self.mStanzaStore = stanzastore.StanzaStore()
-      if opts.stanzas:
+
+      if opts.stanzas is not None and len(opts.stanzas) > 0:
          self.mStanzaStore.loadStanzas(opts.stanzas, progressCB)
-      else:
-         self.mStanzaStore.scan(progressCB)
+
+      self.mStanzaStore.scan(progressCB)
 
       # -- Initialize the plugin holders -- #
       #self.mViewPluginsHolder = lucid.core.ViewPluginsHolder()
