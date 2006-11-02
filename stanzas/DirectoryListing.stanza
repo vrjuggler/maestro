@@ -7,11 +7,11 @@
       <command class="Windows XP" name="windows_cmd">
          dir
       </command>
-      <cwd class="Linux" name="linux_cwd">
-         /
-      </cwd>
-      <cwd class="Windows XP" name="windows_cwd">
+      <arg class="Windows XP" editable="true" flag="" hidden="false" label="Directory" name="Directory" selected="true" value_type="string">
          C:\
-      </cwd>
+      </arg>
+      <arg class="Linux" editable="true" flag="" hidden="false" label="Directory" name="Directory" selected="true" value_type="string">
+         ~
+      </arg>
    </application>
 </stanza>
