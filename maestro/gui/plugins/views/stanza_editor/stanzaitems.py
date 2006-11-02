@@ -175,7 +175,7 @@ class Edge(QtGui.QGraphicsItem):
          return QtCore.QRectF()
 
       self.penWidth = 1
-      if self.hasFocus():
+      if self.isSelected() or self.hasFocus():
          pen_width = self.penWidth * 3.0
       else:
          pen_width = self.penWidth
@@ -574,7 +574,7 @@ class Node(QtGui.QGraphicsItem):
 
       # If we are selected, then make our border and text lines thicker.
       border_width = self.penWidth
-      if self.hasFocus():
+      if self.isSelected() or self.hasFocus():
          border_width = 3.0 
 
       rect.adjust(-(border_width/2), -(border_width/2),
@@ -611,7 +611,7 @@ class Node(QtGui.QGraphicsItem):
 
       # If we are selected, then make our border and text lines thicker.
       border_width = self.penWidth
-      if self.hasFocus():
+      if self.isSelected() or self.hasFocus():
          border_width = 3.0 
 
       # Set our alpha value and ben color depending on enabled status
