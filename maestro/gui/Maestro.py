@@ -39,7 +39,6 @@ import ensemble
 LOCAL = maestro.core.EventManager.EventManager.LOCAL
 
 import elementtree.ElementTree as ET
-import xml.dom.minidom
 
 import LogWidget
 import LoginDialog
@@ -446,13 +445,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mEnsembleStartDir = os.path.dirname(ensemble_filename)
 
       try:
-         ensemble_str = ET.tostring(self.mEnsemble.mElement)
-         lines = [l.strip() for l in ensemble_str.splitlines()]
-         ensemble_str = ''.join(lines)
-         dom = xml.dom.minidom.parseString(ensemble_str)
-         output_file = file(ensemble_filename, 'w')
-         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
-         output_file.close()
+         self.mEnsemble.save(ensemble_filename)
          self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
       except IOError, ex:
          QtGui.QMessageBox.critical(
@@ -476,13 +469,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          return
 
       try:
-         ensemble_str = ET.tostring(self.mEnsemble.mElement)
-         lines = [l.strip() for l in ensemble_str.splitlines()]
-         ensemble_str = ''.join(lines)
-         dom = xml.dom.minidom.parseString(ensemble_str)
-         output_file = file(ensemble_filename, 'w')
-         output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
-         output_file.close()
+         self.mEnsemble.save(ensemble_filename)
          self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
       except IOError, ex:
          QtGui.QMessageBox.critical(self, "Error",
@@ -693,6 +680,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       # Check to ensure the user does not have pending changes.
       env = maestro.gui.Environment()
       env.mStanzaStore.checkForStanzaChanges()
+      if self.mEnsemble.checkForChanges():
+         self.onSaveEnsemble()
       QtGui.QMainWindow.closeEvent(self, event)
 
    def __closeLoggers(self):

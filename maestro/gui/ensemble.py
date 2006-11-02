@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import logging
+import logging, md5
 import elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
 from PyQt4 import QtCore, QtGui
@@ -47,6 +47,10 @@ class Ensemble(QtCore.QObject):
       self.mElement = self.mElementTree.getroot()
       assert self.mElement.tag == "ensemble"
 
+      # Store a digest to ensure we save changes.
+      ensemble_str = ET.tostring(self.mElement)
+      self.mDigest = md5.new(ensemble_str).digest()
+
       self.mLogger = logging.getLogger("maestro.gui.ensemble")
 
       # Parse all node settings
@@ -65,6 +69,40 @@ class Ensemble(QtCore.QObject):
       env = maestro.gui.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.connect(LOCAL, "connectionLost", self.onLostConnection)
+
+   def save(self, filename=None):
+      if filename is None:
+         filename = self.mFilename
+
+      # The maestro gui should have asked the user for a
+      # filename if we don't already have one.
+      assert filename is not None
+
+      ensemble_str = ET.tostring(self.mElement)
+      lines = [l.strip() for l in ensemble_str.splitlines()]
+      ensemble_str = ''.join(lines)
+      dom = parseString(ensemble_str)
+      output_file = file(filename, 'w')
+      output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
+      output_file.close()
+
+      # Store a digest to ensure we save changes.
+      ensemble_str = ET.tostring(self.mElement)
+      self.mDigest = md5.new(ensemble_str).digest()
+
+   def checkForChanges(self):
+      ensemble_str = ET.tostring(self.mElement)
+      ensemble_digest = md5.new(ensemble_str).digest()
+      if self.mDigest != ensemble_digest:
+         # Ask the user if they are sure.
+         reply = QtGui.QMessageBox.question(None, "Unsaved Ensemble",
+            "You have unsaved ensemble changes. Do you want to save them?",
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+
+         # If they say yes, go ahead and do it.
+         return QtGui.QMessageBox.Yes == reply
+      return False
 
    def disconnectFromEventManager(self):
       # Unregister to receive signals from all nodes about their current os.
