@@ -31,7 +31,11 @@ docdir=		$(datadir)/doc/$(PKG)
 appdir=		$(prefix)/lib/$(PKG)
 mimedir=	$(datadir)/mime
 siteappdir=	$(datadir)/applications
-icondir=	$(datadir)/pixmaps
+icondir=	$(datadir)/icons
+gicondir=	$(datadir)/icons/gnome
+gmimetypedir=	$(gicondir)/48x48/mimetypes
+
+GTK_UPDATE_ICON_CACHE=	/usr/bin/gtk-update-icon-cache
 
 install:
 	@mkdir -p $(bindir)
@@ -41,6 +45,7 @@ install:
 	@mkdir -p $(mimedir)/packages
 	@mkdir -p $(siteappdir)
 	@mkdir -p $(icondir)
+	@mkdir -p $(gmimetypedir)
 	tar --exclude .svn -cvf - maestro | tar -C $(appdir) -xpf -
 	install -m 0755 maestrod.py $(appdir)
 	install -m 0755 Maestro.py $(appdir)
@@ -57,6 +62,11 @@ install:
 	install -m 0644 dist/Maestro.xml $(mimedir)/packages
 	install -m 0644 dist/maestro.desktop $(siteappdir)
 	install -m 0644 maestro/gui/images/maestro_icon.png $(icondir)/maestro.png
+	cd dist && 							\
+          for f in application-*.png ; do				\
+              install -m 0644 $$f $(gmimetypedir)/gnome-mime-$$f ;	\
+          done
+#	-[ -x $(GTK_UPDATE_ICON_CACHE) ] && $(GTK_UPDATE_ICON_CACHE) $(gicondir)
 ifeq ($(OS), Linux)
 	@mkdir -p $(svcdir)
 	install -m 0755 dist/maestrod $(svcdir)

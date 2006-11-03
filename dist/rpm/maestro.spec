@@ -112,7 +112,7 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindi
 %{_prefix}/lib/maestro-%{version}/stanzas
 %{_prefix}/share/applications/maestro.desktop
 %{_prefix}/share/mime
-%{_prefix}/share/pixmaps
+%{_prefix}/share/icons
 
 %files server
 %defattr(-, root, root)
@@ -129,11 +129,17 @@ stanza_str='application/x-maestro-stanza=maestro.desktop'
 echo $ensemble_str >> /usr/share/applications/defaults.list
 echo $stanza_str >> /usr/share/applications/defaults.list
 update-mime-database /usr/share/mime >/dev/null 2>&1
+if test -x /usr/bin/gtk-update-icon-cache ; then
+   /usr/bin/gtk-update-icon-cache /usr/share/icons/gnome
+fi
 
 %postun gui
 cat /usr/share/applications/defaults.list | grep -v x-maestro > /usr/share/applications/defaults.list.tmp
 mv /usr/share/applications/defaults.list.tmp /usr/share/applications/defaults.list
 update-mime-database /usr/share/mime >/dev/null 2>&1
+if test -x /usr/bin/gtk-update-icon-cache ; then
+   /usr/bin/gtk-update-icon-cache /usr/share/icons/gnome
+fi
 
 %post server
 /sbin/chkconfig --add maestrod
