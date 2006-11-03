@@ -90,4 +90,3 @@ for sfile in pyuic_rc_files:
    env.Pyrcc(sfile)
 
 Default(".");
-Help(help_text); 
