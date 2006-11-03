@@ -80,7 +80,7 @@ class LaunchService(maestro.core.IServicePlugin):
       env.mEventManager.connect("*", "launch.terminate", self.onTerminateCommand)
       env.mEventManager.connect("*", "launch.get_is_running", self.onIsRunning)
 
-   def onRunCommand(self, nodeId, avatar, command, cwd, envMap):
+   def onRunCommand(self, nodeId, avatar, command, args, cwd, envMap):
       def merge(d1, d2):
          '''
          Merges the two dictionaries into one so that d1 contains all the
@@ -91,7 +91,8 @@ class LaunchService(maestro.core.IServicePlugin):
             if not d1.has_key(k):
                d1[k] = d2[k]
 
-      self.mLogger.debug("LaunchService.onRunCommand(%s, %s, %s)" % (command, cwd, envMap))
+      self.mLogger.debug("LaunchService.onRunCommand(%s, %s, %s, %s)" % \
+                         (command, str(args), cwd, envMap))
 
       try:
          if self.mProcess is not None:
@@ -145,6 +146,10 @@ class LaunchService(maestro.core.IServicePlugin):
          self.evaluateEnvVars(envMap)
          command = self.expandEnv(command, envMap)[0]
 
+         if args is not None:
+            for i in xrange(len(args)):
+               args[i] = self.expandEnv(args[i], envMap)[0]
+
          match_obj = self.cmd_space_re.search(command)
 
          # If command contains spaces, ensure that it is wrapped in double
@@ -192,6 +197,12 @@ class LaunchService(maestro.core.IServicePlugin):
          #self.mLogger.info("Running command: " + command)
          self.mLogger.debug("Working Dir: " + str(cwd))
          self.mLogger.debug("Translated env: " + str(envMap))
+
+         # Construct the actual command that will be executed. At this point,
+         # all quoting on command and the individual arguments has to be
+         # correct.
+         if args is not None and len(args) > 0:
+            command = '%s %s' % (command, ' '.join(args))
 
          self.mProcess = process.ProcessOpen(cmd = command, cwd = cwd,
                                              env = envMap, avatar = avatar)

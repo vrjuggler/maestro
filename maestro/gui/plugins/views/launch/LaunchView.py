@@ -272,23 +272,24 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
          elif len(option_visitor.mCwds) == 1:
             cwd = option_visitor.mCwds[0]
 
-         arg_string = ""
-         for arg in option_visitor.mArgs:
-            arg_string = arg_string + ' ' + arg
-         
-         total_command = command + arg_string
+         # NOTE: This variable is used only as a convenience for the debug
+         # output printed below.
+         total_command = command + ' '.join(option_visitor.mArgs)
 
          env_map = option_visitor.mEnvVars
 
          print "\n Node [%s]" % (node.getName())
          print "   Command   [%s]" % (command)
-         print "   Args      [%s]" % (arg_string)
+         print "   Args      [%s]" % (option_visitor.mArgs)
          print "   Final Cmd [%s]" % (total_command)
          print "   Cwd       [%s]" % (cwd)
          print "   EnvVars   [%s]" % (option_visitor.mEnvVars)
-         env.mEventManager.localEmit(node.getId(), "launch.output", "Command [%s]" % (total_command))
 
-         env.mEventManager.emit(node.getId(), "launch.run_command", total_command, cwd, env_map)
+         env.mEventManager.localEmit(node.getId(), "launch.output",
+                                     "Command [%s]" % total_command)
+
+         env.mEventManager.emit(node.getId(), "launch.run_command",
+                                command, option_visitor.mArgs, cwd, env_map)
 
    def _resetAppState(self):
       """ Resets the information associated with the selected application. """
