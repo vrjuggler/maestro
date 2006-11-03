@@ -46,7 +46,7 @@ Group: Applications/System
 BuildArch: noarch
 Requires: maestro-base = %{version}
 Requires: qt4 >= 4.2.0
-Requires: PyQt >= 4.0.20061008
+Requires: PyQt4 >= 4.0.20061029
 
 %description gui
 Maestro GUI client.
