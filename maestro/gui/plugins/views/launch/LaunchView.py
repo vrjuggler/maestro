@@ -539,6 +539,8 @@ class GroupSheet(Sheet):
       if self.mChildrenHidden:
          self.mTitleWidget = QtGui.QLabel(self)
          self.hboxlayout = QtGui.QHBoxLayout(self)
+         self.hboxlayout.setMargin(1)
+         self.hboxlayout.setSpacing(1)
          if self.mButtonWidget is not None:
             self.hboxlayout.addWidget(self.mButtonWidget)
          self.hboxlayout.addWidget(self.mTitleWidget)
