@@ -89,8 +89,8 @@ make prefix=%{buildroot}%{_prefix} confdir=%{buildroot}/etc install
 make prefix=%{buildroot}%{_prefix} install-docs
 %endif
 maestro_dir="%{_prefix}/lib/maestro-%{version}"
-sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_bindir}/maestro
-sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" %{buildroot}%{_sbindir}/maestrod
+sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" -e "s|%{buildroot}||g" %{buildroot}%{_bindir}/maestro
+sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" -e "s|%{buildroot}||g" %{buildroot}%{_sbindir}/maestrod
 
 %clean
 [ -z %{buildroot} ] || rm -rf %{buildroot}
