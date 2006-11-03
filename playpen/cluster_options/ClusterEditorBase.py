@@ -13,7 +13,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -89,6 +89,7 @@ class Ui_ClusterEditor(object):
       self.mAddBtn.setText(QtGui.QApplication.translate("ClusterEditor", "&Add", None, QtGui.QApplication.UnicodeUTF8))
       self.mRemoveBtn.setText(QtGui.QApplication.translate("ClusterEditor", "&Remove", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveBtn.setText(QtGui.QApplication.translate("ClusterEditor", "&Save", None, QtGui.QApplication.UnicodeUTF8))
+
 
 
 if __name__ == "__main__":
