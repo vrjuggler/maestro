@@ -3209,6 +3209,45 @@ setup (hd0)</screen>
             should be used. The environment variable evaluation happens on the
             remote computer as part of launching.</para>
 
+            <indexterm>
+               <primary>Windows</primary>
+
+               <secondary>drive letters</secondary>
+            </indexterm>
+
+            <indexterm>
+               <primary>drive letters</primary>
+
+               <see>Windows</see>
+            </indexterm>
+
+            <indexterm>
+               <primary>Windows</primary>
+
+               <secondary>user profile</secondary>
+            </indexterm>
+
+            <para>For users of Microsoft Windows, drive letter mappings are
+            handled when the Maestro GUI user authenticates with the Maestro
+            server. The drive letters mapped are the user's home directory and
+            all persistent drive mappings in the user's profile. This
+            information gets loaded into the local Windows Registry when the
+            user's profile is loaded after authentication.</para>
+
+            <indexterm>
+               <primary>Windows</primary>
+
+               <secondary>user profile</secondary>
+
+               <tertiary>logon scripts</tertiary>
+            </indexterm>
+
+            <note>
+               <para>As of this writing, user logon scripts defined as part of
+               the user profile are not being executed when the profile is
+               loaded.</para>
+            </note>
+
             <para>In the stanza editor, there is a tool bar containing all the
             information that can go into a stanza. The tool bar items are as
             follows:</para>
@@ -3492,13 +3531,13 @@ setup (hd0)</screen>
 
             <indexterm class="startofrange"
                        id="index.section.stanza.item.class">
-               <primary>stanza items</primary>
+               <primary>stanza item</primary>
 
                <secondary>class</secondary>
             </indexterm>
 
             <indexterm>
-               <primary>stanza items</primary>
+               <primary>stanza item</primary>
 
                <secondary>class</secondary>
 
@@ -3518,7 +3557,7 @@ setup (hd0)</screen>
             therefore matches all ensemble nodes.</para>
 
             <indexterm>
-               <primary>stanza items</primary>
+               <primary>stanza item</primary>
 
                <secondary>class</secondary>
 
@@ -3540,7 +3579,7 @@ setup (hd0)</screen>
 
             <indexterm class="startofrange"
                        id="index.section.stanza.item.class.os">
-               <primary>stanza items</primary>
+               <primary>stanza item</primary>
 
                <secondary>class</secondary>
 
@@ -3678,7 +3717,7 @@ setup (hd0)</screen>
 
             <indexterm class="startofrange"
                        id="index.section.stanza.item.class.master.slave">
-               <primary>stanza items</primary>
+               <primary>stanza item</primary>
 
                <secondary>class</secondary>
 
