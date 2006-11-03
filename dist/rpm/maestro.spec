@@ -146,7 +146,7 @@ fi
 /sbin/chkconfig --level 34 maestrod off
 /sbin/chkconfig --level 5 maestrod on
 
-%postun server
+%preun server
 /sbin/service maestrod stop
 /sbin/chkconfig --del maestrod
 
