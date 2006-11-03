@@ -33,10 +33,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    def __init__(self):
       maestro.core.ISaverPlugin.__init__(self)
       env = maestro.core.Environment()
-      if env.settings.has_key('xset_cmd'):
-         self.mCmd = env.settings['xset_cmd']
-      else:
-         self.mCmd = '/usr/X11R6/bin/xset'
+      self.mCmd = env.settings.get('xset_cmd', '/usr/X11R6/bin/xset').strip()
 
    def getName():
       return 'xset'

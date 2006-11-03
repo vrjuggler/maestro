@@ -256,6 +256,9 @@ class UserPerspective(pb.Avatar):
       env = maestro.core.Environment()
       env.mEventManager.remote_emit(nodeId, sigName, (self,) + args, **kwArgs)
 
+   sDefaultXauthCmd = '/usr/X11R6/bin/xauth'
+   sDefaultXauthFile = '/var/gdm/:0.Xauth'
+
    def setCredentials(self, creds):
       self.mCredentials = creds
 
@@ -333,10 +336,16 @@ class UserPerspective(pb.Avatar):
       # X Window System.
       else:
          env = maestro.core.Environment()
+
+         xauth_cmd = \
+            env.settings.get('xauth_cmd', self.sDefaultXauthCmd).strip()
+         xauth_file = \
+            env.settings.get('xauthority_file', self.sDefaultXauthFile).strip()
+
          user_name = creds['username']
-         (display_name, has_key) = \
-            x11desktop.addAuthority(user_name, env.settings['xauth_cmd'],
-                                    env.settings['xauthority_file'])
+         (display_name, has_key) = x11desktop.addAuthority(user_name,
+                                                           xauth_cmd,
+                                                           xauth_file)
          print 'display_name =', display_name
          print 'has_key =', has_key
 
@@ -390,9 +399,11 @@ class UserPerspective(pb.Avatar):
          # local X11 display. Hence, we now need to remove that permission
          # since the user is logging out.
          if self.mDisplayToRemove is not None:
+            xauth_cmd = \
+               env.settings.get('xauth_cmd', self.sDefaultXauthCmd).strip()
+
             x11desktop.removeAuthority(self.mCredentials['username'],
-                                       env.settings['xauth_cmd'],
-                                       self.mDisplayToRemove)
+                                       xauth_cmd, self.mDisplayToRemove)
             self.mDisplayToRemove = None
 
          self.mDisplayName = None

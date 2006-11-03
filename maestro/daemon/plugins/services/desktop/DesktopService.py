@@ -31,6 +31,7 @@ class DesktopService(maestro.core.IServicePlugin):
       self.mLogger = logging.getLogger('maestrod.DesktopService')
       self.mSaverPlugins = []
 
+      saver_types = []
       env = maestro.core.Environment()
 
       # Load the list of plug-ins to use for controlling the screen saver.
@@ -38,9 +39,12 @@ class DesktopService(maestro.core.IServicePlugin):
       # "xset,xscreensaver" to indicate the use of the xset and xscreensaver
       # plug-ins or just "windows" to indicate the use of the Windows
       # plug-in).
-      if env.settings.has_key('saver_types') and \
-         env.settings.get('saver_types') is not None:
-         saver_types = env.settings.get('saver_types').lower().split(',')
+      if env.settings.has_key('saver_types'):
+         saver_types_str = env.settings['saver_types']
+         if saver_types_str is not None:
+            saver_types = saver_types_str.lower().split(',')
+            for i in xrange(len(saver_types)):
+               saver_types[i] = saver_types[i].strip()
       else:
          # On Windows, default to using the standard screen saver management
          # plug-ins.
@@ -71,6 +75,8 @@ class DesktopService(maestro.core.IServicePlugin):
 
       if env.settings.has_key('background_image_manager'):
          bg_type = env.settings['background_image_manager']
+         if bg_type is not None:
+            bg_type = bg_type.strip().lower()
       else:
          if sys.platform.startswith('win'):
             bg_type = 'windows'

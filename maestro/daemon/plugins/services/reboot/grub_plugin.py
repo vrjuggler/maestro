@@ -92,7 +92,7 @@ class GrubPlugin(maestro.core.IBootPlugin):
    def __init__(self):
       maestro.core.IBootPlugin.__init__(self)
       env = maestro.core.Environment()
-      grub_path = env.settings.get('grub_conf', '/boot/grub/grub.conf')
+      grub_path = env.settings.get('grub_conf', '/boot/grub/grub.conf').strip()
       # If this throws an exception (such as an IOException resulting from
       # grub_path being invalid), then this plug-in is unusable anyway.
       self.mGrubConfig = grubconfig.GrubConfig(grub_path)

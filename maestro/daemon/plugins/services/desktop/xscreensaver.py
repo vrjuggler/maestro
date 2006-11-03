@@ -40,15 +40,13 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
       maestro.core.ISaverPlugin.__init__(self)
       env = maestro.core.Environment()
 
-      if env.settings.has_key('xscreensaver_cmd'):
-         self.mSaverCmd = env.settings['xscreensaver_cmd']
-      else:
-         self.mSaverCmd = '/usr/X11R6/bin/xscreensaver'
+      self.mSaverCmd = \
+         env.settings.get('xscreensaver_cmd',
+                          '/usr/X11R6/bin/xscreensaver').strip()
 
-      if env.settings.has_key('xscreensaver_command_cmd'):
-         self.mControlCmd = env.settings['xscreensaver_command_cmd']
-      else:
-         self.mControlCmd = '/usr/X11R6/bin/xscreensaver-command'
+      self.mControlCmd = \
+         env.settings.get('xscreensaver_command_cmd',
+                          '/usr/X11R6/bin/xscreensaver-command').strip()
 
    def getName():
       return 'xscreensaver'

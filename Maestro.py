@@ -217,7 +217,7 @@ def main():
       # go at the begining of the stanza search path.
       user_stanza_path = gui_settings.get('user_stanza_path', None)
       if user_stanza_path is not None:
-         user_stanza_path = user_stanza_path.split(os.path.pathsep)
+         user_stanza_path = user_stanza_path.strip().split(os.path.pathsep)
 
       site_stanza_path = None
 
@@ -225,7 +225,7 @@ def main():
       # out to go after the user-specific stanza path.
       site_stanza_path = gui_settings.get('site_stanza_path', None)
       if site_stanza_path is not None:
-         site_stanza_path = site_stanza_path.split(os.path.pathsep)
+         site_stanza_path = site_stanza_path.strip().split(os.path.pathsep)
 
       if user_stanza_path is None:
          user_stanza_path = []
@@ -242,7 +242,7 @@ def main():
       # Determine whether the use of the built-in stanza search path has been
       # disabled.
       if gui_settings.has_key('use_builtin_stanza_path'):
-         value = gui_settings['use_builtin_stanza_path']
+         value = gui_settings.get('use_builtin_stanza_path', 'true').strip()
          if value.lower() == 'false' or value == '0':
             use_builtin_stanza_path = False
 
@@ -274,7 +274,9 @@ def main():
       # If no ensemble has been specified yet, check to see if the GUI
       # settings contains a default ensemble to use.
       if opts.ensemble is None and gui_settings.has_key('default_ensemble'):
-         opts.ensemble = expandEnv(gui_settings['default_ensemble'])
+         ensemble_str = gui_settings['default_ensemble']
+         if ensemble_str is not None:
+            opts.ensemble = expandEnv(ensemble_str.strip())
 
       def splashProgressCB(percent, message):
          splash.showMessage("%3.0f%% %s"%(percent*100,message))

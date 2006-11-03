@@ -243,8 +243,8 @@ class OutputFileLogger(NodeLogger):
 
    def getLogDir():
       env = maestro.gui.Environment()
-      if env.settings.has_key('logdir'):
-         logdir = env.settings['logdir']
+      if env.settings.has_key('logdir') and env.settings['logdir'] is not None:
+         logdir = env.settings['logdir'].strip()
       else:
          home_dir = xplatform.getUserHome()
          if home_dir is not None:
@@ -687,12 +687,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def __closeLoggers(self):
       env = maestro.gui.Environment()
       clean = True
-      if env.settings.has_key('clean_logfiles'):
-         cleanup_str = env.settings.get('clean_logfiles','true').lower()
-         if cleanup_str == 'true' or cleanup_str == '1':
-            clean = True
-         else:
-            clean = False
+      cleanup_str = env.settings.get('clean_logfiles', 'true').strip().lower()
+      if cleanup_str == 'false' or cleanup_str == '0':
+         clean = False
 
       if clean and self.mFileLogger is not None:
          # In order to remove the log files on Windows, they must first be

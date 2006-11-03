@@ -58,9 +58,12 @@ class WindowsPowercfgPlugin(maestro.core.ISaverPlugin):
 
       env = maestro.core.Environment()
 
-      if env.settings.has_key('powercfg/ac_off_time') and \
-         env.settings.get('powercfg/ac_off_time') is not None:
-         self.mACOffTime = int(env.settings['powercfg/ac_off_time'])
+      if env.settings.has_key('powercfg/ac_off_time'):
+         off_time_str = env.settings['powercfg/ac_off_time']
+         if off_time_str is None:
+            self.mACOffTime = 0
+         else:
+            self.mACOffTime = int(off_time_str.strip())
 
    def getName():
       return 'powercfg'

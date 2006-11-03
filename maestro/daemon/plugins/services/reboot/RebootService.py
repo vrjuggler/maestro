@@ -65,7 +65,7 @@ class RebootService(maestro.core.IServicePlugin):
       env = Env()
       # Find out which boot loader we are using. If none is set, assume that
       # we are using GRUB.
-      boot_loader = env.settings.get('boot_loader', 'GRUB')
+      boot_loader = env.settings.get('boot_loader', 'GRUB').strip()
       self.mLogger.debug("RebootService.registerCallbacks boot_loader: %s" % boot_loader)
 
 

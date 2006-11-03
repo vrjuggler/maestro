@@ -41,10 +41,8 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
    def __init__(self):
       maestro.core.IDesktopWallpaperPlugin.__init__(self)
       env = maestro.core.Environment()
-      if env.settings.has_key('gconftool_cmd'):
-         self.mCmd = env.settings['gconftool_cmd']
-      else:
-         self.mCmd = '/usr/bin/gconftool-2'
+      self.mCmd = \
+         env.settings.get('gconftool_cmd', '/usr/bin/gconftool-2').strip()
 
    def getName():
       return 'gnome'
