@@ -57,9 +57,13 @@ class StanzaStore:
       if not progressCB:
          progressCB = null_progress_cb
 
+      num_dirs = len(maestro.core.const.STANZA_PATH)
+      if num_dirs == 0:
+         return
+
       # We'll say that reading the N stanza directories totals up to 1% of
       # the overall work.
-      increment = 1.0 / len(maestro.core.const.STANZA_PATH)
+      increment = 1.0 / num_dirs
       status    = 0.0
 
       for stanza_path in maestro.core.const.STANZA_PATH:
