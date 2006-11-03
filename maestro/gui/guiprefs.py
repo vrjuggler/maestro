@@ -49,7 +49,7 @@ class GuiPrefs:
             )
 
    def create(prefsFile, rootToken):
-      maestro.core.prefs.create(prefsFile, rootToken)
+      maestro.core.prefs.Preferences.create(prefsFile, rootToken)
 
    create = staticmethod(create)
 
