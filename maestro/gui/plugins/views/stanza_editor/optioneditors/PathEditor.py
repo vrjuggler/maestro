@@ -57,6 +57,7 @@ class OptionPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
    def setupUi(self, widget):
       PathEditorBase.Ui_PathEditorBase.setupUi(self, widget)
+      self.mPathCB.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
       self.connect(self.mPathCB, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPathSelected)
 
    def setOption(self, option):
@@ -150,6 +151,7 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
 
    def setupUi(self, widget):
       PathEditorBase.Ui_PathEditorBase.setupUi(self, widget)
+      self.mPathCB.completer().setCaseSensitivity(QtCore.Qt.CaseSensitive)
       self.connect(self.mPathCB,
                    QtCore.SIGNAL("currentIndexChanged(QString)"),
                    self.onPathSelected)
