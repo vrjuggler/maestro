@@ -31,7 +31,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>October 30, 2006</pubdate>
+      <pubdate>November 3, 2006</pubdate>
    </bookinfo>
 
    <preface>
@@ -439,21 +439,21 @@
             <listitem>
                <para><ulink
                url="http://www.trolltech.com/products/qt/downloads">Qt</ulink>
-               4.2.0 (client GUI only)</para>
+               4.2.1 (client GUI only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
                url="http://www.riverbankcomputing.com/Downloads/Snapshots/sip4/">SIP
-               4 snapshot</ulink> from October 8, 2006 (client GUI
+               4 snapshot</ulink> from October 28, 2006 (client GUI
                only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
                url="http://www.riverbankcomputing.com/Downloads/Snapshots/PyQt4/">PyQt
-               4 snapshot</ulink> from October 8, 2006, with patches included
-               in Maestro source tree (client GUI only)</para>
+               4 snapshot</ulink> from October 29, 2006 (client GUI
+               only)</para>
             </listitem>
 
             <listitem>
@@ -553,8 +553,8 @@ Certificate information:
          user-specific prefix. This makefile has very limited capabilities and
          currently exists primarily to help out automated packaging tools such
          as <command>rpmbuild</command>(1). Nevertheless, to use this makefile
-         to install into /usr, simply run the folllowing from the root of the
-         Maestro source tree using GNU Make:</para>
+         to install into <filename>/usr</filename>, simply run the following
+         from the root of the Maestro source tree using GNU Make:</para>
 
          <screen>make install</screen>
 
@@ -607,6 +607,16 @@ Certificate information:
                rendered to HTML and PDF.</para>
             </listitem>
          </orderedlist>
+
+         <para>After installing the <filename>maestro-server</filename>
+         package for the first time, go to the directory
+         <filename>/usr/lib/maestro-X.Y.Z</filename> (where
+         <quote>X.Y.Z</quote> is the Maestro version number such as 1.0.1) and
+         run the script <command>mkpem</command> as root. This will generate a
+         file named <filename>server.pem</filename> that is the machine
+         certificate for that instance of the Maestro daemon. The certificate
+         can be reused with future Maestro installations, though it will
+         expire two years after the date of creation.</para>
 
          <para>On <productname class="registered">Microsoft
          Windows</productname>, an automated installer is provided. Currently,
@@ -881,8 +891,12 @@ maestrod.py remove</screen>
          <section>
             <title>Configuring <command>maestrod</command></title>
 
-            <indexterm class="startofrange" id="index.section.maestrod.xcfg">
-               <primary><filename>maestrod.xcfg</filename></primary>
+            <indexterm class="startofrange" id="index.section.maestrod.config">
+               <primary>maestrod</primary>
+
+               <secondary>configuration</secondary>
+
+               <seealso><filename>maestrod.xcfg</filename></seealso>
             </indexterm>
 
             <para>The <command>maestrod</command> software uses a
@@ -924,11 +938,11 @@ maestrod.py remove</screen>
                maestrod to run on Red Hat Enterprise Linux 4. For Fedora Core
                5, the configuration is slightly different, as seen in <xref
                linkend="example.maestrod.xcfg.fc5" />. In both cases, <ulink
-               url="http://www.gnome.org/projects/gdm/">GDM</ulink> is being
-               used as the X display manager. The path to the Xauthority file
-               would differ if using <ulink
-               url="http://docs.kde.org/en/HEAD/kdebase/kdm/">KDM</ulink> or
-               XDM.</para>
+               url="http://www.gnome.org/projects/gdm/">GDM</ulink> (the GNOME
+               Display Manager) is being used as the X display manager. The
+               path to the Xauthority file would differ if using <ulink
+               url="http://docs.kde.org/en/HEAD/kdebase/kdm/">KDM</ulink> (the
+               KDE Display Manager) or XDM (the X Display Manager).</para>
 
                <indexterm>
                   <primary><filename>maestrod.xcfg</filename></primary>
@@ -950,7 +964,7 @@ maestrod.py remove</screen>
                   <title><command>maestrod.xcfg</command> for Red Hat
                   Enterprise Linux 4</title>
 
-                  <programlisting>&lt;?xml version="1.0" ?&gt;
+                  <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
@@ -961,12 +975,28 @@ maestrod.py remove</screen>
                   <title><command>maestrod.xcfg</command> for Fedora Core
                   5</title>
 
-                  <programlisting>&lt;?xml version="1.0" ?&gt;
+                  <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
 &lt;/maestrod&gt;</programlisting>
                </example>
+
+               <note>
+                  <para>If <sgmltag>&lt;xauth_cmd&gt;</sgmltag> is not
+                  specified or has no value, the default setting is
+                  <literal>/usr/X11R6/bin/xauth</literal>. This may not be
+                  valid for all operating systems using the X Window System,
+                  so it is better to set this value than to rely on the
+                  default.</para>
+
+                  <para>If <sgmltag>&lt;xauthority_file&gt;</sgmltag> is not
+                  specified or has no value, the default setting is
+                  <literal>/var/gdm/:0.Xauth</literal>. This is only valid
+                  when using GDM on display :0, and this path may still vary
+                  between operating systems. As such, it is better to set this
+                  value than to rely on the default.</para>
+               </note>
             </section>
 
             <section id="section.maestrod.settings.reboot">
@@ -979,6 +1009,16 @@ maestrod.py remove</screen>
                   <secondary>reboot</secondary>
 
                   <tertiary>settings</tertiary>
+               </indexterm>
+
+               <indexterm class="startofrange">
+                  <primary>maestrod</primary>
+
+                  <secondary>configuration</secondary>
+
+                  <tertiary>Reboot Service</tertiary>
+
+                  <see>services</see>
                </indexterm>
 
                <indexterm>
@@ -1052,7 +1092,7 @@ maestrod.py remove</screen>
                   <title><command>maestrod.xcfg</command>: Using GRUB with the
                   Reboot Service</title>
 
-                  <programlisting>&lt;?xml version="1.0" ?&gt;
+                  <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
@@ -1065,7 +1105,7 @@ maestrod.py remove</screen>
                   <title><command>maestrod.xcfg</command>: Using the NT Loader
                   with the Reboot Service</title>
 
-                  <programlisting>&lt;?xml version="1.0" ?&gt;
+                  <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
@@ -1202,9 +1242,10 @@ maestrod.py remove</screen>
                      computer will be rendered unbootable, so having a
                      recovery CD that can reinstall some boot loader (such as
                      the default Master Boot Record [MBR] or GRUB's first
-                     stage loader) is highly recommended. Furthermore,
-                     understand of how boot loaders and boot blocks work will
-                     come in very handy if anything should go wrong.</para>
+                     stage loader) is highly recommended. Furthermore, a good
+                     understanding of how boot loaders and boot blocks work
+                     will come in very handy if anything should go
+                     wrong.</para>
                   </caution>
 
                   <para>The first step of installing GRUB onto a FAT32
@@ -1220,7 +1261,57 @@ maestrod.py remove</screen>
                   actual disk and partition used will vary from site to
                   site.</para>
 
-                  <para>Once the partition is created, a GRUB <ulink
+                  <important>
+                     <para>It is highly recommended that the FAT32 partition
+                     be created as part of setting up the computer rather than
+                     as an afterthought. However, this is not always possible,
+                     and in that case, the FAT32 partition should go
+                     <emphasis>after</emphasis> the existing primary
+                     partitions on the hard disk where it is created. (It does
+                     not have to be on the first disk.) Doing it this way
+                     prevents the BIOS partitions from being renumbered which
+                     would cause existing boot loader configurations. This is
+                     because boot loaders generally rely upon BIOS partition
+                     ordering to know which OS to load.</para>
+                  </important>
+
+                  <para>Once the partition is created, the existing GRUB
+                  installation needs to be copied into the directory. In most
+                  cases, GRUB will only be accessible from a non-<productname
+                  class="registered">Windows</productname> platform, so the
+                  FAT32 partition must be mounted under the operating system
+                  where the GRUB files are currently installed. Let us assume
+                  that the GRUB files are currently available under /boot/grub
+                  and that the new FAT32 partition is mounted at /mnt. The
+                  following commands (run as root or another user with write
+                  access to <filename>/mnt</filename>) copy the existing GRUB
+                  files to the FAT32 partition where they need to be:</para>
+
+                  <screen>mkdir -p /mnt/boot/grub
+cp -r /boot/grub /mnt/boot/grub</screen>
+
+                  <para>The <filename>grub.conf</filename> file that gets
+                  copied as part of this will continue working since we have
+                  not changed any partition numbering.</para>
+
+                  <para>When we are finished, the old
+                  <filename>/boot/grub</filename> will no longer be the valid
+                  GRUB installation. For that reason, the FAT32 partition must
+                  be mounted when the non-Windows operating system is booted
+                  (add an entry to <filename>/etc/fstab</filename> to do
+                  this), and the <filename>/boot/grub</filename> directory
+                  should be moved out of the way to be replaced with a
+                  symbolic link. For example, let us say that the FAT32
+                  partition will be mounted under <filename>/fat32</filename>
+                  every time the computer boots. In that case, the following
+                  command would set up the new
+                  <filename>/boot/grub</filename>:</para>
+
+                  <screen>cd /boot
+mv grub grub-off
+ln -s /fat32/boot/grub ./</screen>
+
+                  <para>Next, a GRUB <ulink
                   url="http://www.gnu.org/software/grub/manual/html_node/Creating-a-GRUB-boot-floppy.html">boot
                   floppy</ulink> or <ulink
                   url="http://www.gnu.org/software/grub/manual/html_node/Making-a-GRUB-bootable-CD-ROM.html">boot
@@ -1260,30 +1351,6 @@ setup (hd0)</screen>
                   FAT32 partition mount point would determine how the files
                   get accessed.</para>
 
-                  <para>The next step would be to reboot the computer, but we
-                  must first consider what the user will see upon rebooting.
-                  Unless a <filename>grub.conf</filename> was included with
-                  the GRUB installation (the boot CD ISO image referenced
-                  above does not include one), rebooting would leave the user
-                  at a GRUB prompt. Without a good understanding of how to use
-                  GRUB through its command interface, there is not much that
-                  the average user can do at this point. To address this, an
-                  existing <filename>grub.conf</filename> could be placed into
-                  the <filename>boot/grub</filename> directory on the FAT32
-                  partition <emphasis>prior</emphasis> to installing GRUB. For
-                  example, let us assume that the newly created FAT32
-                  partition has been mounted at <filename>/mnt</filename> in
-                  Linux and that the original GRUB installation is in
-                  <filename>/boot/grub</filename>. The following commands (run
-                  as root or another user with write access to
-                  <filename>/mnt/boot/grub</filename>) would get the existing
-                  <filename>grub.conf</filename> into place for use by the
-                  GRUB installation that will be located in the FAT32
-                  partition:</para>
-
-                  <screen>mkdir -p /mnt/boot/grub
-cp /boot/grub/grub.conf /mnt/boot/grub</screen>
-
                   <indexterm class="endofrange"
                              startref="index.section.boot.loader.config.grub.fat32"></indexterm>
 
@@ -1302,8 +1369,9 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
 
                   <para>After all of that, <filename>maestrod.xcfg</filename>
                   must be updated to point to the new location for
-                  <filename>grub.conf</filename>. For Linux, let us assume
-                  that the FAT32 partition will be mounted at
+                  <filename>grub.conf</filename>. For the non-<productname
+                  class="registered">Windows</productname> operating system,
+                  remember that we are mounting the FAT32 partition at
                   <filename>/fat32</filename> every time the computer boots.
                   In that case, <filename>maestrod.xcfg</filename> would be
                   similar to what is shown in <xref
@@ -1327,7 +1395,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                      <title><command>maestrod.xcfg</command>: Multi-Platform
                      <filename>grub.conf</filename> Access (Linux)</title>
 
-                     <programlisting>&lt;?xml version="1.0" ?&gt;
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
@@ -1342,7 +1410,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                      class="registered">Microsoft
                      Windows</productname>)</title>
 
-                     <programlisting>&lt;?xml version="1.0" ?&gt;
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
@@ -1476,6 +1544,16 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                   <secondary>desktop</secondary>
 
                   <tertiary>settings</tertiary>
+               </indexterm>
+
+               <indexterm class="startofrange">
+                  <primary>maestrod</primary>
+
+                  <secondary>configuration</secondary>
+
+                  <tertiary>Desktop Service</tertiary>
+
+                  <see>services</see>
                </indexterm>
 
                <para>The Desktop Service<indexterm>
@@ -1615,7 +1693,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                      <title><command>maestrod.xcfg</command>: Screen Saver and
                      Power Management on Linux Without Local Logon</title>
 
-                     <programlisting>&lt;?xml version="1.0" ?&gt;
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
@@ -1645,7 +1723,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                      <title><command>maestrod.xcfg</command>: Screen Saver and
                      Power Management on Linux With Local Logon</title>
 
-                     <programlisting>&lt;?xml version="1.0" ?&gt;
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
@@ -1653,7 +1731,9 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
    &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
    &lt;saver_types&gt;xset,xscreensaver&lt;/saver_types&gt;
    &lt;xscreensaver_cmd&gt;/usr/X11R6/bin/xscreensaver&lt;/xscreensaver_cmd&gt;
-   &lt;xscreensaver_command_cmd&gt;/usr/X11R6/bin/xscreensaver-command&lt;/xscreensaver_command_cmd&gt;
+   &lt;xscreensaver_command_cmd&gt;
+      /usr/X11R6/bin/xscreensaver-command
+   &lt;/xscreensaver_command_cmd&gt;
 &lt;/maestrod&gt;</programlisting>
                   </example>
 
@@ -1663,11 +1743,50 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                      class="registered">Microsoft
                      Windows</productname></title>
 
-                     <programlisting>&lt;?xml version="1.0" ?&gt;
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
    &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
+                  <para>Additional configuration can be performed for the
+                  <literal>powercfg</literal> plug-in available for use on
+                  <productname class="registered">Microsoft
+                  Windows</productname>. The (current) job of this plug-in is
+                  to change the power-off timeout for a monitor drawing AC
+                  power. It does this by switching time timeout value between
+                  0 minutes (no power off) and some other number of minutes.
+                  The plug-in will query the current power-off timeout setting
+                  when the Maestro service is launched and use that as the
+                  non-zero value. However, if the power-off timeout is 0 when
+                  the Maestro service starts, then it falls back on a
+                  twenty-minute timeout. This may not be appropriate, and the
+                  <filename>maestrod.xcfg</filename> file provides a means to
+                  override this behavior. As shown in <xref
+                  linkend="example.maestrod.xcfg.desktop.saver.windows.powercfg" />,
+                  we see that the power-off timeout can be set to some number
+                  of minutes explicitly. This value can be set to 0 to prevent
+                  the powercfg plug-in from enabling the power-off timeout
+                  altogether, though in this case, it may be better to set the
+                  <sgmltag>&lt;saver_types&gt;</sgmltag> value to be
+                  <literal>windows</literal> alone.</para>
+
+                  <example id="example.maestrod.xcfg.desktop.saver.windows.powercfg">
+                     <title><command>maestrod.xcfg</command>: Screen Saver and
+                     Power Management on <productname
+                     class="registered">Microsoft Windows</productname>
+                     (2)</title>
+
+                     <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestrod&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
+   &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
+   &lt;powercfg&gt;
+      &lt;ac_off_time&gt;120&lt;/ac_off_time&gt;
+   &lt;/powercfg&gt;
 &lt;/maestrod&gt;</programlisting>
                   </example>
                </section>
@@ -1741,7 +1860,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                              startref="index.sectcion.service.desktop.settings"></indexterm>
 
                   <indexterm class="endofrange"
-                             startref="index.section.maestrod.xcfg"></indexterm>
+                             startref="index.section.maestrod.config"></indexterm>
                </section>
             </section>
          </section>
@@ -1832,53 +1951,141 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                <title>Command Line Options for the <application>Maestro
                GUI</application></title>
 
-               <para>There are three command line options to the
+               <indexterm id="index.section.maestro.cmd.opts">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+               </indexterm>
+
+               <para>There are five command line options to the
                <command>maestro</command> command:
-               <option>--ensemble</option>, <option>--stanza</option>, and
-               <option>--view</option>. The exact syntax and usage information
-               for these options can be displayed by running the
-               following:</para>
+               <option>--ensemble</option>, <option>--stanza</option>,
+               <option>--launch-only</option>,
+               <option>--launch-all-from</option>, and
+               <option>--view</option>. These options have short forms that
+               are, respectively, <option>-e</option>, <option>-s</option>,
+               <option>-l</option>, <option>-L</option>, and
+               <option>-v</option>, and we will refer to the command line
+               options henceforth using the form <option>-a/--arg</option>.
+               The exact syntax and usage information for these options can be
+               displayed by running the following:</para>
 
                <screen>maestro --help</screen>
 
-               <para>The <option>--ensemble</option> option names an ensemble
-               file to load when the <application>Maestro GUI</application>
-               starts. Using this option eliminates the need to open an
-               ensemble after the GUI opens, but it does not preclude the user
-               from changing the current ensemble (as we will see in <xref
-               linkend="section.gui.ensemble.load" />). One use of this
-               command line option would be in the context of associations
-               that cause the <application>Maestro GUI</application> to load
-               when a user double-clicks on a file. The file association
-               action could include this option to cause a specific ensemble
-               to be loaded by default so that the <application>Maestro
-               GUI</application> automatically connects to a cluster when it
-               opens.</para>
+               <para>The <option>-e/--ensemble</option> option names an
+               ensemble file to load when the <application>Maestro
+               GUI</application> starts. Using this option eliminates the need
+               to open an ensemble after the GUI opens, but it does not
+               preclude the user from changing the current ensemble (as we
+               will see in <xref linkend="section.gui.ensemble.load" />). One
+               use of this command line option would be in the context of
+               associations that cause the <application>Maestro
+               GUI</application> to load when a user double-clicks on a file.
+               The file association action could include this option to cause
+               a specific ensemble to be loaded by default so that the
+               <application>Maestro GUI</application> automatically connects
+               to a cluster when it opens.</para>
 
-               <para>The <option>--stanza</option> option names the stanza
-               file that will be accessible from the <application>Maestro
-               GUI</application>. Using this option prevents the
-               <application>Maestro GUI</application> from scanning for other
-               stanza files so that the named file is the only one that is
-               accessible. As with the <option>--ensemble</option> option, one
-               way of using this option is in the context of file
-               associations. If the file associated with launching the
-               <application>Maestro GUI</application> is an input file to an
-               application, the stanza for the application that uses the input
-               file could be identified as the one (and only) to use in the
+               <para>The <option>-s/--stanza</option> option names a stanza
+               file that will be loaded by the <application>Maestro
+               GUI</application> in addition to those found by scanning the
+               stanza search path<indexterm>
+                     <primary>stanza</primary>
+
+                     <secondary>search path</secondary>
+                  </indexterm><footnote>
+                     <para>If the named file is found during the stanza search
+                     path scanning, it will not be loaded twice.</para>
+                  </footnote>. This option can be specified repeatedly to
+               identify multiple stanza files to load. As with the
+               <option>--ensemble</option> option, one way of using this
+               option is in the context of file associations. If the file
+               associated with launching the <application>Maestro
+               GUI</application> is an input file to an application, the
+               stanza for the application that uses the input file could be
+               identified as the one (and only) to use in the
                <application>Maestro GUI</application>. In that way, the user
                would be presented with a <application>Maestro
                GUI</application> configuration that only pertains to the
                application and input file in question.</para>
 
-               <para>The <option>--view</option> option tells the
+               <para>The use of the <option>-e/--ensemble</option> and
+               <option>-s/--stanza</option> options are not strictly necessary
+               to delineate ensemble and stanza files. When processing command
+               line options, those that are not preceded by one of the five
+               options are treated as positional arguments. Positional
+               arguments are treated as XML files, and they are examined to
+               determine the document type. Documents with the root tag
+               <sgmltag>&lt;ensemble&gt;</sgmltag> are treated as ensemble
+               files, and those with the root tag
+               <sgmltag>&lt;stanza&gt;</sgmltag> are treated as stanza files.
+               Among other things, this behavior facilitates file associations
+               and double-click launching actions.</para>
+
+               <para>The <option>-l/--launch-only</option> option directs the
+               Launch Viewer<indexterm>
+                     <primary>viewers</primary>
+
+                     <secondary>launch</secondary>
+                  </indexterm> (see <xref linkend="section.viewer.launch" />)
+               to display <emphasis>only</emphasis> the named application in
+               its pull-down menu. The argument to this option must be the
+               name of an application defined in a stanza that will be found
+               by the Maestro GUI, either by scanning the search path or from
+               the <option>-s/--stanza</option> option. If the application
+               name contains spaces, the argument to the
+               <option>-l/--launch-only</option> command line option must be
+               quoted appropriately.</para>
+
+               <para>The <option>-L/--launch-all-from</option> option directs
+               the Launch Viewer (see <xref
+               linkend="section.viewer.launch" />) to display all the
+               applications defined in the named stanza file but no others.
+               This approach is less restrictive than the
+               <option>-l/--launch-only</option> option, though it may still
+               display only one application if that is all that is defined in
+               the named stanza file. The stanza file named by this argument
+               must be a valid path to a stanza file.</para>
+
+               <note>
+                  <para>The <option>-l/--launch-only</option> and
+                  <option>-L/--launch-all-from</option> options do not prevent
+                  the stanza search path<indexterm>
+                        <primary>stanza</primary>
+
+                        <secondary>search path</secondary>
+                     </indexterm> from being scanned. As such, all discovered
+                  stanzas are still available to be edited using the Stanza
+                  Editor<indexterm>
+                        <primary>viewers</primary>
+
+                        <secondary>stanza editor</secondary>
+                     </indexterm> (see <xref
+                  linkend="section.files.stanza" />), but the applications
+                  displayed in the Launch Viewer will be restricted based on
+                  the use of one of these options.</para>
+               </note>
+
+               <sidebar>
+                  <para>Only one of the options
+                  <option>-l/--launch-only</option> or
+                  <option>-L/--launch-all-from</option> should be given when
+                  running the Maestro GUI. If both are used, the
+                  <option>-l/--launch-only</option> option takes
+                  precedence.</para>
+               </sidebar>
+
+               <para>The <option>-v/--view</option> option tells the
                <application>Maestro GUI</application> which viewer plug-in to
                display when it opens. By default, the <application>Maestro
                GUI</application> displays whichever viewer plug-in is the
                first in the list when it opens. This option overrides that
                behavior. The viewer plug-in to use is identified by its name,
                and the names of the viewer plug-ins that come with Maestro are
-               as follows:</para>
+               as follows<footnote>
+                     <para>We explain more about the viewers in later
+                     subsections.</para>
+                  </footnote>:</para>
 
                <indexterm>
                   <primary>viewers</primary>
@@ -1923,20 +2130,151 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                syntax):</para>
 
                <screen>maestro.py --ensemble="C:\site\cluster.ensem"
-           --stanza="C:\myapp.stanza" --view="Launch View"</screen>
+           --stanza="C:\apps\myapp.stanza" --view="Launch View"</screen>
 
-               <para>We will explain more about these viewers in the following
-               sections.</para>
+               <para>A simpler form of the same is the following:</para>
+
+               <screen>maestro.py --view="Launch View" C:\site\cluster.ensem
+           C:\apps\myapp.stanza</screen>
+
+               <para>By using the short form of the <option>-v/--view</option>
+               option, we can shrink the command line a little further, as
+               shown below:</para>
+
+               <screen>maestro.py -v "Launch View" C:\site\cluster.ensem
+           C:\apps\myapp.stanza</screen>
+
+               <para>We will see in <xref linkend="section.maestro.config" />
+               how this command can be simplified further through the Maestro
+               GUI configuration.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts"></indexterm>
+            </section>
+
+            <section id="section.stanza.search.path">
+               <title>Stanza Search Path</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.stanza.search.path">
+                  <primary>stanza</primary>
+
+                  <secondary>search path</secondary>
+               </indexterm>
+
+               <para>Every time the Maestro GUI starts, it scans a collection
+               of directories looking for files with the extension
+               <filename>.stanza</filename> (unless told not to do so by the
+               Maestro GUI configuration—see <xref
+               linkend="section.maestro.config" />). The default search path
+               consists of the following three directories (searched in this
+               order):</para>
+
+               <orderedlist>
+                  <listitem>
+                     <para>The <filename>stanzas</filename> subdirectory of
+                     the Maestro GUI installation</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The <filename>stanzas</filename> subdirectory of
+                     the user-specific Maestro directory
+                     (<filename>%APPDATA%\Maestro</filename> or
+                     <filename>%USERPROFILE%\Application
+                     Data\Maestro</filename> on <productname
+                     class="registered">Microsoft Windows</productname>,
+                     <filename>$HOME/Library/Application
+                     Support/Maestro</filename> on Mac OS X, and
+                     <filename>$HOME/.maestro</filename> on all other
+                     platforms)</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The <filename>stanzas</filename> subdirectory of
+                     the system-wide Maestro directory
+                     (<filename>%SystemDrive%\Documents and Settings\All
+                     Users\maestro</filename> on <productname
+                     class="registered">Microsoft Windows</productname> and
+                     <filename>/etc/maestro</filename> on all other
+                     platforms)</para>
+                  </listitem>
+               </orderedlist>
+
+               <para>If the environment variable <envar>STANZA_PATH</envar> is
+               set, the directories listed in the value of that variable are
+               appended to the above list. Note that this environment variable
+               uses platform-specific conventions for path separation. On
+               <productname class="registered">Microsoft
+               Windows</productname>, the path separation character is
+               <literal>;</literal>, and on all other platforms it is
+               <literal>:</literal>.</para>
+
+               <para>The default search path can be extended further using a
+               system-wide path setting and a user-specific path setting. We
+               will see more about these in <xref
+               linkend="section.maestro.config.system" /> and <xref
+               linkend="section.maestro.config.user" />. Putting it all
+               together, then, we have the following list of places scanned
+               for <filename>.stanza</filename> files (in order):</para>
+
+               <orderedlist>
+                  <listitem>
+                     <para>The user-specific list of directories from
+                     <filename>maestro.xml</filename><indexterm>
+                           <primary><filename>maestro.xml</filename></primary>
+                        </indexterm></para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The system-wide list of directories from
+                     <filename>maestro.xcfg</filename><indexterm>
+                           <primary><filename>maestro.xcfg</filename></primary>
+                        </indexterm></para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The <filename>stanzas</filename> subdirectory of
+                     the Maestro GUI installation</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The <filename>stanzas</filename> subdirectory of
+                     the user-specific Maestro directory</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The <filename>stanzas</filename> subdirectory of
+                     the system-wide Maestro directory</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>The directories listed in the
+                     <envar>STANZA_PATH</envar> environment variable</para>
+                  </listitem>
+               </orderedlist>
+
+               <para>The search process goes one step further by searching
+               each directory in the stanza search path recursively. This
+               means that subdirectories under each of the searched
+               directories are also scanned. As such, users can set up
+               hierarchical stanza organizational schemes very easily without
+               having to list every single directory in the stanza search
+               path. Only the root of the hierarchy need be named in order for
+               all the <filename>.stanza</filename> files to be found.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.stanza.search.path"></indexterm>
             </section>
 
             <section id="section.gui.ensemble.load">
                <title>Loading an Ensemble</title>
 
-               <para>When the Maestro GUI starts, it either loads an ensemble
-               as specified on the command line, or it starts with no
-               ensemble. In the latter case, the user must load an ensemble
-               through the GUI. This can be accomplished by selecting
-               <menuchoice>
+               <para>When the Maestro GUI starts, it either loads either an
+               ensemble as specified on the command line, the default ensemble
+               named in the Maestro configuration (see <xref
+               linkend="section.maestro.config" />), or no ensemble. In the
+               third case, the user must load an ensemble through the GUI.
+               This can be accomplished by selecting <menuchoice>
                      <guimenu>File</guimenu>
 
                      <guimenuitem>Load Ensemble</guimenuitem>
@@ -2273,85 +2611,384 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
             </section>
          </section>
 
-         <section>
+         <section id="section.maestro.config">
             <title>Configuring the <application>Maestro
             GUI</application></title>
 
-            <para>Presently, the <application>Maestro GUI</application> has
-            only three user preferences: the user skill level, the directory
-            where the log files get stored during execution, and whether to
-            delete these log files when the GUI exits. The GUI does not yet
-            provide a graphical means to edit these preferences, so users must
-            edit the file
-            <filename>$HOME/.maestro/maestro.xml</filename><indexterm>
-                  <primary><filename>maestro.xml</filename></primary>
-               </indexterm>
-            (<filename>%APPDATA%\Maestro\maestro.xml</filename> or
-            <filename>%USERPROFILE%\Application
-            Data\Maestro\maestro.xml</filename> on <productname
-            class="registered">Microsoft Windows</productname>) by hand. An
-            example version of this file is shown in <xref
-            linkend="example.maestro.gui.config" />.</para>
+            <indexterm class="startofrange" id="index.section.maestro.config">
+               <primary>maestro</primary>
 
-            <indexterm>
-               <primary><filename>maestro.xml</filename></primary>
+               <secondary>configuration</secondary>
 
-               <secondary>elements</secondary>
+               <seealso><filename>maestro.xcfg</filename></seealso>
 
-               <tertiary><sgmltag>&lt;maestro&gt;</sgmltag></tertiary>
+               <seealso><filename>maestro.xml</filename></seealso>
             </indexterm>
 
-            <example id="example.maestro.gui.config">
-               <title>Sample <filename>maestro.xml</filename></title>
+            <para>The Maestro GUI can be configured using a system-wide
+            configuration file and a user-specific configuration file. The
+            system-wide configuration file will be
+            <filename>/etc/maestro.xcfg</filename><indexterm>
+                  <primary><filename>maestro.xcfg</filename></primary>
+               </indexterm> on Linux and <filename>maestro.xcfg</filename>
+            under the Maestro installation directory (e.g.,
+            <filename>C:\Program Files\Infiscape\Maestro 1.0.0</filename>) on
+            <productname class="registered">Microsoft Windows</productname>.
+            The user-specific configuration file will be
+            <filename>$HOME/.maestro/maestro.xml</filename><indexterm>
+                  <primary><filename>maestro.xml</filename></primary>
+               </indexterm> on Linux and
+            <filename>%APPDATA%\Maestro\maestro.xml</filename> or
+            <filename>%USERPROFILE%\Application
+            Data\Maestro\maestro.xml</filename> on <productname
+            class="registered">Microsoft Windows</productname>.</para>
 
-               <programlisting>&lt;?xml version="1.0" ?&gt;
+            <para>If both the system-wide <filename>maestro.xcfg</filename>
+            and the user-specific <filename>maestro.xml</filename> are
+            present, the two collections of settings are merged (conceptually)
+            at run time with the user-specific settings taking precedence.
+            This means that the user can override <emphasis>any</emphasis>
+            system-wide settings from <filename>maestro.xcfg</filename> in his
+            or her <filename>maestro.xml</filename> file. This capability
+            should be used with care.</para>
+
+            <para>Both Maestro GUI settings files can reference environment
+            variables as part of path names. This is done using the syntax of
+            UNIX shells. For example, using <literal>${MY_ENV_VAR}</literal>
+            would look up the environment variable <envar>MY_ENV_VAR</envar>
+            in the runtime environment of the Maestro GUI. This means that
+            <envar>MY_ENV_VAR</envar> must be set when the Maestro GUI is
+            launched.</para>
+
+            <section id="section.maestro.config.system">
+               <title>System-Wide Maestro GUI Settings</title>
+
+               <para>The system-wide Maestro GUI settings file will usually
+               contain two key pieces of information: a site-specific stanza
+               search path<indexterm>
+                     <primary>stanza</primary>
+
+                     <secondary>search path</secondary>
+
+                     <tertiary>site</tertiary>
+                  </indexterm> and a site-specific default ensemble<indexterm>
+                     <primary>ensemble</primary>
+
+                     <secondary>default</secondary>
+
+                     <tertiary>site</tertiary>
+                  </indexterm>. Both of these settings are optional, and there
+               is no default value for either if they are not present. Refer
+               back to <xref linkend="section.stanza.search.path" /> for more
+               information about the default stanza search path and to <xref
+               linkend="section.gui.command.line.options" /> and <xref
+               linkend="section.gui.ensemble.load" /> for the handling of
+               ensemble files.</para>
+
+               <para>The site-specific stanza search path will be used to
+               extend the default stanza search path for all users of the
+               Maestro GUI. It is set using the
+               <sgmltag>&lt;site_stanza_path&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;site_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;site_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm> XML tag, the value of which is a
+               platform-specific list of directories separated by the
+               platform-specific path separator character
+               (<literal>;</literal> on <productname
+               class="registered">Microsoft Windows</productname> and
+               <literal>:</literal> on all other platforms).</para>
+
+               <para>The default ensemble setting identifies an ensemble file
+               that should be loaded by default when the Maestro GUI is
+               launched unless one is named explicitly using the
+               <option>-e/--ensemble</option> command line option. The default
+               ensemble file is named using a platform-specific path in the
+               <sgmltag>&lt;default_ensemble&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;default_ensemble&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;default_ensemble&gt;</sgmltag></tertiary>
+                  </indexterm> XML tag.</para>
+
+               <para>Below, we show example <filename>maestro.xcfg</filename>
+               files. The first, <xref
+               linkend="example.maestro.gui.config.site.unix" />, is for a
+               non-Windows platform. In this case, the directories
+               <filename>/usr/local/maestro/stanzas</filename> and
+               <filename>/opt/software/stanzas</filename> will be searched
+               before the directories in the default stanza search path.
+               Secondly, the default ensemble file that will be loaded is
+               <filename>/usr/local/maestro/site.ensemble</filename>. The
+               second file, shown in <xref
+               linkend="example.maestro.gui.config.site.windows" />, is for a
+               <productname class="registered">Microsoft Windows</productname>
+               installation, and the ideas are the same; only the paths have
+               changed.</para>
+
+               <example id="example.maestro.gui.config.site.unix">
+                  <title>Sample <filename>maestro.xcfg</filename> for a
+                  non-<productname class="registered">Windows</productname>
+                  Platform</title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestro&gt;
+   &lt;site_stanza_path&gt;
+      /usr/local/maestro/stanzas:/opt/software/stanzas
+   &lt;/site_stanza_path&gt;
+   &lt;default_ensemble&gt;
+      /usr/local/maestro/site.ensemble
+   &lt;/default_ensemble&gt;
+&lt;/maestro&gt;</programlisting>
+               </example>
+
+               <example id="example.maestro.gui.config.site.windows">
+                  <title>Sample <filename>maestro.xcfg</filename> for
+                  <productname class="registered">Microsoft
+                  Windows</productname></title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestro&gt;
+   &lt;site_stanza_path&gt;
+      Z:\maestro\stanzas;X:\software\stanzas
+   &lt;/site_stanza_path&gt;
+   &lt;default_ensemble&gt;
+      Z:\maestro\site.ensemble
+   &lt;/default_ensemble&gt;
+&lt;/maestro&gt;</programlisting>
+               </example>
+            </section>
+
+            <section id="section.maestro.config.user">
+               <title>User-Specific Maestro GUI Settings</title>
+
+               <para>As we noted earlier, the system-wide and user-specific
+               Maestro GUI configuration files are merged into one at run time
+               with the user settings taking precedence over system-wide
+               settings. This means that the user-specific Maestro GUI file
+               can contain the same XML tags as the system-wide file. In this
+               subsection, we explain how to utilize this feature to extend
+               and override system-wide settings and to control behavior of
+               the Maestro GUI that would usually not be appropriate for
+               system-wide settings.</para>
+
+               <sidebar>
+                  <para>Recall that the user-specific Maestro GUI settings are
+                  in a file named maestro.xml that is located in a
+                  platform-specific directory. For Microsoft Windows, the file
+                  is either <filename>%APPDATA%\Maestro\maestro.xml</filename>
+                  or <filename>%USERPROFILE%\Application
+                  Data\Maestro\maestro.xml</filename>. For Mac OS X, the file
+                  is <filename>$HOME/Library/Application
+                  Support/maestro.xml</filename>. For all other platforms, it
+                  is <filename>$HOME/.maestro/maestro.xml</filename>.</para>
+               </sidebar>
+
+               <para>The first user-specific setting that we will examine is
+               the user-defined stanza search path. If set, this list of
+               directories is the <emphasis>first</emphasis> searched when
+               scanning for <filename>.stanza</filename> files (refer back to
+               <xref linkend="section.stanza.search.path" /> for more
+               details). The user-defined stanza search path is set using the
+               <sgmltag>&lt;user_stanza_path&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;user_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;user_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm> XML tag, the value of which is a
+               platform-specific list of directories separated by the
+               platform-specific path separator character
+               (<literal>;</literal> on <productname
+               class="registered">Microsoft Windows</productname> and
+               <literal>:</literal> on all other platforms). A convenient use
+               of this setting is when several applications are being
+               developed in the user's home directory. While the
+               <filename>.stanza</filename> files for the applications could
+               be found using the <envar>STANZA_PATH</envar> environment
+               variable or the <option>-s/--stanza</option> command line
+               option, this setting would tend to be more practical for a
+               sufficiently large number of application directories to
+               scan.</para>
+
+               <para>In some cases, the user may wish to prevent the Maestro
+               GUI from scanning directories for <filename>.stanza</filename>
+               files. This can be accomplished by overriding the system-wide
+               stanza search path and/or by preventing the scanning the
+               default stanza search path. In the user-specific settings, the
+               <sgmltag>&lt;site_stanza_path&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;site_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;site_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm> XML tag can be set to have no value,
+               effectively wiping out the system-wide stanza search path for
+               the use<footnote>
+                     <para>Remember that these per-user settings, and one
+                     user's <filename>maestro.xml</filename> file does not
+                     interfere with another's.</para>
+                  </footnote>. To prevent the default stanza search path from
+               being scanned, the user can set the value of the
+               <sgmltag>&lt;use_builtin_stanza_path&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;use_builtin_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;use_builtin_stanza_path&gt;</sgmltag></tertiary>
+                  </indexterm> XML tag to the value of
+               <literal>false</literal> or <literal>0</literal><footnote>
+                     <para>The
+                     <sgmltag>&lt;use_builtin_stanza_path&gt;</sgmltag> XML
+                     tag could also be used in
+                     <filename>maestro.xcfg</filename>, but it might not
+                     always be a good idea to prevent scanning the default
+                     stanza path on a system-wide basis.</para>
+                  </footnote>. By taking both of these steps, the user can
+               limit the stanza search path to the user-defined search path
+               and the directories listed in <envar>STANZA_PATH</envar> (if
+               any). An example of this is shown in <xref
+               linkend="example.maestro.gui.config.user.unix" />.</para>
+
+               <example id="example.maestro.gui.config.user.unix">
+                  <title>Sample <filename>maestro.xml</filename> for a
+                  non-<productname class="registered">Windows</productname>
+                  Platform</title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestro&gt;
+   &lt;user_stanza_path&gt;
+      ${HOME}/.maestro/stanzas:${HOME}/src/vrj-apps
+   &lt;/user_stanza_path&gt;
+   &lt;site_stanza_path /&gt;
+   &lt;use_builtin_stanza_path&gt;false&lt;/use_builtin_stanza_path&gt;
+&lt;/maestro&gt;</programlisting>
+               </example>
+
+               <para>The user-specific Maestro GUI settings can also change
+               the system-wide default ensemble file by setting a value for
+               the <sgmltag>&lt;default_ensemble&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;default_ensemble&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;default_ensemble&gt;</sgmltag></tertiary>
+                  </indexterm> XML tag.</para>
+
+               <para>Finally, the <application>Maestro GUI</application> has
+               three settings that fall under the category of <quote>user
+               preferences</quote>: the user skill level, the directory where
+               the log files get stored during execution, and whether to
+               delete these log files when the GUI exits. The GUI does not yet
+               provide a graphical means to edit these preferences, so users
+               must edit <filename>maestro.xml</filename> by hand. An example
+               version of this file is shown in <xref
+               linkend="example.maestro.gui.config" />.</para>
+
+               <indexterm>
+                  <primary><filename>maestro.xml</filename></primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;maestro&gt;</sgmltag></tertiary>
+               </indexterm>
+
+               <example id="example.maestro.gui.config">
+                  <title>Sample <filename>maestro.xml</filename> for User
+                  Preferences</title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestro&gt;
    &lt;logdir&gt;/var/tmp&lt;/logdir&gt;
    &lt;clean_logfiles&gt;true&lt;/clean_logfiles&gt;
 &lt;/maestro&gt;</programlisting>
-            </example>
+               </example>
 
-            <para>This example demonstrates a key aspect of the
-            <application>Maestro GUI</application> configuration. Namely, the
-            lack of a setting (in this case, the user skill level) is not a
-            problem. Reasonable defaults exist for the current settings, and
-            there is not usually a need to override the defaults by adding to
-            this file. The defaults for the settings are as follows:</para>
+               <para>This example demonstrates a key aspect of the
+               <application>Maestro GUI</application> configuration. Namely,
+               the lack of a setting (in this case, the user skill level) is
+               not a problem. Reasonable defaults exist for the current
+               settings, and there is not usually a need to override the
+               defaults by adding to this file. The defaults for the settings
+               are as follows:</para>
 
-            <itemizedlist>
-               <listitem>
-                  <para><literal>logdir</literal><indexterm>
-                        <primary><filename>maestro.xml</filename></primary>
+               <itemizedlist>
+                  <listitem>
+                     <para><literal>logdir</literal><indexterm>
+                           <primary><filename>maestro.xml</filename></primary>
 
-                        <secondary>elements</secondary>
+                           <secondary>elements</secondary>
 
-                        <tertiary><sgmltag>&lt;logdir&gt;</sgmltag></tertiary>
-                     </indexterm>: The platform-specific home directory of the
-                  user running the <application>Maestro
-                  GUI</application></para>
-               </listitem>
+                           <tertiary><sgmltag>&lt;logdir&gt;</sgmltag></tertiary>
+                        </indexterm>: The platform-specific home directory of
+                     the user running the <application>Maestro
+                     GUI</application></para>
+                  </listitem>
 
-               <listitem>
-                  <para><literal>clean_logfiles</literal><indexterm>
-                        <primary><filename>maestro.xml</filename></primary>
+                  <listitem>
+                     <para><literal>clean_logfiles</literal><indexterm>
+                           <primary><filename>maestro.xml</filename></primary>
 
-                        <secondary>elements</secondary>
+                           <secondary>elements</secondary>
 
-                        <tertiary><sgmltag>&lt;clean_logfiles&gt;</sgmltag></tertiary>
-                     </indexterm>: <literal>true</literal></para>
-               </listitem>
+                           <tertiary><sgmltag>&lt;clean_logfiles&gt;</sgmltag></tertiary>
+                        </indexterm>: <literal>true</literal></para>
+                  </listitem>
 
-               <listitem>
-                  <para><literal>user_mode</literal><indexterm>
-                        <primary><filename>maestro.xml</filename></primary>
+                  <listitem>
+                     <para><literal>user_mode</literal><indexterm>
+                           <primary><filename>maestro.xml</filename></primary>
 
-                        <secondary>elements</secondary>
+                           <secondary>elements</secondary>
 
-                        <tertiary><sgmltag>&lt;user_mode&gt;</sgmltag></tertiary>
-                     </indexterm>: <literal>100</literal> (meaning
-                  novice)</para>
-               </listitem>
-            </itemizedlist>
+                           <tertiary><sgmltag>&lt;user_mode&gt;</sgmltag></tertiary>
+                        </indexterm>: <literal>100</literal> (meaning
+                     novice)</para>
+                  </listitem>
+               </itemizedlist>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.config"></indexterm>
+            </section>
          </section>
       </section>
    </chapter>
@@ -2405,7 +3042,15 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          <literal>class</literal> is a comma-separated list of identifiers
          indicating the role of the node in the cluster, and it comes into
          play with the stanzas and application launching. Common values are
-         <literal>master</literal> or <literal>slave</literal>. The
+         <literal>master</literal> or <literal>slave</literal><indexterm>
+               <primary>ensemble</primary>
+
+               <secondary>class</secondary>
+
+               <tertiary>master/slave</tertiary>
+            </indexterm>. By default, every node in the ensemble has its
+         operating system name as part of its class, so this need not (and
+         should not) be specified in the ensemble file. The
          <literal>hostname</literal> is the IP address or machine name for the
          node. This is what the <application>Maestro GUI</application> uses
          for making the connection to the remote node. Finally, the
@@ -2416,7 +3061,7 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          <example id="example.maestro.ensemble">
             <title>Maestro Ensemble</title>
 
-            <programlisting>&lt;?xml version="1.0" ?&gt;
+            <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;ensemble&gt;
    &lt;cluster_node class="" hostname="node0" name="Node 0" /&gt;
    &lt;cluster_node class="" hostname="node1" name="Node 1" /&gt;
@@ -2528,24 +3173,66 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          <section>
             <title>Stanza Items</title>
 
+            <para>Stanza items are objects that appear as children of an
+            application root (stanza XML element
+            <sgmltag>&lt;application&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;application&gt;</sgmltag></tertiary>
+               </indexterm>) or a global option root (stanza XML element
+            <sgmltag>&lt;global_option&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;global_option&gt;</sgmltag></tertiary>
+               </indexterm>). Stanza items define the behavior of how an
+            application gets executed by capturing details such as the command
+            to run, command line flags, and execution environment. The
+            composition of this information at launch time is done by making
+            choices in the Launch Viewer<indexterm>
+                  <primary>viewers</primary>
+
+                  <secondary>launch</secondary>
+               </indexterm> of the Maestro GUI. There are many stanza items,
+            and we explain their usage in this section.</para>
+
+            <para>Some stanza items can reference environment variables in
+            their value setting. The environment variable can be one that is
+            set as part of the stanza itself, as part of a the environment of
+            referenced global options, or as part of the execution environment
+            on the remote computer. This is done using the syntax of UNIX
+            shells where <literal>${ENV_VAR}</literal> indicates that the
+            value of the environment variable <literal>ENV_VAR</literal>
+            should be used. The environment variable evaluation happens on the
+            remote computer as part of launching.</para>
+
             <para>In the stanza editor, there is a tool bar containing all the
             information that can go into a stanza. The tool bar items are as
             follows:</para>
 
             <itemizedlist>
                <listitem>
-                  <para><guibutton>Command</guibutton>: A command is what
-                  actually gets executed when the application is launched. The
-                  command path should <emphasis>not</emphasis> be enclosed in
-                  quotes even when it contains spaces because the Maestro
-                  Launch Service<indexterm>
+                  <para><guibutton>Command</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>command</secondary>
+                     </indexterm>: A command is what actually gets executed
+                  when the application is launched. The command path should
+                  <emphasis>not</emphasis> be enclosed in quotes even when it
+                  contains spaces because the Maestro Launch Service<indexterm>
                         <primary>services</primary>
 
                         <secondary>launch</secondary>
                      </indexterm> will handle using correct quoting when
-                  necessary. The executed command can be varied on each node
-                  of the cluster using the <literal>class</literal> attribute.
-                  For example, on a cluster that mixes <productname
+                  necessary. The command can set using one or more environment
+                  variables.</para>
+
+                  <para>The executed command can be varied on each node of the
+                  cluster using the <literal>class</literal> attribute. For
+                  example, on a cluster that mixes <productname
                   class="registered">Microsoft Windows</productname> and
                   Linux, a command might be <filename>C:\Program
                   Files\Software\myprog.exe</filename> on some nodes and
@@ -2558,43 +3245,61 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Cwd</guibutton>: The current working
-                  directory identifies where in the file system the command
-                  will be executed. This does not have to be the same as the
-                  directory containing the command since the command can be
-                  specified using an absolute path. As with the command, this
-                  path can vary based on classification of the various cluster
-                  nodes.</para>
+                  <para><guibutton>Cwd</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>cwd</secondary>
+                     </indexterm>: The current working directory identifies
+                  where in the file system the command will be executed. This
+                  does not have to be the same as the directory containing the
+                  command since the command can be specified using an absolute
+                  path. As with the command, this path can vary based on
+                  classification of the various cluster nodes. The current
+                  working directory can be set using one or more environment
+                  variables.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Env Variable</guibutton>: [Deprecated—use
-                  environment variable lists instead] An environment variable
-                  describes a setting that is applied to the execution
-                  environment of the application. It is made up of a key (the
-                  name of the environment variable) and a value. These
-                  settings are applied to the run-time environment
-                  <emphasis>of the application</emphasis> on each of the
-                  remote nodes when the application is launched. Environment
-                  variable values can reference other environment variables
-                  using the syntax <literal>${ENV_VAR_NAME}</literal> where
+                  <para><guibutton>Env Variable</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>env variable</secondary>
+                     </indexterm>: An environment variable describes a setting
+                  that is applied to the execution environment of the
+                  application. It is made up of a key (the name of the
+                  environment variable) and a value. These settings are
+                  applied to the run-time environment <emphasis>of the
+                  application</emphasis> on each of the remote nodes when the
+                  application is launched by merging the stanza environment
+                  with the runtime environment of the Maestro server.
+                  Environment variable values can reference other environment
+                  variables using the syntax
+                  <literal>${ENV_VAR_NAME}</literal> where
                   <varname>ENV_VAR_NAME</varname> is the name of the other
                   environment variable. Be careful not to introduce circular
                   references, however, because this will result in an infinite
                   loop on the server side when trying to resolve the
-                  references.</para>
+                  references. The value of an environment variable in the
+                  remote execution environment can be modified (extended or
+                  replaced) using this stanza item. For example,
+                  <envar>PATH</envar> could be changed to
+                  <literal>${VJ_BASE_DIR}/bin:${PATH}:${HOME}/somedir/bin</literal>.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Env List</guibutton>: A list of environment
-                  variables. In some cases, an application may use a large
-                  collection of environment variables, and creating individual
-                  environment variable items in the stanza can be quite
-                  tedious. Instead, an environment variable list can be used
-                  to capture multiple environment variables in one place. Each
-                  environment variable in the list is made up of a (the name
-                  of the environment variable) and zero or more values. If the
-                  stanza author allows the user to change the value of the
+                  <para><guibutton>Env List</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>env list</secondary>
+                     </indexterm>: A list of environment variables. In some
+                  cases, an application may use a large collection of
+                  environment variables, and creating individual environment
+                  variable items in the stanza can be quite tedious. Instead,
+                  an environment variable list can be used to capture multiple
+                  environment variables in one place. Each environment
+                  variable in the list is made up of a (the name of the
+                  environment variable) and zero or more values. If the stanza
+                  author allows the user to change the value of the
                   environment variable, multi-valued variables will be
                   presented using a combo box or an editable combo box when
                   appropriate.</para>
@@ -2602,54 +3307,72 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                   <para>The environment variables in the list are applied to
                   the run-time environment <emphasis>of the
                   application</emphasis> on each of the remote nodes when the
-                  application is launched. Environment variable values can
-                  reference other environment variables using the syntax
+                  application is launched by merging the stanza environment
+                  with the runtime environment of the Maestro server.
+                  Environment variable values can reference other environment
+                  variables using the syntax
                   <literal>${ENV_VAR_NAME}</literal> where
                   <varname>ENV_VAR_NAME</varname> is the name of the other
                   environment variable. Be careful not to introduce circular
                   references, however, because this will result in an infinite
                   loop on the server side when trying to resolve the
-                  references.</para>
+                  references. The value of an environment variable in the
+                  remote execution environment can be modified (extended or
+                  replaced) using this stanza item. For example,
+                  <envar>PATH</envar> could be changed to
+                  <literal>${VJ_BASE_DIR}/bin:${PATH}:${HOME}/somedir/bin</literal>.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Argument</guibutton>: An argument describes
-                  a command line argument to an application. This may or may
-                  not have a flag (such as <option>-f</option> or
-                  <option>--flag</option>), but it always has a value.
-                  Arguments cannot have children but instead are the children
-                  of groups and choices. Ultimately, these are what get passed
-                  to the launched application based on the decisions of the
-                  user in the Launch Viewer. Argument values can reference
-                  environment variables defined in the stanza.</para>
+                  <para><guibutton>Argument</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>argument</secondary>
+                     </indexterm>: An argument describes a command line
+                  argument to an application. This may or may not have a flag
+                  (such as <option>-f</option> or <option>--flag</option>),
+                  but it always has a value. Arguments cannot have children
+                  but instead are the children of groups and choices.
+                  Ultimately, these are what get passed to the launched
+                  application based on the decisions of the user in the Launch
+                  Viewer. Argument values can reference environment
+                  variables.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Choice</guibutton>: Creates a structural
-                  item containing a list of choices, either mutually exclusive
-                  or not. Choices can encompass one or more groups, one or
-                  more other choices, one or more arguments, and/or one or
-                  more environment variables. When using a mutually exclusive
-                  choice, either radio buttons or a combo box (also known as a
-                  pull-down menu) can be used for showing the options. Which
-                  type to use is up to the stanza author, but authors should
-                  keep in mind that combo boxes are much better when there are
-                  many (more than three or four) possible options.</para>
+                  <para><guibutton>Choice</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>choice</secondary>
+                     </indexterm>: Creates a structural item containing a list
+                  of choices, either mutually exclusive or not. Choices can
+                  encompass one or more groups, one or more other choices, one
+                  or more arguments, and/or one or more environment variables.
+                  When using a mutually exclusive choice, either radio buttons
+                  or a combo box (also known as a pull-down menu) can be used
+                  for showing the options. Which type to use is up to the
+                  stanza author, but authors should keep in mind that combo
+                  boxes are much better when there are many (more than three
+                  or four) possible options.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Group</guibutton>: Creates a structural
-                  association of related items. Groups can encompass other
-                  groups, choices, arguments, and/or environment variables.
-                  Groups are often used as children of choices when further
-                  nesting of choices is required. Another common usage is to
-                  collect fixed settings behind a common facade. For example,
-                  if there are four VR Juggler configuration files required
-                  for a four-wall flexible wall projection system, two groups
-                  may be <quote>Walls Open</quote> and <quote>Walls
-                  Closed.</quote> These groups need not display that they are
-                  referencing four VR Juggler configuration files and can
-                  instead be identified in the Launch Viewer<indexterm>
+                  <para><guibutton>Group</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>group</secondary>
+                     </indexterm>: Creates a structural association of related
+                  items. Groups can encompass other groups, choices,
+                  arguments, and/or environment variables. Groups are often
+                  used as children of choices when further nesting of choices
+                  is required. Another common usage is to collect fixed
+                  settings behind a common facade. For example, if there are
+                  four VR Juggler configuration files required for a four-wall
+                  flexible wall projection system, two groups may be
+                  <quote>Walls Open</quote> and <quote>Walls Closed.</quote>
+                  These groups need not display that they are referencing four
+                  VR Juggler configuration files and can instead be identified
+                  in the Launch Viewer<indexterm>
                         <primary>viewers</primary>
 
                         <secondary>launch</secondary>
@@ -2658,21 +3381,24 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Reference</guibutton>: A reference allows
-                  reuse of a structural item in another stanza. References can
-                  be refined by using add, remove, and override operations as
-                  the children. A reference has an identifier that uniquely
-                  describes what XML element in another stanza is being
-                  referenced. This identifier is formed using a syntax similar
-                  to <ulink url="http://www.w3.org/TR/xpath">XPath</ulink>,
-                  though it is <emphasis>not</emphasis> XPath. The path has a
-                  root and children that are separated by the
-                  <literal>/</literal> character, and a reference identifier
-                  must include both. In other words, referencing only the root
-                  is not valid. The root node itself may have a namespace that
-                  is used to assist with creating unique identifiers. For
-                  example, two root nodes might be
-                  <literal>site1:VrJugglerOptions</literal> and
+                  <para><guibutton>Reference</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>reference</secondary>
+                     </indexterm>: A reference allows reuse of a structural
+                  item in another stanza. References can be refined by using
+                  add, remove, and override operations as the children. A
+                  reference has an identifier that uniquely describes what XML
+                  element in another stanza is being referenced. This
+                  identifier is formed using a syntax similar to <ulink
+                  url="http://www.w3.org/TR/xpath">XPath</ulink>, though it is
+                  <emphasis>not</emphasis> XPath. The path has a root and
+                  children that are separated by the <literal>/</literal>
+                  character, and a reference identifier must include both. In
+                  other words, referencing only the root is not valid. The
+                  root node itself may have a namespace that is used to assist
+                  with creating unique identifiers. For example, two root
+                  nodes might be <literal>site1:VrJugglerOptions</literal> and
                   <literal>site2:VrJugglerOptions</literal> where
                   <literal>site1</literal> and <literal>site2</literal> (the
                   namespaces) are common identifiers for two different VR
@@ -2697,43 +3423,54 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Override</guibutton>: An override changes a
-                  detail of a referenced structural item. This can include XML
-                  attributes and the CDATA of the referenced element. The
-                  overriding is based on the same identifier syntax as a
-                  reference identifier, although the path is now relative to
-                  the root of the referenced item(s). One possible use of
-                  overrides is to change how a collection of site-wide
-                  arguments are passed in to an application. For example, a
-                  site may have many VR Juggler configuration files required
-                  to launch applications. In the site's global options, these
-                  files are described as arguments with no flag, but some
-                  applications require a command line option to identify the
-                  meaning of an argument. Those cases can be handled by
-                  overriding the <literal>flag</literal> attribute on all the
-                  arguments for VR Juggler options in the case of the
-                  applications that require it.</para>
+                  <para><guibutton>Override</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>override</secondary>
+                     </indexterm>: An override changes a detail of a
+                  referenced structural item. This can include XML attributes
+                  and the CDATA of the referenced element. The overriding is
+                  based on the same identifier syntax as a reference
+                  identifier, although the path is now relative to the root of
+                  the referenced item(s). One possible use of overrides is to
+                  change how a collection of site-wide arguments are passed in
+                  to an application. For example, a site may have many VR
+                  Juggler configuration files required to launch applications.
+                  In the site's global options, these files are described as
+                  arguments with no flag, but some applications require a
+                  command line option to identify the meaning of an argument.
+                  Those cases can be handled by overriding the
+                  <literal>flag</literal> attribute on all the arguments for
+                  VR Juggler options in the case of the applications that
+                  require it.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Add Options</guibutton>: An add operation
-                  extends a referenced structural item by defining more
-                  children such as groups, choices, arguments, and environment
-                  variables. The exact result of the add operation depends on
-                  what structural item is being referenced. Additions can be
-                  in the form of choices, groups, environment variables,
-                  environment variable lists, and/or arguments.</para>
+                  <para><guibutton>Add Options</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>add options</secondary>
+                     </indexterm>: An add operation extends a referenced
+                  structural item by defining more children such as groups,
+                  choices, arguments, and environment variables. The exact
+                  result of the add operation depends on what structural item
+                  is being referenced. Additions can be in the form of
+                  choices, groups, environment variables, environment variable
+                  lists, and/or arguments.</para>
                </listitem>
 
                <listitem>
-                  <para><guibutton>Remove Option</guibutton>: A remove
-                  operation deletes a child of the referenced structural item.
-                  The reference identifier uses the same path syntax as its
-                  parent reference, but the path in this case is relative to
-                  the parent. In the event that the path matches multiple
-                  nodes, the individually matched roots can be matched using
-                  the <literal>@</literal> indexing syntax. For example, if
-                  the parent reference identifier
+                  <para><guibutton>Remove Option</guibutton><indexterm>
+                        <primary>stanza item</primary>
+
+                        <secondary>remove option</secondary>
+                     </indexterm>: A remove operation deletes a child of the
+                  referenced structural item. The reference identifier uses
+                  the same path syntax as its parent reference, but the path
+                  in this case is relative to the parent. In the event that
+                  the path matches multiple nodes, the individually matched
+                  roots can be matched using the <literal>@</literal> indexing
+                  syntax. For example, if the parent reference identifier
                   <literal>site1:VrJugglerOptions/Input*</literal> matches
                   <literal>site1:VrJugglerOptions/InputGlove</literal>,
                   <literal>site1:VrJugglerOptions/InputJoystick</literal> and
@@ -2753,7 +3490,364 @@ cp /boot/grub/grub.conf /mnt/boot/grub</screen>
          <section id="section.stanza.item.class">
             <title>Stanza Item Classes</title>
 
-            <para></para>
+            <indexterm class="startofrange"
+                       id="index.section.stanza.item.class">
+               <primary>stanza items</primary>
+
+               <secondary>class</secondary>
+            </indexterm>
+
+            <indexterm>
+               <primary>stanza items</primary>
+
+               <secondary>class</secondary>
+
+               <tertiary>matching</tertiary>
+            </indexterm>
+
+            <para>Stanza items can have a class setting that dictates how the
+            item is used on a given remote computer. As we saw in <xref
+            linkend="section.files.ensemble" />, every node in the ensemble
+            has a class setting, and a matching process is followed to
+            determine if a stanza item is to be used with the ensemble node.
+            The matching is fairly simple. If all the class tokens of a stanza
+            item match up with class tokens of the ensemble node, then the
+            stanza item is used with that ensemble node. The more class tokens
+            used on a stanza item, the more specific the matching with
+            ensemble nodes will be. A stanza item with an empty class setting
+            therefore matches all ensemble nodes.</para>
+
+            <indexterm>
+               <primary>stanza items</primary>
+
+               <secondary>class</secondary>
+
+               <tertiary>operating system identifiers</tertiary>
+            </indexterm>
+
+            <para>As we progress through this section, we will see repeated
+            examples of class tokens. It is important to remember that these
+            are not the only values that can be used. Maestro users are free
+            to set up their own conventions for class naming and usage. The
+            only special class token is the operating system that an ensemble
+            node is currently running. The operating system identifiers are
+            built in to Maestro so that it has a common form for representing
+            each platform. The full list can be seen in
+            <filename>maestro/core/__init__.py</filename> in the Maestro
+            installation directory. As of this writing, the valid operating
+            system identifiers that can be used in a stanza item
+            <literal>class</literal> attribute is the following:</para>
+
+            <indexterm class="startofrange"
+                       id="index.section.stanza.item.class.os">
+               <primary>stanza items</primary>
+
+               <secondary>class</secondary>
+
+               <tertiary>operating system</tertiary>
+            </indexterm>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>Linux</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>Windows</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>Windows XP</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>MacOS</literal> (for Mac OS 9)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>MacOS X</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>HP UX</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>AIX</literal></para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>Solaris</literal></para>
+               </listitem>
+            </itemizedlist>
+
+            <para>Note that this list does not imply that all of these
+            platforms are supported by Maestro.</para>
+
+            <important>
+               <para>It is not valid to set the operating system class token
+               for the nodes of an ensemble file. This information is
+               determined by Maestro so that nodes can be rebooted to a
+               different operating system without requiring a change to the
+               ensemble file being used by the Maestro GUI. The ability of the
+               Maestro GUI to handle server reboots gracefully relies upon
+               this handling of the operating system class token.</para>
+            </important>
+
+            <para>With that, let us now consider the example stanza shown in
+            <xref linkend="example.stanza.classes" /> (a slightly modified
+            version of <filename>stanzas/DirectoryListing.stanza</filename> in
+            the Maestro installation tree). In this case, the stanza provides
+            a way to list a user-specified directory on the remote machine.
+            Since the command for doing this varies between operating systems,
+            there are platform-specific command stanza items (XML tag
+            <sgmltag>&lt;command&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;command&gt;</sgmltag></tertiary>
+               </indexterm>). Here, we see cases for Linux and Windows XP. In
+            other words, the <literal>class</literal> attribute on the
+            &lt;command&gt; tag is set to <literal>Linux</literal> for the
+            Linux case and to <literal>Windows XP</literal> for the
+            <productname class="registered">Microsoft Windows</productname>
+            case. The ensemble nodes that running Linux at the time this
+            application gets launched will receive the Linux command, and
+            those running Windows XP will receive the Windows XP command. If
+            all the nodes are running (say) Linux, then the Windows XP command
+            will not be sent to any ensemble node.</para>
+
+            <example id="example.stanza.classes">
+               <title>Application Stanza Using Classes</title>
+
+               <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;stanza&gt;
+   &lt;application helpUrl="" tooltip="List files in a directory."
+                name="DirListing" label="Directory Listing"&gt;
+      &lt;command class="Linux" name="linux_cmd"&gt;
+         ls
+      &lt;/command&gt;
+      &lt;command class="Windows XP" name="windows_cmd"&gt;
+         dir
+      &lt;/command&gt;
+      &lt;arg class="Linux" editable="true" flag="-l" hidden="false"
+           label="Directory" name="Directory" value_type="string"&gt;
+         ${HOME}
+      &lt;/arg&gt;
+      &lt;arg class="Windows XP" editable="true" flag="" hidden="false"
+           label="Directory" name="Directory" value_type="string"&gt;
+         ${HOMEDRIVE}${HOMEPATH}
+      &lt;/arg&gt;
+   &lt;/application&gt;
+&lt;/stanza&gt;</programlisting>
+            </example>
+
+            <para>The next point of variation in this example is the argument
+            used for the command. Since path syntax varies between platforms,
+            we allow the user to enter the platform-specific syntax in the
+            Maestro GUI Launch Viewer<indexterm>
+                  <primary>viewers</primary>
+
+                  <secondary>launch</secondary>
+               </indexterm>. (The user can do this because the
+            <literal>editable</literal> attribute of both
+            <sgmltag>&lt;arg&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;arg&gt;</sgmltag></tertiary>
+               </indexterm> tags is set to <literal>true</literal>.) In the
+            example, the output from both commands may end up listing the
+            authenticated user's home directory is the same on the Linux
+            ensemble nodes as it is on the <productname
+            class="registered">Microsoft Windows</productname> ensemble
+            nodes.</para>
+
+            <para>A second item of interest for the
+            <sgmltag>&lt;arg&gt;</sgmltag> tags in the example above is that
+            the <literal>flag</literal> attribute is varied. To get a
+            <quote>long</quote> directory listing from <command>ls</command>,
+            we pass the <option>-l</option> option. The <command>dir</command>
+            command, on the other hand, will give us the long listing by
+            default, so no additional flag is needed.</para>
+
+            <indexterm class="endofrange"
+                       startref="index.section.stanza.item.class.os"></indexterm>
+
+            <indexterm class="startofrange"
+                       id="index.section.stanza.item.class.master.slave">
+               <primary>stanza items</primary>
+
+               <secondary>class</secondary>
+
+               <tertiary>master/slave</tertiary>
+            </indexterm>
+
+            <para>As we noted in <xref linkend="section.files.ensemble" />,
+            common class settings for ensemble nodes include
+            <literal>master</literal> and <literal>slave</literal>. These
+            classes allow application launching to determine when it is
+            running on a <quote>master</quote> node of the cluster versus a
+            <quote>slave.</quote> For VR Juggler 2.0 and 2.2, the notion of a
+            master cluster node is a rather weak one, but application
+            developers may structure their software in such a way that
+            different code gets run on different nodes based on the role of
+            the node in the cluster. The <literal>class</literal> attribute on
+            stanza items allows Maestro to handle this case.</para>
+
+            <para>Consider the example shown in <xref
+            linkend="example.stanza.classes.master.slave" />. In this case, we
+            have the following variations based on operating system and
+            ensemble node role:</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para>The path to the command is different based on the
+                  operating system</para>
+               </listitem>
+
+               <listitem>
+                  <para>The command executed is different based on the role of
+                  the ensemble node</para>
+               </listitem>
+
+               <listitem>
+                  <para>The arguments passed to the commands are different
+                  based on the role of the ensemble node</para>
+               </listitem>
+            </itemizedlist>
+
+            <para>The variation in the command is captured using the
+            <sgmltag>&lt;command&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;command&gt;</sgmltag></tertiary>
+               </indexterm> tag and its <literal>class</literal> attribute.
+            For the master node, we run <command>masterApp</command> whereas
+            the slave nodes all run <command>slaveApp</command>. Note that
+            both of these stanza items reference the environment variable
+            <envar>APP_DIR</envar>. This environment variable is used to
+            capture the platform-specific path to the executable. The two
+            <sgmltag>&lt;env_var&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;env_var&gt;</sgmltag></tertiary>
+               </indexterm> tags have their <literal>class</literal> attribute
+            set to a platform-specific value. In this way, we avoid having to
+            include the operating system in the <literal>class</literal>
+            attribute for the <sgmltag>&lt;command&gt;</sgmltag> tags so that
+            we may have two <sgmltag>&lt;command&gt;</sgmltag> tags instead of
+            four. Next, both the master and the slave applications take the
+            same VR Juggler configuration file. We do this using an
+            <sgmltag>&lt;arg&gt;</sgmltag><indexterm>
+                  <primary>stanza</primary>
+
+                  <secondary>elements</secondary>
+
+                  <tertiary><sgmltag>&lt;arg&gt;</sgmltag></tertiary>
+               </indexterm> tag with an empty class setting so that it matches
+            all ensemble nodes. Finally, the slave application needs to be
+            told the address of the master for making the network connection.
+            This is done by using another <sgmltag>&lt;arg&gt;</sgmltag> tag
+            whose <literal>class</literal> attribute is set to
+            <literal>slave</literal>.</para>
+
+            <example id="example.stanza.classes.master.slave">
+               <title>Application Stanza Using Classes for Master and
+               Slave</title>
+
+               <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;stanza namespace="myapp"&gt;
+   &lt;application helpUrl="" tooltip="My master/slave VR app."
+                name="myapp" label="My VR Application"&gt;
+      &lt;command class="master" name="master_cmd" hidden="true"&gt;
+         ${APP_DIR}/masterApp
+      &lt;/command&gt;
+      &lt;command class="slave" name="slave_cmd" hidden="true"&gt;
+         ${APP_DIR}/slaveApp
+      &lt;/command&gt;
+      &lt;arg class="" editable="false" hidden="true" flag="-j"
+           label="VR Juggler Configuration" name="jconf"
+           value_type="file"
+         ${HOME}/vrcluster.jconf
+      &lt;/arg&gt;
+      &lt;arg class="slave" editable="true" flag="-a" hidden="false"
+           label="Master Address" name="masterAddr"
+           value_type="string"&gt;
+         master_node:34567
+      &lt;/arg&gt;
+      &lt;env_var key="APP_DIR" label="" name="app_dir" hidden="true"
+               class="Linux"&gt;
+         ${HOME}/software/myapplication
+      &lt;/env_var&gt;
+      &lt;env_var key="APP_DIR" label="" name="app_dir" hidden="true"
+               class="Windows XP"&gt;
+         ${HOMEDRIVE}${HOMEPATH}\software\myapplication
+      &lt;/env_var&gt;
+   &lt;/application&gt;
+&lt;/stanza&gt;</programlisting>
+            </example>
+
+            <para>The above example did not make use of multiple class tokens
+            on a stanza item. As noted, we could have had four command items
+            instead of two with platform-specific details being captured in
+            the environment variable settings. For the purposes of
+            demonstrating the use of multiple class tokens, we repeat the
+            example without the environment variables in <xref
+            linkend="example.stanza.classes.master.slave2" />. Now, we have
+            stanza items with class settings such as
+            <literal>Linux,slave</literal> and <literal>Windows
+            XP,master</literal>.</para>
+
+            <example id="example.stanza.classes.master.slave2">
+               <title>Application Stanza Using Classes for Master and Slave
+               (2)</title>
+
+               <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;stanza namespace="myapp"&gt;
+   &lt;application helpUrl="" tooltip="My master/slave VR app."
+                name="myapp" label="My VR Application"&gt;
+      &lt;command class="Linux,master" name="linux_master_cmd"
+               hidden="true"&gt;
+         ${HOME}/software/myapplication/masterApp
+      &lt;/command&gt;
+      &lt;command class="Windows XP,master" name="windows_master_cmd"
+               hidden="true"&gt;
+         ${HOMEDRIVE}${HOMEPATH}\software\myapplication\masterApp
+      &lt;/command&gt;
+      &lt;command class="Linux,slave" name="linux_slave_cmd"
+               hidden="true"&gt;
+         ${HOME}/software/myapplication/slaveApp
+      &lt;/command&gt;
+      &lt;command class="Windows XP,slave" name="windows_slave_cmd"
+               hidden="true"&gt;
+         ${HOMEDRIVE}${HOMEPATH}\software\myapplication\slaveApp
+      &lt;/command&gt;
+      &lt;arg class="" editable="false" hidden="true" flag="-j"
+           label="VR Juggler Configuration" name="jconf"
+           value_type="file"
+         ${HOME}/vrcluster.jconf
+      &lt;/arg&gt;
+      &lt;arg class="slave" editable="true" flag="-a" hidden="false"
+           label="Master Address" name="masterAddr"
+           value_type="string"&gt;
+         master_node:34567
+      &lt;/arg&gt;
+   &lt;/application&gt;
+&lt;/stanza&gt;</programlisting>
+            </example>
+
+            <indexterm class="endofrange"
+                       startref="index.section.stanza.item.class.master.slave"></indexterm>
+
+            <indexterm class="endofrange"
+                       startref="index.section.stanza.item.class"></indexterm>
 
             <indexterm class="endofrange" startref="index.file.stanza"></indexterm>
          </section>
