@@ -1,19 +1,27 @@
 <?xml version="1.0" ?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-   <mime-type type="application/x-maestro-ensemble">
+   <mime-type type="application/x-maestro-ensemble+xml">
+      <sub-class-of type="application/xml"/>
       <comment>Maestro ensemble</comment>
       <glob pattern="*.ensem"/>
-      <glob pattern="*.ensemble"/>
-      <magic>
-         <match offset="1" type="string" value="&lt;ensemble&gt;"/>
+      <magic priority="50">
+         <match value="&lt;ensemble" offset="0:64" type="string"/>
       </magic>
+      <glob pattern="*.ensemble"/>
+<!--
+      <root-XML namespaceURI="http://realityforge.vrsource.org/trac/maestro/1/ensemble" localName="ensemble" MIME-Type="application/x-maestro-ensemble+xml"/>
+-->
    </mime-type>
 
-   <mime-type type="application/x-maestro-stanza">
+   <mime-type type="application/x-maestro-stanza+xml">
+      <sub-class-of type="application/xml"/>
       <comment>Maestro stanza</comment>
-      <glob pattern="*.stanza"/>
-      <magic>
-         <match offset="1" type="string" value="&lt;stanza&gt;"/>
+      <magic priority="50">
+         <match value="&lt;stanza" offset="0:64" type="string"/>
       </magic>
+      <glob pattern="*.stanza"/>
+<!--
+      <root-XML namespaceURI="http://realityforge.vrsource.org/trac/maestro/1/stanza" localName="stanza" MIME-Type="application/x-maestro-stanza+xml"/>
+-->
    </mime-type>
 </mime-info>

@@ -236,8 +236,8 @@ done
 %ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/reboot/*.pyo
 
 %post gui
-ensemble_str='application/x-maestro-ensemble=maestro.desktop'
-stanza_str='application/x-maestro-stanza=maestro.desktop'
+ensemble_str='application/x-maestro-ensemble+xml=maestro.desktop'
+stanza_str='application/x-maestro-stanza+xml=maestro.desktop'
 echo $ensemble_str >> /usr/share/applications/defaults.list
 echo $stanza_str >> /usr/share/applications/defaults.list
 update-mime-database /usr/share/mime >/dev/null 2>&1
@@ -268,6 +268,9 @@ fi
 %endif
 
 %changelog
+* Mon Nov  6 2006 Patrick Hartling
+- More file association fixes
+
 * Mon Nov  6 2006 Patrick Hartling
 - Indicate that *.pyo files and the maestrod log file(s) are "ghost" files
 
