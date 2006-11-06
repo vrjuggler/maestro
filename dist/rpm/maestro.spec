@@ -91,6 +91,12 @@ make prefix=%{buildroot}%{_prefix} install-docs
 maestro_dir="%{_prefix}/lib/maestro-%{version}"
 sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" -e "s|%{buildroot}||g" %{buildroot}%{_bindir}/maestro
 sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" -e "s|%{buildroot}||g" %{buildroot}%{_sbindir}/maestrod
+[ -d %{buildroot}/var/log ] || mkdir -p %{buildroot}/var/log
+find %{buildroot}%{_prefix}/lib/maestro-%{version}/maestro/gui \( -name \*.ui -or -name \*.qrc \) -exec rm {} \;
+touch %{buildroot}/var/log/maestrod.log
+for i in 1 2 3 4 5 6 7 8 9 10; do
+   touch %{buildroot}/var/log/maestrod.log.$i
+done
 
 %clean
 [ -z %{buildroot} ] || rm -rf %{buildroot}
@@ -99,16 +105,93 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" -e "s|%{buildroot}||g
 
 %files base
 %defattr(-, root, root)
-%{_prefix}/lib/maestro-%{version}/maestro/*.py*
-%{_prefix}/lib/maestro-%{version}/maestro/core
-%{_prefix}/lib/maestro-%{version}/maestro/util
+%dir %{_prefix}/lib/maestro-%{version}/
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/
+%{_prefix}/lib/maestro-%{version}/maestro/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/core/
+%{_prefix}/lib/maestro-%{version}/maestro/core/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/core/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/core/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/util/
+%{_prefix}/lib/maestro-%{version}/maestro/util/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/util/*.pyc
+%{_prefix}/lib/maestro-%{version}/maestro/util/*.txt
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/util/*.pyo
 
 %files gui
 %defattr(-, root, root)
 /etc/maestro.xcfg
 %{_bindir}/maestro
-%{_prefix}/lib/maestro-%{version}/Maestro.py*
-%{_prefix}/lib/maestro-%{version}/maestro/gui
+
+%{_prefix}/lib/maestro-%{version}/Maestro.py
+%{_prefix}/lib/maestro-%{version}/Maestro.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/Maestro.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/images/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/images/*
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/desktop/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/desktop/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/desktop/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/desktop/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/process/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/process/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/process/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/process/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/resource/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/resource/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/resource/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/resource/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/ensemble/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/ensemble/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/ensemble/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/ensemble/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/launch/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/launch/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/launch/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/launch/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/reboot/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/reboot/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/reboot/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/reboot/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/help/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/help/*
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/images/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/images/*
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/optioneditors/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/optioneditors/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/optioneditors/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/stanza_editor/optioneditors/*.pyo
+
 %{_prefix}/lib/maestro-%{version}/stanzas
 %{_prefix}/share/applications/maestro.desktop
 %{_prefix}/share/mime
@@ -118,10 +201,39 @@ sed -i -e "s|maestro_dir=.*|maestro_dir=\"$maestro_dir\"|" -e "s|%{buildroot}||g
 %defattr(-, root, root)
 /etc/init.d/maestrod
 /etc/maestrod.xcfg
+%ghost /var/log/maestrod.log*
 %{_sbindir}/maestrod
-%{_prefix}/lib/maestro-%{version}/maestrod.py*
+%{_prefix}/lib/maestro-%{version}/maestrod.py
+%{_prefix}/lib/maestro-%{version}/maestrod.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestrod.pyo
 %{_prefix}/lib/maestro-%{version}/mkpem
-%{_prefix}/lib/maestro-%{version}/maestro/daemon
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/desktop/
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/desktop/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/desktop/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/desktop/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/launch/
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/launch/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/launch/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/launch/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/reboot/
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/reboot/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/reboot/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/reboot/*.pyo
 
 %post gui
 ensemble_str='application/x-maestro-ensemble=maestro.desktop'
