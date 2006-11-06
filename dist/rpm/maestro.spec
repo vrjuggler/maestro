@@ -268,5 +268,51 @@ fi
 %endif
 
 %changelog
-* Thu Apr 13 2006 Patrick Hartling
+* Mon Nov  6 2006 Patrick Hartling
+- Indicate that *.pyo files and the maestrod log file(s) are "ghost" files
+
+* Mon Nov  6 2006 Patrick Hartling
+- Do not incorporate the Linux distribution name into the package version
+
+* Fri Nov  3 2006 Patrick Hartling
+- The maestrod service has to be stopped prior to uninstalling
+  /etc/init.d/maestrod
+
+* Fri Nov  3 2006 Patrick Hartling
+- Fix instances of %{buildroot} showing up in installed wrapper scripts
+
+* Fri Nov  3 2006 Patrick Hartling
+- Get icon associations working for ensemble and stanza files
+
+* Fri Nov  3 2006 Patrick Hartling
+- Depend on the PyQt4 packages instead of PyQt
+
+* Thu Nov  2 2006 Patrick Hartling
+- Incorporate the Linux distribution name into the package version
+
+* Wed Nov  1 2006 Patrick Hartling
+- Added support for a site-wide Maestro GUI configuration file
+
+* Wed Oct 25 2006 Patrick Hartling
+- Changed how file associations work so that two .desktop files are not needed
+
+* Wed Oct 25 2006 Patrick Hartling
+- Update to version 0.3.0
+
+* Thu Oct 19 2006 Patrick Hartling
+- Initial work on file association support
+
+* Thu Oct 19 2006 Patrick Hartling
+- Make sure that maestrod starts at init level 5
+
+* Tue Oct 17 2006 Patrick Hartling
+- Update to version 0.2.0
+
+* Sat Oct 14 2006 Patrick Hartling
+- Do not generate server.pem as part of the server installation
+
+* Sat Oct 14 2006 Patrick Hartling
+- Generate server.pem as part of the server installation
+
+* Sat Oct 14 2006 Patrick Hartling
 - Initial version
