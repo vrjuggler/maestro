@@ -113,8 +113,16 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
          for i in xrange(ensemble.getNumNodes()):
             node = ensemble.getNode(i)
             node_id = node.getId()
-            self.mNodeChooser.addItem(node.getHostname(), QtCore.QVariant(node_id))
-            self.mSettings[node_id] = DesktopSettings()
+
+            if node_id is not None:
+               self.mNodeChooser.addItem(node.getHostname(),
+                                         QtCore.QVariant(node_id))
+               self.mSettings[node_id] = DesktopSettings()
+            else:
+               QtGui.QMessageBox.warning(
+                  self.parentWidget(), "Bad Ensemble Node",
+                  "Ensemble includes node with no ID"
+               )
 
       # XXX: We should call this if we can't count on the ensembleChanged()
       # signal.
