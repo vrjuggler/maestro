@@ -618,6 +618,13 @@ Certificate information:
          can be reused with future Maestro installations, though it will
          expire two years after the date of creation.</para>
 
+         <para>If the <filename>maestro-server</filename> package is being
+         upgraded, the existing <filename>server.pem</filename> file should be
+         moved into the new Maestro installation directory. The
+         <filename>maestro-server</filename> RPM does not claim ownership of
+         the <filename>server.pem</filename> file, so it does not get removed
+         when the package is erased.</para>
+
          <para>On <productname class="registered">Microsoft
          Windows</productname>, an automated installer is provided. Currently,
          this installer includes all the dependencies
@@ -1938,14 +1945,53 @@ setup (hd0)</screen>
                the part of the user.</para>
             </sidebar>
 
-            <para>Its main interface panel has three parts: a tool bar, the
-            viewer panel, and the log window. The tool bar contains buttons
-            for basic operations such as loading and saving the ensemble file.
-            Within the viewer panel, the various viewer plug-ins can be
-            accessed. Only one viewer is displayed at a time, and switching
-            viewers is done by clicking on an icon in the left side of the
-            viewer panel. Tool bars and menu items may be added and removed on
-            the fly as the current viewer changes.</para>
+            <indexterm>
+               <primary>Windows</primary>
+
+               <secondary>drive letters</secondary>
+            </indexterm>
+
+            <indexterm>
+               <primary>drive letters</primary>
+
+               <see>Windows</see>
+            </indexterm>
+
+            <indexterm>
+               <primary>Windows</primary>
+
+               <secondary>user profile</secondary>
+            </indexterm>
+
+            <para>For users of Microsoft Windows, drive letter mappings are
+            handled when the Maestro GUI user authenticates with the Maestro
+            server. The drive letters mapped are the user's home directory and
+            all persistent drive mappings in the user's profile. This
+            information gets loaded into the local Windows Registry when the
+            user's profile is loaded after authentication.</para>
+
+            <indexterm>
+               <primary>Windows</primary>
+
+               <secondary>user profile</secondary>
+
+               <tertiary>logon scripts</tertiary>
+            </indexterm>
+
+            <note>
+               <para>As of this writing, user logon scripts defined as part of
+               the user profile are not being executed when the profile is
+               loaded.</para>
+            </note>
+
+            <para>The main interface panel of the Maestro GUI has three parts:
+            a tool bar, the viewer panel, and the log window. The tool bar
+            contains buttons for basic operations such as loading and saving
+            the ensemble file. Within the viewer panel, the various viewer
+            plug-ins can be accessed. Only one viewer is displayed at a time,
+            and switching viewers is done by clicking on an icon in the left
+            side of the viewer panel. Tool bars and menu items may be added
+            and removed on the fly as the current viewer changes.</para>
 
             <section id="section.gui.command.line.options">
                <title>Command Line Options for the <application>Maestro
@@ -3209,45 +3255,6 @@ setup (hd0)</screen>
             should be used. The environment variable evaluation happens on the
             remote computer as part of launching.</para>
 
-            <indexterm>
-               <primary>Windows</primary>
-
-               <secondary>drive letters</secondary>
-            </indexterm>
-
-            <indexterm>
-               <primary>drive letters</primary>
-
-               <see>Windows</see>
-            </indexterm>
-
-            <indexterm>
-               <primary>Windows</primary>
-
-               <secondary>user profile</secondary>
-            </indexterm>
-
-            <para>For users of Microsoft Windows, drive letter mappings are
-            handled when the Maestro GUI user authenticates with the Maestro
-            server. The drive letters mapped are the user's home directory and
-            all persistent drive mappings in the user's profile. This
-            information gets loaded into the local Windows Registry when the
-            user's profile is loaded after authentication.</para>
-
-            <indexterm>
-               <primary>Windows</primary>
-
-               <secondary>user profile</secondary>
-
-               <tertiary>logon scripts</tertiary>
-            </indexterm>
-
-            <note>
-               <para>As of this writing, user logon scripts defined as part of
-               the user profile are not being executed when the profile is
-               loaded.</para>
-            </note>
-
             <para>In the stanza editor, there is a tool bar containing all the
             information that can go into a stanza. The tool bar items are as
             follows:</para>
@@ -3310,7 +3317,7 @@ setup (hd0)</screen>
                   applied to the run-time environment <emphasis>of the
                   application</emphasis> on each of the remote nodes when the
                   application is launched by merging the stanza environment
-                  with the runtime environment of the Maestro server.
+                  with the run-time environment of the Maestro server.
                   Environment variable values can reference other environment
                   variables using the syntax
                   <literal>${ENV_VAR_NAME}</literal> where
@@ -3347,7 +3354,7 @@ setup (hd0)</screen>
                   the run-time environment <emphasis>of the
                   application</emphasis> on each of the remote nodes when the
                   application is launched by merging the stanza environment
-                  with the runtime environment of the Maestro server.
+                  with the run-time environment of the Maestro server.
                   Environment variable values can reference other environment
                   variables using the syntax
                   <literal>${ENV_VAR_NAME}</literal> where
@@ -3367,15 +3374,15 @@ setup (hd0)</screen>
                         <primary>stanza item</primary>
 
                         <secondary>argument</secondary>
-                     </indexterm>: An argument describes a command line
-                  argument to an application. This may or may not have a flag
-                  (such as <option>-f</option> or <option>--flag</option>),
-                  but it always has a value. Arguments cannot have children
-                  but instead are the children of groups and choices.
-                  Ultimately, these are what get passed to the launched
-                  application based on the decisions of the user in the Launch
-                  Viewer. Argument values can reference environment
-                  variables.</para>
+                     </indexterm>: An argument describes a command line option
+                  to an application. This may or may not have a flag (such as
+                  <option>/f</option>, <option>-f</option>, or
+                  <option>--flag</option>), but it always has a value.
+                  Arguments cannot have children but instead are the children
+                  of groups and choices. Ultimately, these are what get passed
+                  to the launched application based on the decisions of the
+                  user in the Launch Viewer. Argument values can reference
+                  environment variables.</para>
                </listitem>
 
                <listitem>
