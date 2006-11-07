@@ -90,7 +90,7 @@ def getUserHome():
       home_dir = os.path.expanduser('~')
    # The remainder of these are for the Windows case.
    # XXX: Should USERPROFILE take precedence over the HOME* variables?
-   elif os.environ.has_key('HOMESHARE') and os.environ['HOMEDRIVE'] != '':
+   elif os.environ.has_key('HOMESHARE') and os.environ['HOMESHARE'] != '':
       home_dir = os.environ['HOMESHARE']
    elif os.environ.has_key('HOMEDRIVE'):
       home_dir = '%s%s' % (os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
