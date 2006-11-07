@@ -164,6 +164,25 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       else:
          self.mApplications = env.mStanzaStore.getApplications()
 
+         # If cur_text is not empty, check to see if the user identified one
+         # or more stanza files on the command line. If so, set the default
+         # application to be displayed using the first application found among
+         # those stanza files.
+         if cur_text is None or cur_text == '':
+            if env.mCmdOpts.stanzas is not None and \
+               len(env.mCmdOpts.stanzas) > 0:
+               cur_text    = ''
+               i           = 0
+               stanzas     = env.mCmdOpts.stanzas
+               num_stanzas = len(stanzas)
+
+               while cur_text == '' and i < num_stanzas:
+                  apps = env.mStanzaStore.getApplications(stanzas[i])
+                  if len(apps) > 0:
+                     cur_text = apps[0].getName()
+
+                  i = i + 1
+
       # If cur_text is not found among the namesl for applications in
       # self.mApplications, then Item 0 will be the one selected in
       # self.mAppComboBox.
