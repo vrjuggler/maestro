@@ -2007,18 +2007,19 @@ setup (hd0)</screen>
                   <secondary>command line options</secondary>
                </indexterm>
 
-               <para>There are five command line options to the
+               <para>There are six command line options to the
                <command>maestro</command> command:
                <option>--ensemble</option>, <option>--stanza</option>,
                <option>--launch-only</option>,
-               <option>--launch-all-from</option>, and
-               <option>--view</option>. These options have short forms that
-               are, respectively, <option>-e</option>, <option>-s</option>,
-               <option>-l</option>, <option>-L</option>, and
-               <option>-v</option>, and we will refer to the command line
-               options henceforth using the form <option>-a/--arg</option>.
-               The exact syntax and usage information for these options can be
-               displayed by running the following:</para>
+               <option>--launch-all-from</option>, <option>--view</option>,
+               <option>--override</option>. These options have short forms
+               that are, respectively, <option>-e</option>,
+               <option>-s</option>, <option>-l</option>, <option>-L</option>,
+               <option>-v</option>, and <option>-o</option>, and we will refer
+               to the command line options henceforth using the form
+               <option>-a/--arg</option>. The exact syntax and usage
+               information for these options can be displayed by running the
+               following:</para>
 
                <screen>maestro --help</screen>
 
@@ -2196,7 +2197,124 @@ setup (hd0)</screen>
 
                <para>We will see in <xref linkend="section.maestro.config" />
                how this command can be simplified further through the Maestro
-               GUI configuration.</para>
+               GUI configuration. By configuring the Maestro GUI
+               appropriately, we can avoid having to list the ensemble file
+               every time the GUI is launched. Moreover, site-wide and
+               user-specific extensions to the stanza search path can
+               eliminate the need to name any stanza files on the command line
+               in many cases.</para>
+
+               <para>The <option>-o/--override</option> option offers a great
+               deal of power to users of the Maestro GUI, though its use is by
+               no means simple. Later, in <xref
+               linkend="section.stanza.items" />, we will explain how one
+               stanza file entry can reference <emphasis>and</emphasis> refine
+               content from one or more other stanza entries. Reusing stanza
+               constructs from files is a very static process, however, and
+               this is not always sufficient. The
+               <option>-o/--override</option> offers some of this same
+               functionality by allowing the Maestro GUI user to change the
+               behavior of a stanza when the GUI is launched.</para>
+
+               <para>To understand when this overriding behavior can be
+               useful, consider the case of a clustered application that loads
+               a data file. This data file determines what the application
+               will display. To make things simple for new users, the stanza
+               file for this application defines a default data file. In this
+               way, a single click of the Launch button is sufficient to get
+               the application running. More experienced users may have their
+               own data files, however, and they would like to be able to use
+               them by double-clicking on the data file. To make this work, a
+               file association would need to be created between the data file
+               type and the Maestro GUI. In our file association setup, we can
+               use the <option>-l/--launch-only</option> option to restrict
+               what application can be launched and the
+               <option>-v/--view</option> option to go straight to the Launch
+               View. The only remaining step is to replace the default data
+               file option in the stanza with the file name provided through
+               the double-click launch operation, and this is where the
+               <option>-o/--override</option> option plays a role.</para>
+
+               <para>Without getting into the details of the stanza file
+               format at this point (refer to <xref
+               linkend="section.files.stanza" /> for more on that topic), let
+               us assume that we have the stanza file shown in <xref
+               linkend="example.stanza.file.simple" />. Notice that the root
+               <sgmltag>&lt;stanza&gt;</sgmltag><indexterm>
+                     <primary>stanza</primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;stanza&gt;</sgmltag></tertiary>
+                  </indexterm> XML element has an attribute called
+               <literal>namespace</literal> and that each XML element under
+               the <sgmltag>&lt;stanza&gt;</sgmltag> root has an attribute
+               called <literal>name</literal>. These attributes are used in
+               constructing the path to an entry in the stanza, and we can use
+               the <option>-o/--override</option> with any child of the
+               <sgmltag>&lt;stanza&gt;</sgmltag> root, no matter how deeply
+               nested it may be. In this case, we need to change the path to
+               the data file based on what is provided through the file
+               association action. The path to the data file item is
+               <literal>mine:app/input</literal>, and we need to change the
+               CDATA for that XML element. To do this, the command line option
+               would be similar to <literal>-o
+               "mine:app/input?cdata=/path/to/myfile.ext"</literal>. In the
+               context of a file association action, the syntax depends on
+               what operating environment is being used. For example, a
+               Windows Registry association would for this case would be
+               <literal>-o "mine:app/input?cdata=%1"</literal>, and a <ulink
+               url="???">freedesktop.org</ulink> association would be
+               <literal>-o "mine:app/input?cdata=%f"</literal>. (Details on
+               setting up file association actions are well beyond the scope
+               of this document.)</para>
+
+               <example id="example.stanza.file.simple">
+                  <title>Basic Stanza File</title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;stanza namespace="mine"&gt;
+   &lt;application label="My App" name="app"&gt;
+      &lt;command class="" hidden="true" label="Application" name="cmd"&gt;
+         myApp
+      &lt;/command&gt;
+      &lt;arg name="input" class="" editable="true" label="Data File"
+           flag="-d"&gt;
+         ${HOME}/data/datafile.ext
+      &lt;/arg&gt;
+      &lt;arg name="vrjconfig" clsss="" hidden="true"
+           label="VR Juggler Configuration" flag="-j"&gt;
+         ${VJ_CONFIG}/cluster.jconf
+      &lt;/arg&gt;
+   &lt;/application&gt;
+&lt;/stanza&gt;</programlisting>
+               </example>
+
+               <para>The behavior of the <option>-o/--override</option> option
+               is not limited to changing the CDATA of an XML element. Any
+               attribute of the identified element can be changed using the
+               syntax <literal>path?attr=value</literal> where
+               <literal>path</literal> is a valid stanza ID path,
+               <literal>attr</literal> is the name of the attribute (such as
+               <literal>class</literal>, <literal>label</literal>, etc.) and
+               <literal>value</literal> is the new value for the named
+               attribute. Multiple overrides can be performed on a stanza
+               entry using a single <option>-o/--override</option> option or
+               by repeating the ID path in multiple
+               <option>-o/--override</option> options. To see how we can do
+               this using a single <option>-o/--override</option> option, let
+               us say that we want to change the command line flag used to
+               name the data file to be loaded from <option>-d</option> to
+               <option>--input</option> in addition to our override from
+               above. In this case, the option for use in the Windows Registry
+               would be <literal>-o
+               "mine:app/input?cdata=%1&amp;flag=--input"</literal> and
+               <literal>-o
+               "mine:app/input?cdata=%f&amp;flag=--input"</literal> for a
+               freedesktop.org association. The key point here is the use of
+               the <literal>&amp;</literal> character to separate multiple
+               overrides for a single ID path. (That and we slipped in an
+               example of how to change the value of an XML attribute.)</para>
 
                <indexterm class="endofrange"
                           startref="index.section.maestro.cmd.opts"></indexterm>
@@ -3220,7 +3338,7 @@ setup (hd0)</screen>
 
          <indexterm class="endofrange" startref="index.file.stanza.edit"></indexterm>
 
-         <section>
+         <section id="section.stanza.items">
             <title>Stanza Items</title>
 
             <para>Stanza items are objects that appear as children of an
