@@ -1,13 +1,16 @@
 <h1><div align="center">Environment Variable</div></h1>
-<p>[Deprecated&#8212;use environment variable lists instead]<br>
-An environment variable describes a setting that is applied to the execution
-environment of the application. It is made up of a key (the name of the
-environment variable) and a value. These settings are applied to the run-time
-environment <em>of the application</em> on each of the remote nodes when the
-application is launched. Environment variable values can reference other
-environment variables using the syntax
+<p>An environment variable describes a setting that is applied to the
+execution environment of the application. It is made up of a key (the name
+of the environment variable) and a value. These settings are applied to the
+run-time environment <em>of the application</em> on each of the remote nodes
+when the application is launched by merging the stanza environment with the
+run-time environment of the Maestro server. Environment variable values can
+reference other environment variables using the syntax
 <code class="literal">${ENV_VAR_NAME}</code> where
 <code class="varname">ENV_VAR_NAME</code> is the name of the other environment
 variable. Be careful not to introduce circular references, however, because
-this will result in an infinite loop on the server side when trying to
-resolve the references.</p>
+this will result in an infinite loop on the server side when trying to resolve
+the references. The value of an environment variable in the remote execution
+environment can be modified (extended or replaced) using this stanza item.
+For example, <code class="envar">PATH</code> could be changed to
+<code class="literal">${VJ_BASE_DIR}/bin:${PATH}:${HOME}/somedir/bin</code>.</p>
