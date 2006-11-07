@@ -31,7 +31,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>November 3, 2006</pubdate>
+      <pubdate>November 7, 2006</pubdate>
    </bookinfo>
 
    <preface>
@@ -640,6 +640,10 @@ Certificate information:
             recommended. Remember that all dependencies must be built using
             the same version of Python.</para>
          </important>
+
+         <para>After installing the Maestro GUI and/or the Maestro server,
+         users should configure site-wide settings. We delve into these topics
+         in the next chapter.</para>
       </section>
    </chapter>
 
