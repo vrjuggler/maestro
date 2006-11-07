@@ -641,9 +641,9 @@ Certificate information:
             the same version of Python.</para>
          </important>
 
-         <para>After installing the Maestro GUI and/or the Maestro server,
-         users should configure site-wide settings. We delve into these topics
-         in the next chapter.</para>
+         <para>After installing the <application>Maestro GUI</application>
+         and/or the Maestro server, users should configure site-wide settings.
+         We delve into these topics in the next chapter.</para>
       </section>
    </chapter>
 
@@ -1878,7 +1878,8 @@ setup (hd0)</screen>
       </section>
 
       <section id="section.usage.gui">
-         <title>Using the Maestro GUI Client</title>
+         <title>Using the <application>Maestro GUI</application>
+         Client</title>
 
          <para>The client side of Maestro is a cross-platform GUI written in
          the Python programming language with PyQt as the widget set. As we
@@ -1968,11 +1969,12 @@ setup (hd0)</screen>
             </indexterm>
 
             <para>For users of Microsoft Windows, drive letter mappings are
-            handled when the Maestro GUI user authenticates with the Maestro
-            server. The drive letters mapped are the user's home directory and
-            all persistent drive mappings in the user's profile. This
-            information gets loaded into the local Windows Registry when the
-            user's profile is loaded after authentication.</para>
+            handled when the <application>Maestro GUI</application> user
+            authenticates with the Maestro server. The drive letters mapped
+            are the user's home directory and all persistent drive mappings in
+            the user's profile. This information gets loaded into the local
+            Windows Registry when the user's profile is loaded after
+            authentication.</para>
 
             <indexterm>
                <primary>Windows</primary>
@@ -1988,20 +1990,22 @@ setup (hd0)</screen>
                loaded.</para>
             </note>
 
-            <para>The main interface panel of the Maestro GUI has three parts:
-            a tool bar, the viewer panel, and the log window. The tool bar
-            contains buttons for basic operations such as loading and saving
-            the ensemble file. Within the viewer panel, the various viewer
-            plug-ins can be accessed. Only one viewer is displayed at a time,
-            and switching viewers is done by clicking on an icon in the left
-            side of the viewer panel. Tool bars and menu items may be added
-            and removed on the fly as the current viewer changes.</para>
+            <para>The main interface panel of the <application>Maestro
+            GUI</application> has three parts: a tool bar, the viewer panel,
+            and the log window. The tool bar contains buttons for basic
+            operations such as loading and saving the ensemble file. Within
+            the viewer panel, the various viewer plug-ins can be accessed.
+            Only one viewer is displayed at a time, and switching viewers is
+            done by clicking on an icon in the left side of the viewer panel.
+            Tool bars and menu items may be added and removed on the fly as
+            the current viewer changes.</para>
 
             <section id="section.gui.command.line.options">
                <title>Command Line Options for the <application>Maestro
                GUI</application></title>
 
-               <indexterm id="index.section.maestro.cmd.opts">
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts">
                   <primary>maestro</primary>
 
                   <secondary>command line options</secondary>
@@ -2023,6 +2027,15 @@ setup (hd0)</screen>
 
                <screen>maestro --help</screen>
 
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts.ensemble">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+
+                  <tertiary><option>-e/--ensemble</option></tertiary>
+               </indexterm>
+
                <para>The <option>-e/--ensemble</option> option names an
                ensemble file to load when the <application>Maestro
                GUI</application> starts. Using this option eliminates the need
@@ -2036,6 +2049,18 @@ setup (hd0)</screen>
                a specific ensemble to be loaded by default so that the
                <application>Maestro GUI</application> automatically connects
                to a cluster when it opens.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts.ensemble"></indexterm>
+
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts.stanza">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+
+                  <tertiary><option>-s/--stanza</option></tertiary>
+               </indexterm>
 
                <para>The <option>-s/--stanza</option> option names a stanza
                file that will be loaded by the <application>Maestro
@@ -2054,24 +2079,59 @@ setup (hd0)</screen>
                associated with launching the <application>Maestro
                GUI</application> is an input file to an application, the
                stanza for the application that uses the input file could be
-               identified as the one (and only) to use in the
-               <application>Maestro GUI</application>. In that way, the user
-               would be presented with a <application>Maestro
-               GUI</application> configuration that only pertains to the
-               application and input file in question.</para>
+               identified as the default to use when the Launch View<indexterm>
+                     <primary>viewers</primary>
 
-               <para>The use of the <option>-e/--ensemble</option> and
-               <option>-s/--stanza</option> options are not strictly necessary
-               to delineate ensemble and stanza files. When processing command
-               line options, those that are not preceded by one of the five
-               options are treated as positional arguments. Positional
-               arguments are treated as XML files, and they are examined to
-               determine the document type. Documents with the root tag
-               <sgmltag>&lt;ensemble&gt;</sgmltag> are treated as ensemble
-               files, and those with the root tag
-               <sgmltag>&lt;stanza&gt;</sgmltag> are treated as stanza files.
-               Among other things, this behavior facilitates file associations
-               and double-click launching actions.</para>
+                     <secondary>launch</secondary>
+                  </indexterm> (see <xref linkend="section.viewer.launch" />)
+               is first displayed.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts.stanza"></indexterm>
+
+               <para>The use of the <option>-e/--ensemble</option><indexterm>
+                     <primary>maestro</primary>
+
+                     <secondary>command line options</secondary>
+
+                     <tertiary><option>-e/--ensemble</option></tertiary>
+                  </indexterm> and <option>-s/--stanza</option><indexterm>
+                     <primary>maestro</primary>
+
+                     <secondary>command line options</secondary>
+
+                     <tertiary><option>-s/--stanza</option></tertiary>
+                  </indexterm> options are not strictly necessary to delineate
+               ensemble and stanza files. When processing command line
+               options, those that are not preceded by one of the five options
+               are treated as positional arguments. Positional arguments are
+               treated as XML files, and they are examined to determine the
+               document type. Documents with the root tag
+               <sgmltag>&lt;ensemble&gt;</sgmltag><indexterm>
+                     <primary>ensemble</primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;ensemble&gt;</sgmltag></tertiary>
+                  </indexterm> are treated as ensemble files, and those with
+               the root tag <sgmltag>&lt;stanza&gt;</sgmltag><indexterm>
+                     <primary>stanza</primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;stanza&gt;</sgmltag></tertiary>
+                  </indexterm> are treated as stanza files. Among other
+               things, this behavior facilitates file associations and
+               double-click launching actions.</para>
+
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts.launchonly">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+
+                  <tertiary><option>-l/--launch-only</option></tertiary>
+               </indexterm>
 
                <para>The <option>-l/--launch-only</option> option directs the
                Launch Viewer<indexterm>
@@ -2082,11 +2142,31 @@ setup (hd0)</screen>
                to display <emphasis>only</emphasis> the named application in
                its pull-down menu. The argument to this option must be the
                name of an application defined in a stanza that will be found
-               by the Maestro GUI, either by scanning the search path or from
-               the <option>-s/--stanza</option> option. If the application
-               name contains spaces, the argument to the
+               by the <application>Maestro GUI</application>, either by
+               scanning the search path or from the
+               <option>-s/--stanza</option> option. If the application name
+               contains spaces, the argument to the
                <option>-l/--launch-only</option> command line option must be
-               quoted appropriately.</para>
+               quoted appropriately. If the file associated with launching the
+               <application>Maestro GUI</application> is an input file to an
+               application, the application that uses the input file could be
+               identified as the one (and only) to use in the
+               <application>Maestro GUI</application>. In that way, the user
+               would be presented with a <application>Maestro
+               GUI</application> configuration that only pertains to the
+               application and input file in question.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts.launchonly"></indexterm>
+
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts.launchallfrom">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+
+                  <tertiary><option>-L/--launch-all-from</option></tertiary>
+               </indexterm>
 
                <para>The <option>-L/--launch-all-from</option> option directs
                the Launch Viewer (see <xref
@@ -2119,12 +2199,30 @@ setup (hd0)</screen>
 
                <sidebar>
                   <para>Only one of the options
-                  <option>-l/--launch-only</option> or
-                  <option>-L/--launch-all-from</option> should be given when
-                  running the Maestro GUI. If both are used, the
+                  <option>-l/--launch-only</option><indexterm>
+                        <primary>maestro</primary>
+
+                        <secondary>command line options</secondary>
+
+                        <tertiary><option>-l/--launch-only</option></tertiary>
+                     </indexterm> or <option>-L/--launch-all-from</option>
+                  should be given when running the <application>Maestro
+                  GUI</application>. If both are used, the
                   <option>-l/--launch-only</option> option takes
                   precedence.</para>
                </sidebar>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts.launchallfrom"></indexterm>
+
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts.view">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+
+                  <tertiary><option>-v/--view</option></tertiary>
+               </indexterm>
 
                <para>The <option>-v/--view</option> option tells the
                <application>Maestro GUI</application> which viewer plug-in to
@@ -2174,8 +2272,9 @@ setup (hd0)</screen>
 
                <para>Using any of these names on a command line would require
                proper quoting to avoid misinterpreting the space in the viewer
-               name. For example, here is one way that the Maestro GUI could
-               be launched as a result of a file association on <productname
+               name. For example, here is one way that the
+               <application>Maestro GUI</application> could be launched as a
+               result of a file association on <productname
                class="registered">Microsoft Windows</productname> (the wrapped
                line is to facilitate rendering rather than to indicate
                syntax):</para>
@@ -2195,26 +2294,40 @@ setup (hd0)</screen>
                <screen>maestro.py -v "Launch View" C:\site\cluster.ensem
            C:\apps\myapp.stanza</screen>
 
+               <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts.view"></indexterm>
+
                <para>We will see in <xref linkend="section.maestro.config" />
-               how this command can be simplified further through the Maestro
-               GUI configuration. By configuring the Maestro GUI
+               how this command can be simplified further through the
+               <application>Maestro GUI</application> configuration. By
+               configuring the <application>Maestro GUI</application>
                appropriately, we can avoid having to list the ensemble file
                every time the GUI is launched. Moreover, site-wide and
                user-specific extensions to the stanza search path can
                eliminate the need to name any stanza files on the command line
                in many cases.</para>
 
+               <indexterm class="startofrange"
+                          id="index.section.maestro.cmd.opts.override">
+                  <primary>maestro</primary>
+
+                  <secondary>command line options</secondary>
+
+                  <tertiary><option>-o/--override</option></tertiary>
+               </indexterm>
+
                <para>The <option>-o/--override</option> option offers a great
-               deal of power to users of the Maestro GUI, though its use is by
-               no means simple. Later, in <xref
-               linkend="section.stanza.items" />, we will explain how one
-               stanza file entry can reference <emphasis>and</emphasis> refine
-               content from one or more other stanza entries. Reusing stanza
-               constructs from files is a very static process, however, and
-               this is not always sufficient. The
+               deal of power to users of the <application>Maestro
+               GUI</application>, though its use is by no means simple. Later,
+               in <xref linkend="section.stanza.items" />, we will explain how
+               one stanza file entry can reference <emphasis>and</emphasis>
+               refine content from one or more other stanza entries. Reusing
+               stanza constructs from files is a very static process, however,
+               and this is not always sufficient. The
                <option>-o/--override</option> offers some of this same
-               functionality by allowing the Maestro GUI user to change the
-               behavior of a stanza when the GUI is launched.</para>
+               functionality by allowing the <application>Maestro
+               GUI</application> user to change the behavior of a stanza when
+               the GUI is launched.</para>
 
                <para>To understand when this overriding behavior can be
                useful, consider the case of a clustered application that loads
@@ -2226,14 +2339,15 @@ setup (hd0)</screen>
                own data files, however, and they would like to be able to use
                them by double-clicking on the data file. To make this work, a
                file association would need to be created between the data file
-               type and the Maestro GUI. In our file association setup, we can
-               use the <option>-l/--launch-only</option> option to restrict
-               what application can be launched and the
-               <option>-v/--view</option> option to go straight to the Launch
-               View. The only remaining step is to replace the default data
-               file option in the stanza with the file name provided through
-               the double-click launch operation, and this is where the
-               <option>-o/--override</option> option plays a role.</para>
+               type and the <application>Maestro GUI</application>. In our
+               file association setup, we can use the
+               <option>-l/--launch-only</option> option to restrict what
+               application can be launched and the <option>-v/--view</option>
+               option to go straight to the Launch View. The only remaining
+               step is to replace the default data file option in the stanza
+               with the file name provided through the double-click launch
+               operation, and this is where the <option>-o/--override</option>
+               option plays a role.</para>
 
                <para>Without getting into the details of the stanza file
                format at this point (refer to <xref
@@ -2317,6 +2431,9 @@ setup (hd0)</screen>
                example of how to change the value of an XML attribute.)</para>
 
                <indexterm class="endofrange"
+                          startref="index.section.maestro.cmd.opts.override"></indexterm>
+
+               <indexterm class="endofrange"
                           startref="index.section.maestro.cmd.opts"></indexterm>
             </section>
 
@@ -2330,18 +2447,19 @@ setup (hd0)</screen>
                   <secondary>search path</secondary>
                </indexterm>
 
-               <para>Every time the Maestro GUI starts, it scans a collection
-               of directories looking for files with the extension
-               <filename>.stanza</filename> (unless told not to do so by the
-               Maestro GUI configuration—see <xref
-               linkend="section.maestro.config" />). The default search path
-               consists of the following three directories (searched in this
-               order):</para>
+               <para>Every time the <application>Maestro GUI</application>
+               starts, it scans a collection of directories looking for files
+               with the extension <filename>.stanza</filename> (unless told
+               not to do so by the <application>Maestro GUI</application>
+               configuration—see <xref linkend="section.maestro.config" />).
+               The default search path consists of the following three
+               directories (searched in this order):</para>
 
                <orderedlist>
                   <listitem>
                      <para>The <filename>stanzas</filename> subdirectory of
-                     the Maestro GUI installation</para>
+                     the <application>Maestro GUI</application>
+                     installation</para>
                   </listitem>
 
                   <listitem>
@@ -2402,7 +2520,8 @@ setup (hd0)</screen>
 
                   <listitem>
                      <para>The <filename>stanzas</filename> subdirectory of
-                     the Maestro GUI installation</para>
+                     the <application>Maestro GUI</application>
+                     installation</para>
                   </listitem>
 
                   <listitem>
@@ -2437,12 +2556,13 @@ setup (hd0)</screen>
             <section id="section.gui.ensemble.load">
                <title>Loading an Ensemble</title>
 
-               <para>When the Maestro GUI starts, it either loads either an
-               ensemble as specified on the command line, the default ensemble
-               named in the Maestro configuration (see <xref
-               linkend="section.maestro.config" />), or no ensemble. In the
-               third case, the user must load an ensemble through the GUI.
-               This can be accomplished by selecting <menuchoice>
+               <para>When the <application>Maestro GUI</application> starts,
+               it either loads either an ensemble as specified on the command
+               line, the default ensemble named in the Maestro configuration
+               (see <xref linkend="section.maestro.config" />), or no
+               ensemble. In the third case, the user must load an ensemble
+               through the GUI. This can be accomplished by selecting
+               <menuchoice>
                      <guimenu>File</guimenu>
 
                      <guimenuitem>Load Ensemble</guimenuitem>
@@ -2506,13 +2626,15 @@ setup (hd0)</screen>
 
                   <para>When an application is launched, any output that it
                   would normally write to a console window is streamed back to
-                  the Maestro GUI and displayed in the tabbed panel of log
-                  windows. This panel is normally at the bottom of the Maestro
-                  GUI. Note that each tab can be detached from the Maestro GUI
-                  and moved &amp; resized independently. This allows the
-                  output from multiple nodes to be seen simultaneously if so
-                  desired. Otherwise, as a tabbed panel, it offers a very
-                  compact view of the log output.</para>
+                  the <application>Maestro GUI</application> and displayed in
+                  the tabbed panel of log windows. This panel is normally at
+                  the bottom of the <application>Maestro GUI</application>.
+                  Note that each tab can be detached from the
+                  <application>Maestro GUI</application> and moved &amp;
+                  resized independently. This allows the output from multiple
+                  nodes to be seen simultaneously if so desired. Otherwise, as
+                  a tabbed panel, it offers a very compact view of the log
+                  output.</para>
 
                   <para>The output from the launched application is also
                   written to node-specific log files in the user's home
@@ -2793,9 +2915,9 @@ setup (hd0)</screen>
                <seealso><filename>maestro.xml</filename></seealso>
             </indexterm>
 
-            <para>The Maestro GUI can be configured using a system-wide
-            configuration file and a user-specific configuration file. The
-            system-wide configuration file will be
+            <para>The <application>Maestro GUI</application> can be configured
+            using a system-wide configuration file and a user-specific
+            configuration file. The system-wide configuration file will be
             <filename>/etc/maestro.xcfg</filename><indexterm>
                   <primary><filename>maestro.xcfg</filename></primary>
                </indexterm> on Linux and <filename>maestro.xcfg</filename>
@@ -2820,20 +2942,22 @@ setup (hd0)</screen>
             or her <filename>maestro.xml</filename> file. This capability
             should be used with care.</para>
 
-            <para>Both Maestro GUI settings files can reference environment
-            variables as part of path names. This is done using the syntax of
-            UNIX shells. For example, using <literal>${MY_ENV_VAR}</literal>
-            would look up the environment variable <envar>MY_ENV_VAR</envar>
-            in the runtime environment of the Maestro GUI. This means that
-            <envar>MY_ENV_VAR</envar> must be set when the Maestro GUI is
-            launched.</para>
+            <para>Both <application>Maestro GUI</application> settings files
+            can reference environment variables as part of path names. This is
+            done using the syntax of UNIX shells. For example, using
+            <literal>${MY_ENV_VAR}</literal> would look up the environment
+            variable <envar>MY_ENV_VAR</envar> in the runtime environment of
+            the <application>Maestro GUI</application>. This means that
+            <envar>MY_ENV_VAR</envar> must be set when the
+            <application>Maestro GUI</application> is launched.</para>
 
             <section id="section.maestro.config.system">
-               <title>System-Wide Maestro GUI Settings</title>
+               <title>System-Wide <application>Maestro GUI</application>
+               Settings</title>
 
-               <para>The system-wide Maestro GUI settings file will usually
-               contain two key pieces of information: a site-specific stanza
-               search path<indexterm>
+               <para>The system-wide <application>Maestro GUI</application>
+               settings file will usually contain two key pieces of
+               information: a site-specific stanza search path<indexterm>
                      <primary>stanza</primary>
 
                      <secondary>search path</secondary>
@@ -2855,7 +2979,7 @@ setup (hd0)</screen>
 
                <para>The site-specific stanza search path will be used to
                extend the default stanza search path for all users of the
-               Maestro GUI. It is set using the
+               <application>Maestro GUI</application>. It is set using the
                <sgmltag>&lt;site_stanza_path&gt;</sgmltag><indexterm>
                      <primary><filename>maestro.xcfg</filename></primary>
 
@@ -2876,10 +3000,11 @@ setup (hd0)</screen>
                <literal>:</literal> on all other platforms).</para>
 
                <para>The default ensemble setting identifies an ensemble file
-               that should be loaded by default when the Maestro GUI is
-               launched unless one is named explicitly using the
-               <option>-e/--ensemble</option> command line option. The default
-               ensemble file is named using a platform-specific path in the
+               that should be loaded by default when the <application>Maestro
+               GUI</application> is launched unless one is named explicitly
+               using the <option>-e/--ensemble</option> command line option.
+               The default ensemble file is named using a platform-specific
+               path in the
                <sgmltag>&lt;default_ensemble&gt;</sgmltag><indexterm>
                      <primary><filename>maestro.xcfg</filename></primary>
 
@@ -2943,24 +3068,27 @@ setup (hd0)</screen>
             </section>
 
             <section id="section.maestro.config.user">
-               <title>User-Specific Maestro GUI Settings</title>
+               <title>User-Specific <application>Maestro GUI</application>
+               Settings</title>
 
                <para>As we noted earlier, the system-wide and user-specific
-               Maestro GUI configuration files are merged into one at run time
-               with the user settings taking precedence over system-wide
-               settings. This means that the user-specific Maestro GUI file
-               can contain the same XML tags as the system-wide file. In this
+               <application>Maestro GUI</application> configuration files are
+               merged into one at run time with the user settings taking
+               precedence over system-wide settings. This means that the
+               user-specific <application>Maestro GUI</application> file can
+               contain the same XML tags as the system-wide file. In this
                subsection, we explain how to utilize this feature to extend
                and override system-wide settings and to control behavior of
-               the Maestro GUI that would usually not be appropriate for
-               system-wide settings.</para>
+               the <application>Maestro GUI</application> that would usually
+               not be appropriate for system-wide settings.</para>
 
                <sidebar>
-                  <para>Recall that the user-specific Maestro GUI settings are
-                  in a file named maestro.xml that is located in a
-                  platform-specific directory. For Microsoft Windows, the file
-                  is either <filename>%APPDATA%\Maestro\maestro.xml</filename>
-                  or <filename>%USERPROFILE%\Application
+                  <para>Recall that the user-specific <application>Maestro
+                  GUI</application> settings are in a file named maestro.xml
+                  that is located in a platform-specific directory. For
+                  Microsoft Windows, the file is either
+                  <filename>%APPDATA%\Maestro\maestro.xml</filename> or
+                  <filename>%USERPROFILE%\Application
                   Data\Maestro\maestro.xml</filename>. For Mac OS X, the file
                   is <filename>$HOME/Library/Application
                   Support/maestro.xml</filename>. For all other platforms, it
@@ -3000,11 +3128,12 @@ setup (hd0)</screen>
                sufficiently large number of application directories to
                scan.</para>
 
-               <para>In some cases, the user may wish to prevent the Maestro
-               GUI from scanning directories for <filename>.stanza</filename>
-               files. This can be accomplished by overriding the system-wide
-               stanza search path and/or by preventing the scanning the
-               default stanza search path. In the user-specific settings, the
+               <para>In some cases, the user may wish to prevent the
+               <application>Maestro GUI</application> from scanning
+               directories for <filename>.stanza</filename> files. This can be
+               accomplished by overriding the system-wide stanza search path
+               and/or by preventing the scanning the default stanza search
+               path. In the user-specific settings, the
                <sgmltag>&lt;site_stanza_path&gt;</sgmltag><indexterm>
                      <primary><filename>maestro.xcfg</filename></primary>
 
@@ -3066,9 +3195,10 @@ setup (hd0)</screen>
 &lt;/maestro&gt;</programlisting>
                </example>
 
-               <para>The user-specific Maestro GUI settings can also change
-               the system-wide default ensemble file by setting a value for
-               the <sgmltag>&lt;default_ensemble&gt;</sgmltag><indexterm>
+               <para>The user-specific <application>Maestro GUI</application>
+               settings can also change the system-wide default ensemble file
+               by setting a value for the
+               <sgmltag>&lt;default_ensemble&gt;</sgmltag><indexterm>
                      <primary><filename>maestro.xcfg</filename></primary>
 
                      <secondary>elements</secondary>
@@ -3261,9 +3391,9 @@ setup (hd0)</screen>
          <para>Generally, an ensemble would be edited once per cluster when
          setting up Maestro for use with that cluster. An administrator would
          put the ensemble file in a place that is convenient for accessing by
-         all users of the cluster. At this time, the Maestro GUI does not have
-         a way to name a default ensemble to load, but this capability will be
-         added in a future release.</para>
+         all users of the cluster. At this time, the <application>Maestro
+         GUI</application> does not have a way to name a default ensemble to
+         load, but this capability will be added in a future release.</para>
 
          <indexterm class="endofrange" startref="index.file.ensemble"></indexterm>
       </section>
@@ -3298,12 +3428,13 @@ setup (hd0)</screen>
             <tertiary>editing</tertiary>
          </indexterm>
 
-         <para>The stanza editor is one of the Maestro GUI viewer plug-ins. It
-         is currently the only viewer that does not have a corresponding
-         service since it does not do anything with the ensemble. Thus, it is
-         not necessary to have an ensemble loaded in order to edit stanza
-         files. There are two items in the <guimenu>File</guimenu> menu
-         related to stanza editing: <menuchoice>
+         <para>The stanza editor is one of the <application>Maestro
+         GUI</application> viewer plug-ins. It is currently the only viewer
+         that does not have a corresponding service since it does not do
+         anything with the ensemble. Thus, it is not necessary to have an
+         ensemble loaded in order to edit stanza files. There are two items in
+         the <guimenu>File</guimenu> menu related to stanza editing:
+         <menuchoice>
                <guimenu>File</guimenu>
 
                <guimenuitem>Load Stanza</guimenuitem>
@@ -3364,8 +3495,9 @@ setup (hd0)</screen>
                   <primary>viewers</primary>
 
                   <secondary>launch</secondary>
-               </indexterm> of the Maestro GUI. There are many stanza items,
-            and we explain their usage in this section.</para>
+               </indexterm> of the <application>Maestro GUI</application>.
+            There are many stanza items, and we explain their usage in this
+            section.</para>
 
             <para>Some stanza items can reference environment variables in
             their value setting. The environment variable can be one that is
@@ -3757,9 +3889,10 @@ setup (hd0)</screen>
                for the nodes of an ensemble file. This information is
                determined by Maestro so that nodes can be rebooted to a
                different operating system without requiring a change to the
-               ensemble file being used by the Maestro GUI. The ability of the
-               Maestro GUI to handle server reboots gracefully relies upon
-               this handling of the operating system class token.</para>
+               ensemble file being used by the <application>Maestro
+               GUI</application>. The ability of the <application>Maestro
+               GUI</application> to handle server reboots gracefully relies
+               upon this handling of the operating system class token.</para>
             </important>
 
             <para>With that, let us now consider the example stanza shown in
@@ -3814,7 +3947,7 @@ setup (hd0)</screen>
             <para>The next point of variation in this example is the argument
             used for the command. Since path syntax varies between platforms,
             we allow the user to enter the platform-specific syntax in the
-            Maestro GUI Launch Viewer<indexterm>
+            <application>Maestro GUI</application> Launch Viewer<indexterm>
                   <primary>viewers</primary>
 
                   <secondary>launch</secondary>
