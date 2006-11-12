@@ -337,6 +337,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                "of the following:\n%s\nDefaulting to the first view (%s)."\
                % (env.mCmdOpts.view, view_names, view_names[0]))
 
+      self.mViewList.setCurrentRow(start_view_index)
+
       # Timer to refresh pyro connections to nodes.
       self.refreshTimer = QtCore.QTimer()
       self.refreshTimer.setInterval(2000)
