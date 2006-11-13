@@ -439,6 +439,12 @@ def RunServer(installSH=True):
    logger = logging.getLogger('maestrod.RunServer')
    try:
 
+      # Tell windows to not pop up annoying error dialog boxes.
+      if sys.platform.startswith("win"):
+         win32api.SetErrorMode(win32con.SEM_FAILCRITICALERRORS |
+                               win32con.SEM_NOGPFAULTERRORBOX |
+                               win32con.SEM_NOALIGNMENTFAULTEXCEPT |
+                               win32con.SEM_NOOPENFILEERRORBOX)
       def logCB(percent, message):
          logger.info(message)
 
