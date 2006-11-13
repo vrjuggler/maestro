@@ -213,7 +213,7 @@ if os.name == 'nt':
          sys.stderr = maestro.util.PseudoFileErr(null_output)
 
          formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
-         self.mNtEvent.setLevel(logging.INFO)
+         self.mNtEvent.setLevel(logging.ERROR)
          self.mNtEvent.setFormatter(formatter)
          self.mFileLog.setLevel(logging.DEBUG)
          self.mFileLog.setFormatter(formatter)
