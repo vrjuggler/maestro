@@ -159,7 +159,7 @@ class MaestroServer:
       #self.mEventManager.timers().createTimer(launch_service.update, 0)
 
    def update(self):
-      """ Give the event manager time to handle it's timers. """
+      """ Give the event manager time to handle its timers. """
       env = maestro.core.Environment()
 
       # Try to limit the amount of work done when no nodes

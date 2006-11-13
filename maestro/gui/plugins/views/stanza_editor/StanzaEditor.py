@@ -116,7 +116,7 @@ class StanzaEditorPlugin(maestro.core.IViewPlugin):
       #mainWindow.addToolBarBreak()
 
       # Add a search toolbar that allows the user to select the current
-      # application and filter it's options depending on the operating
+      # application and filter its options depending on the operating
       # system and node class.
       #mainWindow.addToolBar(self.mStanzaSearchToolbar)
       #self.mStanzaSearchToolbar.show()

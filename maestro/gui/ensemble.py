@@ -63,7 +63,7 @@ class Ensemble(QtCore.QObject):
       self.mIpToNodeMap = {}
 
       # XXX: Should we manage this signal on a per node basis? We would have
-      #      to make each node generate a signal when it's OS changed and
+      #      to make each node generate a signal when its OS changed and
       #      listen for it here anyway.
       # Register to receive signals from all nodes about their current os.
       env = maestro.gui.Environment()
@@ -150,7 +150,7 @@ class Ensemble(QtCore.QObject):
       return len(self.mNodes)
 
    def onReportOs(self, nodeId, os):
-      """ Slot that gets called when a node reports it's operating system.
+      """ Slot that gets called when a node reports its operating system.
 
           @param nodeId: The ID of the node that is reporting its OS.
           @param os: Operating system integer constant.
@@ -263,7 +263,7 @@ class Ensemble(QtCore.QObject):
       """ Slot that is called when a connection is lost to a node.
 
           @param msgFrom: Source of signal, in this case always '*'.
-          @param nodeId: ID of the node that lost it's connection.
+          @param nodeId: ID of the node that lost its connection.
       """
       self.__refreshIpMap()
       node = self.getNodeById(nodeId)

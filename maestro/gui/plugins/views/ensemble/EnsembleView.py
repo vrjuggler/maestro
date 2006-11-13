@@ -56,7 +56,7 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
       # Connect the new ensemble.
       self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
 
-      # Register to receive a signal when a node reports it's settings.
+      # Register to receive a signal when a node reports its settings.
       env().mEventManager.connect("*", "ensemble.report_settings", self.onReportSettings)
 
    def onNodeChanged(self, node):
@@ -64,7 +64,7 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
          self.emit(QtCore.SIGNAL("modelReset()"))
 
    def onReportSettings(self, nodeId, settings):
-      """ Slot that gets called when a node reports it's settings. """
+      """ Slot that gets called when a node reports its settings. """
       self.mNodeSettings[nodeId] = settings
       if self.mSelectedNode is not None and nodeId == self.mSelectedNode.getId():
          # Signal that all data was updated.

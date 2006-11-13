@@ -496,7 +496,7 @@ class ChoiceSheetCB(Sheet):
          if selected_index < 0 and c.mSelected:
             selected_index = i
          i += 1
-      # Select the first child option that had it's selected attribute
+      # Select the first child option that had its selected attribute
       # set to true. If no children were selected, then use -1 which
       # lets Qt decide what to choose.
       self.mChoice.setCurrentIndex(selected_index)
@@ -508,7 +508,7 @@ class ChoiceSheetCB(Sheet):
          self.mSelectedObject.mSelected = False
          self.mSelectedObject = None
 
-      # If the past selection has not hidden and it's frame was displayed,
+      # If the past selection has not hidden and its frame was displayed,
       # remove the frame from the widget and mark it for deletion.
       if self.mSelectedFrame is not None:
          self.layout().removeWidget(self.mSelectedFrame)

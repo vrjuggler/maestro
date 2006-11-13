@@ -30,7 +30,7 @@ class RebootInfo:
 
    def lostConnection(self):
       """ Slot that is called when the connection to this node is lost. All
-          cached data should be cleared and set to it's inital state.
+          cached data should be cleared and set to its inital state.
       """
       self.mTargets = []
       self.mDefaultTargetIndex = -1
@@ -171,7 +171,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
    def onReportTargets(self, nodeId, targets, defaultTargetIndex, timeout):
-      """ Slot that is called when a node reports it's possible boot targets. """
+      """ Slot that is called when a node reports its possible boot targets. """
 
       ri = RebootInfo(targets, defaultTargetIndex, timeout)
       self.mRebootInfoMap[nodeId] = ri
@@ -370,7 +370,7 @@ class RebootDelegate(QtGui.QItemDelegate):
          # If the new boot target is different, emit a signal to force change.
          if not current_target == new_target:
             (title, os, target_index) = new_target
-            # Tell the selected node to change it's default target.
+            # Tell the selected node to change its default target.
             env = maestro.gui.Environment()
             env.mEventManager.emit(node.getId(), "reboot.set_default_target", target_index, title)
       elif 2 == index.column():
@@ -380,7 +380,7 @@ class RebootDelegate(QtGui.QItemDelegate):
          timeout = widget.value()
          print "TIMEOUT: ", timeout
          if not timeout == reboot_info.mTimeout:
-            # Tell the selected node to change it's default target.
+            # Tell the selected node to change its default target.
             env = maestro.gui.Environment()
             env.mEventManager.emit(node.getId(), "reboot.set_timeout", timeout)
       else:
