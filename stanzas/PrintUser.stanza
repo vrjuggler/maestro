@@ -17,7 +17,7 @@
          import os, pwd; print pwd.getpwuid(os.getuid())[0]
       </arg>
       <arg class="Windows XP" editable="false" flag="-c" label="Code" name="win_arg">
-         import win32api; print win32api.GetUserName()
+         import os, win32api, win32profile; print 'Username: %s User Env: %s' % (win32api.GetUserName(), os.environ.get('USERNAME', ''))
       </arg>
    </application>
 </stanza>
