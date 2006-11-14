@@ -169,7 +169,7 @@ def main():
                           datefmt = date_fmt)
 
    try:
-      logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'images', 'cpu_array.png')
+      logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'images', 'splash.png')
 
       # --- Bootstrap the environment --- #
       splash_map = QtGui.QPixmap(logo_path)
