@@ -204,7 +204,7 @@ class LaunchService(maestro.core.IServicePlugin):
          if cwd is not None:
             cwd = self.expandEnv(cwd, envMap, user_env)[0]
          #command = command.replace('\\', '\\\\')
-         #self.mLogger.info("Running command: " + command)
+         self.mLogger.info("Running command: " + command)
          self.mLogger.debug("Working Dir: " + str(cwd))
          self.mLogger.debug("Translated env: " + str(envMap))
 
@@ -278,8 +278,8 @@ class LaunchService(maestro.core.IServicePlugin):
 
          # Try to get env_var value from location map first. If not found
          # then try to get from user's environment.
-         if envMap.has_key(env_var) and not (env_var == key):
-            new_value = env_var_ex.sub(envMap[env_var].replace('\\', '\\\\'), value)
+         if cmdEnvMap.has_key(env_var) and not (env_var == key):
+            new_value = env_var_ex.sub(cmdEnvMap[env_var].replace('\\', '\\\\'), value)
             self.mLogger.debug("Replacing %s -> %s" % (value, new_value))
             value = new_value
             replaced = replaced + 1
