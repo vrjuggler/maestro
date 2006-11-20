@@ -511,61 +511,14 @@ def _fixupCommand(cmd, env=None):
       - cannot spawn batch files
     """
     if sys.platform.startswith("win"):
-        # Fixup the command string to spawn.  (Lifted from
-        # posixmodule.c::_PyPopenCreateProcess() with some modifications)
-        comspec = os.environ.get("COMSPEC", None)
-        win32Version = win32api.GetVersion()
-        if comspec is None:
-            raise ProcessError("Cannot locate a COMSPEC environment "\
-                               "variable to use as the shell")
-        # Explicitly check if we are using COMMAND.COM.  If we
-        # are then use the w9xpopen hack.
-        elif (win32Version & 0x80000000L == 0) and\
-             (win32Version &        0x5L >= 5) and\
-             os.path.basename(comspec).lower() != "command.com":
-            # 2000/XP and not using command.com.
-            if '"' in cmd or "'" in cmd:
-                cmd = comspec + ' /c "%s"' % cmd
-            else:
-                cmd = comspec + ' /c ' + cmd
-        elif (win32Version & 0x80000000L == 0) and\
-             (win32Version &        0x5L  < 5) and\
-             os.path.basename(comspec).lower() != "command.com":
-            # NT and not using command.com.
-            try:
-                cmd = _whichFirstArg(cmd, env)
-            except (ProcessError, which.WhichError):
-                raise ProcessError("Could not find a suitable executable "\
-                    "to launch for '%s'. On WinNT you must manually prefix "\
-                    "shell commands and batch files with 'cmd.exe /c' to "\
-                    "have the shell run them." % cmd)
-        else:
-            # Oh gag, we're on Win9x and/or using COMMAND.COM. Use the
-            # workaround listed in KB: Q150956
-            w9xpopen = os.path.join(
-                os.path.dirname(win32api.GetModuleFileName(0)),
-                'w9xpopen.exe')
-            if not os.path.exists(w9xpopen):
-                # Eeek - file-not-found - possibly an embedding
-                # situation - see if we can locate it in sys.exec_prefix
-                w9xpopen = os.path.join(os.path.dirname(sys.exec_prefix),
-                                        'w9xpopen.exe')
-                if not os.path.exists(w9xpopen):
-                    raise ProcessError(\
-                        "Can not locate 'w9xpopen.exe' which is needed "\
-                        "for ProcessOpen to work with your shell or "\
-                        "platform.")
-            ## This would be option (1):
-            #cmd = '%s "%s /c %s"'\
-            #      % (w9xpopen, comspec, cmd.replace('"', '\\"'))
-            try:
-                cmd = _whichFirstArg(cmd, env)
-            except (ProcessError, which.WhichError):
-                raise ProcessError("Could not find a suitable executable "\
-                    "to launch for '%s'. On Win9x you must manually prefix "\
-                    "shell commands and batch files with 'command.com /c' "\
-                    "to have the shell run them." % cmd)
-            cmd = '%s "%s"' % (w9xpopen, cmd.replace('"', '\\"'))
+        # NT and not using command.com.
+        try:
+            cmd = _whichFirstArg(cmd, env)
+        except (ProcessError, which.WhichError):
+            raise ProcessError("Could not find a suitable executable "\
+                "to launch for '%s'. On WinNT you must manually prefix "\
+                "shell commands and batch files with 'cmd.exe /c' to "\
+                "have the shell run them." % cmd)
     return cmd
 
 class _FileWrapper:
