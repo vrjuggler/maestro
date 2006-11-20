@@ -176,7 +176,8 @@ def main():
       #splash = QtGui.QSplashScreen(splash_map, QtCore.Qt.WindowStaysOnTopHint)
       splash = QtGui.QSplashScreen(splash_map)
       splash.show()
-      splash.showMessage("Loading Maestro by Infiscape")
+      splash.showMessage("Loading Maestro by Infiscape",
+         QtCore.Qt.AlignLeft, QtCore.Qt.white)
       app.processEvents()
 
       if os.environ.has_key('MAESTRO_CFG'):
@@ -279,7 +280,8 @@ def main():
             opts.ensemble = expandEnv(ensemble_str.strip())
 
       def splashProgressCB(percent, message):
-         splash.showMessage("%3.0f%% %s"%(percent*100,message))
+         splash.showMessage("%3.0f%% %s"%(percent*100,message),
+            QtCore.Qt.AlignLeft, QtCore.Qt.white)
          app.processEvents()   
 
       env = maestro.gui.Environment()
