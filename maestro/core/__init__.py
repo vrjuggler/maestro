@@ -49,8 +49,8 @@ const.OsNameMap = \
     const.WIN    : 'Windows',
     const.WINXP  : 'Windows XP',
     const.MACOS  : 'MacOS',
-    const.MACOSX : 'MacOS X',
-    const.HPUX   : 'HP UX',
+    const.MACOSX : 'Mac OS X',
+    const.HPUX   : 'HP-UX',
     const.AIX    : 'AIX',
     const.SOLARIS : 'Solaris'}
 
