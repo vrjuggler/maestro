@@ -503,7 +503,10 @@ class RebootModel(QtCore.QAbstractTableModel):
 
       if role == QtCore.Qt.DecorationRole:
          if index.column() == 0:
-            return QtCore.QVariant(const.mOsIcons[node.mPlatform])
+            if const.mOsIcons.has_key(node.mPlatform):
+               return QtCore.QVariant(const.mOsIcons[node.mPlatform])
+            else:
+               return QtCore.QVariant()
          if index.column() == 1:
             # Return an icon representing the operating system.
             return QtCore.QVariant(const.mOsIcons[os])
