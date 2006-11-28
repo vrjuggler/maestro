@@ -61,7 +61,7 @@ class PseudoFileOut(PseudoFile):
       return 1
 
    def fileno(self):
-      return self.write.fileno()
+      return 1
 
 class PseudoFileErr(PseudoFile):
    def __init__(self, write):
@@ -74,4 +74,4 @@ class PseudoFileErr(PseudoFile):
       return 1
 
    def fileno(self):
-      return self.write.fileno()
+      return 2
