@@ -293,7 +293,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
          # NOTE: This variable is used only as a convenience for the debug
          # output printed below.
-         total_command = command + ' '.join(option_visitor.mArgs)
+         total_command = command + ' ' + ' '.join(option_visitor.mArgs)
 
          env_map = option_visitor.mEnvVars
 
