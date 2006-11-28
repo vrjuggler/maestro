@@ -59,11 +59,8 @@ class SettingsService(maestro.core.IServicePlugin):
    def _getPlatform(self):
       """Returns tuple with error code and platform code.
          1 is Linux, 2 is Windows, and 0 is unknown."""
-      sys_name = platform.system()
-      if sys_name == 'Linux':
+      if platform.system() == 'Linux':
          return const.LINUX
-      elif sys_name == 'Darwin':
-         return const.MACOSX
       elif os.name == 'nt':
          return const.WINXP
       else:

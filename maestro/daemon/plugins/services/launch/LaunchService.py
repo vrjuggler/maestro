@@ -20,9 +20,7 @@
 import re
 import sys, os, os.path, threading, time
 
-if sys.platform.startswith("win"):
-   import win32profile
-else:
+if not sys.platform.startswith("win"):
    import pwd
 
 import maestro.core
@@ -124,41 +122,33 @@ class LaunchService(maestro.core.IServicePlugin):
             if not envMap.has_key('LOG_NAME'):
                envMap['LOG_NAME'] = user_name
 
-         # Retrieve the user's environment.
-         # TODO: Need to find a way to do this on other platforms.
-         if sys.platform.startswith('win'):
-            user_env = win32profile.CreateEnvironmentBlock(avatar.mUserHandle, False)
-         else:
-            # XXX: This might not give us what we think it does because on UNIX
-            #      os.environ is bound when the service starts. This will happen
-            #      before many things get set up in the environment, $HOSTNAME
-            #      for example is not defined yet. On Windows it should give
-            #      us the System Environment.
-            user_env = os.environ
-
          # Merge our environment with the local environment.
-         merge(envMap, user_env)
+         # XXX: This might not give us what we think it does because on UNIX
+         #      os.environ is bound when the service starts. This will happen
+         #      before many things get set up in the environment, $HOSTNAME
+         #      for example is not defined yet. On Windows it should give
+         #      us the System Environment.
+         merge(envMap, os.environ)
 
          # No need to do this since we are merging the entire os.environ.
          if sys.platform.startswith("win"):
-            # XXX: For some reason SYSTEMROOT is not getting into user env.
             envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
          # XXX: We should not assume that a non-Windows platform is running
          # the X Window System.
          else:
-            envMap['DISPLAY']    = user_env['DISPLAY']
-            envMap['XAUTHORITY'] = user_env['USER_XAUTHORITY']
+            envMap['DISPLAY']    = os.environ['DISPLAY']
+            envMap['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
 
          # Expand all environment variables.
          # XXX: Do we really need to do this in all cases? The operating system
          #      should be able to do this for us. Except we are not using cross
          #      platform envvar syntax.
-         self.evaluateEnvVars(envMap, user_env)
-         command = self.expandEnv(command, envMap, user_env)[0]
+         self.evaluateEnvVars(envMap)
+         command = self.expandEnv(command, envMap)[0]
 
          if args is not None:
             for i in xrange(len(args)):
-               args[i] = self.expandEnv(args[i], envMap, user_env)[0]
+               args[i] = self.expandEnv(args[i], envMap)[0]
 
          match_obj = self.cmd_space_re.search(command)
 
@@ -202,9 +192,9 @@ class LaunchService(maestro.core.IServicePlugin):
                   command = '"%s"' % command
 
          if cwd is not None:
-            cwd = self.expandEnv(cwd, envMap, user_env)[0]
+            cwd = self.expandEnv(cwd, envMap)[0]
          #command = command.replace('\\', '\\\\')
-         self.mLogger.info("Running command: " + command)
+         #self.mLogger.info("Running command: " + command)
          self.mLogger.debug("Working Dir: " + str(cwd))
          self.mLogger.debug("Translated env: " + str(envMap))
 
@@ -261,7 +251,7 @@ class LaunchService(maestro.core.IServicePlugin):
 
    sEnvVarRegexBraces = re.compile('\${(\w+)}')
 
-   def expandEnv(self, value, cmdEnvMap, userEnv, key = None):
+   def expandEnv(self, value, envMap, key = None):
       """
       Expands a single entry in out environment map.
       """
@@ -273,19 +263,20 @@ class LaunchService(maestro.core.IServicePlugin):
       match = self.sEnvVarRegexBraces.search(value, start_pos)
 
       while match is not None:
+         self.mLogger.debug("1")
          env_var = match.group(1)
          env_var_ex = re.compile(r'\${%s}' % env_var)
 
          # Try to get env_var value from location map first. If not found
-         # then try to get from user's environment.
-         if cmdEnvMap.has_key(env_var) and not (env_var == key):
-            new_value = env_var_ex.sub(cmdEnvMap[env_var].replace('\\', '\\\\'), value)
+         # then try to get from os.environ
+         if envMap.has_key(env_var) and not (env_var == key):
+            new_value = env_var_ex.sub(envMap[env_var].replace('\\', '\\\\'), value)
             self.mLogger.debug("Replacing %s -> %s" % (value, new_value))
             value = new_value
             replaced = replaced + 1
-         elif userEnv.has_key(env_var):
-            #self.mLogger.debug("%s = %s" % (env_var, userEnv[env_var]))
-            new_value = env_var_ex.sub(userEnv[env_var].replace('\\', '\\\\'), value)
+         elif os.environ.has_key(env_var):
+            #self.mLogger.debug("%s = %s" % (env_var, os.environ[env_var]))
+            new_value = env_var_ex.sub(os.environ[env_var].replace('\\', '\\\\'), value)
             self.mLogger.debug("Replacing %s -> %s" % (value, new_value))
             value = new_value
             replaced = replaced + 1
@@ -297,7 +288,7 @@ class LaunchService(maestro.core.IServicePlugin):
 
       return (value, replaced)
 
-   def evaluateEnvVars(self, envMap, usrEnvMap):
+   def evaluateEnvVars(self, envMap):
       replaced = 1
       while replaced > 0:
          self.mLogger.debug("replaced: " + str(replaced))
@@ -307,6 +298,6 @@ class LaunchService(maestro.core.IServicePlugin):
             match = self.sEnvVarRegexBraces.search(v)
             if match is not None:
                self.mLogger.debug("Trying to replace env vars in " + str(v))
-               (v, r) = self.expandEnv(v, envMap, usrEnvMap, k)
+               (v, r) = self.expandEnv(v, envMap, k)
                envMap[k] = v
                replaced = replaced + r

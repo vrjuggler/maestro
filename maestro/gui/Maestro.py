@@ -554,7 +554,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mModuleButtons = []
 
    def onAbout(self):
-      dialog = QtGui.QDialog(self)
+      dialog = QtGui.QDialog()
       about_ui = AboutDialogBase.Ui_AboutDialogBase()
       about_ui.setupUi(dialog)
       dialog.exec_()

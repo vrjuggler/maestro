@@ -369,16 +369,11 @@ if sys.platform.startswith("win"):
 
         #XXX Komodo 2.0 Beta 1 hack. This requirement should be
         #    pushed out to Komodo code using process.py. Or should it?
-        if isWin9x and env is not None:
+        if isWin9x and env:
             aenv = {}
             for key, value in env.items():
                 aenv[str(key)] = str(value)
             env = aenv
-        elif env is not None:
-            uenv = {}
-            for key, val in env.items():
-                uenv[unicode(key)] = unicode(val)
-            env = uenv
         
         log.debug("""\
 _SaferCreateProcess(appName=%r,
@@ -406,9 +401,31 @@ _SaferCreateProcess(appName=%r,
                     = win32process.CreateProcess(*params)
         except TypeError, ex:
             if ex.args == ('All dictionary items must be strings, or all must be unicode',):
+                # Try again with an all unicode environment.
+                #XXX Would be nice if didn't have to depend on the error
+                #    string to catch this.
                 import warnings
                 warnings.warn('env: ' + str(ex), stacklevel=4)
-            raise
+                if isWin9x and env:
+                    aenv = {}
+                    try:
+                        for key, value in env.items():
+                            aenv[str(key)] = str(value)
+                    except UnicodeError, ex:
+                        raise ProcessError(str(ex))
+                    env = aenv
+                elif env:
+                    uenv = {}
+                    for key, val in env.items():
+                        uenv[unicode(key)] = unicode(val)
+                    env = uenv
+                hProcess, hThread, processId, threadId\
+                    = win32process.CreateProcess(appName, cmd, processSA,
+                                                 threadSA, inheritHandles,
+                                                 creationFlags, env, cwd,
+                                                 si)
+            else:
+                raise
         return hProcess, hThread, processId, threadId
 
 
@@ -1266,7 +1283,6 @@ class ProcessOpen(Process):
             si.hStdOutput = hChildStdoutWr
             si.hStdError = hChildStdoutWr
             si.dwFlags |= win32process.STARTF_USESTDHANDLES
-            si.lpDesktop = "winsta0\default"
 
             cmd = _fixupCommand(cmd, self._env)
 

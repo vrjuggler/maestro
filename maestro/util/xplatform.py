@@ -50,8 +50,7 @@ def getUserAppDir(appName):
    elif os.environ.has_key('HOME'):
       # Mac OS X.
       if sys.platform == 'darwin':
-         app_dir = os.path.join(os.environ['HOME'], 'Library',
-                                'Application Support', appName)
+         app_dir = os.path.join(os.environ['HOME'], 'Library', appName)
       # Everything else.
       else:
          app_dir = os.path.join(os.environ['HOME'], '.' + appName)

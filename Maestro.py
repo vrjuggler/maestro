@@ -175,8 +175,6 @@ def main():
       splash_map = QtGui.QPixmap(logo_path)
       #splash = QtGui.QSplashScreen(splash_map, QtCore.Qt.WindowStaysOnTopHint)
       splash = QtGui.QSplashScreen(splash_map)
-      font = QtGui.QFont("Helvetica", 10, QtGui.QFont.Bold)
-      splash.setFont(font)
       splash.show()
       splash.showMessage("Loading Maestro by Infiscape",
          QtCore.Qt.AlignLeft, QtCore.Qt.white)
