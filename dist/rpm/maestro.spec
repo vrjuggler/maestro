@@ -4,7 +4,7 @@
 
 # Spec file for Maestro.
 %define name    maestro
-%define version 0.3.1
+%define version 0.3.2
 %define release 1
 
 # Change to 0 to disable building documentation.
@@ -268,6 +268,12 @@ fi
 %endif
 
 %changelog
+* Tue Nov 28 2006 Patrick Hartling
+- Update to version 0.3.2
+
+* Mon Nov 20 2006 Patrick Hartling
+- Update to version 0.3.1
+
 * Mon Nov  6 2006 Patrick Hartling
 - More file association fixes
 
