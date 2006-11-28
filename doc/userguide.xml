@@ -31,7 +31,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>November 7, 2006</pubdate>
+      <pubdate>November 28, 2006</pubdate>
    </bookinfo>
 
    <preface>
@@ -444,16 +444,14 @@
 
             <listitem>
                <para><ulink
-               url="http://www.riverbankcomputing.com/Downloads/Snapshots/sip4/">SIP
-               4 snapshot</ulink> from October 28, 2006 (client GUI
-               only)</para>
+               url="httphttp://www.riverbankcomputing.co.uk/sip/download.php//www.riverbankcomputing.com/Downloads/Snapshots/sip4/">SIP
+               4.5</ulink> (client GUI only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
-               url="http://www.riverbankcomputing.com/Downloads/Snapshots/PyQt4/">PyQt
-               4 snapshot</ulink> from October 29, 2006 (client GUI
-               only)</para>
+               url="http://www.riverbankcomputing.co.uk/pyqt/download.php">PyQt
+               4.1</ulink> (client GUI only)</para>
             </listitem>
 
             <listitem>
@@ -484,13 +482,15 @@
             <listitem>
                <para><ulink
                url="http://sourceforge.net/project/showfiles.php?group_id=78018">pywin32</ulink>
-               (Windows only)</para>
+               (<productname class="registered">Microsoft
+               Windows</productname> only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
                url="http://www.pangalactic.org/PyPAM/">PyPAM</ulink> (or
-               python-pam) 0.4.2 (Linux server only; <ulink
+               python-pam) 0.4.2 (non-<productname
+               class="registered">Windows</productname> server only; <ulink
                url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Dev/GettingTheCode/python-pam_0.4.2-10.4.tar.gz">known
                working source</ulink>)</para>
             </listitem>

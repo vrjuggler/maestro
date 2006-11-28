@@ -50,7 +50,6 @@ class PseudoFileIn(PseudoFile):
    def isatty(self):
       return 1
 
-
 class PseudoFileOut(PseudoFile):
    def __init__(self, write):
       if callable(write):
@@ -59,6 +58,9 @@ class PseudoFileOut(PseudoFile):
          raise ValueError, 'write must be callable'
 
    def isatty(self):
+      return 1
+
+   def fileno(self):
       return 1
 
 class PseudoFileErr(PseudoFile):
@@ -70,3 +72,6 @@ class PseudoFileErr(PseudoFile):
 
    def isatty(self):
       return 1
+
+   def fileno(self):
+      return 2
