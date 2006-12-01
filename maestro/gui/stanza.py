@@ -199,13 +199,17 @@ class Application(TreeItem):
    def __init__(self, xmlElt, parent=None, row=0):
       TreeItem.__init__(self, xmlElt, parent, row)
 
-      self.mLabel = xmlElt.get("label", "Unknown")
+      self.mLabel  = xmlElt.get("label", "Unknown")
+      self.mEmblem = xmlElt.get('emblem', None)
 
       self.mTooltip = xmlElt.get("tooltip", '')
       self.mHelpUrl = xmlElt.get("helpUrl", '')
 
    def getName(self):
       return self.mLabel
+
+   def getEmblemPath(self):
+      return self.mEmblem
 
    def __repr__(self):
       return "<Application: label:%s tooltip: %s helpUrl: %s>"\

@@ -191,7 +191,11 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
 
       for s in self.mApplications:
          name = s.getName()
-         self.mAppComboBox.addItem(name)
+         emblem = s.getEmblemPath()
+         if emblem is None:
+            self.mAppComboBox.addItem(name)
+         else:
+            self.mAppComboBox.addItem(QtGui.QIcon(emblem), name)
 
          # If name matches cur_text, then we have found the new index of
          # the previously selected item.
