@@ -318,6 +318,9 @@ class Property:
 GlobalPropertyMap = {}
 GlobalPropertyMap['name'] = Property('Name', 'Unknown')
 GlobalPropertyMap['label'] = Property('Label', 'Unknown')
+GlobalPropertyMap['helpUrl'] = Property('Help URL', 'Unknown')
+GlobalPropertyMap['emblem'] = Property('Emblem', 'Unknown')
+GlobalPropertyMap['tooltip'] = Property('Tooltip', 'Unknown')
 GlobalPropertyMap['class'] = Property('Class', '')
 GlobalPropertyMap['hidden'] = Property('Hidden', 'false',
                                       {'False':'false', 'True': 'true'})
@@ -714,7 +717,8 @@ class Node(QtGui.QGraphicsItem):
       return False
 
 class AppItem(Node):
-   mPropertyMap = buildPropertyMap(['name', 'label'])
+   mPropertyMap = buildPropertyMap(['name', 'label', 'helpURL', 'tooltip',
+                                    'emblem'])
    def __init__(self, elm=None, graphWidget=None):
       Node.__init__(self, elm, graphWidget)
       self.mTitle = "Application"
