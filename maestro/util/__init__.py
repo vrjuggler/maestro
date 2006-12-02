@@ -18,6 +18,11 @@
 
 # Module file
 
+import errno
+import sys, os
+if not sys.platform.startswith("win"):
+   import pwd
+
 class PseudoFile:
    def __init__(self):
       """Create a file-like object."""
@@ -75,3 +80,56 @@ class PseudoFileErr(PseudoFile):
 
    def fileno(self):
       return 2
+
+def changeToUserName(userName):
+   pw_entry = pwd.getpwnam(userName)
+   changeToUser(pw_entry[2], pw_entry[3])
+
+def changeToUser(uid, gid):
+   # NOTE: os.setgid() must be called first or else we will get an
+   # "operation not permitted" error.
+   os.setgid(gid)
+   os.setuid(uid)
+
+def waitpidRetryOnEINTR(pid, options):
+   while True:
+      try:
+         return os.waitpid(pid, options)
+      except OSError, ex:
+         if ex.errno == errno.EINTR:
+            continue
+         else:
+            raise
+
+def readlineRetryOnEINTR(handle):
+   line = ''
+   done = False
+   while not done:
+      try:
+         line = handle.readline()
+         done = True
+      except IOError, ex:
+         if ex.errno == errno.EINTR:
+            continue
+         else:
+            raise
+
+   return line
+
+def readlinesRetryOnEINTR(handle):
+   lines = []
+   done  = False
+   while not done:
+      try:
+         line = handle.readlines()
+         if line == '':
+            done = True
+         else:
+            lines.append(line)
+      except IOEerror, ex:
+         if ex.errno == errno.EINTR:
+            continue
+         else:
+            raise
+
+   return lines

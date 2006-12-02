@@ -22,7 +22,7 @@ import popen2
 import re
 
 import maestro.core
-import procutil
+import maestro.util
 
 
 class XsetSaverPlugin(maestro.core.ISaverPlugin):
@@ -101,7 +101,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    def setSaverEnabled(self, avatar, enabled):
       pid = os.fork()
       if pid == 0:
-         procutil.changeToUserName(avatar.mCredentials['username'])
+         maestro.util.changeToUserName(avatar.mCredentials['username'])
          if enabled:
             saver_flag = 'on'
             dpms_flag  = '+dpms'
@@ -115,12 +115,12 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
          os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, dpms_flag, env)
          os._exit(0)
 
-      (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
+      (child_pid, status) = maestro.util.waitpidRetryOnEINTR(pid, 0)
 
    def stopSaver(self, avatar):
       pid = os.fork()
       if pid == 0:
-         procutil.changeToUserName(avatar.mCredentials['username'])
+         maestro.util.changeToUserName(avatar.mCredentials['username'])
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
          os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, 's', 'off', env)
@@ -130,4 +130,4 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
          os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, '-dpms', env)
          os._exit(0)
 
-      (child_pid, status) = procutil.waitpidRetryOnEINTR(pid, 0)
+      (child_pid, status) = maestro.util.waitpidRetryOnEINTR(pid, 0)

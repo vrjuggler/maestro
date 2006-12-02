@@ -27,7 +27,7 @@ if not sys.platform.startswith("win"):
 import re
 
 import maestro.core
-import procutil
+import maestro.util
 
 
 class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
@@ -116,11 +116,11 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
       # change the user's desktop background image via GConf.
       pid = os.fork()
       if pid == 0:
-         procutil.changeToUserName(user_name)
+         maestro.util.changeToUserName(user_name)
          os.execl(self.mCmd, self.mCmd, '--type=string', '--set',
                   '/desktop/gnome/background/picture_filename', img_file)
 
-      procutil.waitpidRetryOnEINTR(pid, 0)
+      maestro.util.waitpidRetryOnEINTR(pid, 0)
 
    def getBackgroundImageFile(self, avatar):
       '''
@@ -144,7 +144,7 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
       if pid == 0:
          os.close(child_pipe_rd)
 
-         procutil.changeToUserName(avatar.mCredentials['username'])
+         maestro.util.changeToUserName(avatar.mCredentials['username'])
          child_stdout, child_stdin = \
             popen2.popen2([self.mCmd, '--get',
                            '/desktop/gnome/background/picture_filename'])
@@ -212,6 +212,6 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
 
          assert(len(path) == path_len)
 
-      procutil.waitpidRetryOnEINTR(pid, 0)
+      maestro.util.waitpidRetryOnEINTR(pid, 0)
 
       return path

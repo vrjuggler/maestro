@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import errno
 import os, sys
 import os.path
 if not sys.platform.startswith("win"):
@@ -27,7 +26,7 @@ import signal
 import sys
 
 import maestro.core
-import procutil
+import maestro.util
 
 
 class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
@@ -105,7 +104,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          pid = os.fork()
          if pid == 0:
             user_name = avatar.mCredentials['username']
-            procutil.changeToUserName(user_name)
+            maestro.util.changeToUserName(user_name)
 
             # Start the xscreensaver process up if it is not currently
             # running.
@@ -121,7 +120,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
             # to exit immediately lest things get really screwed up.
             os._exit(0)
 
-         procutil.waitpidRetryOnEINTR(pid, 0)
+         maestro.util.waitpidRetryOnEINTR(pid, 0)
 
       # Disabling XScreenSaver means shutting down the xscreensaver process.
       else:
@@ -165,21 +164,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
       # Read the output from 'ps ...'. This is not done using readlines()
       # because that could fail due to an interrupted system call. Instead,
       # we read lines one at a time and handle EINTR if an when it occurs.
-      lines = []
-      done = False
-      while not done:
-         try:
-            line = child_stdout.readline()
-            if line == '':
-               done = True
-            else:
-               lines.append(line)
-         except IOError, ex:
-            if ex.errno == errno.EINTR:
-               continue
-            else:
-               raise
-
+      lines = maestro.util.readlinesRetryOnEINTR(child_stdout)
       child_stdout.close()
       child_stdin.close()
 
