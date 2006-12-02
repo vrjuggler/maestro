@@ -467,8 +467,6 @@ def RunServer(installSH=True):
       #factory = pb.PBServerFactory(p)
       factory = pboverssl.PBServerFactory(pb_portal)
 
-      p.registerChecker(
-         checkers.InMemoryUsernamePasswordDatabaseDontUse(aronb="aronb"))
       try:
          from maestro.util.pamchecker import PAMChecker
          p.registerChecker(PAMChecker())
