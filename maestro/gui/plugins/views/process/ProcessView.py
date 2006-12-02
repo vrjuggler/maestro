@@ -158,7 +158,10 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
 
    def onReportProcs(self, nodeId, procs):
       """ Callback for when a node is reporting a list of processes """
-      (host_name, alias_list, ipaddr_list) = socket.gethostbyaddr(nodeId)
+      try:
+         (host_name, alias_list, ipaddr_list) = socket.gethostbyaddr(nodeId)
+      except:
+         host_name = nodeId
 
       new_procs = []
       for p in procs:
