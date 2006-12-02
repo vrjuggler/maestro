@@ -121,7 +121,7 @@ def readlinesRetryOnEINTR(handle):
    done  = False
    while not done:
       try:
-         line = handle.readlines()
+         line = handle.readline()
          if line == '':
             done = True
          else:
