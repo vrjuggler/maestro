@@ -16,38 +16,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import errno
 import os
 import os.path
 import popen2
 import pwd
 import re
 
+import maestro.util
 
-def changeToUser(uid, gid):
-   # NOTE: os.setgid() must be called first or else we will get an "operation
-   # not permitted" error.
-   os.setgid(gid)
-   os.setuid(uid)
-
-def changeToUserName(userName):
-   pw_entry = pwd.getpwnam(userName)
-   changeToUser(pw_entry[2], pw_entry[3])
 
 def getUserXauthFile(userName):
    pw_entry = pwd.getpwnam(userName)
    user_home = pw_entry[5]
    return os.path.join(user_home, '.Xauthority')
-
-def waitpidRetryOnEINTR(pid, options):
-   while True:
-      try:
-         return os.waitpid(pid, options)
-      except OSError, ex:
-         if ex.errno == errno.EINTR:
-            continue
-         else:
-            raise
 
 def addAuthority(user, xauthCmd, xauthFile):
    '''
@@ -62,17 +43,7 @@ def addAuthority(user, xauthCmd, xauthFile):
    (temp_stdout, temp_stdin) = popen2.popen2('/bin/hostname')
 
    # Read the output from /bin/hostname. Protect against EINTR just in case.
-   done = False
-   while not done:
-      try:
-         hostname = temp_stdout.readline().strip()
-         done = True
-      except IOError, ex:
-         if ex.errno == errno.EINTR:
-            continue
-         else:
-            raise
-
+   hostname = maestro.util.readlineRetryOnEINTR(temp_stdout).strip()
    temp_stdout.close()
    temp_stdin.close()
 
@@ -85,17 +56,7 @@ def addAuthority(user, xauthCmd, xauthFile):
 
    # Read the output from running the above xauth command. Protect against
    # EINTR just in case.
-   done = False
-   while not done:
-      try:
-         line = child_stdout.readline()
-         done = True
-      except IOError, ex:
-         if ex.errno == errno.EINTR:
-            continue
-         else:
-            raise
-
+   line = maestro.util.readlineRetryOnEINTR(child_stdout)
    child_stdout.close()
    child_stdin.close()
 
@@ -112,26 +73,13 @@ def addAuthority(user, xauthCmd, xauthFile):
    # readlines() because that could fail due to an interrupted system call.
    # Instead, we read lines one at a time and handle EINTR if an when it
    # occurs.
-   lines = []
-   done = False
-   while not done:
-      try:
-         line = child_stdout.readline()
-         if line == '':
-            done = True
-         else:
-            lines.append(line)
-      except IOError, ex:
-         if ex.errno == errno.EINTR:
-            continue
-         else:
-            raise
-
+   lines = maestro.util.readlinesRetryOnEINTR(child_stdout)
    child_stdout.close()
    child_stdin.close()
 
    has_key = False
 
+   # Determine if the user's Xauthority file already has the key.
    for l in lines:
       key_match = display_key_re.match(l)
       user_key = (key_match.group(1), key_match.group(2), key_match.group(3))
@@ -139,16 +87,17 @@ def addAuthority(user, xauthCmd, xauthFile):
          has_key = True
          break
 
+   # If the user's Xauthority file does not have the key, thne we add it.
    if not has_key:
       pid = os.fork()
       if pid == 0:
          # Run the xauth(1) command as the user.
-         changeToUserName(user)
+         maestro.util.changeToUserName(user)
          os.execl(xauthCmd, xauthCmd, '-f', getUserXauthFile(user), 'add',
                   key[0], key[1], key[2])
 
       # Wait on the child to complete.
-      waitpidRetryOnEINTR(pid, 0)
+      maestro.util.waitpidRetryOnEINTR(pid, 0)
 
    return (key[0], has_key)
 
@@ -162,9 +111,9 @@ def removeAuthority(user, xauthCmd, displayName):
    pid = os.fork()
    if pid == 0:
       # Run the xauth(1) command as the named user.
-      changeToUserName(user)
+      maestro.util.changeToUserName(user)
       os.execl(xauthCmd, xauthCmd, '-f', getUserXauthFile(user), 'remove',
                displayName)
 
    # Wait on the child to complete.
-   waitpidRetryOnEINTR(pid, 0)
+   maestro.util.waitpidRetryOnEINTR(pid, 0)
