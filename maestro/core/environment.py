@@ -14,6 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import logging
 import os.path, socket
 pj = os.path.join
 
@@ -34,6 +35,7 @@ class Environment(maestro.util.mixins.Singleton):
          self.mPluginManager = None
          self.settings = None
          self.mCmdOpts = None
+         self.mLogger  = logging.getLogger('environment.Environment')
 
    def initialize(self, settings, opts=None, progressCB=None):
       """ Initialize the environment. """
@@ -52,6 +54,6 @@ class Environment(maestro.util.mixins.Singleton):
       self.mPluginManager.scan(pj(maestro.core.const.PLUGIN_DIR), progressCB)
       #self.pluginManager.scan(self.settings.plugin_paths, progressCB)
       plugins = self.mPluginManager.getPlugins(returnNameDict=True)
-      print "Environment found plugins: "      
+      self.mLogger.info('Environment found plug-ins:')
       for (name,p) in plugins.iteritems():
-         print "  %s : %s"%(name,p)
+         self.mLogger.info('  %s : %s' % (name, p))
