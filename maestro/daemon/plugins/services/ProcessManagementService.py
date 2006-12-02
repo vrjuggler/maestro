@@ -20,6 +20,7 @@ import sys, os, platform
 
 import re
 import maestro.core
+import maestro.util
 
 if sys.platform.startswith('win'):
    from maestro.daemon import wmi
@@ -84,11 +85,28 @@ class ProcessManagementService(maestro.core.IServicePlugin):
          return procs
       else:
          procs = []
-         (stdin, stdout_stderr) = os.popen4("ps -NU root -Nu root -o comm,pid,ppid,user,lstart,args h")
-         for l in stdout_stderr.readlines():
+         sys_name = platform.system()
+         if sys_name == 'Linux':
+            ps_cmd = "ps -NU root -Nu root -o comm,pid,ppid,user,lstart,args h"
+         elif sys_name == 'Darwin' or sys_name == 'FreeBSD':
+            ps_cmd = "ps -aw -o ucomm,pid,ppid,user,lstart,command"
+         else:
+            ps_cmd = 'ps uxwa'
+
+         (stdin, stdout_stderr) = os.popen4(ps_cmd)
+
+         # Read the output from ps(1). This is not done using readlines()
+         # because that could fail due to an interrupted system call. Instead,
+         # we read lines one at a time and handle EINTR if an when it occurs.
+         lines = maestro.util.readlinesRetryOnEINTR(stdout_stderr)
+         stdout_stderr.close()
+         stdin.close()
+
+         for l in lines:
             match_obj = ps_regex.match(l)
             if match_obj is not None:
-               procs.append(match_obj.groups())
+               if match_obj.group(4) != 'root':
+                  procs.append(match_obj.groups())
          return procs
 
 if __name__ == "__main__":
