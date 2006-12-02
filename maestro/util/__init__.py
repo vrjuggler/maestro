@@ -126,7 +126,7 @@ def readlinesRetryOnEINTR(handle):
             done = True
          else:
             lines.append(line)
-      except IOEerror, ex:
+      except IOError, ex:
          if ex.errno == errno.EINTR:
             continue
          else:
