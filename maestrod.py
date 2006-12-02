@@ -348,30 +348,35 @@ class UserPerspective(pb.Avatar):
             env.settings.get('xauthority_file', self.sDefaultXauthFile).strip()
 
          user_name = creds['username']
-         (display_name, has_key) = x11desktop.addAuthority(user_name,
-                                                           xauth_cmd,
-                                                           xauth_file)
-         print 'display_name =', display_name
-         print 'has_key =', has_key
-
-         # Setting these environment variables is vital for being able to
-         # lauch X11 applications correctly.
-         os.environ['DISPLAY'] = display_name
-         os.environ['USER_XAUTHORITY'] = x11desktop.getUserXauthFile(user_name)
-         self.mDisplayName = display_name
 
          # self.mDisplayToRemove is used in logout() to remove the authority
          # for the autenticated user to open windows on the local X11 display.
          # By setting self.mDisplayToRemove to None here when the user already
          # has permission, we ensure that that permission is not removed in
          # logout().
-         if has_key:
-            self.mDisplayToRemove = None
-         # If we had to grant permission to the authenticated user to open
-         # windows on the local X11 display, then we have to remove it when
-         # the user logs out (in logout()).
-         else:
-            self.mDisplayToRemove = display_name
+         self.mDisplayToRemove = None
+
+         try:
+            (display_name, has_key) = x11desktop.addAuthority(user_name,
+                                                              xauth_cmd,
+                                                              xauth_file)
+            print 'display_name =', display_name
+
+            # Setting these environment variables is vital for being able to
+            # lauch X11 applications correctly.
+            os.environ['DISPLAY'] = display_name
+            os.environ['USER_XAUTHORITY'] = \
+               x11desktop.getUserXauthFile(user_name)
+            self.mDisplayName = display_name
+
+            # If we had to grant permission to the authenticated user to open
+            # windows on the local X11 display, then we have to remove it when
+            # the user logs out (in logout()).
+            if not has_key:
+               self.mDisplayToRemove = display_name
+         except Exception, ex:
+            logger.error('Granting acess to X11 server failed:')
+            logger.error(ex)
 
    def getCredentials(self):
       return self.mCredentials
