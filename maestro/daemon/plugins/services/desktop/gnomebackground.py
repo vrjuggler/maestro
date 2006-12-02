@@ -150,7 +150,7 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
                            '/desktop/gnome/background/picture_filename'])
 
          # Read the path returned by the GConf query.
-         path = child_stdout.readline().rstrip('\n')
+         path = maestro.util.readlineRetryOnEINTR(child_stdout).rstrip('\n')
 
          # We are done with these.
          child_stdout.close()
