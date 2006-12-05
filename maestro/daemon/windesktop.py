@@ -29,6 +29,28 @@ def updateACL(handle, acl):
                                        win32con.DACL_SECURITY_INFORMATION,
                                        new_security_desc)
 
+def handleHasSID(handle, sid):
+   '''
+   Determines whether the given SID is known to the ACEs of the given
+   handle.
+   '''
+   security_desc = \
+      win32security.GetUserObjectSecurity(handle,
+                                          win32con.DACL_SECURITY_INFORMATION)
+   acl = security_desc.GetSecurityDescriptorDacl()
+
+   for i in range(acl.GetAceCount()):
+      ace = acl.GetAce(i)
+      if len(ace) == 3:
+         sid_index = 2
+      else:
+         sid_index = 5
+
+      if ace[sid_index] == sid:
+         return True
+
+   return False
+
 def addUserToWindowStation(winsta, userSid):
    '''
    Adds the given PySID representing a user to the given window station's
