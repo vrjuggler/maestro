@@ -14,8 +14,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import socket
 import maestro.core.environment as env
 import stanzastore
+import connection
 
 
 class GuiEnvironment(env.Environment):
@@ -28,6 +30,10 @@ class GuiEnvironment(env.Environment):
 
    def initialize(self, settings, opts = None, progressCB = None):
       env.Environment.initialize(self, settings, opts, progressCB)
+
+      ip_address = socket.gethostbyname(socket.gethostname())
+      self.mConnectionMgr = connection.ConnectionManager(ip_address,
+                                                         self.mEventManager)
 
       # Create a stanza store and scan for files.
       self.mStanzaStore = stanzastore.StanzaStore()

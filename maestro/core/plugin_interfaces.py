@@ -16,6 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+from twisted.spread import pb
+from twisted.spread.flavors import Referenceable
+from twisted.spread.interfaces import IJellyable
+
 # Plugin base classes
 import maestro.util.plugin
 import maestro.util.reloader
@@ -273,4 +277,34 @@ class IOptionEditorPlugin(maestro.util.plugin.Plugin):
 
       @param option The stanza option that we want to edit.
       '''
+      not_implemented()
+
+class IServerAuthenticationPlugin(Referenceable, maestro.util.plugin.Plugin):
+   '''
+   The base interface for server-side authentication plug-ins.
+   '''
+   id = 'Unknown'
+
+   def __init__(self, broker):
+      self.mBroker = broker
+
+   def remote_getID(self):
+      return self.id
+
+   def prepareAvatar(self, avatar):
+      self.mBroker.notifyOnDisconnect(avatar.logout)
+      if not IJellyable.providedBy(avatar):
+         avatar = pb.AsReferenceable(avatar, "perspective")
+      return avatar
+
+class IClientAuthenticationPlugin(maestro.util.plugin.Plugin):
+   '''
+   The base interface for client-side authentication plug-ins.
+   '''
+   id = 'Unknown'
+
+   def __init__(self):
+      pass
+
+   def handleServerAuth(self, authObj, serverID):
       not_implemented()

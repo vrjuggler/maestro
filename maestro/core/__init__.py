@@ -17,9 +17,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from environment import Environment
-from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin, \
-                              ISaverPlugin, IDesktopWallpaperPlugin,    \
-                              IGraphicsSceneLayout, IOptionEditorPlugin
+from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin,  \
+                              ISaverPlugin, IDesktopWallpaperPlugin,     \
+                              IGraphicsSceneLayout, IOptionEditorPlugin, \
+			      IServerAuthenticationPlugin,		 \
+			      IClientAuthenticationPlugin
 #from plugin_holder import ViewPluginsHolder
 
 class _const:

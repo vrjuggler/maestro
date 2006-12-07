@@ -35,37 +35,25 @@ const.MAESTRO_GUI = False
 import maestro
 import maestro.core
 import maestro.core.prefs
-import maestro.core.EventManager
 
 import datetime
-import time
 import socket
 import logging
 import logging.handlers
 
 from twisted.spread import pb
+import twisted.spread.flavors
 import maestro.util
 from maestro.util import pboverssl
-from twisted.cred import checkers, credentials, portal, error
 from zope.interface import implements
 from twisted.internet import ssl
-from twisted.python import failure
 
 from elementtree.ElementTree import parse
 
 if os.name == 'nt':
-   import win32api, win32event, win32serviceutil, win32service, win32security
-   import win32net, win32profile
-   import pywintypes
+   import win32api, win32serviceutil, win32service, win32security
    import ntsecuritycon, win32con
-   import maestro.daemon.windesktop as windesktop
-   import maestro.daemon.winshares as winshares
-   import maestro.util.registry as registry
 
-# XXX: We should not assume that a non-Windows platform is running the
-# X Window System.
-else:
-   import maestro.daemon.x11desktop as x11desktop
 
 if os.name == 'nt':
    def AdjustPrivilege(priv, enable):
@@ -109,7 +97,6 @@ def writeErr(text):
 class MaestroServer:
    def __init__(self):
       self.mLogger = logging.getLogger('maestrod.MaestroServer')
-      ip_address = socket.gethostbyname(socket.gethostname())
       self.mServices = {}
 
       server_settings = ServerSettings()
@@ -126,7 +113,8 @@ class MaestroServer:
                                  (settings_file, ex.strerror))
 
       env = maestro.core.Environment()
-      env.initialize(server_settings)
+      env.initialize(server_settings,
+                     progressCB = lambda percent, msg: self.mLogger.info(msg))
 
       self.mLogger.debug(server_settings)
 
@@ -237,213 +225,56 @@ if os.name == 'nt':
                                servicemanager.PYS_SERVICE_STARTED,
                                (self._svc_display_name_, 'error' + str(ex)))
 
-class UserPerspective(pb.Avatar):
-   def __init__(self, avatarId):
-      """ Constructs a UserPerspective used to access the event manager.
-          @param eventMgr: A reference to the event manager to use.
-          @param avatarId: Handle to the user's authentication.
-          @note avatarId is a username on UNIX and a handle on win32.
-      """
-      self.mAvatarId = avatarId
-      self.mCredentials = {}
-      self.mUserHandle = None
-      self.mUserSID    = None
-      self.mWinsta     = None
-      self.mDesktop    = None
+class AuthServer(twisted.spread.flavors.Referenceable):
+   sDefaultAuthPlugins = 'sspi_negotiate,sspi_ntlm,username_password'
 
-      self.mLogger = logging.getLogger('UserPerspective')
-
-   def perspective_registerCallback(self, nodeId, obj):
+   def __init__(self, broker):
       env = maestro.core.Environment()
-      env.mEventManager.remote_registerCallback(nodeId, obj)
-
-   def perspective_emit(self, nodeId, sigName, args, **kwArgs):
-      env = maestro.core.Environment()
-      env.mEventManager.remote_emit(nodeId, sigName, (self,) + args, **kwArgs)
-
-   sDefaultXauthCmd = '/usr/X11R6/bin/xauth'
-   sDefaultXauthFile = '/var/gdm/:0.Xauth'
-
-   def setCredentials(self, creds):
-      self.mCredentials = creds
-
-      if sys.platform.startswith("win"):
-         # Save the current window station for later.
-         cur_winsta = win32service.GetProcessWindowStation()
-
-         # Open window station winsta0 and make it the window station
-         # for this process.
-         winsta_flags = win32con.READ_CONTROL | win32con.WRITE_DAC
-         new_winsta = win32service.OpenWindowStation("winsta0", False,
-                                                     winsta_flags)
-         new_winsta.SetProcessWindowStation()
-
-         # Get a handle to the default desktop so that we can change
-         # its access control list.
-         desktop_flags = win32con.READ_CONTROL         | \
-                         win32con.WRITE_DAC            | \
-                         win32con.DESKTOP_WRITEOBJECTS | \
-                         win32con.DESKTOP_READOBJECTS
-         desktop = win32service.OpenDesktop("default", 0, False,
-                                            desktop_flags)
-
-         # Get the handle to the user.
-         user = win32security.LogonUser(creds['username'], creds['domain'],
-                                        creds['password'],
-                                        win32con.LOGON32_LOGON_INTERACTIVE,
-                                        win32con.LOGON32_PROVIDER_DEFAULT)
-         self.mUserHandle = user
-
-         # Get name of domain controller.
+      self.mLogger  = logging.getLogger('maestrod.AuthServer')
+      self.mBroker  = broker
+      self.mPlugins = {}
+      self.mAuthPluginTypes = \
+         env.mPluginManager.getPlugins(plugInType=maestro.core.IServerAuthenticationPlugin,
+                                       returnNameDict=True)
+      for name, vtype in self.mAuthPluginTypes.iteritems():
+         # Try to load the authentication plug-in.
+         new_auth = None
          try:
-            dc_name = win32net.NetGetDCName()
-         except:
-            dc_name = None
+            # Instantiate the authentication plug-in type to ensure that it
+            # is usable.
+            new_auth = vtype(broker)
 
-         user_info_4=win32net.NetUserGetInfo(dc_name, creds['username'], 4)
-         profilepath=user_info_4['profile']
-         # LoadUserProfile apparently doesn't like an empty string
-         if not profilepath:
-            profilepath=None
-
-         try:
-            # Leave Flags in since 2.3 still chokes on some types of optional keyword args
-            self.mUserProfile = win32profile.LoadUserProfile(self.mUserHandle,
-               {'UserName':creds['username'], 'Flags':0, 'ProfilePath':profilepath})
-            self.mLogger.info("Loaded profile %s" % profilepath)
-         except pywintypes.error, error:
-            self.mLogger.error("Error loading profile: %s"%error)
-
-         # Setup correct windows shares.
-         winshares.updateShares(self)
-
-         # Get the PySID object for user's logon ID.
-         tic = win32security.GetTokenInformation(user,
-                                                 ntsecuritycon.TokenGroups)
-         user_sid = None
-         for sid, flags in tic:
-            if flags & win32con.SE_GROUP_LOGON_ID:
-               user_sid = sid
-               break
-
-         if user_sid is None:
-            raise Exception('Failed to determine logon ID')
-
-         windesktop.addUserToWindowStation(new_winsta, user_sid)
-         windesktop.addUserToDesktop(desktop, user_sid)
-
-         cur_winsta.SetProcessWindowStation()
-
-         self.mUserSID = user_sid
-         self.mWinsta  = new_winsta
-         self.mDesktop = desktop
-      # XXX: We should not assume that a non-Windows platform is running the
-      # X Window System.
-      else:
-         env = maestro.core.Environment()
-
-         xauth_cmd = \
-            env.settings.get('xauth_cmd', self.sDefaultXauthCmd).strip()
-         xauth_file = \
-            env.settings.get('xauthority_file', self.sDefaultXauthFile).strip()
-
-         user_name = creds['username']
-
-         # self.mDisplayToRemove is used in logout() to remove the authority
-         # for the autenticated user to open windows on the local X11 display.
-         # By setting self.mDisplayToRemove to None here when the user already
-         # has permission, we ensure that that permission is not removed in
-         # logout().
-         self.mDisplayToRemove = None
-
-         try:
-            (display_name, has_key) = x11desktop.addAuthority(user_name,
-                                                              xauth_cmd,
-                                                              xauth_file)
-            print 'display_name =', display_name
-
-            # Setting these environment variables is vital for being able to
-            # lauch X11 applications correctly.
-            os.environ['DISPLAY'] = display_name
-            os.environ['USER_XAUTHORITY'] = \
-               x11desktop.getUserXauthFile(user_name)
-            self.mDisplayName = display_name
-
-            # If we had to grant permission to the authenticated user to open
-            # windows on the local X11 display, then we have to remove it when
-            # the user logs out (in logout()).
-            if not has_key:
-               self.mDisplayToRemove = display_name
+            # Keep track of authentication plug-in instances in order to be
+            # able to remove them later.
+            self.mPlugins[new_auth.id] = new_auth
          except Exception, ex:
-            logger.error('Granting acess to X11 server failed:')
-            logger.error(ex)
+            if new_auth is not None:
+               new_auth = None
+            self.mLogger.error("Failed to load authentication plug-in '%s'" % \
+                                  name)
+            self.mLogger.error("   %s" % str(ex))
+            traceback.print_exc()
 
-   def getCredentials(self):
-      return self.mCredentials
+      # Based on the configuration, create a list that specifies (by name) the
+      # order of authentication plug-ins to use when a client connects.
+      auth_plugins = \
+         env.settings.get('authentication_plugins', self.sDefaultAuthPlugins).strip()
+      auth_plugin_list = [p.strip() for p in auth_plugins.split(',') if self.mPlugins.has_key(p.strip())]
+      self.mActivePlugins = auth_plugin_list
+      self.mLogger.debug('Active plug-ins: %s' % str(self.mActivePlugins))
 
-   def logout(self, nodeId):
-      if sys.platform.startswith("win"):
-         windesktop.removeUserSID(self.mWinsta, self.mUserSID)
-         windesktop.removeUserSID(self.mDesktop, self.mUserSID)
+   def remote_getHostAddress(self):
+      return self.mBroker.transport.getHost().host
 
-         self.mWinsta.CloseWindowStation()
-         self.mDesktop.CloseDesktop()
+   def remote_getCapabilities(self):
+      return self.mActivePlugins
 
-         # Unload the user's profile.
-         try:
-            # Leave Flags in since 2.3 still chokes on some types of optional keyword args
-            win32profile.UnloadUserProfile(self.mUserHandle, self.mUserProfile)
-            self.mLogger.info("Unloaded profile.")
-         except pywintypes.error, error:
-            self.mLogger.error("Error unloading profile: %s"%error)
+   def remote_getAuthenticationModule(self, id):
+      return (self.mPlugins[id], self.mBroker.transport.getHost().host)
 
-         self.mUserSID = None
-         self.mUserHandle.Close()
-      # XXX: We should not assume that a non-Windows platform is running the
-      # X Window System.
-      else:
-         env = maestro.core.Environment()
-
-         # If a named display is set to be removed, then that means that we
-         # granted permission to the authenticated user to open windows on the
-         # local X11 display. Hence, we now need to remove that permission
-         # since the user is logging out.
-         if self.mDisplayToRemove is not None:
-            xauth_cmd = \
-               env.settings.get('xauth_cmd', self.sDefaultXauthCmd).strip()
-
-            x11desktop.removeAuthority(self.mCredentials['username'],
-                                       xauth_cmd, self.mDisplayToRemove)
-            self.mDisplayToRemove = None
-
-         self.mDisplayName = None
-
-         # We are done with these environment variables now that the user is
-         # logged out.
-         if os.environ.has_key('DISPLAY'):
-            del os.environ['DISPLAY']
-         if os.environ.has_key('USER_XAUTHORITY'):
-            del os.environ['USER_XAUTHORITY']
-
-      logger = logging.getLogger('maestrod.UserPerspective')
-      logger.info("Logging out client: " + str(nodeId))
-      env = maestro.core.Environment()
-      env.mEventManager.unregisterProxy(nodeId)
-
-class TestRealm(object):
-   implements(portal.IRealm)
-
-   def __init__(self):
-      pass
-
-   def requestAvatar(self, avatarId, mind, *interfaces):
-      """ mind is nodeId
-      """
-      if not pb.IPerspective in interfaces:
-         raise NotImplementedError, "No supported avatar interface."
-      else:
-         avatar = UserPerspective(avatarId)
-         return pb.IPerspective, avatar, lambda nodeId=mind: avatar.logout(nodeId)
+class _AuthServerWrapper(pb.Root):
+   def rootObject(self, broker):
+      return AuthServer(broker)
 
 def RunServer(installSH=True):
    logger = logging.getLogger('maestrod.RunServer')
@@ -458,8 +289,8 @@ def RunServer(installSH=True):
       def logCB(percent, message):
          logger.info(message)
 
-      env = maestro.core.Environment()
-      env.initialize(None, progressCB=logCB)
+#      env = maestro.core.Environment()
+#      env.initialize(None, progressCB=logCB)
 
       cluster_server = MaestroServer()
       cluster_server.loadServices()
@@ -467,21 +298,8 @@ def RunServer(installSH=True):
       from twisted.internet import task
 
       #reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
-      p = portal.Portal(TestRealm())
-      pb_portal = pboverssl.PortalRoot(p)
-      #factory = pb.PBServerFactory(p)
-      factory = pboverssl.PBServerFactory(pb_portal)
+      factory = pboverssl.PBServerFactory(_AuthServerWrapper())
 
-      try:
-         from maestro.util.pamchecker import PAMChecker
-         p.registerChecker(PAMChecker())
-      except:
-         pass
-      try:
-         from maestro.util.winchecker import WindowsChecker
-         p.registerChecker(WindowsChecker())
-      except:
-         pass
       #reactor.listenTCP(8789, factory)
       pk_path = os.path.join(const.EXEC_DIR, 'server.pem')
       cert_path = os.path.join(const.EXEC_DIR, 'server.pem')
