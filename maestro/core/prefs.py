@@ -48,7 +48,8 @@ class Preferences:
          if prefsFile is None:
             prefsFile = self.mFile
 
-         Preferences.writeTree(prefsFile, self.mRoot)
+#         print ET.tostring(self.mRoot.getroot())
+         Preferences.writeTree(prefsFile, self.mRoot.getroot())
 
    def writeTree(prefsFile, root):
       cfg_text = ET.tostring(root)
@@ -75,8 +76,22 @@ class Preferences:
          raise KeyError, '%s is not a child of the root' % item
 
    def __setitem__(self, key, value):
-      # TODO: Implement me!
-      pass
+      if not self.has_key(key):
+         path     = key.split('/')
+         cur_node = self.mRoot.getroot()
+         for i in xrange(len(path)):
+            parent   = cur_node
+            cur_node = parent.find(path[i])
+            if cur_node is None:
+               for j in xrange(i, len(path)):
+                  new_elt = ET.Element(path[j])
+                  parent.append(new_elt)
+                  parent = new_elt
+               break
+
+      elt = self.mRoot.find(key)
+      assert elt is not None
+      elt.text = str(value)
 
    def __iter__(self):
       '''
