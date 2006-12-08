@@ -590,6 +590,18 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def onExit(self):
       env = maestro.gui.Environment()
       env.mEventManager.closeAllConnections()
+
+      rect = self.geometry()
+
+      try:
+         env.settings['gui_layout/width']  = rect.width()
+         env.settings['gui_layout/height'] = rect.height()
+         env.settings['gui_layout/x']      = rect.x()
+         env.settings['gui_layout/y']      = rect.y()
+         env.settings.save()
+      except:
+         traceback.print_exc()
+
       self.close()
       QtGui.QApplication.exit(0)
 
