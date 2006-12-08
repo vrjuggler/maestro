@@ -203,22 +203,27 @@ class X11Avatar(UserPerspective):
       xauth_file = \
          env.settings.get('xauthority_file', self.sDefaultXauthFile).strip()
 
-      (display_name, has_key) = x11desktop.addAuthority(self.mUserName,
-                                                        xauth_cmd, xauth_file)
-#      print 'display_name =', display_name
-#      print 'has_key =', has_key
+      try:
+         (display_name, has_key) = x11desktop.addAuthority(self.mUserName,
+                                                           xauth_cmd,
+                                                           xauth_file)
+#         print 'display_name =', display_name
+#         print 'has_key =', has_key
 
-      # Setting these environment variables is vital for being able to launch
-      # X11 applications correctly.
-      os.environ['DISPLAY'] = display_name
-      os.environ['USER_XAUTHORITY'] = x11desktop.getUserXauthFile(userName)
-      self.mDisplayName = display_name
+         # Setting these environment variables is vital for being able to
+         # launch X11 applications correctly.
+         os.environ['DISPLAY'] = display_name
+         os.environ['USER_XAUTHORITY'] = x11desktop.getUserXauthFile(userName)
+         self.mDisplayName = display_name
 
-      # If we had to grant permission to the authenticated user to open
-      # windows on the local X11 display, then we have to remove it when the
-      # user logs out (in logout()).
-      if not has_key:
-         self.mDisplayToRemove = display_name
+         # If we had to grant permission to the authenticated user to open
+         # windows on the local X11 display, then we have to remove it when
+         # the user logs out (in logout()).
+         if not has_key:
+            self.mDisplayToRemove = display_name
+      except Exception, ex:
+         self.mLogger.warn('Failed to extend Xauthority permissions:')
+         self.mLogger.warn(str(ex))
 
    def logout(self):
       env = maestro.core.Environment()
