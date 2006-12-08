@@ -64,8 +64,11 @@ class GuiPrefs:
          return self.mSitePrefs[item]
 
    def __setitem__(self, key, value):
-      # TODO: Implement me!
-      pass
+      '''
+      Sets the key in the user preferences to the given value. To set the
+      value in the site-wide preferences, use the site() method.
+      '''
+      self.mUserPrefs[key] = value
 
    def __iter__(self):
       return self.mUserPrefs.__iter__() + self.mSitePrefs.__iter__()
@@ -83,6 +86,18 @@ class GuiPrefs:
 
    def keys(self):
       return self.mUserPrefs.keys() + self.mSitePrefs.keys()
+
+   def user(self):
+      '''
+      Returns the preferences object for the current user.
+      '''
+      return self.mUserPrefs
+
+   def site(self):
+      '''
+      Returns the site-wide preferences object.
+      '''
+      return self.mSitePrefs
 
    def getUserMode(self):
       '''
