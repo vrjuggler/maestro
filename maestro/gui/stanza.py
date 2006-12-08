@@ -114,11 +114,11 @@ class TreeItem:
 def classMatch(nodeClassList, optionClassString):
    """
    Determine if a value should be used for the given node.
-   Values are only used for a given node it that node contains
+   Values are only used for a given node if that node contains
    all classes listed in the value.
    """
    # Eliminate all empty string classes
-   option_classes = [c.lstrip().rstrip() for c in optionClassString.split(",") if c != ""]
+   option_classes = [c.strip() for c in optionClassString.split(",") if c != ""]
    #print "classMatch: node %s option %s" % (nodeClassList, value_classes)
    for c in option_classes:
       if nodeClassList.count(c) == 0:
