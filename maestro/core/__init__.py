@@ -45,16 +45,17 @@ const.AIX = 7
 const.SOLARIS = 8
 const.FREEBSD = 9
 
-const.OsNameMap = \
-   {const.ERROR  : 'Error',
-    const.LINUX  : 'Linux',
-    const.WIN    : 'Windows',
-    const.WINXP  : 'Windows XP',
-    const.MACOS  : 'MacOS',
-    const.MACOSX : 'Mac OS X',
-    const.HPUX   : 'HP-UX',
-    const.AIX    : 'AIX',
-    const.SOLARIS : 'Solaris'}
+const.OsNameMap = {
+   const.ERROR   : ['Error'],
+   const.LINUX   : ['Linux', 'UNIX'],
+   const.WIN     : ['Windows'],
+   const.WINXP   : ['Windows XP'],
+   const.MACOS   : ['MacOS', 'UNIX'],
+   const.MACOSX  : ['Mac OS X', 'UNIX'],
+   const.HPUX    : ['HP-UX', 'UNIX'],
+   const.AIX     : ['AIX', 'UNIX'],
+   const.SOLARIS : ['Solaris', 'UNIX']
+}
 
 # GUI user levels.
 const.NOVICE   = 100

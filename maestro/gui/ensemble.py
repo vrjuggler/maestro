@@ -398,11 +398,12 @@ class ClusterNode(QtCore.QObject):
       self.emit(QtCore.SIGNAL("nodeChanged"), self)
 
    def getPlatformName(self):
+      return const.OsNameMap[self.mPlatform][0]
+
+   def getPlatformNames(self):
       return const.OsNameMap[self.mPlatform]
 
    def getClassList(self):
       class_list = [c.strip() for c in self.getClass().split(",") if c != ""]
-      platform = self.getPlatformName()
-      if platform > 0:
-         class_list.insert(0, platform)
-      return class_list
+      platform_names = self.getPlatformNames()
+      return platform_names + class_list
