@@ -32,7 +32,6 @@ class LoginHandler(QtCore.QObject):
       self.mFailCallback    = failCallback
 
       # Create a log in dialog.
-      self.mLoginDlg = None
       self.mLoginDlg = maestro.gui.LoginDialog.LoginDialog()
       self.mLoginDlg.connect(self.mLoginDlg, QtCore.SIGNAL("accepted()"),
                              self._loginAccepted)
