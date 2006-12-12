@@ -4,7 +4,7 @@
 
 # Spec file for Maestro.
 %define name    maestro
-%define version 0.3.2
+%define version 0.3.3
 %define release 1
 
 # Change to 0 to disable building documentation.
@@ -46,8 +46,7 @@ Group: Applications/System
 BuildArch: noarch
 Requires: maestro-base = %{version}
 Requires: qt4 >= 4.2.0
-Requires: sip >= 4.5.1
-Requires: PyQt4 >= 4.1.1
+Requires: PyQt4 >= 4.0.20061029
 
 %description gui
 Maestro GUI client.
@@ -269,8 +268,8 @@ fi
 %endif
 
 %changelog
-* Sun Dec 10 2006 Patrick Hartling
-- Update minimum requirements for SIP and PyQt
+* Tue Dec 12 2006 Patrick Hartling
+- Update to version 0.3.3
 
 * Tue Nov 28 2006 Patrick Hartling
 - Update to version 0.3.2

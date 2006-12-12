@@ -113,7 +113,7 @@ class LaunchService(maestro.core.IServicePlugin):
          # environment.
          # TODO: What about Windows?
          if not sys.platform.startswith('win'):
-            user_name = avatar.mUserName
+            user_name = avatar.mCredentials['username']
 
             # Do not overwrite settings that were provided as part of the
             # command execution request.

@@ -2,7 +2,7 @@
 
 # HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Maestro"
-!define PRODUCT_VERSION "0.3.2"
+!define PRODUCT_VERSION "0.3.3"
 !define FILE_VERSION "${PRODUCT_VERSION}.0"
 !define PRODUCT_PUBLISHER "Infiscape Corporation"
 !define PRODUCT_WEB_SITE "http://realityforge.vrsource.org/trac/maestro/"

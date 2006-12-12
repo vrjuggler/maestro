@@ -15,7 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import logging
-import os.path
+import os.path, socket
 pj = os.path.join
 
 import maestro.util.plugin
@@ -46,7 +46,8 @@ class Environment(maestro.util.mixins.Singleton):
       # Create an event dispatcher that will:
       #   - Connect to remote event manager objects.
       #   - Emit events to remote event manager objects.
-      self.mEventManager = EventManager.EventManager()
+      ip_address = socket.gethostbyname(socket.gethostname())
+      self.mEventManager = EventManager.EventManager(ip_address)
 
       # -- Plugin manager -- #
       self.mPluginManager = maestro.util.plugin.PluginManager()
