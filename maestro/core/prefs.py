@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import re
 import xml.dom.minidom
 import elementtree.ElementTree as ET
 
@@ -48,11 +49,18 @@ class Preferences:
          if prefsFile is None:
             prefsFile = self.mFile
 
-         Preferences.writeTree(prefsFile, self.mRoot)
+#         print ET.tostring(self.mRoot.getroot())
+         Preferences.writeTree(prefsFile, self.mRoot.getroot())
+
+   sLeadSpacesRe  = re.compile('>\s+')
+   sTrailSpacesRe = re.compile('\s+<')
 
    def writeTree(prefsFile, root):
       cfg_text = ET.tostring(root)
+      cfg_text = Preferences.sLeadSpacesRe.sub('>', cfg_text)
+      cfg_text = Preferences.sTrailSpacesRe.sub('<', cfg_text)
       dom = xml.dom.minidom.parseString(cfg_text)
+      dom.normalize()
       output_file = file(prefsFile, 'w')
       output_file.write(dom.toprettyxml(indent = '   ', newl = '\n'))
       output_file.close()
@@ -75,8 +83,22 @@ class Preferences:
          raise KeyError, '%s is not a child of the root' % item
 
    def __setitem__(self, key, value):
-      # TODO: Implement me!
-      pass
+      if not self.has_key(key):
+         path     = key.split('/')
+         cur_node = self.mRoot.getroot()
+         for i in xrange(len(path)):
+            parent   = cur_node
+            cur_node = parent.find(path[i])
+            if cur_node is None:
+               for j in xrange(i, len(path)):
+                  new_elt = ET.Element(path[j])
+                  parent.append(new_elt)
+                  parent = new_elt
+               break
+
+      elt = self.mRoot.find(key)
+      assert elt is not None
+      elt.text = str(value)
 
    def __iter__(self):
       '''
