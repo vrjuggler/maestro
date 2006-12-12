@@ -25,7 +25,8 @@
 
 import sys, os, platform, traceback
 
-if not sys.platform.startswith("win"):
+# Windows and Mac OS X do not have the dl module.
+if not sys.platform.startswith("win") and not platform.system() == 'Darwin':
    import dl
 
    flags = sys.getdlopenflags()
