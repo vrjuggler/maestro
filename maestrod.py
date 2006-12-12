@@ -375,8 +375,8 @@ class UserPerspective(pb.Avatar):
             if not has_key:
                self.mDisplayToRemove = display_name
          except Exception, ex:
-            logger.error('Granting acess to X11 server failed:')
-            logger.error(ex)
+            self.mLogger.error('Granting acess to X11 server failed:')
+            self.mLogger.error(ex)
 
    def getCredentials(self):
       return self.mCredentials
