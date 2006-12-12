@@ -1073,6 +1073,7 @@ class ProcessOpen(Process):
         self._cwd = cwd
         self._env = env
         self._mode = mode
+        self._avatarId = avatar.mAvatarId
         self._avatar = avatar
         if self._mode not in ('t', 'b'):
             raise ProcessError("'mode' must be 't' or 'b'.")
@@ -1134,7 +1135,7 @@ class ProcessOpen(Process):
         pid = os.fork()
         if pid == 0: # child
             # Drop root privileges entirely and run as the authenticated user.
-            pw_entry = pwd.getpwnam(self._avatar.mUserName)
+            pw_entry = pwd.getpwnam(self._avatar.getCredentials()['username'])
             # NOTE: os.setgid() must be called first or else we will get an
             # "operation not permitted" error.
             os.setgid(pw_entry[3])
@@ -1497,6 +1498,7 @@ class ProcessProxy(Process):
             self.stderr = stderr
         self._closed = 0
 
+        self._avatarId = avatar.mAvatarId
         self._avatar = avatar
 
         if sys.platform.startswith("win"):

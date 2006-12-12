@@ -113,7 +113,7 @@ class LaunchService(maestro.core.IServicePlugin):
          # environment.
          # TODO: What about Windows?
          if not sys.platform.startswith('win'):
-            user_name = avatar.mUserName
+            user_name = avatar.mCredentials['username']
 
             # Do not overwrite settings that were provided as part of the
             # command execution request.
@@ -143,12 +143,11 @@ class LaunchService(maestro.core.IServicePlugin):
          if sys.platform.startswith("win"):
             # XXX: For some reason SYSTEMROOT is not getting into user env.
             envMap["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+         # XXX: We should not assume that a non-Windows platform is running
+         # the X Window System.
          else:
-            # XXX: This could be better.
-            if user_env.has_key('DISPLAY'):
-               envMap['DISPLAY'] = user_env['DISPLAY']
-            if user_env.has_key('USER_XAUTHORITY'):
-               envMap['XAUTHORITY'] = user_env['USER_XAUTHORITY']
+            envMap['DISPLAY']    = user_env['DISPLAY']
+            envMap['XAUTHORITY'] = user_env['USER_XAUTHORITY']
 
          # Expand all environment variables.
          # XXX: Do we really need to do this in all cases? The operating system

@@ -59,6 +59,7 @@ const.MAESTRO_GUI = True
 import maestro.gui as gui
 import maestro.gui.ensemble as ensemble
 import maestro.gui.Maestro
+import maestro.gui.LoginDialog
 import maestro.gui.guiprefs
 
 import maestro.core.EventManager
@@ -288,8 +289,22 @@ def main():
       env = maestro.gui.Environment()
       env.initialize(gui_settings, opts, splashProgressCB)
 
+      # Create a log in dialog.
+      ld = gui.LoginDialog.LoginDialog()
+
       # Close the splash screen.
+      # NOTE: We wait until after the LoginDialog has been constructed
+      #       because on Windows the LoginDialog can take a while to
+      #       query the current username ans domain.
       splash.finish(None)
+
+      # If the user canceld the login dialog, exit the application.
+      if QtGui.QDialog.Rejected == ld.exec_():
+         sys.exit(-1)
+
+      # Take the username/password and give them to the EventManager
+      # so that it can connect to the various nodes.
+      env.mEventManager.setCredentials(ld.getLoginInfo())
 
       # Create and display GUI
       m = gui.Maestro.Maestro()
@@ -314,13 +329,8 @@ def main():
       if element_tree is None:
          m.onCreateNewEnsemble()
 
-      gui_width  = int(gui_settings.get('gui_layout/width', 785))
-      gui_height = int(gui_settings.get('gui_layout/height', 745))
-      gui_pos_x  = int(gui_settings.get('gui_layout/x', 20))
-      gui_pos_y  = int(gui_settings.get('gui_layout/y', 55))
-
       m.show()
-      m.setGeometry(gui_pos_x, gui_pos_y, gui_width, gui_height)
+      m.resize(800, 850)
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()

@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <stanza>
    <application helpUrl="" label="Directory Listing" name="DirListing" tooltip="List files in a directory." emblem="stanzas/cmd.png">
-      <command class="UNIX" name="unix_cmd">
+      <command class="Linux" name="linux_cmd">
          ls
       </command>
       <command class="Windows XP" name="windows_cmd">
          C:\WINDOWS\system32\cmd.exe
       </command>
-      <arg class="UNIX" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
+      <arg class="Linux" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
          ${HOME}
       </arg>
       <arg class="Windows XP" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">

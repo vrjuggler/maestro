@@ -17,11 +17,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from environment import Environment
-from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin,  \
-                              ISaverPlugin, IDesktopWallpaperPlugin,     \
-                              IGraphicsSceneLayout, IOptionEditorPlugin, \
-			      IServerAuthenticationPlugin,		 \
-			      IClientAuthenticationPlugin
+from plugin_interfaces import IViewPlugin, IServicePlugin, IBootPlugin, \
+                              ISaverPlugin, IDesktopWallpaperPlugin,    \
+                              IGraphicsSceneLayout, IOptionEditorPlugin
 #from plugin_holder import ViewPluginsHolder
 
 class _const:
@@ -45,17 +43,16 @@ const.AIX = 7
 const.SOLARIS = 8
 const.FREEBSD = 9
 
-const.OsNameMap = {
-   const.ERROR   : ['Error'],
-   const.LINUX   : ['Linux', 'UNIX'],
-   const.WIN     : ['Windows'],
-   const.WINXP   : ['Windows XP'],
-   const.MACOS   : ['MacOS', 'UNIX'],
-   const.MACOSX  : ['Mac OS X', 'UNIX'],
-   const.HPUX    : ['HP-UX', 'UNIX'],
-   const.AIX     : ['AIX', 'UNIX'],
-   const.SOLARIS : ['Solaris', 'UNIX']
-}
+const.OsNameMap = \
+   {const.ERROR  : 'Error',
+    const.LINUX  : 'Linux',
+    const.WIN    : 'Windows',
+    const.WINXP  : 'Windows XP',
+    const.MACOS  : 'MacOS',
+    const.MACOSX : 'Mac OS X',
+    const.HPUX   : 'HP-UX',
+    const.AIX    : 'AIX',
+    const.SOLARIS : 'Solaris'}
 
 # GUI user levels.
 const.NOVICE   = 100

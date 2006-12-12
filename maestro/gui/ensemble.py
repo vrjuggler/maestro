@@ -183,10 +183,9 @@ class Ensemble(QtCore.QObject):
                # Connection is now in progress. Do not reattempt again until
                # this becomes false.
                self.mConnectInProgress[ip_address] = True
-               deferred = env.mConnectionMgr.connectToNode(ip_address)
-               if deferred is not None:
-                  deferred.addCallback(self.onConnection, ip_address)
-                  deferred.addErrback(self.onConnectError, ip_address)
+               deferred = env.mEventManager.connectToNode(ip_address)
+               deferred.addCallback(self.onConnection, ip_address)
+               deferred.addErrback(self.onConnectError, ip_address)
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
 
@@ -331,7 +330,7 @@ class Ensemble(QtCore.QObject):
          # connectionLost() signals to be fired since the node will already
          # be removed from self.mNodes
          if node.getId() is not None:
-            env.mConnectionMgr.disconnectFromNode(node.getId())
+            env.mEventManager.disconnectFromNode(node.getId())
  
 class ClusterNode(QtCore.QObject):
    """ Represents a node in the active cluster configuration. Most of this
@@ -375,7 +374,7 @@ class ClusterNode(QtCore.QObject):
    def setHostname(self, newHostname):
       env = maestro.gui.Environment()
       if self.mIpAddress is not None and env.mEventManager.isConnected(self.mIpAddress):
-         env.mConnectionMgr.disconnectFromNode(self.mIpAddress)
+         env.mEventManager.disconnectFromNode(self.mIpAddress)
 
       self.mElement.set('hostname', newHostname)
       self.mIpAddress = None
@@ -383,7 +382,7 @@ class ClusterNode(QtCore.QObject):
       self.lookupIpAddress()
 
       if self.mIpAddress is not None:
-         env.mConnectionMgr.connectToNode(self.mIpAddress)
+         env.mEventManager.connectToNode(self.mIpAddress)
 
       self.emit(QtCore.SIGNAL("nodeChanged"), self)
 
@@ -398,12 +397,11 @@ class ClusterNode(QtCore.QObject):
       self.emit(QtCore.SIGNAL("nodeChanged"), self)
 
    def getPlatformName(self):
-      return const.OsNameMap[self.mPlatform][0]
-
-   def getPlatformNames(self):
       return const.OsNameMap[self.mPlatform]
 
    def getClassList(self):
       class_list = [c.strip() for c in self.getClass().split(",") if c != ""]
-      platform_names = self.getPlatformNames()
-      return platform_names + class_list
+      platform = self.getPlatformName()
+      if platform > 0:
+         class_list.insert(0, platform)
+      return class_list

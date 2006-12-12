@@ -20,7 +20,7 @@ class StanzaStoreTest(unittest.TestCase):
       expanded = self.mStanzaStore.expand(app_elms[0])
       test_app = stanza.Application(expanded)
 
-      os_class = maestro.core.const.OsNameMap[maestro.core.const.LINUX][0]
+      os_class = maestro.core.const.OsNameMap[maestro.core.const.LINUX]
       option_visitor = stanza.OptionVisitor(os_class)
       stanza.traverse(test_app, option_visitor)
       print option_visitor.mArgs

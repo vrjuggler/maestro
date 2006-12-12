@@ -51,7 +51,6 @@ const.mOsIcons[const.ERROR] = QtGui.QIcon(":/Maestro/images/error2.png")
 const.mOsIcons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
 const.mOsIcons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
 const.mOsIcons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
-const.mOsIcons[const.MACOSX] = QtGui.QIcon(":/Maestro/images/MacOSX.png")
 
 class OutputTabWidget(QtGui.QTabWidget):
    def __init__(self, parent):
@@ -591,18 +590,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def onExit(self):
       env = maestro.gui.Environment()
       env.mEventManager.closeAllConnections()
-
-      rect = self.geometry()
-
-      try:
-         env.settings['gui_layout/width']  = rect.width()
-         env.settings['gui_layout/height'] = rect.height()
-         env.settings['gui_layout/x']      = rect.x()
-         env.settings['gui_layout/y']      = rect.y()
-         env.settings.save()
-      except:
-         traceback.print_exc()
-
       self.close()
       QtGui.QApplication.exit(0)
 

@@ -30,10 +30,11 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
    """ Handles sending messages to remote objects.
    """
    LOCAL = "<LOCAL>"
-   def __init__(self):
+   def __init__(self, ipAddress):
       """ Initialize the event dispatcher. """
       EventManagerBase.EventManagerBase.__init__(self)
       self.mProxies = {}
+      self.mIpAddress = ipAddress
       self.mLogger = logging.getLogger('maestrod.EventManager')
 
    def closeAllConnections(self):
@@ -42,6 +43,9 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
          print "Closing connection to: ", remote_addr
          proxy.broker.transport.loseConnection()
       self.mProxies = {}
+
+   def setCredentials(self, creds):
+      self.mCredentials = creds
 
    def remote_registerCallback(self, nodeId, obj):
       """ Forward request to register for callback signals. """
@@ -52,11 +56,71 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       """ Forward incoming signals to event manager. """
       self.localEmit(nodeId, sigName, *args, **kwArgs)
 
-   def hasProxy(self, nodeId):
-      return self.mProxies.has_key(nodeId)
+   def _catchFailure(self, failure):
+      self.mLogger.error(str(failure.value))
+#      self.mLogger.error(failure.getErrorMessage())
+      return failure
 
-   def getProxy(self, nodeId):
-      return self.mProxies[nodeId]
+   def connectToNode(self, nodeId):
+      """ Connect to the given nodes event manager.
+          nodeId - IP/hostname of the node to connect to
+      """
+      # nodeId must be a string.
+      if not isinstance(nodeId, types.StringType):
+         raise TypeError("EventManager.connect: nodeId of non-string type passed")
+      
+      # Make sure we are not already connected to node.
+      if self.mProxies.has_key(nodeId):
+         raise AttributeError("EventManager.connect: already connected to [%s]" % (nodeId))
+
+      from twisted.spread import pb
+      from twisted.internet import reactor, ssl
+      from OpenSSL import SSL
+      #factory = pb.PBClientFactory()
+      factory = pboverssl.PBClientFactory()
+      #reactor.connectTCP(nodeId, 8789, factory)
+      ctx_factory = ssl.ClientContextFactory()
+      def verify(*a):
+         print "FAIL: "
+         return False
+      ctx_factory.getContext().set_verify_depth(2)
+      ctx_factory.getContext().set_verify(SSL.VERIFY_PEER, verify)
+
+      reactor.connectSSL(nodeId, 8789, factory, ctx_factory)
+
+      #creds = {'username':'aronb', 'password':'aronb', 'domain':''}
+      ip_address = socket.gethostbyname(socket.gethostname())
+      d = factory.login(self.mCredentials, ip_address).addCallback(
+         lambda object: self.completeConnect(nodeId, factory, object)).addErrback(self._catchFailure)
+
+      return d
+
+   def connectionLost(self, nodeId):
+      self.mLogger.debug("EventManager.connectionLost(%s)" % (nodeId))
+      self.unregisterProxy(nodeId)
+      self.localEmit(EventManager.LOCAL, "connectionLost", nodeId)
+
+   def completeConnect(self, nodeId, factory, object):
+      object.callRemote("registerCallback", self.mIpAddress, self)
+      factory._broker.notifyOnDisconnect(lambda n=nodeId: self.connectionLost(n))
+      self.registerProxy(nodeId, object)
+      # As soon as we connect to a new node, we want to know what OS it is running.
+      self.emit("*", "ensemble.get_os")
+      self.emit("*", "ensemble.get_settings")
+      self.emit("*", "reboot.get_info")
+
+      return object
+
+   def disconnectFromNode(self, nodeId):
+      """ Disconnect a given nodes remote object.
+      """
+      if not isinstance(nodeId, types.StringType):
+         raise TypeError("EventManager.connect: nodeId of non-string type passed")
+
+      if self.mProxies.has_key(nodeId):
+         self.mLogger.debug("EventManager.disconnect(%s)" % (nodeId))
+         self.mProxies[nodeId].broker.transport.loseConnection()
+         del self.mProxies[nodeId]
 
    def registerProxy(self, nodeId, obj):
       """ Register object to recieve callback events for the given node.
@@ -103,8 +167,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
          nodes = [(nodeId, self.mProxies[nodeId])]
 
       if print_debug:
-         self.mLogger.debug("   Proxies: %s" % (self.mProxies.items()))
-         self.mLogger.debug("   Nodes: %s" % (nodes))
+         self.mLogger.debug("   [%s][%s] " % (self.mProxies.items(), nodes))
 
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:

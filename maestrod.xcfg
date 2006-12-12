@@ -1,8 +1,5 @@
 <?xml version="1.0" ?>
 <maestrod version="1">
-   <authentication_plugins>
-      sspi_negotiate,sspi_ntlm,username_password
-   </authentication_plugins>
    <boot_loader>GRUB</boot_loader>
    <grub_conf>/boot/grub/grub.conf</grub_conf>
    <xauth_cmd>/usr/X11R6/bin/xauth</xauth_cmd>
