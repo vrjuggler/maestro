@@ -214,7 +214,7 @@ class GrubPlugin(maestro.core.IBootPlugin):
       else:
          target_name = "Unknown"
          try:
-            target_name = Constants.OsNameMap[targetOS]
+            target_name = Constants.OsNameMap[targetOS][0]
          except:
             pass
          print "Can not currently reboot into: [%s][%d]" % (target_name, targetOs)

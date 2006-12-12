@@ -71,7 +71,7 @@ class SettingsService(maestro.core.IServicePlugin):
 
    def _getPlatformName(self):
       try:
-         return const.OsNameMap[self._getPlatform()]
+         return const.OsNameMap[self._getPlatform()][0]
       except:
          return 'Unknown'
 
