@@ -329,8 +329,13 @@ def main():
       if element_tree is None:
          m.onCreateNewEnsemble()
 
+      gui_width  = int(gui_settings.get('gui_layout/width', 785))
+      gui_height = int(gui_settings.get('gui_layout/height', 745))
+      gui_pos_x  = int(gui_settings.get('gui_layout/x', 20))
+      gui_pos_y  = int(gui_settings.get('gui_layout/y', 55))
+
       m.show()
-      m.resize(800, 850)
+      m.setGeometry(gui_pos_x, gui_pos_y, gui_width, gui_height)
       reactor.run()
       reactor.stop()
       reactor.runUntilCurrent()
