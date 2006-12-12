@@ -24,10 +24,12 @@
 #   pass
 
 import sys, os, platform, traceback
-import dl
 
-flags = sys.getdlopenflags()
-sys.setdlopenflags(flags | dl.RTLD_GLOBAL)
+if not sys.platform.startswith("win"):
+   import dl
+
+   flags = sys.getdlopenflags()
+   sys.setdlopenflags(flags | dl.RTLD_GLOBAL)
 
 import maestro.core
 const = maestro.core.const
