@@ -186,7 +186,7 @@ class ConnectionManager:
 
          avatar.callRemote("registerCallback", self.mIpAddress,
                            self.mEventMgr)
-         avatar.callRemote("setNodeId", nodeId)
+         avatar.callRemote("setNodeId", self.mIpAddress)
 
          factory._broker.notifyOnDisconnect(lambda: self.connectionLost(nodeId))
          self.mEventMgr.registerProxy(nodeId, avatar)
