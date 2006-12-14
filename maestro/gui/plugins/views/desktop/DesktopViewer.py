@@ -93,8 +93,8 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       '''
 
       if self.mEnsemble is not None:
-         self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"),
-                      self.onEnsembleChange)
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"),
+                         self.onEnsembleChange)
 
       # Set the new ensemble configuration.
       self.mEnsemble = ensemble
@@ -107,22 +107,9 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       self._setBackgroundImage('', None)
 
       if ensemble is not None:
-         self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged()"),
+         self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"),
                       self.onEnsembleChange)
-
-         for i in xrange(ensemble.getNumNodes()):
-            node = ensemble.getNode(i)
-            node_id = node.getId()
-
-            if node_id is not None:
-               self.mNodeChooser.addItem(node.getHostname(),
-                                         QtCore.QVariant(node_id))
-               self.mSettings[node_id] = DesktopSettings()
-            else:
-               QtGui.QMessageBox.warning(
-                  self.parentWidget(), "Bad Ensemble Node",
-                  "Ensemble includes node with no ID"
-               )
+         self._updateNodeChooser()
 
       # XXX: We should call this if we can't count on the ensembleChanged()
       # signal.
@@ -146,6 +133,51 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       if self.mDirty:
          self._queryState('*')
 
+   def _updateNodeChooser(self):
+      nodes      = []
+      node_names = []
+
+      # Build up the information that we have about the nodes in the ensemble.
+      for i in xrange(self.mEnsemble.getNumNodes()):
+         node = self.mEnsemble.getNode(i)
+         nodes.append(node)
+         node_id = node.getId()
+         if node_id is not None:
+            node_names.append(node_id)
+
+      # Clear out self.mNodeChooser except for the "All Nodes" item.
+      while self.mNodeChooser.count() > 1:
+         node_id = str(self.mNodeChooser.itemData(1).toString())
+
+         # If we no longer need to care about node_id, remove it from
+         # self.mSettings. We are careful about this because it should help
+         # reduce expensive network calls to re-query data that we already
+         # have.
+         if self.mSettings.has_key(node_id) and not node_id in node_names:
+            del self.mSettings[node_id]
+
+         self.mNodeChooser.removeItem(1)
+
+      # We are done with this now.
+      del node_names
+
+      for node in nodes:
+         node_id = node.getId()
+
+         if node_id is not None:
+            self.mNodeChooser.addItem(node.getHostname(),
+                                      QtCore.QVariant(node_id))
+            self.mSettings[node_id] = DesktopSettings()
+         # If node does not yet have an ID, it may still be going through the
+         # connection process. In that case, we register a slot with the
+         # ensemble's nodeChanged signal so that we can be notified when it is
+         # ready to be accessed.
+         else:
+            # XXX: Is there a way to break this connection once we are done
+            # with it?
+            self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"),
+                         lambda n: self.onNodeChanged(node, n))
+
    def _queryState(self, nodeId):
       self.mReportCount = 0
 
@@ -164,7 +196,16 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       # NOTE :This method is invoked as a result of invoking the method
       # refreshConnections() on our ensemble object, so we do not want to get
       # into an infinite loop by invoking refreshConnections() again.
+      self._updateNodeChooser()
       self._queryState('*')
+
+   def onNodeChanged(self, pendingNode, changedNode):
+      if pendingNode is changedNode:
+         node_id = changedNode.getId()
+         if node_id is not None and not self.mSettings.has_key(node_id):
+            self.mSettings[node_id] = node_id
+            self._updateNodeChooser()
+            self._queryState(node_id)
 
    def onToggleScreenSaver(self, val):
       node_id = self.getCurrentNodeID()
