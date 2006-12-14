@@ -60,7 +60,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
    def isSaverEnabled(self, avatar):
       enabled = False
 
-      user_name = avatar.mCredentials['username']
+      user_name = avatar.mUserName
       home_dir  = pwd.getpwnam(user_name)[5]
       settings  = os.path.join(home_dir, '.xscreensaver')
 
@@ -94,7 +94,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
       Indicates whether a screen saver is currently running on the local
       computer.
       '''
-      return self.__isRunning(avatar.mCredentials['username'])
+      return self.__isRunning(avatar.mUserName)
       # Using 'xscreensaver-command -watch' would allow us to track whether
       # the screen saver has started running, but it wouldn't tell us if it
       # is already running.
@@ -103,7 +103,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
       if enabled:
          pid = os.fork()
          if pid == 0:
-            user_name = avatar.mCredentials['username']
+            user_name = avatar.mUserName
             maestro.util.changeToUserName(user_name)
 
             # Start the xscreensaver process up if it is not currently
@@ -127,7 +127,7 @@ class XScreenSaverSaverPlugin(maestro.core.ISaverPlugin):
          self.stopSaver(avatar)
 
    def stopSaver(self, avatar):
-      user_name = avatar.mCredentials['username']
+      user_name = avatar.mUserName
       if self.__isRunning(user_name):
          # Send the xscreensaver process SIGTERM to shut it down. This is
          # sufficient to unlock a locked screen when run as the user who owns

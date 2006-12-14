@@ -236,7 +236,7 @@ class X11Avatar(UserPerspective):
          xauth_cmd = \
             env.settings.get('xauth_cmd', self.sDefaultXauthCmd).strip()
 
-         x11desktop.removeAuthority(self.mCredentials['username'], xauth_cmd,
+         x11desktop.removeAuthority(self.mUserName, xauth_cmd,
                                     self.mDisplayToRemove)
          self.mDisplayToRemove = None
 

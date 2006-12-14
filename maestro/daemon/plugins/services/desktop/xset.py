@@ -101,7 +101,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    def setSaverEnabled(self, avatar, enabled):
       pid = os.fork()
       if pid == 0:
-         maestro.util.changeToUserName(avatar.mCredentials['username'])
+         maestro.util.changeToUserName(avatar.mUserName)
          if enabled:
             saver_flag = 'on'
             dpms_flag  = '+dpms'
@@ -120,7 +120,7 @@ class XsetSaverPlugin(maestro.core.ISaverPlugin):
    def stopSaver(self, avatar):
       pid = os.fork()
       if pid == 0:
-         maestro.util.changeToUserName(avatar.mCredentials['username'])
+         maestro.util.changeToUserName(avatar.mUserName)
          env = os.environ.copy()
          env['XAUTHORITY'] = os.environ['USER_XAUTHORITY']
          os.spawnle(os.P_WAIT, self.mCmd, self.mCmd, 's', 'off', env)

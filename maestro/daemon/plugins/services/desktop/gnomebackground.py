@@ -144,7 +144,7 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
       if pid == 0:
          os.close(child_pipe_rd)
 
-         maestro.util.changeToUserName(avatar.mCredentials['username'])
+         maestro.util.changeToUserName(avatar.mUserName)
          child_stdout, child_stdin = \
             popen2.popen2([self.mCmd, '--get',
                            '/desktop/gnome/background/picture_filename'])
