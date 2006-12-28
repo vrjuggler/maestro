@@ -29,11 +29,13 @@ SetCompressor bzip2
 !define MUI_ABORTWARNING
 !define MUI_ICON "maestro_install.ico"
 !define MUI_UNICON "maestro_uninstall.ico"
+!define MUI_LICENSEPAGE_TEXT_TOP "Infiscape Corporation © 2006"
 
 # Welcome page
 !insertmacro MUI_PAGE_WELCOME
 # Components page
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE ComponentLeaveFunc
+!insertmacro MUI_PAGE_LICENSE "gpl.rtf"
 !insertmacro MUI_PAGE_COMPONENTS
 # Directory page
 !insertmacro MUI_PAGE_DIRECTORY
