@@ -16,7 +16,6 @@ SetCompressor bzip2
 
 # MUI 1.67 compatible ------
 !include "MUI.nsh"
-!include WriteEnvStr.nsh
 !include FileAssociation.nsh
 !include StartMenu.nsh
 !include "Sections.nsh"
