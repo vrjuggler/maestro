@@ -66,7 +66,7 @@ ShowUnInstDetails hide
 BrandingText "Maestro ${PRODUCT_VERSION} Installer by Infiscape Corporation"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${PRODUCT_NAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PRODUCT_PUBLISHER}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Infiscape Corporation Â© 2006"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Infiscape Corporation © 2006"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${FILE_VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "Maestro Installer"
 VIProductVersion "${FILE_VERSION}"
