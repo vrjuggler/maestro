@@ -21,6 +21,10 @@ SetCompressor bzip2
 !include StartMenu.nsh
 !include "Sections.nsh"
 !include "LogicLib.nsh"
+!include "FileFunc.nsh"
+
+!insertmacro GetOptions
+!insertmacro GetParameters
 
 # MUI Settings
 !define MUI_ABORTWARNING
@@ -142,6 +146,38 @@ Section "Maestro Documentation" SecDoc
   SetOverwrite ifnewer
   File /r /x .svn /x *.mk /x Makefile /x *.xml /x README.txt maestro\doc
 SectionEnd
+
+Function .onInit
+  Call GetParameters
+  Pop $2
+  ${GetOptions} $2 "/service=" $SERVICE_INST
+  ${GetOptions} $2 "/gui=" $GUI_INST
+  ${GetOptions} $2 "/doc=" $DOC_INST
+
+  StrCmp $SERVICE_INST "0" serviceOff serviceOn
+  serviceOff:
+    SectionSetFlags ${SecService} 0
+    Goto serviceEnd
+  serviceOn:
+    SectionSetFlags ${SecService} ${SF_SELECTED}
+  serviceEnd:
+
+  StrCmp $GUI_INST "0" guiOff guiOn
+  guiOff:
+    SectionSetFlags ${SecGUI} 0
+    Goto guiEnd
+  guiOn:
+    SectionSetFlags ${SecGUI} ${SF_SELECTED}
+  guiEnd:
+
+  StrCmp $DOC_INST "0" docOff docOn
+  docOff:
+    SectionSetFlags ${SecDoc} 0
+    Goto docEnd
+  docOn:
+    SectionSetFlags ${SecDoc} ${SF_SELECTED}
+  docEnd:
+FunctionEnd
 
 Section -AdditionalIcons
   Call SetStartMenuToUse
