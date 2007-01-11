@@ -1,4 +1,4 @@
-# Maestro is Copyright (C) 2006 by Infiscape
+# Maestro is Copyright (C) 2006-2007 by Infiscape
 #
 # Original Author: Aron Bierbaum
 #

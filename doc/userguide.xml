@@ -5,12 +5,18 @@
    <bookinfo>
       <title>Maestro User's Guide</title>
 
-      <releaseinfo>Version 0.3</releaseinfo>
+      <releaseinfo>Version 0.4</releaseinfo>
 
       <authorgroup>
          <corpauthor><ulink url="http://www.infiscape.com/">Infiscape
          Corporation</ulink></corpauthor>
       </authorgroup>
+
+      <copyright>
+         <year>2006–2007</year>
+
+         <holder>Infiscape Corporation</holder>
+      </copyright>
 
       <address><street>2901 South Loop Drive, Suite 3400</street><city>Ames</city><state>Iowa</state><postcode>50010-8646</postcode><phone>+1.515.296.3787</phone><email>contact@infiscape.com</email><otheraddr>Website: <ulink
                url="http://www.infiscape.com/">http://www.infiscape.com/</ulink></otheraddr></address>
