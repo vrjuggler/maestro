@@ -297,6 +297,148 @@ class ConsoleLogger(NodeLogger):
       logger.setLevel(self.mLevel)
       self.mLoggers[nodeId] = logger
 
+class PluginList(QtGui.QListWidget):
+   '''
+   A subclass of QtQui.QListWidget for handling the list of View Plug-ins.
+   This class includes the code needed for dragging and dropping the list
+   widget items representing the View Plug-ins so that they may be reordered
+   dynamically by the user.
+   '''
+
+   sMimeType = "application/maestro-view-plugin"
+
+   def __init__(self, parent = None):
+      QtGui.QListWidget.__init__(self, parent)
+      self.setDragEnabled(True)
+      self.setDropIndicatorShown(True)
+      #self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+      self.setAcceptDrops(True)
+      self.setMinimumSize(QtCore.QSize(0, 0))
+      self.setMaximumSize(QtCore.QSize(100, 16777215))
+      self.setIconSize(QtCore.QSize(45, 45))
+      self.setMovement(QtGui.QListView.Free)
+      self.setViewMode(QtGui.QListView.IconMode)
+      self.setUniformItemSizes(False)
+      self.setSortingEnabled(False)
+
+   def addPlugin(self, icon, text, pluginType):
+      '''
+      Appends a new item to this list widget for a View Plug-in.
+      '''
+      plugin_item = self.__makePluginItem(icon, text, pluginType)
+      self.addItem(plugin_item)
+
+   def insertPlugin(self, icon, text, pluginType, row):
+      '''
+      Inserts a new item into this list widget at the identified row for a
+      View Plug-in.
+      '''
+      plugin_item = self.__makePluginItem(icon, text, pluginType)
+      self.insertItem(row, plugin_item)
+
+   def __makePluginItem(self, icon, text, pluginType):
+      '''
+      Creates a new QtGui.QListWidgetItem representing the View Plug-in
+      described by the given arguments.
+      '''
+      plugin_item = QtGui.QListWidgetItem(icon, text)
+      plugin_item.setTextAlignment(QtCore.Qt.AlignCenter)
+      plugin_item.setData(QtCore.Qt.UserRole, QtCore.QVariant(pluginType))
+      plugin_item.setFlags(QtCore.Qt.ItemIsEnabled |    \
+                           QtCore.Qt.ItemIsSelectable | \
+                           QtCore.Qt.ItemIsDragEnabled)
+
+      return plugin_item
+
+   def dragEnterEvent(self, event):
+      if event.mimeData().hasFormat(self.sMimeType):
+         event.accept()
+      else:
+         event.ignore()
+
+   def dragMoveEvent(self, event):
+      if event.mimeData().hasFormat(self.sMimeType):
+         event.setDropAction(QtCore.Qt.MoveAction)
+         event.accept()
+      else:
+         event.ignore()
+
+   def dropEvent(self, event):
+      if event.mimeData().hasFormat(self.sMimeType):
+         # Extract the data from the dragged object.
+         plugin_data = event.mimeData().data(self.sMimeType)
+
+         # Deserialzied the dragged obejct into an icon, the icon text, and
+         # the View Plug-in type name.
+         data_stream = QtCore.QDataStream(plugin_data,
+                                          QtCore.QIODevice.ReadOnly)
+         icon        = QtGui.QIcon()
+         text        = QtCore.QString()
+         plugin_type = QtCore.QString()
+
+         data_stream >> icon >> text >> plugin_type
+         plugin_type = str(plugin_type)
+
+         # The currently selected item is the one being dragged. We need to
+         # know above which item the drop event occurred so that we know where
+         # to put the dragged item.
+         drag_item   = self.currentItem()
+         target_item = self.itemAt(event.pos())
+
+         # If the user dropped the dragged item over another plug-in icon,
+         # then we will insert the dragged item before the drop target.
+         if target_item is not None:
+            start_row = self.row(drag_item)
+            drop_row = self.row(target_item)
+
+            # Handle the case when the dragged item's row number is less than
+            # the row of the target item.
+            if drop_row > start_row:
+               drop_row = drop_row + 1
+
+            self.insertPlugin(icon, text, plugin_type, drop_row)
+            self.setCurrentRow(drop_row)
+         # If the user dropped the dragged item above no other plug-in icon,
+         # then we append the dragged item to the list.
+         else:
+            self.addPlugin(icon, text, plugin_type)
+            self.setCurrentRow(self.count() - 1)
+
+         event.setDropAction(QtCore.Qt.MoveAction)
+         event.accept()
+      else:
+         event.ignore()
+
+   def startDrag(self, supportedActions):
+      item = self.currentItem()
+
+      # Serialize the list widget item's icon, its text, and its plug-in type
+      # name.
+      item_data   = QtCore.QByteArray()
+      data_stream = QtCore.QDataStream(item_data, QtCore.QIODevice.WriteOnly)
+      icon        = item.icon()
+      text        = item.text()
+      plugin_type = item.data(QtCore.Qt.UserRole).toString()
+
+      data_stream << icon << text << plugin_type
+
+      # Create the MIME data object that will hold the serialized form of the
+      # item being dragged.
+      mime_data = QtCore.QMimeData()
+      mime_data.setData(self.sMimeType, item_data)
+
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mime_data)
+
+      # Make the drag visually interesting as well as informative.
+      icon_size = self.iconSize()
+      drag.setHotSpot(QtCore.QPoint(icon_size.width() / 2,
+                                    icon_size.height() / 2))
+      drag.setPixmap(icon.pixmap(icon_size))
+
+      if drag.start(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
+         self.takeItem(self.row(item))
+
 class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def __init__(self, parent = None):
       QtGui.QMainWindow.__init__(self, parent)
@@ -311,6 +453,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       env = maestro.gui.Environment()
       self.mCurViewPlugin = None
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
+
       for name, cls in self.mViewPlugins.iteritems():
          self.addView(name)
 
@@ -520,6 +663,17 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
+      # Replace the sself.mViewList object created by the above method call
+      # with our derived type. This is done to get drag-and-drop operations
+      # in the view list to behave.
+      # XXX: This is not great.
+      size_policy = self.mViewList.sizePolicy()
+      self.gridlayout.removeWidget(self.mViewList)
+      self.mViewList = PluginList(self.centralwidget)
+      self.mViewList.setSizePolicy(size_policy)
+      self.mViewList.setObjectName("mViewList")
+      self.gridlayout.addWidget(self.mViewList, 0, 0, 2, 1)
+
       # Clear out all test data in list view and stack.
       self.mViewList.clear()
       self.mStack.removeWidget(self.mOldPage)
@@ -543,7 +697,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.connect(self.mAboutAction, QtCore.SIGNAL("triggered()"),
                    self.onAbout)
       self.connect(self.mViewList, QtCore.SIGNAL("currentRowChanged(int)"),
-                   self.mStack, QtCore.SLOT("setCurrentIndex(int)"))
+                   self.onViewSelection)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout.addWidget(self.mOutputTab)
@@ -551,6 +705,12 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       # Load custom modules
       self.mPlugins = {}             # Dict of plugins: mod_name -> (module, ..)
       self.mModuleButtons = []
+
+   def onViewSelection(self, index):
+      view_item = self.mViewList.item(index)
+      plugin_type_name = str(view_item.data(QtCore.Qt.UserRole).toString())
+      view_widget = self.mActiveViewPlugins[plugin_type_name][1]
+      self.mStack.setCurrentWidget(view_widget)
 
    def onAbout(self):
       dialog = QtGui.QDialog(self)
@@ -631,9 +791,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          index = self.mStack.addWidget(new_view_widget)
 
          # Create a new list item for the view.
-         list_item = QtGui.QListWidgetItem(new_icon, new_view.getName())
-         list_item.setTextAlignment(QtCore.Qt.AlignCenter)
-         self.mViewList.addItem(list_item)
+         self.mViewList.addPlugin(new_icon, new_view.getName(),
+                                  pluginTypeName)
 
          # Keep track of widgets to remove them later
          self.mActiveViewPlugins[pluginTypeName] = [new_view, new_view_widget]
