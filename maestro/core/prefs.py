@@ -156,6 +156,12 @@ class Preferences:
       else:
          return default
 
+   def findall(self, item):
+      if self.mRoot is not None:
+         return self.mRoot.findall(item)
+      else:
+         raise Exception, 'No XML tree to search'
+
    def keys(self):
       '''
       Returns this preferences structure as a flattened list.
