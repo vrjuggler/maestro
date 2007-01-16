@@ -170,3 +170,34 @@ class Preferences:
          return self.mRoot.getiterator()
       else:
          return None
+
+   def add(self, item, textValue = None):
+      '''
+      Adds the given item (specified as a path)--and all missing intervening
+      items in the path--to this preferences structure and sets its text
+      property to the given value. If the given value is None, then the text
+      property of the added item is not set. If there is already an item at
+      the given path, then another item is added as a sibling of the extant
+      item. The added Element object is returned.
+      '''
+      added_elt = None
+
+      if self.mRoot is not None:
+         path = item.split('/')
+         append_type = path.pop()
+         item = '/'.join(path)
+         parent = self.mRoot.find(item)
+
+         if parent is None:
+            parent = self.add(item)
+
+         child = ET.Element(append_type)
+         if textValue is not None:
+            child.text = str(textValue)
+         parent.append(child)
+
+         added_elt = child
+      else:
+         raise Exception, 'No XML tree available to modify'
+
+      return added_elt
