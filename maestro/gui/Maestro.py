@@ -454,8 +454,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mCurViewPlugin = None
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
 
-      for name, cls in self.mViewPlugins.iteritems():
-         self.addView(name)
+      view_plugins = env.settings.findall('gui_layout/view_plugins/*')
+      if view_plugins is None or len(view_plugins) == 0:
+         for name, cls in self.mViewPlugins.iteritems():
+            self.addView(name)
+      else:
+         for p in view_plugins:
+            self.addView(p.text.strip())
 
 #      QtCore.QObject.connect(self.mToolboxButtonGroup,
 #                             QtCore.SIGNAL("buttonClicked(int)"),
@@ -757,6 +762,15 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          env.settings['gui_layout/height'] = rect.height()
          env.settings['gui_layout/x']      = rect.x()
          env.settings['gui_layout/y']      = rect.y()
+
+         if env.settings.has_key('gui_layout/view_plugins'):
+            del env.settings['gui_layout/view_plugins']
+
+         for i in xrange(self.mViewList.count()):
+            item = self.mViewList.item(i)
+            plugin_type = item.data(QtCore.Qt.UserRole).toString()
+            env.settings.add('gui_layout/view_plugins/plugin', plugin_type)
+
          env.settings.save()
       except:
          traceback.print_exc()
@@ -770,13 +784,19 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       """
       # Try to get the plugin
       vtype = self.mViewPlugins.get(pluginTypeName,None)
+
       if not vtype:
-         warning_text = "Warning: could not find view plugin of name: %s"%pluginTypeName      
-         print warning_text
-         QtGui.QMessageBox.critical(self, "Plugin Failure", warning_text, 
-                                    QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
-                                    QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
+         warning_text = "WARNING: Could not find View Plug-in named: %s" % \
+                           pluginTypeName      
+         QtGui.QMessageBox.critical(self, "Plug-in Lookup Failure",
+                                    warning_text, 
+                                    QtGui.QMessageBox.Ignore |     \
+                                       QtGui.QMessageBox.Default | \
+                                       QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton,
+                                    QtGui.QMessageBox.NoButton)
          return
+
       view_name = vtype.getName()
       
       # Try to load the view
