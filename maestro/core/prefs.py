@@ -80,7 +80,7 @@ class Preferences:
 
          return element.text
       else:
-         raise KeyError, '%s is not a child of the root' % item
+         raise Exception, 'No XML tree to search'
 
    def __setitem__(self, key, value):
       if not self.has_key(key):
