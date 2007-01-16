@@ -73,6 +73,9 @@ class GuiPrefs:
    def __iter__(self):
       return self.mUserPrefs.__iter__() + self.mSitePrefs.__iter__()
 
+   def __delitem__(self, item):
+      del self.mUserPrefs[item]
+
    def has_key(self, item):
       return self.mUserPrefs.has_key(item) or self.mSitePrefs.has_key(item)
 
@@ -86,6 +89,12 @@ class GuiPrefs:
 
    def keys(self):
       return self.mUserPrefs.keys() + self.mSitePrefs.keys()
+
+   def findall(self, item):
+      return self.mUserPrefs.findall(item) + self.mSitePrefs.findall(item)
+
+   def add(self, item, value):
+      self.mUserPrefs.add(item, value)
 
    def user(self):
       '''
