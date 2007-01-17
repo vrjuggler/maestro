@@ -505,15 +505,19 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       found_matching_view = False
       if env.mCmdOpts.view:
          n = 0
-         view_names = [cls.getName() for cls in self.mViewPlugins.values()]
+         view_names = []
+         for i in xrange(self.mViewList.count()):
+            item = self.mViewList.item(i)
+            view_names.append(str(item.text()))
          if view_names.count(env.mCmdOpts.view) > 0:
             start_view_index = view_names.index(env.mCmdOpts.view)
          else:
+            all_view_names = [cls.getName() for cls in self.mViewPlugins.values()]
             QtGui.QMessageBox.information(
                self, "View Not Found ",
                "Could not find view named %s. You can selected from one " \
                "of the following:\n%s\nDefaulting to the first view (%s)."\
-               % (env.mCmdOpts.view, view_names, view_names[0]))
+               % (env.mCmdOpts.view, all_view_names, view_names[0]))
 
       self.mViewList.setCurrentRow(start_view_index)
       self.mViewList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
