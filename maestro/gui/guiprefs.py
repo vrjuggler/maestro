@@ -94,7 +94,7 @@ class GuiPrefs:
       return self.mUserPrefs.findall(item) + self.mSitePrefs.findall(item)
 
    def add(self, item, value):
-      self.mUserPrefs.add(item, value)
+      return self.mUserPrefs.add(item, value)
 
    def user(self):
       '''
