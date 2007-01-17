@@ -96,7 +96,6 @@ class OutputTabWidget(QtGui.QTabWidget):
       # Get the currently selected node.
       temp_callbacks = []
 
-
       log_widget = None
       current_tab = self.currentWidget()
       if current_tab is not None:
@@ -112,9 +111,11 @@ class OutputTabWidget(QtGui.QTabWidget):
          # Create a menu
          menu = QtGui.QMenu("Scroll", self)
          menu.addAction(attach_action)
-         self.connect(attach_action, QtCore.SIGNAL("toggled(bool)"), log_widget.setAttachToBottom)
+         self.connect(attach_action, QtCore.SIGNAL("toggled(bool)"),
+                      log_widget.setAttachToBottom)
          menu.exec_(self.mapToGlobal(point))
-         self.disconnect(attach_action, QtCore.SIGNAL("toggled(bool)"), log_widget.setAttachToBottom)
+         self.disconnect(attach_action, QtCore.SIGNAL("toggled(bool)"),
+                         log_widget.setAttachToBottom)
 
    def onNodeAdded(self, node, index):
       self.addOutputTab(node, index)
@@ -418,7 +419,7 @@ class PluginList(QtGui.QListWidget):
       data_stream = QtCore.QDataStream(item_data, QtCore.QIODevice.WriteOnly)
       icon        = item.icon()
       text        = item.text()
-      plugin_type = item.data(QtCore.Qt.UserRole).toString()
+      plugin_type = QtCore.QString(self.getPluginTypeName(item))
 
       data_stream << icon << text << plugin_type
 
@@ -438,6 +439,16 @@ class PluginList(QtGui.QListWidget):
 
       if drag.start(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
          self.takeItem(self.row(item))
+
+   def getPluginTypeName(self, listItem):
+      '''
+      A helper function for encapsulating the management of this user data
+      within the QListWidgetItem object. The string returned is a Python
+      string rather than a QString since most uses of this helper method are
+      likely to be operating in terms of Python objects rather than Qt
+      objects.
+      '''
+      return str(listItem.data(QtCore.Qt.UserRole).toString())
 
 class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def __init__(self, parent = None):
@@ -485,6 +496,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                % (env.mCmdOpts.view, view_names, view_names[0]))
 
       self.mViewList.setCurrentRow(start_view_index)
+      self.mViewList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+      self.connect(self.mViewList,
+                   QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                   self.onViewListContextMenu)
 
       # Timer to refresh pyro connections to nodes.
       self.refreshTimer = QtCore.QTimer()
@@ -518,6 +533,62 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 #      console_logger = ConsoleLogger(logging.DEBUG)
 #      console_logger.setEnsemble(self.mEnsemble)
 #      self.mLoggers.append(console_logger)
+
+   def onToggleViewPlugin(self, pluginTypeName, enabled):
+      if enabled:
+         self.addView(pluginTypeName)
+         self.mActiveViewPlugins[pluginTypeName][1].setEnsemble(self.mEnsemble)
+      else:
+         for r in xrange(self.mViewList.count()):
+            item = self.mViewList.item(r)
+            plugin_type_name = self.mViewList.getPluginTypeName(item)
+            if plugin_type_name == pluginTypeName:
+               self.mViewList.takeItem(r)
+               break
+
+         cur_widget = self.mStack.currentWidget()
+         if cur_widget is self.mActiveViewPlugins[pluginTypeName][1]:
+            self.mStack.removeWidget(cur_widget)
+
+         del self.mActiveViewPlugins[pluginTypeName]
+
+   def onViewListContextMenu(self, point):
+      menu = QtGui.QMenu("View Plug-ins", self.mViewList)
+
+      actions = {}
+      for name, cls in self.mViewPlugins.iteritems():
+         plugin_name = cls.getName()
+
+         action = QtGui.QAction(plugin_name, self.mViewList)
+         action.setCheckable(True)
+         if self.mActiveViewPlugins.has_key(name):
+            action.setChecked(True)
+
+         callable = lambda t, n = name: self.onToggleViewPlugin(n, t)
+         action.connect(action, QtCore.SIGNAL("toggled(bool)"), callable)
+
+         # NOTE: I do not think that we need to hang onto the callable here
+         # so that we can make a disconnection after the context menu closes.
+         # When the menu object is destroyed, its action objects should also
+         # be destroyed. This would remove the only remaining reference to
+         # each of the callable objects, thereby allowing them to be
+         # destroyed--right?
+
+         actions[plugin_name] = action
+
+      # Sort the actions based on the name of the View Plug-in. Another
+      # sorting option is to use the current order of plug-ins in
+      # self.mViewList. The inactive View Plug-ins would probably have to be
+      # at the end of the list in that case.
+      action_names = actions.keys()
+      action_names.sort()
+      for n in action_names:
+         menu.addAction(actions[n])
+
+      # We are done with the dictionary actions.
+      del actions
+
+      menu.exec_(self.mapToGlobal(point))
 
    def onRefreshEnsemble(self):
       """Try to connect to all nodes."""
@@ -713,7 +784,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def onViewSelection(self, index):
       view_item = self.mViewList.item(index)
-      plugin_type_name = str(view_item.data(QtCore.Qt.UserRole).toString())
+      plugin_type_name = self.mViewList.getPluginTypeName(view_item)
       view_widget = self.mActiveViewPlugins[plugin_type_name][1]
       self.mStack.setCurrentWidget(view_widget)
 
@@ -768,7 +839,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
          for i in xrange(self.mViewList.count()):
             item = self.mViewList.item(i)
-            plugin_type = item.data(QtCore.Qt.UserRole).toString()
+            plugin_type = self.mViewList.getPluginTypeName(item)
             env.settings.add('gui_layout/view_plugins/plugin', plugin_type)
 
          env.settings.save()
@@ -815,6 +886,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                                   pluginTypeName)
 
          # Keep track of widgets to remove them later
+         assert not self.mActiveViewPlugins.has_key(pluginTypeName)
          self.mActiveViewPlugins[pluginTypeName] = [new_view, new_view_widget]
       except Exception, ex:
          view_name = "Unknown"
