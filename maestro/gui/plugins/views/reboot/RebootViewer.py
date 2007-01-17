@@ -121,15 +121,35 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.connect(self.mSetAllTargetsToLinuxAction, QtCore.SIGNAL("triggered()"), self.onSetAllTargetsToLinux)
 
       # Load a reboot/reload icon
-      reboot_icon = QtGui.QIcon(":/Maestro/images/reboot.png")
+      reboot_icon   = QtGui.QIcon(":/Maestro/images/reboot.png")
+      shutdown_icon = QtGui.QIcon(":/Maestro/images/exit.png")
 
       # Create action to reboot the selected node.
-      self.mRebootNodeAction = QtGui.QAction(reboot_icon, self.tr("Reboot Node"), self)
-      self.connect(self.mRebootNodeAction, QtCore.SIGNAL("triggered()"), self.onRebootNode)
+      self.mRebootNodeAction = QtGui.QAction(reboot_icon,
+                                             self.tr("Reboot Node"), self)
+      self.connect(self.mRebootNodeAction, QtCore.SIGNAL("triggered()"),
+                   self.onRebootNode)
 
       # Create action to reboot the entire cluster.
-      self.mRebootClusterAction = QtGui.QAction(reboot_icon, self.tr("Reboot Entire Cluster"), self)
-      self.connect(self.mRebootClusterAction, QtCore.SIGNAL("triggered()"), self.onRebootCluster)
+      self.mRebootClusterAction = QtGui.QAction(reboot_icon,
+                                                self.tr("Reboot Entire Cluster"),
+                                                self)
+      self.connect(self.mRebootClusterAction, QtCore.SIGNAL("triggered()"),
+                   self.onRebootCluster)
+
+      # Create action to shut down the selected node.
+      self.mShutdownNodeAction = QtGui.QAction(shutdown_icon,
+                                               self.tr("Power Off Node"),
+                                               self)
+      self.connect(self.mShutdownNodeAction, QtCore.SIGNAL("triggered()"),
+                   self.onShutdownNode)
+
+      # Create action to shut down the entire cluster.
+      self.mShutdownClusterAction = QtGui.QAction(shutdown_icon,
+                                                  self.tr("Power Off Entire Cluster"),
+                                                  self)
+      self.connect(self.mShutdownClusterAction, QtCore.SIGNAL("triggered()"),
+                   self.onShutdownCluster)
 
       # Create action to refresh targets for all nodes.
       self.mRefreshAction = QtGui.QAction(self.tr("Refresh"), self)
@@ -140,6 +160,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mSelectWinBtn.setDefaultAction(self.mSetAllTargetsToWindowsAction)
       self.mSelectLinuxBtn.setDefaultAction(self.mSetAllTargetsToLinuxAction)
       self.mRebootBtn.setDefaultAction(self.mRebootClusterAction)
+      self.mShutdownBtn.setDefaultAction(self.mShutdownClusterAction)
       self.mRefreshBtn.setDefaultAction(self.mRefreshAction)
 
       # Create ItemDelegate to allow editing boot target with a combo box.
@@ -227,6 +248,8 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       if node is not None:
          menu.addAction(self.mRebootNodeAction)
       menu.addAction(self.mRebootClusterAction)
+      menu.addAction(self.mShutdownNodeAction)
+      menu.addAction(self.mShutdownClusterAction)
 
       # Show the context menu.
       menu.exec_(self.mNodeTableView.mapToGlobal(point))
@@ -245,26 +268,52 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       env.mEventManager.emit("*", "reboot.get_info")
 
    def onRebootNode(self):
-      """ Slot that reboots the selected cluster. """
+      """ Slot that reboots the selected node. """
       node = self.__getSelectedNode()
       if node is not None:
-         reply = QtGui.QMessageBox.question(self, self.tr("Reboot Node"),
-            self.tr("Are you sure you want to reboot %s?" % node.getName()),
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         reply = \
+            QtGui.QMessageBox.question(self, self.tr("Reboot Node"),
+                                       self.tr("Reboot %s?" % node.getName()),
+                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                                       QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
          if reply == QtGui.QMessageBox.Yes:
             env = maestro.gui.Environment()
             env.mEventManager.emit(node.getId(), "reboot.reboot")
 
    def onRebootCluster(self):
       """ Slot that reboots the entire cluster. """
-      reply = QtGui.QMessageBox.question(self, self.tr("Reboot Cluster"),
-         self.tr("Are you sure you want to reboot the entire cluster?"),
-         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-         QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+      reply = \
+         QtGui.QMessageBox.question(self, self.tr("Reboot Cluster"),
+                                    self.tr("Reboot the entire cluster?"),
+                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                                    QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
       if reply == QtGui.QMessageBox.Yes:
          env = maestro.gui.Environment()
          env.mEventManager.emit("*", "reboot.reboot")
+
+   def onShutdownNode(self):
+      """ Slot that shuts down the selected node. """
+      node = self.__getSelectedNode()
+      if node is not None:
+         reply = \
+            QtGui.QMessageBox.question(self, self.tr("Reboot Node"),
+                                       self.tr("Power off %s?" % node.getName()),
+                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                                       QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         if reply == QtGui.QMessageBox.Yes:
+            env = maestro.gui.Environment()
+            env.mEventManager.emit(node.getId(), "reboot.shutdown")
+
+   def onShutdownCluster(self):
+      """ Slot that shuts down the entire cluster. """
+      reply = \
+         QtGui.QMessageBox.question(self, self.tr("Power Off Cluster"),
+                                    self.tr("Power off the entire cluster?"),
+                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                                    QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+      if reply == QtGui.QMessageBox.Yes:
+         env = maestro.gui.Environment()
+         env.mEventManager.emit("*", "reboot.shutdown")
 
    def onSetTargetToLinux(self):
       """ Slot that makes the selected node reboot to Linux. """

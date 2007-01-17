@@ -77,6 +77,12 @@ class Ui_RebootViewerBase(object):
       self.mRebootBtn.setIconSize(QtCore.QSize(24,24))
       self.mRebootBtn.setObjectName("mRebootBtn")
       self.hboxlayout1.addWidget(self.mRebootBtn)
+
+      self.mShutdownBtn = QtGui.QToolButton(RebootViewerBase)
+      self.mShutdownBtn.setIcon(QtGui.QIcon(":/Maestro/images/exit.png"))
+      self.mShutdownBtn.setIconSize(QtCore.QSize(24,24))
+      self.mShutdownBtn.setObjectName("mShutdownBtn")
+      self.hboxlayout1.addWidget(self.mShutdownBtn)
       self.vboxlayout.addLayout(self.hboxlayout1)
 
       self.retranslateUi(RebootViewerBase)
@@ -92,6 +98,8 @@ class Ui_RebootViewerBase(object):
       self.mRefreshBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Reboot Entire Cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mShutdownBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Power Off Entire Cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mShutdownBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

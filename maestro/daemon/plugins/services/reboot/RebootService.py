@@ -86,6 +86,7 @@ class RebootService(maestro.core.IServicePlugin):
       env.mEventManager.connect("*", "reboot.set_timeout", self.onSetTimeout)
       env.mEventManager.connect("*", "reboot.switch_os", self.onSwitchBootPlatform)
       env.mEventManager.connect("*", "reboot.reboot", self.onReboot)
+      env.mEventManager.connect("*", "reboot.shutdown", self.onShutdown)
 
    def onGetInfo(self, nodeId, avatar):
       """ Slot that returns a process list to the calling maestro client.
@@ -143,16 +144,35 @@ class RebootService(maestro.core.IServicePlugin):
 
           @param nodeId: IP address of maestro client that sent event.
           @param avatar: System avatar that represents the remote user.
-          @param pid: Process ID of the process to terminate.
       """
 
+      print "Rebooting..."
+
       if "win32" == sys.platform:
-         print "Rebooting..."
          Reboot(timeout = 0)
       else:
-         print "Rebooting..."
+         # This works on Linux, FreeBSD, and Mac OS X.
          os.system('/sbin/shutdown -r now')
 
+   def onShutdown(self, nodeId, avatar):
+      """ Slot that causes the node to power off.
+
+          @param nodeId: IP address of maestro client that sent event.
+          @param avatar: System avatar that represents the remote user.
+      """
+
+      print "Powering down..."
+
+      if "win32" == sys.platform:
+         Reboot(message = 'Powering Down', timeout = 0, bReboot = False)
+      else:
+         sys_name = platform.system()
+         if sys_name == 'Linux':
+            os.system('/sbin/poweroff')
+         elif sys_name == 'FreeBSD':
+            os.system('/sbin/halt -p')
+         elif sys_name == 'Darwin':
+            os.system('/sbin/halt')
 
 if __name__ == "__main__":
    r = RebootService()
