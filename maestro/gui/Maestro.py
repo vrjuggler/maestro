@@ -496,15 +496,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 #      QtCore.QObject.connect(self.mToolboxButtonGroup,
 #                             QtCore.SIGNAL("buttonClicked(int)"),
 #                             self.mStack, QtCore.SLOT("setCurrentIndex(int)"))
-      QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
-                             self.viewChanged)
-      QtCore.QObject.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
-                             self.viewRemoved)
 
       start_view_index = 0
       found_matching_view = False
       if env.mCmdOpts.view:
-         n = 0
          view_names = []
          for i in xrange(self.mViewList.count()):
             item = self.mViewList.item(i)
@@ -796,6 +791,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onLoadStanza)
       self.connect(self.mAboutAction, QtCore.SIGNAL("triggered()"),
                    self.onAbout)
+      self.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
+                   self.viewChanged)
+      self.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
+                   self.viewRemoved)
       self.connect(self.mViewList, QtCore.SIGNAL("currentRowChanged(int)"),
                    self.onViewSelection)
 
@@ -918,21 +917,26 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       # Try to load the view
       new_view = None
       try:
+         assert not self.mActiveViewPlugins.has_key(pluginTypeName)
          print "Creating new view: %s %s"%(pluginTypeName, vtype.__name__)
          new_view = vtype()
          new_view_widget = new_view.getViewWidget()
          new_icon = vtype.getIcon()
-
-         # Add the view widget to the GUI.
-         index = self.mStack.addWidget(new_view_widget)
 
          # Create a new list item for the view.
          self.mViewList.addPlugin(new_icon, new_view.getName(),
                                   pluginTypeName)
 
          # Keep track of widgets to remove them later
-         assert not self.mActiveViewPlugins.has_key(pluginTypeName)
          self.mActiveViewPlugins[pluginTypeName] = [new_view, new_view_widget]
+
+         # Finally, add the view widget to the GUI. This is done last to
+         # ensure that the plug-in state setup performed above is done in
+         # case this call results in one or more signals being emitted.
+         # (QStackedWidget.addWidget() will change the current widget to be
+         # the given argument if the stacked widget object does not currently
+         # have an active widget.)
+         self.mStack.addWidget(new_view_widget)
       except Exception, ex:
          view_name = "Unknown"
          if vtype:
@@ -958,7 +962,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       if self.mCurViewPlugin is not None:
          self.mViewTitleLbl.setText(self.mCurViewPlugin.getName())
          self.mCurViewPlugin.activate(self)
-
 
    def viewRemoved(self, index):
       if self.mCurViewPlugin is not None:
