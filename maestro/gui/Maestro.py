@@ -793,8 +793,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onAbout)
       self.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
                    self.viewChanged)
-      self.connect(self.mStack, QtCore.SIGNAL("widgetRemoved(int)"),
-                   self.viewRemoved)
       self.connect(self.mViewList, QtCore.SIGNAL("currentRowChanged(int)"),
                    self.onViewSelection)
 
@@ -962,11 +960,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       if self.mCurViewPlugin is not None:
          self.mViewTitleLbl.setText(self.mCurViewPlugin.getName())
          self.mCurViewPlugin.activate(self)
-
-   def viewRemoved(self, index):
-      if self.mCurViewPlugin is not None:
-         pass
-#         removed_widget = 
 
    def getCurrentViewPlugin(self, curViewWidget):
       '''
