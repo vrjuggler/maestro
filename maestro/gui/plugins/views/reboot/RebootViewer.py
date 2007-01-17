@@ -92,6 +92,14 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       # We only want to be able to select rows, not cells.
       self.mNodeTableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
       self.mNodeTableView.setAlternatingRowColors(True)
+      triggers = QtGui.QAbstractItemView.DoubleClicked |        \
+                 QtGui.QAbstractItemView.CurrentChanged |       \
+                 QtGui.QAbstractItemView.SelectedClicked |      \
+                 QtGui.QAbstractItemView.EditKeyPressed |       \
+                 QtGui.QAbstractItemView.AnyKeyPressed
+      self.mNodeTableView.setEditTriggers(triggers)
+      self.mNodeTableView.setTabKeyNavigation(True)
+
 
       # Setup a custom context menu callback.
       self.mNodeTableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
