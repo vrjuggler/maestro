@@ -466,12 +466,32 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
 
       view_plugins = env.settings.findall('gui_layout/view_plugins/*')
+      all_view_plugin_types = self.mViewPlugins.keys()
       if view_plugins is None or len(view_plugins) == 0:
-         for name, cls in self.mViewPlugins.iteritems():
+         for name in all_view_plugin_types:
             self.addView(name)
       else:
+         known_plugin_types = []
+
+         # First, loop over the <plugin> elements that are explicitly named
+         # in the preferences file. Each of the plug-in type names will be
+         # added to known_plugin_types to identify it as one that is known to
+         # the current GUI configuration.
          for p in view_plugins:
-            self.addView(p.text.strip())
+            plugin_type = p.text.strip()
+            known_plugin_types.append(plugin_type)
+
+            # Add active plug-ins to the view list.
+            if not p.attrib.has_key('active') or p.attrib['active'].lower() == 'true':
+               self.addView(plugin_type)
+
+         # Now, check to see if any new view plug-ins have been added since
+         # the last time that the user ran the GUI. If there are plug-in types
+         # that are not listed in the preferences file, then add those to
+         # the view list.
+         for name in all_view_plugin_types:
+            if not name in known_plugin_types:
+               self.addView(name)
 
 #      QtCore.QObject.connect(self.mToolboxButtonGroup,
 #                             QtCore.SIGNAL("buttonClicked(int)"),
@@ -834,13 +854,34 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          env.settings['gui_layout/x']      = rect.x()
          env.settings['gui_layout/y']      = rect.y()
 
+         # Save the state of the View Plug-ins that are currently in use.
+         # We look to self.mViewList to get this information.
+         # The first step is to clear out the current state of the View
+         # Plug-ins in the preferences.
          if env.settings.has_key('gui_layout/view_plugins'):
             del env.settings['gui_layout/view_plugins']
 
+         active_view_plugins = []
+
+         # Add all the active View Plug-ins to the configuration with the
+         # 'active' attribute set to 'true'.
          for i in xrange(self.mViewList.count()):
             item = self.mViewList.item(i)
             plugin_type = self.mViewList.getPluginTypeName(item)
-            env.settings.add('gui_layout/view_plugins/plugin', plugin_type)
+            elt = env.settings.add('gui_layout/view_plugins/plugin',
+                                   plugin_type)
+            elt.attrib['active'] = 'true'
+
+            # Store this plug-in's type name in active_view_plugins so that
+            # we can compare it against all the plug-in type names below.
+            active_view_plugins.append(plugin_type)
+
+         # Add all the inactive View Plug-ins to the configuration with the
+         # 'active' attribute set to 'false'.
+         for name in self.mViewPlugins.keys():
+            if not name in active_view_plugins:
+               elt = env.settings.add('gui_layout/view_plugins/plugin', name)
+               elt.attrib['active'] = 'false'
 
          env.settings.save()
       except:
