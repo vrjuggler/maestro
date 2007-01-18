@@ -426,9 +426,10 @@
       <section>
          <title>Getting Dependencies</title>
 
-         <para>Below, we list the current dependencies of Maestro and provide
-         links to each package's download site. This list comes from the
-         Maestro website page describing <ulink
+         <para>Below, we list the <emphasis>minimum</emphasis> required
+         versions of the Maestro dependencies and provide links to each
+         package's download site. This list comes from the Maestro website
+         page describing <ulink
          url="https://realityforge.vrsource.org/trac/maestro/wiki/Dev/GettingTheCode">how
          to get Maestro</ulink>. That page will always provide up-to-date
          information, and it should be consulted in case this rendering of the
@@ -443,21 +444,28 @@
             </listitem>
 
             <listitem>
+               <para><ulink url="http://www.openssl.org/">OpenSSL</ulink>
+               0.9.7 (<ulink
+               url="http://www.slproweb.com/products/Win32OpenSSL.html">Windows
+               installer</ulink>)</para>
+            </listitem>
+
+            <listitem>
                <para><ulink
                url="http://www.trolltech.com/products/qt/downloads">Qt</ulink>
-               4.2.1 (client GUI only)</para>
+               4.2.2 (client GUI only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
                url="httphttp://www.riverbankcomputing.co.uk/sip/download.php//www.riverbankcomputing.com/Downloads/Snapshots/sip4/">SIP
-               4.5</ulink> (client GUI only)</para>
+               4.5.2</ulink> (client GUI only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
                url="http://www.riverbankcomputing.co.uk/pyqt/download.php">PyQt
-               4.1</ulink> (client GUI only)</para>
+               4.1.1</ulink> (client GUI only)</para>
             </listitem>
 
             <listitem>
@@ -488,15 +496,15 @@
             <listitem>
                <para><ulink
                url="http://sourceforge.net/project/showfiles.php?group_id=78018">pywin32</ulink>
-               (<productname class="registered">Microsoft
+               Build 211 (<productname class="registered">Microsoft
                Windows</productname> only)</para>
             </listitem>
 
             <listitem>
                <para><ulink
                url="http://www.pangalactic.org/PyPAM/">PyPAM</ulink> (or
-               python-pam) 0.4.2 (non-<productname
-               class="registered">Windows</productname> server only; <ulink
+               python-pam) 0.4.2 (server only, non-<productname
+               class="registered">Windows</productname> platforms; <ulink
                url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Dev/GettingTheCode/python-pam_0.4.2-10.4.tar.gz">known
                working source</ulink>)</para>
             </listitem>
@@ -505,10 +513,10 @@
          <para>Maestro also relies upon the <ulink
          url="http://www.zope.org/Products/ZopeInterface">zope.interface
          package</ulink>, and the source for this is usually included with the
-         Twisted 2.4 source. It must be installed before installing Twisted,
-         so be sure to read the Twisted installation instructions carefully.
-         For people who plan on using <application>Qt Designer</application>
-         to make custom views or to modify the <application>Maestro
+         Twisted source. It must be installed before installing Twisted, so be
+         sure to read the Twisted installation instructions carefully. For
+         people who plan on using <application>Qt Designer</application> to
+         make custom views or to modify the <application>Maestro
          GUI</application>, <ulink url="http://www.scons.org/">SCons</ulink>
          and <ulink
          url="https://realityforge.vrsource.org/view/SconsAddons/WebHome">SConsAddons</ulink>
