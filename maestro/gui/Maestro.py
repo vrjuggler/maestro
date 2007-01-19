@@ -480,12 +480,16 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          # added to known_plugin_types to identify it as one that is known to
          # the current GUI configuration.
          for p in view_plugins:
-            plugin_type = p.text.strip()
-            known_plugin_types.append(plugin_type)
+            plugin_type = p.text
+            if plugin_type is not None:
+               plugin_type = plugin_type.strip()
+               if len(plugin_type) > 0:
+                  known_plugin_types.append(plugin_type)
 
-            # Add active plug-ins to the view list.
-            if not p.attrib.has_key('active') or p.attrib['active'].lower() == 'true':
-               self.addView(plugin_type)
+                  # Add active plug-ins to the view list.
+                  if not p.attrib.has_key('active') or \
+                     p.attrib['active'].lower() == 'true':
+                     self.addView(plugin_type)
 
          # Now, check to see if any new view plug-ins have been added since
          # the last time that the user ran the GUI. If there are plug-in types
