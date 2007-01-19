@@ -322,12 +322,14 @@ class PluginList(QtGui.QListWidget):
       self.setUniformItemSizes(False)
       self.setSortingEnabled(False)
 
-   def addPlugin(self, icon, text, pluginType):
+   def addPlugin(self, icon, text, pluginType, hidden = False):
       '''
       Appends a new item to this list widget for a View Plug-in.
       '''
       plugin_item = self.__makePluginItem(icon, text, pluginType)
       self.addItem(plugin_item)
+      # This has to be done after the call to addItem().
+      plugin_item.setHidden(hidden)
 
    def insertPlugin(self, icon, text, pluginType, row):
       '''
@@ -919,22 +921,44 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          print "Creating new view: %s %s"%(pluginTypeName, vtype.__name__)
          new_view = vtype()
          new_view_widget = new_view.getViewWidget()
+         hidden = new_view_widget is None
+
+         # If we did not get back a widget for the new View Plug-in, then we
+         # will not show it in the GUI. However, to keep the state of things
+         # consistent, we will still add an item to the view list, but this
+         # item will not be visible to the user. Utlimately, what this
+         # provides is a way to keep the stack widget from getting a null
+         # object reference while still being able to examine the view list
+         # for all the plug-ins that the user requested via the application
+         # configuration.
+         if hidden:
+            err_text = 'Failed to get view object for %s\n(type %s)' % \
+                          (view_name, pluginTypeName)
+            QtGui.QMessageBox.warning(self, "Plug-in Failure", err_text, 
+                                      QtGui.QMessageBox.Ignore     | \
+                                         QtGui.QMessageBox.Default | \
+                                         QtGui.QMessageBox.Escape,
+                                      QtGui.QMessageBox.NoButton,
+                                      QtGui.QMessageBox.NoButton)
+
          new_icon = vtype.getIcon()
 
          # Create a new list item for the view.
          self.mViewList.addPlugin(new_icon, new_view.getName(),
-                                  pluginTypeName)
+                                  pluginTypeName, hidden)
 
-         # Keep track of widgets to remove them later
-         self.mActiveViewPlugins[pluginTypeName] = [new_view, new_view_widget]
+         if not hidden:
+            # Keep track of widgets to remove them later.
+            self.mActiveViewPlugins[pluginTypeName] = [new_view,
+                                                       new_view_widget]
 
-         # Finally, add the view widget to the GUI. This is done last to
-         # ensure that the plug-in state setup performed above is done in
-         # case this call results in one or more signals being emitted.
-         # (QStackedWidget.addWidget() will change the current widget to be
-         # the given argument if the stacked widget object does not currently
-         # have an active widget.)
-         self.mStack.addWidget(new_view_widget)
+            # Finally, add the view widget to the GUI. This is done last to
+            # ensure that the plug-in state setup performed above is done in
+            # case this call results in one or more signals being emitted.
+            # (QStackedWidget.addWidget() will change the current widget to be
+            # the given argument if the stacked widget object does not
+            # currently have an active widget.)
+            self.mStack.addWidget(new_view_widget)
       except Exception, ex:
          view_name = "Unknown"
          if vtype:
@@ -946,7 +970,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          print err_text
          traceback.print_exc()
          
-         QtGui.QMessageBox.critical(self, "Plugin Failure", err_text, 
+         QtGui.QMessageBox.warning(self, "Plug-in Failure", err_text, 
                                     QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
                                     QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
 
