@@ -40,7 +40,7 @@ class OutputThread(threading.Thread):
 
       try:
          env = maestro.core.Environment()
-         env.mEventManager.emit("*", "launch.report_is_running", True)
+         env.mEventManager.emit("*", "launch.report_is_running", True, 0)
          while self.mLaunchService.mProcess is not None: # and  self.mLaunchService.isProcessRunning():
             # Try to get output from process.
             line = self.mStream.read(4096)
@@ -53,7 +53,8 @@ class OutputThread(threading.Thread):
                check_done = False
             # Other wise check to see if the process is still running.
             else:
-               if not self.mLaunchService.isProcessRunning():
+               running, exit_code = self.mLaunchService.isProcessRunning()
+               if not running:
                   print "Process is not running."
                   if line == "":
                      print "Both stdout and stderr are empty"
@@ -61,7 +62,8 @@ class OutputThread(threading.Thread):
             time.sleep(0.1)
 
          self.mLaunchService.mLogger.info("Process is no longer running.")
-         env.mEventManager.emit("*", "launch.report_is_running", False)
+         env.mEventManager.emit("*", "launch.report_is_running", False,
+                                exit_code)
          self.mLaunchService.mProcess = None
       except Exception, ex:
          self.mLaunchService.mLogger.error("I/O Error: " + str(ex))
@@ -98,12 +100,14 @@ class LaunchService(maestro.core.IServicePlugin):
 
       try:
          if self.mProcess is not None:
-            if self.isProcessRunning():
+            running, exit_code = self.isProcessRunning()
+            if running:
                self.mLogger.warning("Command already running.")
                return False
             else:
                self.mProcess = None
-               env.mEventManager.emit("*", "launch.report_is_running", False)
+               env.mEventManager.emit("*", "launch.report_is_running", False,
+                                      exit_code)
 
          #self.mLogger.debug("Original env: " + str(envMap))
 
@@ -240,11 +244,22 @@ class LaunchService(maestro.core.IServicePlugin):
          #return self.mProcess.kill(sig=signal.SIGSTOP)
 
    def onIsRunning(self, nodeId, avatar):
-      running = self.isProcessRunning()
+      running, exit_code = self.isProcessRunning()
       env = maestro.core.Environment()
-      env.mEventManager.emit("*", "launch.report_is_running", running)
+      env.mEventManager.emit("*", "launch.report_is_running", running,
+                             exit_code)
 
    def isProcessRunning(self):
+      '''
+      Determines whether the launched process is currently running. The
+      returned value is a tuple of a Boolean value and an integer (bool, int).
+      The Boolean value indicates whether the process is currently running;
+      the integer is the process exit code. The exit code only has
+      significance if the process is not running (i.e., when the Boolean
+      value is False).
+      '''
+      exit_code = 0
+      running   = False
       try:
          # poll to see if is process still running
          if sys.platform.startswith("win"):
@@ -252,13 +267,13 @@ class LaunchService(maestro.core.IServicePlugin):
          else:
             timeout = os.WNOHANG
          if self.mProcess is not None:
-            self.mProcess.wait(timeout)
+            exit_code = self.mProcess.wait(timeout)
       except process.ProcessError, ex:
          if ex.errno == process.ProcessProxy.WAIT_TIMEOUT:
-            return True
+            running = True
          else:
             raise
-      return False
+      return (running, exit_code)
 
    sEnvVarRegexBraces = re.compile('\${(\w+)}')
 
