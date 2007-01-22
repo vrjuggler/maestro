@@ -37,7 +37,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>November 7, 2006</pubdate>
+      <pubdate>January 12, 2007</pubdate>
    </bookinfo>
 
    <preface>
@@ -1295,9 +1295,10 @@ maestrod.py remove</screen>
                      partitions on the hard disk where it is created. (It does
                      not have to be on the first disk.) Doing it this way
                      prevents the BIOS partitions from being renumbered which
-                     would cause existing boot loader configurations. This is
-                     because boot loaders generally rely upon BIOS partition
-                     ordering to know which OS to load.</para>
+                     would cause problems with existing boot loader
+                     configurations. This is because boot loaders generally
+                     rely upon BIOS partition ordering to know which OS to
+                     load.</para>
                   </important>
 
                   <para>Once the partition is created, the existing GRUB
@@ -1306,45 +1307,104 @@ maestrod.py remove</screen>
                   class="registered">Windows</productname> platform, so the
                   FAT32 partition must be mounted under the operating system
                   where the GRUB files are currently installed. Let us assume
-                  that the GRUB files are currently available under /boot/grub
-                  and that the new FAT32 partition is mounted at /mnt. The
-                  following commands (run as root or another user with write
-                  access to <filename>/mnt</filename>) copy the existing GRUB
-                  files to the FAT32 partition where they need to be:</para>
+                  that the GRUB files are currently available under
+                  <filename>/boot/grub</filename> and that the new FAT32
+                  partition is mounted at <filename>/mnt</filename>. The
+                  following command (run as root or another user with write
+                  access to <filename>/mnt</filename>) copies the existing
+                  GRUB files to the FAT32 partition where they need to
+                  be:</para>
 
-                  <screen>mkdir -p /mnt/boot/grub
-cp -r /boot/grub /mnt/boot/grub</screen>
-
-                  <para>The <filename>grub.conf</filename> file that gets
-                  copied as part of this will continue working since we have
-                  not changed any partition numbering.</para>
+                  <screen>cp -rp /boot/grub /mnt</screen>
 
                   <para>When we are finished, the old
-                  <filename>/boot/grub</filename> will no longer be the valid
-                  GRUB installation. For that reason, the FAT32 partition must
-                  be mounted when the non-Windows operating system is booted
-                  (add an entry to <filename>/etc/fstab</filename> to do
-                  this), and the <filename>/boot/grub</filename> directory
-                  should be moved out of the way to be replaced with a
-                  symbolic link. For example, let us say that the FAT32
-                  partition will be mounted under <filename>/fat32</filename>
-                  every time the computer boots. In that case, the following
-                  command would set up the new
-                  <filename>/boot/grub</filename>:</para>
+                  <filename>/boot/grub</filename> will no longer be the
+                  official GRUB installation. For that reason, the FAT32
+                  partition must be mounted when the non-Windows operating
+                  system is booted (add an entry to
+                  <filename>/etc/fstab</filename> to do this), and the
+                  <filename>/boot/grub</filename> directory should be moved
+                  out of the way to be replaced with a symbolic link. For
+                  example, let us say that the FAT32 partition will be mounted
+                  under <filename>/fat32</filename> every time the computer
+                  boots. In that case, the following commands would set up the
+                  new <filename>/boot/grub</filename> as a symbolic link to
+                  the actual GRUB installation:</para>
 
                   <screen>cd /boot
 mv grub grub-off
-ln -s /fat32/boot/grub ./</screen>
+ln -s /fat32/grub ./</screen>
 
-                  <para>Next, a GRUB <ulink
+                  <para>At this point, it is a good idea to check
+                  <filename>grub.conf</filename> (i.e.,
+                  <filename>/mnt/grub/grub.conf</filename> in our example so
+                  far) for any partition and/or path references that may need
+                  to be updated. For example, if a splash screen is being used
+                  with GRUB, then it will be referenced relative to its GRUB
+                  partition identifier. For example, a Red Hat-based Linux
+                  distribution will usually have the splash image set to
+                  something similar to to
+                  <filename>(hd0,0)/grub/splash.xpm.gz</filename>. Since GRUB
+                  installation partition has now changed to (hd0,2) in our
+                  example, the partition identifer part of the path must be
+                  updated. (Taking this step at this stage saves some hassle
+                  later.)</para>
+
+                  <para>Next, a decision must be made about how to tell the
+                  GRUB first stage loader (the GRUB boot blocks) about the new
+                  location of the installation. If GRUB was already being used
+                  as the boot loader for the computer, then the process is
+                  very simple. First, make sure that the file
+                  <filename>fat_stage_1_5</filename> exists in
+                  <filename>/fat32/grub</filename>. Next, we have two ways to
+                  go about updating the existing GRUB boot blocks. We can do
+                  it from within the booted operating system, or we can reboot
+                  the computer. Either way, we end up at a
+                  <literal>grub&gt;</literal> prompt and execute the same
+                  commands. If we choose to update the GRUB boot blocks from
+                  within the booted OS (likely to be the more convenient
+                  approach), we need to run the <command>grub</command>
+                  command (usually found in <filename>/sbin</filename> or
+                  <filename>/usr/local/sbin</filename>). At the
+                  <literal>grub&gt;</literal> prompt, enter the following
+                  commands:</para>
+
+                  <screen>root (hd0,2)
+setup (hd0)</screen>
+
+                  <para>If instead we choose to reboot the computer, then the
+                  GRUB first stage loader will run as usual, but it will not
+                  be able to find the second stage loader because it has moved
+                  to a different partition. At this point, we will be sitting
+                  at a <literal>grub&gt;</literal> prompt, so we can issue the
+                  same commands as above and reboot again.</para>
+
+                  <para>Both approaches will update the GRUB first stage
+                  loader to look at the FAT32 partition (for this example) to
+                  find the second stage loader. At this point, booting should
+                  be back to normal, but GRUB will be loading its information
+                  from the FAT32 partition instead of from the Linux
+                  partition.</para>
+
+                  <para>If GRUB was not being used as the boot loader for the
+                  computer, then it will be necessary to set it up as the boot
+                  loader. This can be accomplished from within Linux (or
+                  whatever operating system is currently hosting the GRUB
+                  files). Run the <command>grub</command> command as root, and
+                  at the <literal>grub&gt;</literal> prompt, and enter the
+                  same commands as above.</para>
+
+                  <para>If none of the previous approaches are viable for
+                  getting GRUB ready to boot from the FAT32 partition, then a
+                  GRUB <ulink
                   url="http://www.gnu.org/software/grub/manual/html_node/Creating-a-GRUB-boot-floppy.html">boot
                   floppy</ulink> or <ulink
                   url="http://www.gnu.org/software/grub/manual/html_node/Making-a-GRUB-bootable-CD-ROM.html">boot
-                  CD</ulink> is needed. However, the steps described in the
-                  referenced pages will not produce a complete GRUB
+                  CD</ulink> will be needed. However, the steps described in
+                  the referenced pages will not produce a complete GRUB
                   installation device. Instead, they are intended to give the
-                  user a way to load GRUB, not install it. To simplify things,
-                  we have a pre-made <ulink
+                  user a way to <emphasis>load</emphasis> GRUB, not install
+                  it. To simplify things, we have made a <ulink
                   url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Start/MaestroAndGrub/grub.iso">GRUB
                   0.95 boot CD ISO image</ulink><indexterm>
                         <primary>boot loader</primary>
@@ -1357,40 +1417,37 @@ ln -s /fat32/boot/grub ./</screen>
                   installing GRUB onto any file system supported by
                   GRUB.</para>
 
-                  <para>With a bootable GRUB installation medium ready to go,
-                  boot the computer using the created floppy or CD, and at the
-                  GRUB prompt, enter the following:</para>
-
-                  <screen>root (hd0,2)
-setup (hd0)</screen>
-
-                  <para>This will install GRUB from the installation medium
-                  onto the third partition of the first hard disk (our FAT32
-                  partition) and install the GRUB first stage boot loader to
-                  the boot blocks of the first disk. The GRUB files will go
-                  into the directory <filename>boot/grub</filename> on the
-                  partition. This directory would be accessed as
-                  <filename>&lt;drive&gt;:\boot\grub</filename> in
-                  <productname class="registered">Microsoft
-                  Windows</productname>. On non-Windows operating systems, the
-                  FAT32 partition mount point would determine how the files
-                  get accessed.</para>
+                  <para>The bootable GRUB CD can be used for the case when
+                  GRUB is currently not installed on any disk. For this case,
+                  first make a directory called <filename>grub</filename> (or
+                  <filename>&lt;drive&gt;:\grub</filename> if the FAT32
+                  partition is being created from within <productname
+                  class="registered">Microsoft Windows</productname>) in the
+                  empty FAT32 partition. Then, boot the computer using the
+                  GRUB CD. At the <literal>grub&gt;</literal> prompt, run the
+                  same commands for the previous cases. The GRUB files will be
+                  installed to <filename>grub</filename> on the FAT32
+                  partition, and the first stage loader will be set up just as
+                  it would be for the other cases.</para>
 
                   <indexterm class="endofrange"
                              startref="index.section.boot.loader.config.grub.fat32"></indexterm>
 
                   <para>Once we have GRUB installed in the FAT32 partition
-                  with a working <filename>grub.conf</filename>, we can reboot
-                  the computer. The GRUB configuration will be loaded from the
-                  FAT32 partition, and booting can behave just as it did
-                  before. They key difference is that now the Maestro Reboot
-                  Service<indexterm>
+                  with a working <filename>grub.conf</filename>, we can boot
+                  the computer as normal. The key difference is that now the
+                  Maestro Reboot Service<indexterm>
                         <primary>services</primary>
 
                         <secondary>reboot</secondary>
                      </indexterm> plug-in for GRUB can edit
-                  <filename>grub.conf</filename> on all operating
-                  systems.</para>
+                  <filename>grub.conf</filename> on all operating systems.
+                  Remember that the directory contaning
+                  <filename>grub.conf</filename> will be accessed as
+                  <filename>&lt;drive&gt;:\grub</filename> in <productname
+                  class="registered">Microsoft Windows</productname>. On
+                  non-Windows operating systems, the FAT32 partition mount
+                  point determines how it will be accessed.</para>
 
                   <para>After all of that, <filename>maestrod.xcfg</filename>
                   must be updated to point to the new location for
