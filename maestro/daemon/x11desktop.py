@@ -66,28 +66,72 @@ def addAuthority(user, xauthCmd, xauthFile):
    key = (key_match.group(1), key_match.group(2), key_match.group(3))
    print key
 
-   (child_stdout, child_stdin) = \
-      popen2.popen2('%s -f %s list' % (xauthCmd, getUserXauthFile(user)))
+   # The next step is to determine if the user's Xauthority file already has
+   # the key that we just found. This has to be run as the authenticated user
+   # since the owner of the maestrod process may not have access to that
+   # user's files.
 
-   # Read the contents of the user's X authority file. This is not done using
-   # readlines() because that could fail due to an interrupted system call.
-   # Instead, we read lines one at a time and handle EINTR if an when it
-   # occurs.
-   lines = maestro.util.readlinesRetryOnEINTR(child_stdout)
-   child_stdout.close()
-   child_stdin.close()
+   # Start by opening a pipe so that the child process can communicate the
+   # results of its examination of the user's Xauthority file.
+   (child_read, child_write) = os.pipe()
 
-   has_key = False
+   # Create the child process.
+   pid = os.fork()
+   if pid == 0:
+      # The child process does not need to read from the pipe.
+      os.close(child_read)
 
-   # Determine if the user's Xauthority file already has the key.
-   for l in lines:
-      key_match = display_key_re.match(l)
-      user_key = (key_match.group(1), key_match.group(2), key_match.group(3))
-      if user_key == key:
-         has_key = True
-         break
+      # Run this process as the authenticated user.
+      maestro.util.changeToUserName(user)
 
-   # If the user's Xauthority file does not have the key, thne we add it.
+      # Run the xauth(1) command as the authenticated user (the new owner of
+      # this child process).
+      (child_stdout, child_stdin) = \
+         popen2.popen2('%s -f %s list' % (xauthCmd, getUserXauthFile(user)))
+
+      # Read the contents of the user's X authority file. This is not done
+      # using readlines() because that could fail due to an interrupted system
+      # call. Instead, we read lines one at a time and handle EINTR if an when
+      # it occurs.
+      lines = maestro.util.readlinesRetryOnEINTR(child_stdout)
+      child_stdout.close()
+      child_stdin.close()
+
+      has_key = 0
+
+      # Determine if the user's Xauthority file already has the key.
+      for l in lines:
+         key_match = display_key_re.match(l)
+         user_key = (key_match.group(1), key_match.group(2),
+                     key_match.group(3))
+         if user_key == key:
+            has_key = 1
+            break
+
+      # Tell the parent process about the results of examining the user's
+      # Xauthority file.
+      os.write(child_write, str(has_key))
+
+      # And that's it for us! It is critical that os._exit() be used here
+      # rather than sys.exit() in order to prevent a SystemExit exception from
+      # being thrown.
+      os._exit(0)
+
+   # In the parent parocess, we close the write end of the pipe since we will
+   # not be sending anything to the child process.
+   os.close(child_write)
+
+   # Then, we wait on the child process to send us the yay or nay result.
+   result = os.read(child_read, 1)
+
+   # Finally, we are done with the child process, so we close our read end of
+   # the pipe and wait on the process to exit.
+   os.close(child_read)
+   maestro.util.waitpidRetryOnEINTR(pid, 0)
+
+   has_key = result == '1'
+
+   # If the user's Xauthority file does not have the key, then we add it.
    if not has_key:
       pid = os.fork()
       if pid == 0:
