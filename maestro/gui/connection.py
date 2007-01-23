@@ -103,7 +103,7 @@ class AuthorizationClient:
             d.addErrback(self._printError)
             # Then, we try again with the next server-specified authentication
             # method in the list.
-            d.addErrback(lambda _: self._handleGetCap(caps[1:]))
+            d.addErrback(lambda _, c = caps[1:]: self._handleGetCap(c))
       else:
          self.mLoginDeferred.errback(twisted.cred.error.LoginFailed())
 
@@ -154,10 +154,12 @@ class ConnectionManager:
 
       reactor.connectSSL(nodeId, 8789, factory, ctx_factory)
       d = factory.getRootObject()
-      d = d.addCallback(lambda object: self.handleGetAuthServer(nodeId,
-                                                                factory,
-                                                                object))
-      d.addErrback(lambda err: self._catchFailure(nodeId, err))
+      d = \
+         d.addCallback(
+            lambda obj, n = nodeId, f = factory: self.handleGetAuthServer(n, f,
+                                                                          obj)
+         )
+      d.addErrback(lambda err, n = nodeId: self._catchFailure(n, err))
 
       return d
 
@@ -170,8 +172,10 @@ class ConnectionManager:
    def handleGetAuthServer(self, nodeId, factory, serverAuth):
       client = AuthorizationClient(serverAuth)
       d = client.login()
-      d.addCallback(lambda avatar: self.completeConnect(nodeId, factory,
-                                                        avatar))
+      d.addCallback(
+         lambda avatar, n = nodeId, f = factory: self.completeConnect(n, f,
+                                                                      avatar)
+      )
 
    def connectionLost(self, nodeId):
       self.mLogger.debug("connectionLost(%s)" % (nodeId))
@@ -188,7 +192,9 @@ class ConnectionManager:
                            self.mEventMgr)
          avatar.callRemote("setNodeId", self.mIpAddress)
 
-         factory._broker.notifyOnDisconnect(lambda: self.connectionLost(nodeId))
+         factory._broker.notifyOnDisconnect(
+            lambda n = nodeId: self.connectionLost(n)
+         )
          self.mEventMgr.registerProxy(nodeId, avatar)
          self.mLogger.debug("Proxy registered")
 
