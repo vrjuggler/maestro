@@ -68,6 +68,7 @@ class Ensemble(QtCore.QObject):
       # Register to receive signals from all nodes about their current os.
       env = maestro.gui.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
+      env.mEventManager.connect(LOCAL, "connectionMade", self.onConnection)
       env.mEventManager.connect(LOCAL, "connectionLost", self.onLostConnection)
 
    def save(self, filename=None):
@@ -108,7 +109,10 @@ class Ensemble(QtCore.QObject):
       # Unregister to receive signals from all nodes about their current os.
       env = maestro.gui.Environment()
       env.mEventManager.disconnect("*", "ensemble.report_os", self.onReportOs)
-      env.mEventManager.disconnect(LOCAL, "connectionLost", self.onLostConnection)
+      env.mEventManager.disconnect(LOCAL, "connectionMade",
+                                   self.onConnection)
+      env.mEventManager.disconnect(LOCAL, "connectionLost",
+                                   self.onLostConnection)
 
    def __refreshIpMap(self):
       self.mIpToNodeMap.clear()
@@ -185,7 +189,6 @@ class Ensemble(QtCore.QObject):
                self.mConnectInProgress[ip_address] = True
                deferred = env.mConnectionMgr.connectToNode(ip_address)
                if deferred is not None:
-                  deferred.addCallback(self.onConnection, ip_address)
                   deferred.addErrback(self.onConnectError, ip_address)
          except Exception, ex:
             print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)

@@ -196,6 +196,8 @@ class ConnectionManager:
             lambda n = nodeId: self.connectionLost(n)
          )
          self.mEventMgr.registerProxy(nodeId, avatar)
+         self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+                                  "connectionMade", nodeId)
          self.mLogger.debug("Proxy registered")
 
          # As soon as we connect to a new node, we want to know what OS it is
