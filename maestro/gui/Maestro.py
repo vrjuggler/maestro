@@ -39,7 +39,6 @@ LOCAL = maestro.core.EventManager.EventManager.LOCAL
 import elementtree.ElementTree as ET
 
 import LogWidget
-import LoginDialog
 
 import logging, socket, time
 
