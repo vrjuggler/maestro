@@ -31,10 +31,14 @@ class AuthorizationClient:
    Used on the client side for initiating authentication with the server
    side.
    '''
-   def __init__(self, severAuthObj):
+   def __init__(self, severAuthObj, credentials):
       self.mPlugins = {}
       self.mAvatar = None
-      self.mLoginData     = {}
+
+      if credentials is None:
+         credentials = {}
+
+      self.mLoginData     = credentials
       self.mLoginDeferred = defer.Deferred()
       self.mServerAuthObj = severAuthObj
       self.mLogger = logging.getLogger('gui.AuthorizationClient')
@@ -118,6 +122,16 @@ class ConnectionManager:
       self.mEventMgr  = eventMgr
       self.mLogger    = logging.getLogger('gui.ConnectionManager')
 
+      # This dictionary is used to hold the login data that will be used by
+      # instances of AuthorizationClient. Because we create a new instance of
+      # that type for each invocation of handleGetAuthServer() (see below),
+      # it cannot be in charge of holding onto the master copy of this
+      # information. The instance of this type (ConnectionManager) is
+      # persistent throughout the lifetime of the GUI, so it must hold the
+      # master copy of the login data and pass it to each AuthorizationClient
+      # instance.
+      self.mLoginData = {}
+
       # List of nodes for which a connection is currently in progress.
       self.mConnectingNodes = []
 
@@ -170,7 +184,7 @@ class ConnectionManager:
       return failure
 
    def handleGetAuthServer(self, nodeId, factory, serverAuth):
-      client = AuthorizationClient(serverAuth)
+      client = AuthorizationClient(serverAuth, self.mLoginData)
       d = client.login()
       d.addCallback(
          lambda avatar, n = nodeId, f = factory: self.completeConnect(n, f,
