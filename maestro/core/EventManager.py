@@ -111,9 +111,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
             # by using socket.gethostbyname(). This also ensures that the IP
             # address being used is the one to which the remote node connected
             # (an important detail for multi-homed hosts).
-            # NOTE: With these proxy objects, we are the peer and the host is
-            # the remote node.
-            ip_address = v.broker.transport.getPeer().host
+            ip_address = v.broker.transport.getHost().host
             v.callRemote("emit", ip_address, sigName, args, **kwArgs).addErrback(self.onErrorEmitting)
          except banana.BananaError, ex:
             self.mLogger.error('Emitting failed: %s' % str(ex))
