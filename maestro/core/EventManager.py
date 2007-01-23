@@ -88,9 +88,6 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       if not isinstance(sigName, types.StringType):
          raise TypeError("EventManager.emit: sigName of non-string type passed")
 
-      # Get local IP address to use for nodeId mask on remote nodes.
-      ip_address = socket.gethostbyname(socket.gethostname())
-
       if print_debug:
          self.mLogger.debug("EventManager.emit([%s][%s][%s])" % \
                                (nodeId, sigName, args))
@@ -109,6 +106,14 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       # Emit signal to selected nodes, removing any that have dropped their connection.
       for k, v in nodes:
          try:
+            # Get local IP address to use for nodeId mask on remote nodes.
+            # We do it this way to avoid a DNS lookup that would be required
+            # by using socket.gethostbyname(). This also ensures that the IP
+            # address being used is the one to which the remote node connected
+            # (an important detail for multi-homed hosts).
+            # NOTE: With these proxy objects, we are the peer and the host is
+            # the remote node.
+            ip_address = v.broker.transport.getPeer().host
             v.callRemote("emit", ip_address, sigName, args, **kwArgs).addErrback(self.onErrorEmitting)
          except banana.BananaError, ex:
             self.mLogger.error('Emitting failed: %s' % str(ex))
