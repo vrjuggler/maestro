@@ -236,7 +236,13 @@ class Ensemble(QtCore.QObject):
             # dialog box again so that s/he can reauthenticate.
             if result == QtGui.QMessageBox.Yes:
                self.mDisallowedNodes.remove(nodeId)
-               dlg = LoginDialog.LoginDialog()
+
+               try:
+                  host = socket.gethostbyaddr(nodeId)[0]
+               else:
+                  host = nodeId
+
+               dlg = LoginDialog.LoginDialog(host)
                dlg.exec_()
                env = maestro.gui.Environment()
                env.mEventManager.setCredentials(dlg.getLoginInfo())

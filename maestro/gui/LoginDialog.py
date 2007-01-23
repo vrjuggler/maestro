@@ -71,7 +71,7 @@ class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
 
 if __name__ == "__main__":
    app = QtGui.QApplication(sys.argv)
-   ld = LoginDialog()
+   ld = LoginDialog('example.host.com')
    result = ld.exec_()
    print result
    sys.exit(app.exec_())
