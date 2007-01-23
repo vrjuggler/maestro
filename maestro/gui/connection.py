@@ -37,7 +37,7 @@ class AuthorizationClient:
       self.mLoginData     = {}
       self.mLoginDeferred = defer.Deferred()
       self.mServerAuthObj = severAuthObj
-      self.mLogger = logging.getLogger('core.AuthorizationClient')
+      self.mLogger = logging.getLogger('gui.AuthorizationClient')
 
       env = environment.GuiEnvironment()
       self.mAuthPluginTypes = \
@@ -116,7 +116,7 @@ class ConnectionManager:
    def __init__(self, ipAddress, eventMgr):
       self.mIpAddress = ipAddress
       self.mEventMgr  = eventMgr
-      self.mLogger    = logging.getLogger('core.ConnectionManager')
+      self.mLogger    = logging.getLogger('gui.ConnectionManager')
 
       # List of nodes for which a connection is currently in progress.
       self.mConnectingNodes = []
