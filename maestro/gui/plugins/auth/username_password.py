@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtCore
+import socket
 import twisted.internet.defer
 import maestro.core.plugin_interfaces as PI
 import maestro.core.error
@@ -27,12 +28,19 @@ class LoginHandler(QtCore.QObject):
    def __init__(self, parent = None):
       QtCore.QObject.__init__(self, parent)
 
-   def openDialog(self, successCallback, failCallback):
+   def openDialog(self, hostAddr, successCallback, failCallback):
       self.mSuccessCallback = successCallback
       self.mFailCallback    = failCallback
 
+      # Attempt to get the host name for the given address. If that fails,
+      # fall back on the given value.
+      try:
+         host = socket.gethostbyaddr(hostAddr)[0]
+      except:
+         host = hostAddr
+
       # Create a log in dialog.
-      self.mLoginDlg = maestro.gui.LoginDialog.LoginDialog()
+      self.mLoginDlg = maestro.gui.LoginDialog.LoginDialog(host)
       self.mLoginDlg.connect(self.mLoginDlg, QtCore.SIGNAL("accepted()"),
                              self._loginAccepted)
       self.mLoginDlg.connect(self.mLoginDlg, QtCore.SIGNAL("rejected()"),
@@ -60,7 +68,7 @@ class UsernamePasswordAuthenticationClient(PI.IClientAuthenticationPlugin):
       self.mServerID = serverID
 
       if not self.mCredentials.has_key(serverID):
-         self.mLoginHandler.openDialog(self._loginAccepted,
+         self.mLoginHandler.openDialog(serverID, self._loginAccepted,
                                        self._loginRejected)
       else:
          self._doLogin(*self.mCredentials[serverID])

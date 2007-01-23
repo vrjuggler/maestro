@@ -22,7 +22,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_LoginDialogBase(object):
    def setupUi(self, LoginDialogBase):
       LoginDialogBase.setObjectName("LoginDialogBase")
-      LoginDialogBase.resize(QtCore.QSize(QtCore.QRect(0,0,311,202).size()).expandedTo(LoginDialogBase.minimumSizeHint()))
+      LoginDialogBase.resize(QtCore.QSize(QtCore.QRect(0,0,311,232).size()).expandedTo(LoginDialogBase.minimumSizeHint()))
       LoginDialogBase.setWindowIcon(QtGui.QIcon(":/Maestro/images/maestro_icon.png"))
       LoginDialogBase.setModal(True)
 
@@ -60,6 +60,11 @@ class Ui_LoginDialogBase(object):
       self.mLoginLbl.setObjectName("mLoginLbl")
       self.hboxlayout.addWidget(self.mLoginLbl)
       self.vboxlayout.addLayout(self.hboxlayout)
+
+      self.mHostLabel = QtGui.QLabel(LoginDialogBase)
+      self.mHostLabel.setAlignment(QtCore.Qt.AlignCenter)
+      self.mHostLabel.setObjectName("mHostLabel")
+      self.vboxlayout.addWidget(self.mHostLabel)
 
       self.gridlayout = QtGui.QGridLayout()
       self.gridlayout.setMargin(0)

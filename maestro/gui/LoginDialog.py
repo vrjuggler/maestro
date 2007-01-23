@@ -28,9 +28,10 @@ pj = os.path.join
 import maestro
 
 class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
-   def __init__(self, parent = None):
+   def __init__(self, hostName, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
+      self.setHostName(hostName)
 
    def setupUi(self, widget):
       LoginDialogBase.Ui_LoginDialogBase.setupUi(self, widget)
@@ -58,6 +59,9 @@ class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
       except:
          # Do nothing if we fail to get domain/username.
          pass
+
+   def setHostName(self, name):
+      self.mHostLabel.setText(name)
 
    def getLoginInfo(self):
       login_info = {'username':str(self.mUserEdit.text()),

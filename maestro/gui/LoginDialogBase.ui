@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>311</width>
-    <height>202</height>
+    <height>232</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -71,6 +71,16 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="mHostLabel" >
+     <property name="text" >
+      <string/>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QGridLayout" >
