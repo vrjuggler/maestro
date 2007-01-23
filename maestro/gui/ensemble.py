@@ -239,7 +239,7 @@ class Ensemble(QtCore.QObject):
 
                try:
                   host = socket.gethostbyaddr(nodeId)[0]
-               else:
+               except:
                   host = nodeId
 
                dlg = LoginDialog.LoginDialog(host)
