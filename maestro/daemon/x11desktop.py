@@ -71,21 +71,12 @@ def addAuthority(user, xauthCmd, xauthFile):
    # since the owner of the maestrod process may not have access to that
    # user's files.
 
-   # Start by opening a pipe so that the child process can communicate the
-   # results of its examination of the user's Xauthority file.
-   (child_read, child_write) = os.pipe()
-
    # Create the child process.
    pid = os.fork()
    if pid == 0:
-      # The child process does not need to read from the pipe.
-      os.close(child_read)
-
-      # Run this process as the authenticated user.
+      # Run the xauth(1) command as the authenticated user.
       maestro.util.changeToUserName(user)
 
-      # Run the xauth(1) command as the authenticated user (the new owner of
-      # this child process).
       (child_stdout, child_stdin) = \
          popen2.popen2('%s -f %s list' % (xauthCmd, getUserXauthFile(user)))
 
@@ -108,42 +99,24 @@ def addAuthority(user, xauthCmd, xauthFile):
             has_key = 1
             break
 
-      # Tell the parent process about the results of examining the user's
-      # Xauthority file.
-      os.write(child_write, str(has_key))
+      # If the user's Xauthority file does not have the key, then we add it.
+      if not has_key:
+         os.spawnl(os.P_WAIT, xauthCmd, xauthCmd, '-f',
+                   getUserXauthFile(user), 'add', key[0], key[1], key[2])
 
       # And that's it for us! It is critical that os._exit() be used here
       # rather than sys.exit() in order to prevent a SystemExit exception from
       # being thrown.
-      os._exit(0)
+      os._exit(has_key)
 
-   # In the parent parocess, we close the write end of the pipe since we will
-   # not be sending anything to the child process.
-   os.close(child_write)
+   # Wait on the child to complete. This returns a tuple containing the
+   # process ID and the process exit code. The exit code of the child
+   # indicates whether the authenticated user already has the Xauthority key
+   # (0 -> False, 1 -> True).
+   child_result = maestro.util.waitpidRetryOnEINTR(pid, 0)
+   assert child_result[0] == pid
 
-   # Then, we wait on the child process to send us the yay or nay result.
-   result = os.read(child_read, 1)
-
-   # Finally, we are done with the child process, so we close our read end of
-   # the pipe and wait on the process to exit.
-   os.close(child_read)
-   maestro.util.waitpidRetryOnEINTR(pid, 0)
-
-   has_key = result == '1'
-
-   # If the user's Xauthority file does not have the key, then we add it.
-   if not has_key:
-      pid = os.fork()
-      if pid == 0:
-         # Run the xauth(1) command as the user.
-         maestro.util.changeToUserName(user)
-         os.execl(xauthCmd, xauthCmd, '-f', getUserXauthFile(user), 'add',
-                  key[0], key[1], key[2])
-
-      # Wait on the child to complete.
-      maestro.util.waitpidRetryOnEINTR(pid, 0)
-
-   return (key[0], has_key)
+   return (key[0], bool(child_result[1]))
 
 def removeAuthority(user, xauthCmd, displayName):
    '''
