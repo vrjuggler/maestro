@@ -84,8 +84,9 @@ class EventManagerBase(object):
                slot = slots[x]
                if (slot.isDead() or slot == slot_callable):
                   remove_items.append(x)
-            remove_items.sort(reverse=True)  # Reverse so I can remove below
-            
+            remove_items.sort()
+            remove_items.reverse()  # Reverse so I can remove below
+
             for i in remove_items:
                assert i < len(slots)     # If this isn't true the sort or reverse failed
                del slots[i]
