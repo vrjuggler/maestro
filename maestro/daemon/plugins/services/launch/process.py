@@ -820,7 +820,6 @@ class Process:
         if isinstance(self._cmd, types.StringTypes):
             # This is easier than trying to reproduce shell interpretation to
             # separate the arguments.
-            print "TEST: ", self._cmd
             cmd = ['/bin/sh', '-c', self._cmd]
         else:
             cmd = self._cmd
