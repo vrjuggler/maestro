@@ -2243,119 +2243,119 @@ class _OutFileProxy(threading.Thread):
 
 
 
-if sys.platform.startswith("linux"):
-    class _ThreadFixer:
-        """Mixin class for various classes in the Process hierarchy to
-        work around the known LinuxThreads bug where one cannot .wait()
-        on a created process from a subthread of the thread that created
-        the process.
-
-        Usage:
-            class ProcessXXX(_ThreadFixer, BrokenProcessXXX):
-                _pclass = BrokenProcessXXX
-
-        Details:
-            Because we must do all real os.wait() calls on the child
-            process from the thread that spawned it, we use a proxy
-            thread whose only responsibility is just that. The proxy
-            thread just starts the child and then immediately wait's for
-            the child to terminate. On termination is stores the exit
-            status (for use by the main thread) and notifies any thread
-            waiting for this termination (possibly the main thread). The
-            overriden .wait() uses this stored exit status and the
-            termination notification to simulate the .wait().
-        """
-        def __init__(self, *args, **kwargs):
-            # Keep a reference to 'log' ensure it is around for this object's
-            # destruction.
-            self.__log = log
-            self.__waiter = None
-            self.__hasTerminated = threading.Condition()
-            self.__terminationResult = None
-            self.__childStarted = threading.Condition()
-            self._pclass.__init__(self, *args, **kwargs)
-
-        def _forkAndExecChildOnUnix(self, *args, **kwargs):
-            """Fork and start the child process do it in a special subthread
-            that will negotiate subsequent .wait()'s.
-
-            Sets self._pid as a side effect.
-            """
-            self.__waiter = threading.Thread(
-                target=self.__launchAndWait, args=args, kwargs=kwargs)
-
-            # Start subthread that will launch child and wait until it
-            # *has* started.
-            self.__childStarted.acquire()
-            self.__waiter.start()
-            self.__childStarted.wait()
-            self.__childStarted.release()
-
-        def __launchAndWait(self, *args, **kwargs):
-            """Launch the given command and wait for it to terminate.
-
-            When the process has terminated then store its exit value
-            and finish.
-            """
-            logfix.info("start child in thread %s",
-                        threading.currentThread().getName())
-
-            # Spawn the child process and notify the main thread of
-            # this.
-            self.__childStarted.acquire()
-            self._pclass._forkAndExecChildOnUnix(self, *args, **kwargs)
-            self.__childStarted.notifyAll()
-            self.__childStarted.release()
-
-            # Wait on the thread and store appropriate results when
-            # finished.
-            try:
-                waitResult = self._pclass.wait(self)
-            except ProcessError, ex:
-                waitResult = ex
-            self.__hasTerminated.acquire()
-            self.__terminationResult = waitResult
-            self.__hasTerminated.notifyAll()
-            self.__hasTerminated.release()
-
-            self.__waiter = None # drop ref that would keep instance alive
-        
-        def wait(self, timeout=None): 
-            # If the process __hasTerminated then return the exit
-            # status. Otherwise simulate the wait as appropriate.
-            # Note:
-            #   - This class is only used on linux so 'timeout' has the
-            #     Unix 'timeout' semantics.
-            self.__hasTerminated.acquire()
-            if self.__terminationResult is None:
-                if timeout == os.WNOHANG:   # Poll.
-                    self.__hasTerminated.wait(0)
-                else:                       # Block until process finishes.
-                    self.__hasTerminated.wait()
-            terminationResult = self.__terminationResult
-            self.__hasTerminated.release()
-
-            if terminationResult is None:
-                # process has not finished yet
-                raise ProcessError("Wait for process timed out.",
-                                   self.WAIT_TIMEOUT)
-            elif isinstance(terminationResult, Exception):
-                # some error waiting for process termination
-                raise terminationResult
-            else:
-                # the process terminated
-                return terminationResult
-
-    _ThreadBrokenProcess = Process
-    class Process(_ThreadFixer, _ThreadBrokenProcess):
-        _pclass = _ThreadBrokenProcess
-
-    _ThreadBrokenProcessOpen = ProcessOpen
-    class ProcessOpen(_ThreadFixer, _ThreadBrokenProcessOpen):
-        _pclass = _ThreadBrokenProcessOpen
-
-    _ThreadBrokenProcessProxy = ProcessProxy
-    class ProcessProxy(_ThreadFixer, _ThreadBrokenProcessProxy):
-        _pclass = _ThreadBrokenProcessProxy
+#if sys.platform.startswith("linux"):
+#    class _ThreadFixer:
+#        """Mixin class for various classes in the Process hierarchy to
+#        work around the known LinuxThreads bug where one cannot .wait()
+#        on a created process from a subthread of the thread that created
+#        the process.
+#
+#        Usage:
+#            class ProcessXXX(_ThreadFixer, BrokenProcessXXX):
+#                _pclass = BrokenProcessXXX
+#
+#        Details:
+#            Because we must do all real os.wait() calls on the child
+#            process from the thread that spawned it, we use a proxy
+#            thread whose only responsibility is just that. The proxy
+#            thread just starts the child and then immediately wait's for
+#            the child to terminate. On termination is stores the exit
+#            status (for use by the main thread) and notifies any thread
+#            waiting for this termination (possibly the main thread). The
+#            overriden .wait() uses this stored exit status and the
+#            termination notification to simulate the .wait().
+#        """
+#        def __init__(self, *args, **kwargs):
+#            # Keep a reference to 'log' ensure it is around for this object's
+#            # destruction.
+#            self.__log = log
+#            self.__waiter = None
+#            self.__hasTerminated = threading.Condition()
+#            self.__terminationResult = None
+#            self.__childStarted = threading.Condition()
+#            self._pclass.__init__(self, *args, **kwargs)
+#
+#        def _forkAndExecChildOnUnix(self, *args, **kwargs):
+#            """Fork and start the child process do it in a special subthread
+#            that will negotiate subsequent .wait()'s.
+#
+#            Sets self._pid as a side effect.
+#            """
+#            self.__waiter = threading.Thread(
+#                target=self.__launchAndWait, args=args, kwargs=kwargs)
+#
+#            # Start subthread that will launch child and wait until it
+#            # *has* started.
+#            self.__childStarted.acquire()
+#            self.__waiter.start()
+#            self.__childStarted.wait()
+#            self.__childStarted.release()
+#
+#        def __launchAndWait(self, *args, **kwargs):
+#            """Launch the given command and wait for it to terminate.
+#
+#            When the process has terminated then store its exit value
+#            and finish.
+#            """
+#            logfix.info("start child in thread %s",
+#                        threading.currentThread().getName())
+#
+#            # Spawn the child process and notify the main thread of
+#            # this.
+#            self.__childStarted.acquire()
+#            self._pclass._forkAndExecChildOnUnix(self, *args, **kwargs)
+#            self.__childStarted.notifyAll()
+#            self.__childStarted.release()
+#
+#            # Wait on the thread and store appropriate results when
+#            # finished.
+#            try:
+#                waitResult = self._pclass.wait(self)
+#            except ProcessError, ex:
+#                waitResult = ex
+#            self.__hasTerminated.acquire()
+#            self.__terminationResult = waitResult
+#            self.__hasTerminated.notifyAll()
+#            self.__hasTerminated.release()
+#
+#            self.__waiter = None # drop ref that would keep instance alive
+#        
+#        def wait(self, timeout=None): 
+#            # If the process __hasTerminated then return the exit
+#            # status. Otherwise simulate the wait as appropriate.
+#            # Note:
+#            #   - This class is only used on linux so 'timeout' has the
+#            #     Unix 'timeout' semantics.
+#            self.__hasTerminated.acquire()
+#            if self.__terminationResult is None:
+#                if timeout == os.WNOHANG:   # Poll.
+#                    self.__hasTerminated.wait(0)
+#                else:                       # Block until process finishes.
+#                    self.__hasTerminated.wait()
+#            terminationResult = self.__terminationResult
+#            self.__hasTerminated.release()
+#
+#            if terminationResult is None:
+#                # process has not finished yet
+#                raise ProcessError("Wait for process timed out.",
+#                                   self.WAIT_TIMEOUT)
+#            elif isinstance(terminationResult, Exception):
+#                # some error waiting for process termination
+#                raise terminationResult
+#            else:
+#                # the process terminated
+#                return terminationResult
+#
+#    _ThreadBrokenProcess = Process
+#    class Process(_ThreadFixer, _ThreadBrokenProcess):
+#        _pclass = _ThreadBrokenProcess
+#
+#    _ThreadBrokenProcessOpen = ProcessOpen
+#    class ProcessOpen(_ThreadFixer, _ThreadBrokenProcessOpen):
+#        _pclass = _ThreadBrokenProcessOpen
+#
+#    _ThreadBrokenProcessProxy = ProcessProxy
+#    class ProcessProxy(_ThreadFixer, _ThreadBrokenProcessProxy):
+#        _pclass = _ThreadBrokenProcessProxy
 
 
