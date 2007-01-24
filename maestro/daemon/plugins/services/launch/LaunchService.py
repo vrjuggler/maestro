@@ -55,9 +55,9 @@ class OutputThread(threading.Thread):
             else:
                running, exit_code = self.mLaunchService.isProcessRunning()
                if not running:
-                  print "Process is not running."
+                  self.mLaunchService.mLogger.info("Process is not running.")
                   if line == "":
-                     print "Both stdout and stderr are empty"
+                     self.mLaunchService.mLogger.debug("Input stream is empty")
                      break
             time.sleep(0.1)
 
@@ -225,11 +225,11 @@ class LaunchService(maestro.core.IServicePlugin):
 
          self.mStdoutThread = OutputThread(self, self.mProcess.stdout)
          #self.mStderrThread = OutputThread(self, self.mProcess.stderr)
-         print "BEFORE THREAD START"
+         self.mLogger.debug("BEFORE THREAD START")
          sys.stdout.flush()
          self.mStdoutThread.start()
          #self.mStderrThread.start()
-         print "AFTER THREAD START"
+         self.mLogger.debug("AFTER THREAD START")
          sys.stdout.flush()
          return True
       except KeyError, ex:
