@@ -36,7 +36,8 @@ import maestro.core
 const = maestro.core.const
 
 const.EXEC_DIR = os.path.dirname(__file__)
-const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro', 'daemon', 'plugins')
+const.PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'maestro',
+                                'daemon', 'plugins')
 const.MAESTRO_GUI = False
 
 import maestro
@@ -64,9 +65,11 @@ if os.name == 'nt':
 
 if os.name == 'nt':
    def AdjustPrivilege(priv, enable):
-      htoken = win32security.OpenProcessToken(
-                  win32api.GetCurrentProcess(),
-                  ntsecuritycon.TOKEN_ADJUST_PRIVILEGES | ntsecuritycon.TOKEN_QUERY)
+      htoken = \
+         win32security.OpenProcessToken(
+            win32api.GetCurrentProcess(),
+            ntsecuritycon.TOKEN_ADJUST_PRIVILEGES | ntsecuritycon.TOKEN_QUERY
+         )
       id = win32security.LookupPrivilegeValue(None, priv)
       if enable:
          newPrivileges = [(id, ntsecuritycon.SE_PRIVILEGE_ENABLED)]
@@ -131,7 +134,10 @@ class MaestroServer:
 
    def loadServices(self):
       env = maestro.core.Environment()
-      self.mServicePlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IServicePlugin, returnNameDict=True)
+      self.mServicePlugins = \
+         env.mPluginManager.getPlugins(plugInType = maestro.core.IServicePlugin,
+                                       returnNameDict = True)
+
       for name, vtype in self.mServicePlugins.iteritems():
          # Try to load the view
          new_service = None
@@ -207,7 +213,10 @@ if os.name == 'nt':
          sys.stdout = maestro.util.PseudoFileOut(null_output)
          sys.stderr = maestro.util.PseudoFileErr(null_output)
 
-         formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
+         formatter = \
+            logging.Formatter(
+               '%(asctime)s %(name)-12s: %(levelname)-8s %(message)s'
+            )
          self.mNtEvent.setLevel(logging.ERROR)
          self.mNtEvent.setFormatter(formatter)
          self.mFileLog.setLevel(logging.DEBUG)
@@ -241,8 +250,11 @@ class AuthServer(twisted.spread.flavors.Referenceable):
       self.mBroker  = broker
       self.mPlugins = {}
       self.mAuthPluginTypes = \
-         env.mPluginManager.getPlugins(plugInType=maestro.core.IServerAuthenticationPlugin,
-                                       returnNameDict=True)
+         env.mPluginManager.getPlugins(
+            plugInType = maestro.core.IServerAuthenticationPlugin,
+            returnNameDict = True
+         )
+
       for name, vtype in self.mAuthPluginTypes.iteritems():
          # Try to load the authentication plug-in.
          new_auth = None
@@ -264,9 +276,11 @@ class AuthServer(twisted.spread.flavors.Referenceable):
 
       # Based on the configuration, create a list that specifies (by name) the
       # order of authentication plug-ins to use when a client connects.
-      auth_plugins = \
-         env.settings.get('authentication_plugins', self.sDefaultAuthPlugins).strip()
-      auth_plugin_list = [p.strip() for p in auth_plugins.split(',') if self.mPlugins.has_key(p.strip())]
+      auth_plugins = env.settings.get('authentication_plugins',
+                                      self.sDefaultAuthPlugins)
+      auth_plugins = auth_plugins.strip()
+      auth_plugin_list = \
+         [p.strip() for p in auth_plugins.split(',') if self.mPlugins.has_key(p.strip())]
       self.mActivePlugins = auth_plugin_list
       self.mLogger.debug('Active plug-ins: %s' % str(self.mActivePlugins))
 
@@ -289,8 +303,8 @@ def RunServer(installSH=True):
 
       # Tell windows to not pop up annoying error dialog boxes.
       if sys.platform.startswith("win"):
-         win32api.SetErrorMode(win32con.SEM_FAILCRITICALERRORS |
-                               win32con.SEM_NOGPFAULTERRORBOX |
+         win32api.SetErrorMode(win32con.SEM_FAILCRITICALERRORS     |
+                               win32con.SEM_NOGPFAULTERRORBOX      |
                                win32con.SEM_NOALIGNMENTFAULTEXCEPT |
                                win32con.SEM_NOOPENFILEERRORBOX)
       def logCB(percent, message):
@@ -312,7 +326,7 @@ def RunServer(installSH=True):
       cert_path = os.path.join(const.EXEC_DIR, 'server.pem')
       logger.info("Cert: " + cert_path)
       reactor.listenSSL(8789, factory,
-         ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
+                        ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
 
       looping_call = task.LoopingCall(cluster_server.update)
       looping_call.start(0.1)
@@ -321,8 +335,8 @@ def RunServer(installSH=True):
       logger.error(ex)
       raise
 
-
-def daemonize (stdin='/dev/null', stdout='/dev/null', stderr=None, pidfile=None):
+def daemonize(stdin = '/dev/null', stdout = '/dev/null', stderr = None,
+              pidfile = None):
    """This forks the current process into a daemon. The stdin, stdout,
    and stderr arguments are file names that will be opened and be used
    to replace the standard file descriptors in sys.stdin, sys.stdout,
@@ -390,9 +404,13 @@ if __name__ == '__main__':
          logging.basicConfig(level = logging.DEBUG, format = fmt_str,
                              datefmt = date_fmt)
 
-      const.LOGFILE = os.path.abspath(os.path.join(const.EXEC_DIR, 'maestro.log'))
+      const.LOGFILE = os.path.abspath(os.path.join(const.EXEC_DIR,
+                                                   'maestro.log'))
       file_log = logging.FileHandler(const.LOGFILE, 'w')
-      formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
+      formatter = \
+         logging.Formatter(
+            '%(asctime)s %(name)-12s: %(levelname)-8s %(message)s'
+         )
       file_log.setLevel(logging.DEBUG)
       file_log.setFormatter(formatter)
 
@@ -418,7 +436,10 @@ if __name__ == '__main__':
          const.LOGFILE = '/var/log/maestrod.log'
          file_log = logging.handlers.RotatingFileHandler(const.LOGFILE, 'a',
                                                          50000, 10)
-         formatter = logging.Formatter('%(asctime)s %(name)-12s: %(levelname)-8s %(message)s')
+         formatter = \
+            logging.Formatter(
+               '%(asctime)s %(name)-12s: %(levelname)-8s %(message)s'
+            )
          file_log.setLevel(logging.DEBUG)
          file_log.setFormatter(formatter)
 
