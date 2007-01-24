@@ -106,6 +106,7 @@ class LaunchService(maestro.core.IServicePlugin):
                return False
             else:
                self.mProcess = None
+               env = maestro.core.Environment()
                env.mEventManager.emit("*", "launch.report_is_running", False,
                                       exit_code)
 
