@@ -1,0 +1,1365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book>
+   <bookinfo>
+      <title>Maestro Programmer's Guide</title>
+
+      <releaseinfo>Version 0.4</releaseinfo>
+
+      <authorgroup>
+         <corpauthor><ulink url="http://www.infiscape.com/">Infiscape
+         Corporation</ulink></corpauthor>
+      </authorgroup>
+
+      <copyright>
+         <year>2006–2007</year>
+
+         <holder>Infiscape Corporation</holder>
+      </copyright>
+
+      <address><street>2901 South Loop Drive, Suite 3400</street><city>Ames</city><state>Iowa</state><postcode>50010-8646</postcode><phone>+1.515.296.3787</phone><email>contact@infiscape.com</email><otheraddr>Website: <ulink
+               url="http://www.infiscape.com/">http://www.infiscape.com/</ulink></otheraddr></address>
+
+      <legalnotice>
+         <para>Permission is granted to copy, distribute and/or modify this
+         document under the terms of the GNU Free Documentation License,
+         Version 1.2 or any later version published by the Free Software
+         Foundation; with the Invariant Sections being <xref
+         linkend="appendix.gfdl" />, with no Front-Cover Texts, and with no
+         Back-Cover Texts. A copy of the license is included in <xref
+         linkend="appendix.gfdl" />.</para>
+
+         <para>Some of the designations used by manufacturers and sellers to
+         distinguish their products are claimed as trademarks. Where those
+         designations appear in this book, and Infiscape Corporation was aware
+         of the trademark claim, the designations have been printed in caps or
+         initial caps.</para>
+      </legalnotice>
+
+      <pubdate>January 31, 2007</pubdate>
+   </bookinfo>
+
+   <preface>
+      <title>Preface</title>
+
+      <para>Maestro was originally written by Aron Bierbaum at <ulink
+      url="http://www.infiscape.com/">Infiscape Corporation</ulink> in January
+      2006 and was known simply as the <quote>Cluster Control Tool.</quote> It
+      was born out of a need for improving the launching of <ulink
+      url="http://www.vrjuggler.org/">VR Juggler</ulink> applications<footnote>
+            <para>Applications that present the user(s) with an interactive,
+            immersive virtual space.</para>
+         </footnote> on graphics clusters—especially those running
+      <productname class="registered">Microsoft Windows</productname> where
+      remote execution of interactive applications is atypical. Existing
+      techniques for launching VR Juggler applications involved writing custom
+      shell scripts or batch files for each application. Through varying means
+      (SSH, <ulink
+      url="http://www.sysinternals.com/Utilities/PsExec.html">PsExec</ulink>,
+      etc.), these scripts would get access to the nodes of the cluster and
+      start the application process on each. To see the output from all the
+      cluster nodes usually required having a console window open for each
+      node (which was usually already open as a side effect of running the
+      remote logon and launch commands). All in all, these techniques suffered
+      from many limitations and complexities.</para>
+
+      <para>In this book, we describe how Maestro functions internally so that
+      interested and motivated programmers can contribute improvements to
+      Maestro or simply write extensions of their own.</para>
+
+      <para>Before we begin explaining Maestro and its use, we present the
+      conventions used in this document in order for readers to get the most
+      out of it. In some places, command lines are wrapped to keep the text
+      within the margins of a page when this document is rendered to PDF. Such
+      cases should be obvious to the reader, but it is important to understand
+      that the command lines are intended to appear as a single line when
+      used.</para>
+
+      <para>Typesetting conventions used in this document are as
+      follows:</para>
+
+      <itemizedlist>
+         <listitem>
+            <para>File names and paths appear as
+            <filename>file.txt</filename></para>
+         </listitem>
+
+         <listitem>
+            <para>Commands to be entered by the user appear as
+            <command>command</command></para>
+         </listitem>
+
+         <listitem>
+            <para>Environment variables <emphasis>names</emphasis> appear as
+            <envar>ENV_VAR</envar></para>
+         </listitem>
+
+         <listitem>
+            <para>Environment variables <emphasis>values</emphasis> appear as
+            <envar>$ENV_VAR</envar></para>
+         </listitem>
+
+         <listitem>
+            <para>Command line options appear as <option>-o</option></para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface menus appear as <guimenu>Menu
+            Name</guimenu></para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface menu items appear as
+            <guimenuitem>Item Name</guimenuitem> or as <menuchoice>
+                  <shortcut>
+                     <keycap>Shortcut</keycap>
+                  </shortcut>
+
+                  <guimenu>Menu Name</guimenu>
+
+                  <guimenuitem>Item Name</guimenuitem>
+               </menuchoice> to identify the menu and menu item together—along
+            with the keyboard shortcut in parentheses if one exists</para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface labels appear as <guilabel>Label
+            Text</guilabel></para>
+         </listitem>
+
+         <listitem>
+            <para>Graphical user interface buttons appear as <guibutton>Button
+            Name</guibutton></para>
+         </listitem>
+      </itemizedlist>
+
+      <para>Acronyms used frequently in this document, though we have avoided
+      using abbreviations as much as possible. In a few cases, the text
+      switches back and forth between the acronym and the full spelling of the
+      acronym. The most frequently used acronyms are the following:</para>
+
+      <itemizedlist>
+         <listitem>
+            <para><acronym>GUI</acronym>: A graphical user interface</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>XML</acronym>: The <ulink
+            url="http://www.w3.org/XML/">eXtensible Markup
+            Language</ulink></para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>OS</acronym>: Operating system</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>VR</acronym>: Virtual reality</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>SSH</acronym>: Secure shell</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>PAM</acronym>: Pluggable authentication
+            module</para>
+         </listitem>
+      </itemizedlist>
+   </preface>
+
+   <chapter>
+      <title>Client/Server Communication</title>
+
+      <para>In this chapter, we describe the existing protocols that are used
+      to for the Maestro client GUI to communicate with the Maestro service
+      (also known as <quote>maestrod</quote>). The communication protocol
+      boils down to emission and reception of signals that are identified
+      using strings. A signal can be emitted at any time by either the client
+      or the server. Signals are then received and handled by callables.
+      Maestro uses asynchornous communication in both directions, so emitting
+      a signal returns immediately. Depending on the signal, a response from
+      the other side will come at some later time, but programmers cannot
+      assume that the Maestro event loop will block waiting on that response.
+      Instead, communciation must be written with the express understanding
+      that a response can come at any time after a query is made.</para>
+
+      <para>All communication occurs through the Event Manager, an object held
+      by the singleton Environment object in both the client GUI and the
+      server-side process. To get the Event Manager reference in the Maestro
+      client GUI, use the code shown in <xref
+      linkend="example.get.event.manager.client" />. For the server side, use
+      what is shown in <xref linkend="example.get.event.manager.server" />.
+      The slight difference is due to the specialization of
+      <classname>maestro.core.environment.Environment</classname> used by the
+      Maestro GUI.</para>
+
+      <example id="example.get.event.manager.client">
+         <title>Retrieving the Event Manager Reference in the GUI</title>
+
+         <programlisting>import maestro.gui
+evt_mgr = maestro.gui.Environment().mEventManager</programlisting>
+      </example>
+
+      <example id="example.get.event.manager.server">
+         <title>Retrieving the Event Manager Reference on the Server
+         Side</title>
+
+         <programlisting>import maestro.core
+evt_mgr = maestro.core.Environment().mEventManager</programlisting>
+      </example>
+
+      <para>Signals are emitted by invoking the method
+      <methodname>maestro.core.EventManager.EventManager.emit()</methodname>
+      with a node identifier string (usually an IP address or the special
+      string <literal>'*'</literal> identifying all nodes in the ensemble), a
+      signal name, and any arguments to be passed with the signal. The signal
+      will be received by all code on the remote side that has registered a
+      handler for the identified signal. A signal can be emitted back to the
+      local code by using the method
+      <methodname>maestro.core.EventManager.EventManager.localEmit()</methodname>
+      with the constant value
+      <constant>maestro.core.EventManager.EventManager.LOCAL</constant> as the
+      node identifier. One case where this can be useful is in sending signals
+      to the Maestro client GUI. The signal handler in the GUI can respond as
+      though the signal were coming from a remote node.</para>
+
+      <section>
+         <title>Existing Protocols</title>
+
+         <para></para>
+
+         <section>
+            <title>Launch Service Signals</title>
+
+            <indexterm class="startofrange" id="index.service.launch.signals">
+               <primary>launch service</primary>
+
+               <secondary>signals</secondary>
+            </indexterm>
+
+            <para>The Launch Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>launch</secondary>
+
+                  <see>launch service</see>
+               </indexterm></para>
+
+            <section>
+               <title>launch.run_command</title>
+
+               <indexterm class="startofrange"
+                          id="index.service.launch.signals.runcommand">
+                  <primary>launch service</primary>
+
+                  <secondary>signals</secondary>
+
+                  <tertiary>launch.run_command</tertiary>
+               </indexterm>
+
+               <para>The signal <literal>launch.run_command</literal> is
+               emitted by the client side and received by each of the Maestro
+               service instances to which the client is connected. This signal
+               takes four arguments, and if it were a Python object method,
+               its signature would be the following:</para>
+
+               <methodsynopsis language="Python">
+                  <methodname>run_command</methodname>
+
+                  <methodparam>
+                     <parameter>command</parameter>
+                  </methodparam>
+
+                  <methodparam>
+                     <parameter>args</parameter>
+                  </methodparam>
+
+                  <methodparam>
+                     <parameter>cwd</parameter>
+                  </methodparam>
+
+                  <methodparam>
+                     <parameter>envMap</parameter>
+                  </methodparam>
+               </methodsynopsis>
+
+               <para>The arguments are as follows:</para>
+
+               <variablelist>
+                  <varlistentry>
+                     <term>command</term>
+
+                     <listitem>
+                        <para>The actual command to be executed on the server
+                        side as a string. Generally, this should be an
+                        absolute path. If it is not an absolute path, then it
+                        can be identified relative to the current working
+                        directory (see <varname>cwd</varname> below), or it
+                        can be found using the server-side run-time search
+                        path. Using the search path is discouraged because it
+                        could lead to security holes if the search path is
+                        modified maliciously.</para>
+                     </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                     <term>args</term>
+
+                     <listitem>
+                        <para>A list of strings that form the command line
+                        arguments to be passed to the executed command. Each
+                        argument <emphasis>value</emphasis> must be a separate
+                        entry in the list. The the value of an argument is
+                        supposed to contain spaces, then that value would be a
+                        single entry in the list <emphasis>with</emphasis>
+                        shell escapes (appropriate quoting or a backslash
+                        before the space) for the spaces.</para>
+
+                        <important>
+                           <para>Shell escapes for arguments usually are
+                           required because platform-specific shell evaluation
+                           of command arguments will be performed. For
+                           non-<productname
+                           class="registered">Windows</productname> platforms,
+                           commands are executed via
+                           <command>/bin/sh</command>. Environment variables
+                           using the Maestro syntax are evaluated by the Launch
+                           Service prior to command execution.</para>
+                        </important>
+                     </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                     <term>cwd</term>
+
+                     <listitem>
+                        <para>The current working directory for the command to
+                        be executed as a string. The importance of the current
+                        working directory for a command depends almost
+                        entirely on the command being launched. If the string
+                        <literal>'.'</literal> is used, the current working
+                        directory will be that of the Maestro service. In very
+                        rare cases, failing to specify an alternate current
+                        working directory could result in the command failing
+                        to execute at all due to server-side permissions on
+                        the Maestro service working directory.</para>
+                     </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                     <term>envMap</term>
+
+                     <listitem>
+                        <para>Additional environment variable settings
+                        provided as a dictionary that maps strings
+                        (environment variable names) to strings (envrionment
+                        variable values). This will be merged with a
+                        server-side dictionary that starts out as a
+                        duplication of <varname>os.environ</varname>. Settings
+                        in the client-provided environment take precedence
+                        over environment variable settings in the server-side
+                        environment. The value of an existing environment
+                        variable on the server side can be referenced using
+                        the syntax <varname>${ENV_VAR_NAME}</varname>. This
+                        allows extension of server-side environment variable
+                        settings at the discretion of the client side.</para>
+                     </listitem>
+                  </varlistentry>
+               </variablelist>
+
+               <para>Examples of emitting this signal are shown in <xref
+               linkend="example.emit.signal.launch.runcommand" />. In all
+               cases, the client side is emitting the signal to all the nodes
+               in the ensemble. Individual nodes can be targeted by replacing
+               the <literal>'*'</literal> argument value with the node
+               identifier string.</para>
+
+               <example id="example.emit.signal.launch.runcommand">
+                  <title>Emitting the Signal
+                  <literal>launch.run_command</literal></title>
+
+                  <programlisting>import maestro.gui
+evt_mgr = maestro.gui.Environment().mEventManager
+command = '/bin/ls'
+
+# List the contents of /usr/bin in detail.
+args = ['-l', '/usr/bin']
+evt_mgr.emit('*', 'launch.run_command', command, args, '.', {})
+
+# Set the current working directory to /tmp and list it.
+evt_mgr.emit('*', 'launch.run_command', command, ['.'], '/tmp', {})
+
+# List a directory referencing an environment variable.
+# This includes an example of how to extend a server-side
+# environment variable (PATH in this case).
+args = ['-latr', '${MY_DIR}']
+my_env = { 'MY_DIR' : '${HOME}/docs',
+           'PATH'   : '${PATH}:${HOME}/bin' }
+evt_mgr.emit('*', 'launch.run_command', command, args, '.', my_env)
+
+# List a Windows directory containing a space in its path.
+command = r'C:\WINDOWS\System32\cmd.exe'
+args = ['/c', 'dir', r'C:\Program Files']
+evt_mgr.emit('*', 'launch.run_command', command, args, '.', {})</programlisting>
+               </example>
+
+               <indexterm class="endofrange"
+                          startref="index.service.launch.signals.runcommand"></indexterm>
+            </section>
+
+            <section>
+               <title>launch.output</title>
+
+               <indexterm class="startofrange"
+                          id="index.service.launch.signals.output">
+                  <primary>launch service</primary>
+
+                  <secondary>signals</secondary>
+
+                  <tertiary>launch.output</tertiary>
+               </indexterm>
+
+               <para>The signal <literal>launch.output</literal> is emitted by
+               the server side while a command is being executed whenever the
+               command sends data to stdout or stderr. The two output streams
+               are combined into a single stream to simplify client-side
+               handling of the signal. The client side can, for example,
+               respond to this signal by printing this output in a window.
+               This signal is emitted with a single argument that is the
+               current output string—which may contain newlines.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.service.launch.signals.output"></indexterm>
+            </section>
+
+            <section>
+               <title>launch.get_is_running</title>
+
+               <indexterm class="startofrange"
+                          id="index.service.launch.signals.getisrunning">
+                  <primary>launch service</primary>
+
+                  <secondary>signals</secondary>
+
+                  <tertiary>launch.get_is_running</tertiary>
+               </indexterm>
+
+               <para>The signal <literal>launch.get_is_running</literal> is
+               normally emitted by the client side to ask the server side if a
+               launched command is currently running. It can be emitted from
+               the server side back to itself to determine the state of a
+               launched command. Emitting this signal requires no
+               arguments.</para>
+
+               <para>The server side responds by emitting the
+               <literal>launch.report_is_running</literal><indexterm>
+                     <primary>launch service</primary>
+
+                     <secondary>signals</secondary>
+
+                     <tertiary>launch.report_is_running</tertiary>
+                  </indexterm> signal (see <xref
+               linkend="section.signal.launch.reportisrunning" />), and as
+               such, code that wants to know the response must register a
+               handler for that signal. In general, this signal should not be
+               used as the Launch Service provides a better mechanism for
+               tracking the state of command execution through its internal
+               emission of unrequested
+               <literal>launch.report_is_running</literal> signals. See <xref
+               linkend="section.signal.launch.reportisrunning" /> for more
+               details.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.service.launch.signals.getisrunning"></indexterm>
+            </section>
+
+            <section id="section.signal.launch.reportisrunning">
+               <title>launch.report_is_running</title>
+
+               <indexterm class="startofrange"
+                          id="index.service.launch.signals.reportisrunning">
+                  <primary>launch service</primary>
+
+                  <secondary>signals</secondary>
+
+                  <tertiary>launch.report_is_running</tertiary>
+               </indexterm>
+
+               <para>The signal <literal>launch.report_is_running</literal> is
+               emitted by the server side in three different ways after a
+               command is launched:</para>
+
+               <orderedlist>
+                  <listitem>
+                     <para>When a command first begins execution, it is
+                     emitted with the arguments <constant>True</constant> and
+                     <literal>0</literal> to indicate that a command launched
+                     via emission of the signal
+                     <literal>launch.run_command</literal><indexterm>
+                           <primary>launch service</primary>
+
+                           <secondary>signals</secondary>
+
+                           <tertiary>launch.run_command</tertiary>
+                        </indexterm> has begun. In this case, the second
+                     argument has no meaning. This use of the signal is not
+                     emitted in response to a
+                     <literal>launch.get_is_running</literal><indexterm>
+                           <primary>launch service</primary>
+
+                           <secondary>signals</secondary>
+
+                           <tertiary>launch.get_is_running</tertiary>
+                        </indexterm> signal.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>When a command completes its execution
+                     (successfully and otherwise), it is emitted with the
+                     arguments <constant>False</constant> and the integer exit
+                     code of the command. Traditionally, an exit code of
+                     <literal>0</literal> indicates successful completion, but
+                     this depends entirely on the command being executed. This
+                     use of the signal is not emitted in response to a
+                     <literal>launch.get_is_running</literal> signal.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>When the signal
+                     <literal>launch.get_is_running</literal> is received by
+                     the server side, the server side responds with this
+                     signal. The arguments passed will either be
+                     <constant>True</constant> and <literal>0</literal> or
+                     <constant>False</constant> and the integer exit code of
+                     the command. If the value of the first argument is
+                     <constant>True</constant>, then the second value has no
+                     meaning.</para>
+                  </listitem>
+               </orderedlist>
+
+               <para>Emitting this signal requires no arguments. Code
+               interested in the state of a launched command can connect a
+               signal handler to this signal with the local Event Manager
+               prior to launching a command. The executing state can then e
+               monitored by responding to the receipt of this signal
+               appropriately. In general, responding to the first two cases
+               should be sufficient for most cases.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.service.launch.signals.reportisrunning"></indexterm>
+            </section>
+
+            <section>
+               <title>launch.terminate</title>
+
+               <indexterm class="startofrange"
+                          id="index.service.launch.signals.terminate">
+                  <primary>launch service</primary>
+
+                  <secondary>signals</secondary>
+
+                  <tertiary>launch.terminate</tertiary>
+               </indexterm>
+
+               <para>The signal <literal>launch.terminate</literal> is usually
+               emitted by the client side to cause the server side to shut
+               down the running command forcibly. In other words, it can be
+               used to stop a running command before that command would
+               complete its execution normally. The second internal emission
+               of the <literal>launch.report_is_running</literal><indexterm>
+                     <primary>launch service</primary>
+
+                     <secondary>signals</secondary>
+
+                     <tertiary>launch.report_is_running</tertiary>
+                  </indexterm> signal will still occur once the running
+               command has been terminated. Emitting this signal when no
+               command is currently running has no effect.</para>
+
+               <indexterm class="endofrange"
+                          startref="index.service.launch.signals.terminate"></indexterm>
+
+               <indexterm class="endofrange"
+                          startref="index.service.launch.signals"></indexterm>
+            </section>
+         </section>
+
+         <section>
+            <title>Reboot Service</title>
+
+            <para></para>
+
+            <variablelist>
+               <varlistentry>
+                  <term>reboot.</term>
+
+                  <listitem>
+                     <para>This signal is emitted by the client side and
+                     received by each of the Maestro service instances to
+                     which the client is connected.</para>
+                  </listitem>
+               </varlistentry>
+            </variablelist>
+         </section>
+      </section>
+
+      <section>
+         <title>Creating a New Protocol</title>
+
+         <para></para>
+      </section>
+   </chapter>
+
+   <chapter id="chapter.extending.maestro">
+      <title>Services</title>
+
+      <section id="section.extending.services">
+         <title>Services</title>
+
+         <indexterm class="startofrange" id="index.section.services">
+            <primary>services</primary>
+         </indexterm>
+
+         <para>Services are plug-ins that are loaded by
+         <command>maestrod</command> when it starts. It scans the directory
+         <filename>maestro/daemon/plugins/services</filename> in the Maestro
+         installation directory (henceforth referred to as
+         <filename>&lt;MAESTRODIR&gt;</filename>) at startup to discover what
+         services are available. Services are identified as classes that
+         implement the interface
+         <interface>maestro.core.IServicePlugin</interface><indexterm>
+               <primary>plug-ins</primary>
+
+               <secondary>interfaces</secondary>
+
+               <tertiary>maestro.core.IServicePlugin</tertiary>
+            </indexterm> as defined in
+         <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+         All discovered service plug-ins are instantiated and made available
+         for use. If any plug-in fails to load or fails to instantiate, then
+         it is deactivated.</para>
+
+         <indexterm startref="index.section.services"></indexterm>
+      </section>
+
+      <section id="section.extending.service.plugins">
+         <title>Service Plug-ins</title>
+
+         <indexterm class="startofrange" id="index.section.services.plugins">
+            <primary>services</primary>
+
+            <secondary>plug-ins</secondary>
+         </indexterm>
+
+         <para>On a smaller scope, individual services may use plug-ins to
+         capture variability among different computer and/or operating system
+         configurations.</para>
+
+         <section id="section.plugins.boot.loader">
+            <title>Boot Loader Plug-ins</title>
+
+            <para>The Reboot Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>reboot</secondary>
+               </indexterm> uses plug-ins to capture the details of how to
+            control the default operating system selected by the boot
+            loader<indexterm>
+                  <primary>boot loader</primary>
+               </indexterm> when the computer starts up. The idea is that the
+            nodes of a cluster need not require direct intervention from a
+            user in order to change the operating system. Instead, the boot
+            loader can be reconfigured via the Reboot Service to change the OS
+            booted by default. The assumption is, of course, that the boot
+            loader is capable of being reconfigured by external software. If
+            this were not the case, then the Reboot Service would only be able
+            to reboot the computer and could not change the default OS.</para>
+
+            <para>The job of the plug-ins used by the Reboot Service involves
+            three tasks:</para>
+
+            <orderedlist>
+               <listitem>
+                  <para>Determine all the allowed boot targets<footnote>
+                        <para>In the context of a boot loader, we use the
+                        terms <quote>boot target</quote> and <quote>operating
+                        system</quote> interchangeably.</para>
+                     </footnote> (i.e., the operating system types and
+                  installed versions)</para>
+               </listitem>
+
+               <listitem>
+                  <para>Determine the default boot target (i.e., the default
+                  operating system started by the boot loader)</para>
+               </listitem>
+
+               <listitem>
+                  <para>Change the default boot target</para>
+               </listitem>
+            </orderedlist>
+
+            <para>This is done by implementing the interface
+            <interface>maestro.core.IBootPlugin</interface><indexterm>
+                  <primary>plug-ins</primary>
+
+                  <secondary>interfaces</secondary>
+
+                  <tertiary>maestro.core.IBootPlugin</tertiary>
+               </indexterm>, as defined in
+            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+            The current list of supported boot loader plug-ins is as follows
+            (each identified by its name used in the
+            <command>maestrod</command> configuration):</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>ntldr</literal>: The boot loader used by
+                  Windows NT 4.0 through Windows XP (known as the NT
+                  Loader<indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>NT Loader</secondary>
+                     </indexterm>)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>GRUB</literal>: The <ulink
+                  url="http://www.gnu.org/software/grub/">Grand Unified
+                  Bootloader</ulink><indexterm>
+                        <primary>boot loader</primary>
+
+                        <secondary>GRUB</secondary>
+                     </indexterm> (GRUB) version 0.9x</para>
+               </listitem>
+            </itemizedlist>
+         </section>
+
+         <section>
+            <title>Screen Saver Plug-ins</title>
+
+            <para>The Desktop Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>desktop</secondary>
+               </indexterm> relies on plug-ins to handle controlling the
+            screen saver and power management on the local computer. Since
+            these are usually two separate features of the operating system or
+            desktop interface, multiple screen saver plug-ins can be used
+            together. The job of the plug-in is to enable and disable the
+            screen saver and to handle killing a running screen saver. This is
+            done by implementing the interface
+            <interface>maestro.core.ISaverPlugin</interface><indexterm>
+                  <primary>plug-ins</primary>
+
+                  <secondary>interfaces</secondary>
+
+                  <tertiary>maestro.core.ISaverPlugin</tertiary>
+               </indexterm>, as defined in
+            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+            The current list of supported screen saver plug-ins is as follows
+            (each identified by its name used in the
+            <command>maestrod</command> configuration):</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>windows</literal> (using the regular
+                  <productname class="registered">Microsoft
+                  Windows</productname> Desktop screen saver)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>powercfg</literal> (using the <productname
+                  class="registered">Microsoft Windows</productname> utility
+                  program <command>powercfg.exe</command> to control monitor
+                  power off)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>xset</literal> (blanking and DPMS through the
+                  X server)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>xscreensaver</literal> (controls XScreenSaver
+                  using <command>xscreensaver-command</command>)</para>
+               </listitem>
+            </itemizedlist>
+         </section>
+
+         <section>
+            <title>Desktop Wallpaper Plug-ins</title>
+
+            <para>To query and change the desktop background image (commonly
+            referred to as <quote>desktop wallpaper</quote>), the Desktop
+            Service<indexterm>
+                  <primary>services</primary>
+
+                  <secondary>desktop</secondary>
+               </indexterm> uses a plug-in. The job of the plug-in is to
+            return the name of the wallpaper image file and to handle changing
+            the wallpaper to a new image. This is done by implementing the
+            interface
+            <interface>maestro.core.IDesktopWallpaperPlugin</interface><indexterm>
+                  <primary>plug-ins</primary>
+
+                  <secondary>interfaces</secondary>
+
+                  <tertiary>maestro.core.IDesktopWallpaperPlugin</tertiary>
+               </indexterm>, as defined in
+            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
+            The current list of supported desktop wallpaper management
+            plug-ins is as follows (each identified by its name used in the
+            <command>maestrod</command> configuration):</para>
+
+            <itemizedlist>
+               <listitem>
+                  <para><literal>windows</literal> (using the regular
+                  <productname class="registered">Microsoft
+                  Windows</productname> Desktop—currently supports BMP images
+                  only)</para>
+               </listitem>
+
+               <listitem>
+                  <para><literal>gnome</literal> (using GConf via
+                  <command>gconftool-2</command>)</para>
+               </listitem>
+            </itemizedlist>
+
+            <indexterm class="endofrange"
+                       startref="index.section.services.plugins"></indexterm>
+         </section>
+      </section>
+   </chapter>
+
+   <chapter>
+      <title>Views</title>
+
+      <para>In order for a service to be utilized, there must be a
+      corresponding view in the <application>Maestro GUI</application>. Views
+      provide a visual interface to the remote service. Views are identified
+      as classes that implement the interface
+      <interface>maestro.core.IViewPlugin</interface><indexterm>
+            <primary>plug-ins</primary>
+
+            <secondary>interfaces</secondary>
+
+            <tertiary>maestro.core.IViewPlugin</tertiary>
+         </indexterm> as defined in
+      <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.</para>
+
+      <para>When the <application>Maestro GUI</application> starts, it scans
+      the directory
+      <filename>&lt;MAESTRODIR&gt;/maestro/gui/plugins/views</filename> to
+      discover what views are available. Services All discovered view plug-ins
+      are instantiated and made available for use. If any plug-in fails to
+      load or fails to instantiate, then it is deactivated and not shown in
+      the GUI. The views that come with Maestro are described in the Maestro
+      <emphasis>User's Guide</emphasis> .</para>
+   </chapter>
+
+   <appendix id="appendix.gfdl">
+      <title>GNU Free Documentation License</title>
+
+      <subtitle>Version 1.2, November 2002</subtitle>
+
+      <blockquote id="fsf-copyright">
+         <title>FSF Copyright note</title>
+
+         <para>Copyright (C) 2000,2001,2002 Free Software Foundation, Inc. 59
+         Temple Place, Suite 330, Boston, MA 02111-1307 USA Everyone is
+         permitted to copy and distribute verbatim copies of this license
+         document, but changing it is not allowed.</para>
+      </blockquote>
+
+      <section id="gfdl-0">
+         <title>PREAMBLE</title>
+
+         <para>The purpose of this License is to make a manual, textbook, or
+         other functional and useful document "free" in the sense of freedom:
+         to assure everyone the effective freedom to copy and redistribute it,
+         with or without modifying it, either commercially or noncommercially.
+         Secondarily, this License preserves for the author and publisher a
+         way to get credit for their work, while not being considered
+         responsible for modifications made by others.</para>
+
+         <para>This License is a kind of "copyleft", which means that
+         derivative works of the document must themselves be free in the same
+         sense. It complements the GNU General Public License, which is a
+         copyleft license designed for free software.</para>
+
+         <para>We have designed this License in order to use it for manuals
+         for free software, because free software needs free documentation: a
+         free program should come with manuals providing the same freedoms
+         that the software does. But this License is not limited to software
+         manuals; it can be used for any textual work, regardless of subject
+         matter or whether it is published as a printed book. We recommend
+         this License principally for works whose purpose is instruction or
+         reference.</para>
+      </section>
+
+      <section id="gfdl-1">
+         <title>APPLICABILITY AND DEFINITIONS</title>
+
+         <para id="gfdl-doc">This License applies to any manual or other work,
+         in any medium, that contains a notice placed by the copyright holder
+         saying it can be distributed under the terms of this License. Such a
+         notice grants a world-wide, royalty-free license, unlimited in
+         duration, to use that work under the conditions stated herein. The
+         "Document", below, refers to any such manual or work. Any member of
+         the public is a licensee, and is addressed as "you". You accept the
+         license if you copy, modify or distribute the work in a way requiring
+         permission under copyright law.</para>
+
+         <para id="gfdl-mod-ver">A "Modified Version" of the Document means
+         any work containing the Document or a portion of it, either copied
+         verbatim, or with modifications and/or translated into another
+         language.</para>
+
+         <para id="gfdl-secnd-sect">A "Secondary Section" is a named appendix
+         or a front-matter section of the Document that deals exclusively with
+         the relationship of the publishers or authors of the Document to the
+         Document's overall subject (or to related matters) and contains
+         nothing that could fall directly within that overall subject. (Thus,
+         if the Document is in part a textbook of mathematics, a Secondary
+         Section may not explain any mathematics.) The relationship could be a
+         matter of historical connection with the subject or with related
+         matters, or of legal, commercial, philosophical, ethical or political
+         position regarding them.</para>
+
+         <para id="gfdl-inv-sect">The "Invariant Sections" are certain
+         Secondary Sections whose titles are designated, as being those of
+         Invariant Sections, in the notice that says that the Document is
+         released under this License. If a section does not fit the above
+         definition of Secondary then it is not allowed to be designated as
+         Invariant. The Document may contain zero Invariant Sections. If the
+         Document does not identify any Invariant Sections then there are
+         none.</para>
+
+         <para id="gfdl-cov-text">The "Cover Texts" are certain short passages
+         of text that are listed, as Front-Cover Texts or Back-Cover Texts, in
+         the notice that says that the Document is released under this
+         License. A Front-Cover Text may be at most 5 words, and a Back-Cover
+         Text may be at most 25 words.</para>
+
+         <para id="gfdl-transparent">A "Transparent" copy of the Document
+         means a machine-readable copy, represented in a format whose
+         specification is available to the general public, that is suitable
+         for revising the document straightforwardly with generic text editors
+         or (for images composed of pixels) generic paint programs or (for
+         drawings) some widely available drawing editor, and that is suitable
+         for input to text formatters or for automatic translation to a
+         variety of formats suitable for input to text formatters. A copy made
+         in an otherwise Transparent file format whose markup, or absence of
+         markup, has been arranged to thwart or discourage subsequent
+         modification by readers is not Transparent. An image format is not
+         Transparent if used for any substantial amount of text. A copy that
+         is not "Transparent" is called "Opaque".</para>
+
+         <para>Examples of suitable formats for Transparent copies include
+         plain ASCII without markup, Texinfo input format, LaTeX input format,
+         SGML or XML using a publicly available DTD, and standard-conforming
+         simple HTML, PostScript or PDF designed for human modification.
+         Examples of transparent image formats include PNG, XCF and JPG.
+         Opaque formats include proprietary formats that can be read and
+         edited only by proprietary word processors, SGML or XML for which the
+         DTD and/or processing tools are not generally available, and the
+         machine-generated HTML, PostScript or PDF produced by some word
+         processors for output purposes only.</para>
+
+         <para id="gfdl-title-page">The "Title Page" means, for a printed
+         book, the title page itself, plus such following pages as are needed
+         to hold, legibly, the material this License requires to appear in the
+         title page. For works in formats which do not have any title page as
+         such, "Title Page" means the text near the most prominent appearance
+         of the work's title, preceding the beginning of the body of the
+         text.</para>
+
+         <para id="gfdl-entitled">A section "Entitled XYZ" means a named
+         subunit of the Document whose title either is precisely XYZ or
+         contains XYZ in parentheses following text that translates XYZ in
+         another language. (Here XYZ stands for a specific section name
+         mentioned below, such as "Acknowledgements", "Dedications",
+         "Endorsements", or "History".) To "Preserve the Title" of such a
+         section when you modify the Document means that it remains a section
+         "Entitled XYZ" according to this definition.</para>
+
+         <para>The Document may include Warranty Disclaimers next to the
+         notice which states that this License applies to the Document. These
+         Warranty Disclaimers are considered to be included by reference in
+         this License, but only as regards disclaiming warranties: any other
+         implication that these Warranty Disclaimers may have is void and has
+         no effect on the meaning of this License.</para>
+      </section>
+
+      <section id="gfdl-2">
+         <title>VERBATIM COPYING</title>
+
+         <para>You may copy and distribute the Document in any medium, either
+         commercially or noncommercially, provided that this License, the
+         copyright notices, and the license notice saying this License applies
+         to the Document are reproduced in all copies, and that you add no
+         other conditions whatsoever to those of this License. You may not use
+         technical measures to obstruct or control the reading or further
+         copying of the copies you make or distribute. However, you may accept
+         compensation in exchange for copies. If you distribute a large enough
+         number of copies you must also follow the conditions in section
+         3.</para>
+
+         <para>You may also lend copies, under the same conditions stated
+         above, and you may publicly display copies.</para>
+      </section>
+
+      <section id="gfdl-3">
+         <title>COPYING IN QUANTITY</title>
+
+         <para>If you publish printed copies (or copies in media that commonly
+         have printed covers) of the Document, numbering more than 100, and
+         the Document's license notice requires Cover Texts, you must enclose
+         the copies in covers that carry, clearly and legibly, all these Cover
+         Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+         the back cover. Both covers must also clearly and legibly identify
+         you as the publisher of these copies. The front cover must present
+         the full title with all words of the title equally prominent and
+         visible. You may add other material on the covers in addition.
+         Copying with changes limited to the covers, as long as they preserve
+         the title of the Document and satisfy these conditions, can be
+         treated as verbatim copying in other respects.</para>
+
+         <para>If the required texts for either cover are too voluminous to
+         fit legibly, you should put the first ones listed (as many as fit
+         reasonably) on the actual cover, and continue the rest onto adjacent
+         pages.</para>
+
+         <para>If you publish or distribute Opaque copies of the Document
+         numbering more than 100, you must either include a machine-readable
+         Transparent copy along with each Opaque copy, or state in or with
+         each Opaque copy a computer-network location from which the general
+         network-using public has access to download using public-standard
+         network protocols a complete Transparent copy of the Document, free
+         of added material. If you use the latter option, you must take
+         reasonably prudent steps, when you begin distribution of Opaque
+         copies in quantity, to ensure that this Transparent copy will remain
+         thus accessible at the stated location until at least one year after
+         the last time you distribute an Opaque copy (directly or through your
+         agents or retailers) of that edition to the public.</para>
+
+         <para>It is requested, but not required, that you contact the authors
+         of the Document well before redistributing any large number of
+         copies, to give them a chance to provide you with an updated version
+         of the Document.</para>
+      </section>
+
+      <section id="gfdl-4">
+         <title>MODIFICATIONS</title>
+
+         <para>You may copy and distribute a Modified Version of the Document
+         under the conditions of sections 2 and 3 above, provided that you
+         release the Modified Version under precisely this License, with the
+         Modified Version filling the role of the Document, thus licensing
+         distribution and modification of the Modified Version to whoever
+         possesses a copy of it. In addition, you must do these things in the
+         Modified Version:</para>
+
+         <orderedlist id="gfdl-modif-cond" numeration="upperalpha">
+            <title>GNU FDL Modification Conditions</title>
+
+            <listitem>
+               <simpara>Use in the Title Page (and on the covers, if any) a
+               title distinct from that of the Document, and from those of
+               previous versions (which should, if there were any, be listed
+               in the History section of the Document). You may use the same
+               title as a previous version if the original publisher of that
+               version gives permission.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>List on the Title Page, as authors, one or more
+               persons or entities responsible for authorship of the
+               modifications in the Modified Version, together with at least
+               five of the principal authors of the Document (all of its
+               principal authors, if it has fewer than five), unless they
+               release you from this requirement.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>State on the Title page the name of the publisher of
+               the Modified Version, as the publisher.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve all the copyright notices of the
+               Document.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Add an appropriate copyright notice for your
+               modifications adjacent to the other copyright
+               notices.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Include, immediately after the copyright notices, a
+               license notice giving the public permission to use the Modified
+               Version under the terms of this License, in the form shown in
+               the <link linkend="gfdl-addendum">Addendum</link>
+               below.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve in that license notice the full lists of
+               Invariant Sections and required Cover Texts given in the
+               Document's license notice.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Include an unaltered copy of this License.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve the section Entitled "History", Preserve its
+               Title, and add to it an item stating at least the title, year,
+               new authors, and publisher of the Modified Version as given on
+               the Title Page. If there is no section Entitled "History" in
+               the Document, create one stating the title, year, authors, and
+               publisher of the Document as given on its Title Page, then add
+               an item describing the Modified Version as stated in the
+               previous sentence.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve the network location, if any, given in the
+               Document for public access to a Transparent copy of the
+               Document, and likewise the network locations given in the
+               Document for previous versions it was based on. These may be
+               placed in the "History" section. You may omit a network
+               location for a work that was published at least four years
+               before the Document itself, or if the original publisher of the
+               version it refers to gives permission.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>For any section Entitled "Acknowledgements" or
+               "Dedications", Preserve the Title of the section, and preserve
+               in the section all the substance and tone of each of the
+               contributor acknowledgements and/or dedications given
+               therein.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve all the Invariant Sections of the Document,
+               unaltered in their text and in their titles. Section numbers or
+               the equivalent are not considered part of the section
+               titles.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Delete any section Entitled "Endorsements". Such a
+               section may not be included in the Modified Version.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Do not retitle any existing section to be Entitled
+               "Endorsements" or to conflict in title with any Invariant
+               Section.</simpara>
+            </listitem>
+
+            <listitem>
+               <simpara>Preserve any Warranty Disclaimers.</simpara>
+            </listitem>
+         </orderedlist>
+
+         <para>If the Modified Version includes new front-matter sections or
+         appendices that qualify as Secondary Sections and contain no material
+         copied from the Document, you may at your option designate some or
+         all of these sections as invariant. To do this, add their titles to
+         the list of Invariant Sections in the Modified Version's license
+         notice. These titles must be distinct from any other section
+         titles.</para>
+
+         <para>You may add a section Entitled "Endorsements", provided it
+         contains nothing but endorsements of your Modified Version by various
+         parties--for example, statements of peer review or that the text has
+         been approved by an organization as the authoritative definition of a
+         standard.</para>
+
+         <para>You may add a passage of up to five words as a Front-Cover
+         Text, and a passage of up to 25 words as a Back-Cover Text, to the
+         end of the list of Cover Texts in the Modified Version. Only one
+         passage of Front-Cover Text and one of Back-Cover Text may be added
+         by (or through arrangements made by) any one entity. If the Document
+         already includes a cover text for the same cover, previously added by
+         you or by arrangement made by the same entity you are acting on
+         behalf of, you may not add another; but you may replace the old one,
+         on explicit permission from the previous publisher that added the old
+         one.</para>
+
+         <para>The author(s) and publisher(s) of the Document do not by this
+         License give permission to use their names for publicity for or to
+         assert or imply endorsement of any Modified Version.</para>
+      </section>
+
+      <section id="gfdl-5">
+         <title>COMBINING DOCUMENTS</title>
+
+         <para>You may combine the Document with other documents released
+         under this License, under the terms defined in <link
+         linkend="gfdl-4">section 4</link> above for modified versions,
+         provided that you include in the combination all of the Invariant
+         Sections of all of the original documents, unmodified, and list them
+         all as Invariant Sections of your combined work in its license
+         notice, and that you preserve all their Warranty Disclaimers.</para>
+
+         <para>The combined work need only contain one copy of this License,
+         and multiple identical Invariant Sections may be replaced with a
+         single copy. If there are multiple Invariant Sections with the same
+         name but different contents, make the title of each such section
+         unique by adding at the end of it, in parentheses, the name of the
+         original author or publisher of that section if known, or else a
+         unique number. Make the same adjustment to the section titles in the
+         list of Invariant Sections in the license notice of the combined
+         work.</para>
+
+         <para>In the combination, you must combine any sections Entitled
+         "History" in the various original documents, forming one section
+         Entitled "History"; likewise combine any sections Entitled
+         "Acknowledgements", and any sections Entitled "Dedications". You must
+         delete all sections Entitled "Endorsements".</para>
+      </section>
+
+      <section id="gfdl-6">
+         <title>COLLECTIONS OF DOCUMENTS</title>
+
+         <para>You may make a collection consisting of the Document and other
+         documents released under this License, and replace the individual
+         copies of this License in the various documents with a single copy
+         that is included in the collection, provided that you follow the
+         rules of this License for verbatim copying of each of the documents
+         in all other respects.</para>
+
+         <para>You may extract a single document from such a collection, and
+         distribute it individually under this License, provided you insert a
+         copy of this License into the extracted document, and follow this
+         License in all other respects regarding verbatim copying of that
+         document.</para>
+      </section>
+
+      <section id="gfdl-7">
+         <title>AGGREGATION WITH INDEPENDENT WORKS</title>
+
+         <para>A compilation of the Document or its derivatives with other
+         separate and independent documents or works, in or on a volume of a
+         storage or distribution medium, is called an "aggregate" if the
+         copyright resulting from the compilation is not used to limit the
+         legal rights of the compilation's users beyond what the individual
+         works permit. When the Document is included in an aggregate, this
+         License does not apply to the other works in the aggregate which are
+         not themselves derivative works of the Document.</para>
+
+         <para>If the Cover Text requirement of section 3 is applicable to
+         these copies of the Document, then if the Document is less than one
+         half of the entire aggregate, the Document's Cover Texts may be
+         placed on covers that bracket the Document within the aggregate, or
+         the electronic equivalent of covers if the Document is in electronic
+         form. Otherwise they must appear on printed covers that bracket the
+         whole aggregate.</para>
+      </section>
+
+      <section id="gfdl-8">
+         <title>TRANSLATION</title>
+
+         <para>Translation is considered a kind of modification, so you may
+         distribute translations of the Document under the terms of section 4.
+         Replacing Invariant Sections with translations requires special
+         permission from their copyright holders, but you may include
+         translations of some or all Invariant Sections in addition to the
+         original versions of these Invariant Sections. You may include a
+         translation of this License, and all the license notices in the
+         Document, and any Warranty Disclaimers, provided that you also
+         include the original English version of this License and the original
+         versions of those notices and disclaimers. In case of a disagreement
+         between the translation and the original version of this License or a
+         notice or disclaimer, the original version will prevail.</para>
+
+         <para>If a section in the Document is Entitled "Acknowledgements",
+         "Dedications", or "History", the requirement (section 4) to Preserve
+         its Title (section 1) will typically require changing the actual
+         title.</para>
+      </section>
+
+      <section id="gfdl-9">
+         <title>TERMINATION</title>
+
+         <para>You may not copy, modify, sublicense, or distribute the
+         Document except as expressly provided for under this License. Any
+         other attempt to copy, modify, sublicense or distribute the Document
+         is void, and will automatically terminate your rights under this
+         License. However, parties who have received copies, or rights, from
+         you under this License will not have their licenses terminated so
+         long as such parties remain in full compliance.</para>
+      </section>
+
+      <section id="gfdl-10">
+         <title>FUTURE REVISIONS OF THIS LICENSE</title>
+
+         <para>The Free Software Foundation may publish new, revised versions
+         of the GNU Free Documentation License from time to time. Such new
+         versions will be similar in spirit to the present version, but may
+         differ in detail to address new problems or concerns. See
+         http://www.gnu.org/copyleft/.</para>
+
+         <para>Each version of the License is given a distinguishing version
+         number. If the Document specifies that a particular numbered version
+         of this License "or any later version" applies to it, you have the
+         option of following the terms and conditions either of that specified
+         version or of any later version that has been published (not as a
+         draft) by the Free Software Foundation. If the Document does not
+         specify a version number of this License, you may choose any version
+         ever published (not as a draft) by the Free Software
+         Foundation.</para>
+      </section>
+
+      <section id="gfdl-addendum">
+         <title>ADDENDUM: How to use this License for your documents</title>
+
+         <para>To use this License in a document you have written, include a
+         copy of the License in the document and put the following copyright
+         and license notices just after the title page:</para>
+
+         <blockquote id="copyright-sample">
+            <title>Sample Invariant Sections list</title>
+
+            <para>Copyright (c) YEAR YOUR NAME. Permission is granted to copy,
+            distribute and/or modify this document under the terms of the GNU
+            Free Documentation License, Version 1.2 or any later version
+            published by the Free Software Foundation; with no Invariant
+            Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of
+            the license is included in the section entitled "GNU Free
+            Documentation License".</para>
+         </blockquote>
+
+         <para>If you have Invariant Sections, Front-Cover Texts and
+         Back-Cover Texts, replace the "with...Texts." line with this:</para>
+
+         <blockquote id="inv-cover-sample">
+            <title>Sample Invariant Sections list</title>
+
+            <para>with the Invariant Sections being LIST THEIR TITLES, with
+            the Front-Cover Texts being LIST, and with the Back-Cover Texts
+            being LIST.</para>
+         </blockquote>
+
+         <para>If you have Invariant Sections without Cover Texts, or some
+         other combination of the three, merge those two alternatives to suit
+         the situation.</para>
+
+         <para>If your document contains nontrivial examples of program code,
+         we recommend releasing these examples in parallel under your choice
+         of free software license, such as the GNU General Public License, to
+         permit their use in free software.</para>
+      </section>
+   </appendix>
+
+   <index></index>
+</book>

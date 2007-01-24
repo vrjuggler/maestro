@@ -224,8 +224,8 @@
          extensions such as resource monitoring tools and cluster maintenance
          features. Users can write their own cluster-aware tools that plug in
          to Maestro in the form of a paired service and view. (More
-         information on that is provided later in <xref
-         linkend="chapter.extending.maestro" />.)</para>
+         information on that is provided the Maestro <emphasis>Programmer's
+         Guide</emphasis>.)</para>
       </section>
 
       <section>
@@ -930,8 +930,8 @@ maestrod.py remove</screen>
             <filename>maestrod.py</filename> file or in
             <filename>/etc</filename>. It uses XML, but its form is quite
             flexible. This flexibility is offered to allow service plug-in
-            authors (see <xref linkend="section.extending.services" />) to
-            configure their plug-ins in the manner that best suits their
+            authors (see the Maestro <emphasis>Programmer's Guide</emphasis>)
+            to configure their plug-ins in the manner that best suits their
             needs. The only requirement is that the root node must be
             <sgmltag>&lt;maestrod&gt;</sgmltag><indexterm>
                   <primary><filename>maestrod.xcfg</filename></primary>
@@ -1166,9 +1166,7 @@ maestrod.py remove</screen>
                      <primary>services</primary>
 
                      <secondary>reboot</secondary>
-                  </indexterm>. See for <xref
-               linkend="section.plugins.boot.loader" /> more
-               information.</para>
+                  </indexterm>.</para>
 
                <para>Given these constraints, it is vital to make the boot
                loader configuration editable by all operating systems on the
@@ -4223,253 +4221,6 @@ setup (hd0)</screen>
 
             <indexterm class="endofrange" startref="index.file.stanza"></indexterm>
          </section>
-      </section>
-   </chapter>
-
-   <chapter id="chapter.extending.maestro">
-      <title>Extending Maestro</title>
-
-      <section id="section.extending.services">
-         <title>Services</title>
-
-         <indexterm class="startofrange" id="index.section.services">
-            <primary>services</primary>
-         </indexterm>
-
-         <para>Services are plug-ins that are loaded by
-         <command>maestrod</command> when it starts. It scans the directory
-         <filename>maestro/daemon/plugins/services</filename> in the Maestro
-         installation directory (henceforth referred to as
-         <filename>&lt;MAESTRODIR&gt;</filename>) at startup to discover what
-         services are available. Services are identified as classes that
-         implement the interface
-         <interface>maestro.core.IServicePlugin</interface><indexterm>
-               <primary>plug-ins</primary>
-
-               <secondary>interfaces</secondary>
-
-               <tertiary>maestro.core.IServicePlugin</tertiary>
-            </indexterm> as defined in
-         <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
-         All discovered service plug-ins are instantiated and made available
-         for use. If any plug-in fails to load or fails to instantiate, then
-         it is deactivated.</para>
-
-         <indexterm startref="index.section.services"></indexterm>
-      </section>
-
-      <section id="section.extending.service.plugins">
-         <title>Service Plug-ins</title>
-
-         <indexterm class="startofrange" id="index.section.services.plugins">
-            <primary>services</primary>
-
-            <secondary>plug-ins</secondary>
-         </indexterm>
-
-         <para>On a smaller scope, individual services may use plug-ins to
-         capture variability among different computer and/or operating system
-         configurations.</para>
-
-         <section id="section.plugins.boot.loader">
-            <title>Boot Loader Plug-ins</title>
-
-            <para>The Reboot Service<indexterm>
-                  <primary>services</primary>
-
-                  <secondary>reboot</secondary>
-               </indexterm> uses plug-ins to capture the details of how to
-            control the default operating system selected by the boot
-            loader<indexterm>
-                  <primary>boot loader</primary>
-               </indexterm> when the computer starts up. The idea is that the
-            nodes of a cluster need not require direct intervention from a
-            user in order to change the operating system. Instead, the boot
-            loader can be reconfigured via the Reboot Service to change the OS
-            booted by default. The assumption is, of course, that the boot
-            loader is capable of being reconfigured by external software. If
-            this were not the case, then the Reboot Service would only be able
-            to reboot the computer and could not change the default OS.</para>
-
-            <para>The job of the plug-ins used by the Reboot Service involves
-            three tasks:</para>
-
-            <orderedlist>
-               <listitem>
-                  <para>Determine all the allowed boot targets<footnote>
-                        <para>In the context of a boot loader, we use the
-                        terms <quote>boot target</quote> and <quote>operating
-                        system</quote> interchangeably.</para>
-                     </footnote> (i.e., the operating system types and
-                  installed versions)</para>
-               </listitem>
-
-               <listitem>
-                  <para>Determine the default boot target (i.e., the default
-                  operating system started by the boot loader)</para>
-               </listitem>
-
-               <listitem>
-                  <para>Change the default boot target</para>
-               </listitem>
-            </orderedlist>
-
-            <para>This is done by implementing the interface
-            <interface>maestro.core.IBootPlugin</interface><indexterm>
-                  <primary>plug-ins</primary>
-
-                  <secondary>interfaces</secondary>
-
-                  <tertiary>maestro.core.IBootPlugin</tertiary>
-               </indexterm>, as defined in
-            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
-            The current list of supported boot loader plug-ins is as follows
-            (each identified by its name used in the
-            <command>maestrod</command> configuration):</para>
-
-            <itemizedlist>
-               <listitem>
-                  <para><literal>ntldr</literal>: The boot loader used by
-                  Windows NT 4.0 through Windows XP (known as the NT
-                  Loader<indexterm>
-                        <primary>boot loader</primary>
-
-                        <secondary>NT Loader</secondary>
-                     </indexterm>)</para>
-               </listitem>
-
-               <listitem>
-                  <para><literal>GRUB</literal>: The <ulink
-                  url="http://www.gnu.org/software/grub/">Grand Unified
-                  Bootloader</ulink><indexterm>
-                        <primary>boot loader</primary>
-
-                        <secondary>GRUB</secondary>
-                     </indexterm> (GRUB) version 0.9x</para>
-               </listitem>
-            </itemizedlist>
-         </section>
-
-         <section>
-            <title>Screen Saver Plug-ins</title>
-
-            <para>The Desktop Service<indexterm>
-                  <primary>services</primary>
-
-                  <secondary>desktop</secondary>
-               </indexterm> relies on plug-ins to handle controlling the
-            screen saver and power management on the local computer. Since
-            these are usually two separate features of the operating system or
-            desktop interface, multiple screen saver plug-ins can be used
-            together. The job of the plug-in is to enable and disable the
-            screen saver and to handle killing a running screen saver. This is
-            done by implementing the interface
-            <interface>maestro.core.ISaverPlugin</interface><indexterm>
-                  <primary>plug-ins</primary>
-
-                  <secondary>interfaces</secondary>
-
-                  <tertiary>maestro.core.ISaverPlugin</tertiary>
-               </indexterm>, as defined in
-            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
-            The current list of supported screen saver plug-ins is as follows
-            (each identified by its name used in the
-            <command>maestrod</command> configuration):</para>
-
-            <itemizedlist>
-               <listitem>
-                  <para><literal>windows</literal> (using the regular
-                  <productname class="registered">Microsoft
-                  Windows</productname> Desktop screen saver)</para>
-               </listitem>
-
-               <listitem>
-                  <para><literal>powercfg</literal> (using the <productname
-                  class="registered">Microsoft Windows</productname> utility
-                  program <command>powercfg.exe</command> to control monitor
-                  power off)</para>
-               </listitem>
-
-               <listitem>
-                  <para><literal>xset</literal> (blanking and DPMS through the
-                  X server)</para>
-               </listitem>
-
-               <listitem>
-                  <para><literal>xscreensaver</literal> (controls XScreenSaver
-                  using <command>xscreensaver-command</command>)</para>
-               </listitem>
-            </itemizedlist>
-         </section>
-
-         <section>
-            <title>Desktop Wallpaper Plug-ins</title>
-
-            <para>To query and change the desktop background image (commonly
-            referred to as <quote>desktop wallpaper</quote>), the Desktop
-            Service<indexterm>
-                  <primary>services</primary>
-
-                  <secondary>desktop</secondary>
-               </indexterm> uses a plug-in. The job of the plug-in is to
-            return the name of the wallpaper image file and to handle changing
-            the wallpaper to a new image. This is done by implementing the
-            interface
-            <interface>maestro.core.IDesktopWallpaperPlugin</interface><indexterm>
-                  <primary>plug-ins</primary>
-
-                  <secondary>interfaces</secondary>
-
-                  <tertiary>maestro.core.IDesktopWallpaperPlugin</tertiary>
-               </indexterm>, as defined in
-            <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.
-            The current list of supported desktop wallpaper management
-            plug-ins is as follows (each identified by its name used in the
-            <command>maestrod</command> configuration):</para>
-
-            <itemizedlist>
-               <listitem>
-                  <para><literal>windows</literal> (using the regular
-                  <productname class="registered">Microsoft
-                  Windows</productname> Desktop—currently supports BMP images
-                  only)</para>
-               </listitem>
-
-               <listitem>
-                  <para><literal>gnome</literal> (using GConf via
-                  <command>gconftool-2</command>)</para>
-               </listitem>
-            </itemizedlist>
-
-            <indexterm class="endofrange"
-                       startref="index.section.services.plugins"></indexterm>
-         </section>
-      </section>
-
-      <section>
-         <title>Views</title>
-
-         <para>In order for a service to be utilized, there must be a
-         corresponding view in the <application>Maestro GUI</application>.
-         Views provide a visual interface to the remote service. Views are
-         identified as classes that implement the interface
-         <interface>maestro.core.IViewPlugin</interface><indexterm>
-               <primary>plug-ins</primary>
-
-               <secondary>interfaces</secondary>
-
-               <tertiary>maestro.core.IViewPlugin</tertiary>
-            </indexterm> as defined in
-         <filename>&lt;MAESTRODIR&gt;/maestro/core/plugin_interfaces.py</filename>.</para>
-
-         <para>When the <application>Maestro GUI</application> starts, it
-         scans the directory
-         <filename>&lt;MAESTRODIR&gt;/maestro/gui/plugins/views</filename> to
-         discover what views are available. Services All discovered view
-         plug-ins are instantiated and made available for use. If any plug-in
-         fails to load or fails to instantiate, then it is deactivated and not
-         shown in the GUI. The views that come with Maestro were described in
-         <xref linkend="section.running.maestro.gui" />.</para>
       </section>
    </chapter>
 
