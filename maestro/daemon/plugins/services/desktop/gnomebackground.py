@@ -183,6 +183,11 @@ class GnomeDesktopWallpaperPlugin(maestro.core.IDesktopWallpaperPlugin):
                continue
             else:
                raise
+         except OSError, ex:
+            if ex.errno == errno.EINTR:
+               continue
+            else:
+               raise
 
       path = ''
 
