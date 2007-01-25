@@ -37,7 +37,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>January 12, 2007</pubdate>
+      <pubdate>January 31, 2007</pubdate>
    </bookinfo>
 
    <preface>
@@ -2968,6 +2968,267 @@ setup (hd0)</screen>
                <indexterm class="endofrange"
                           startref="index.section.viewer.settings"></indexterm>
             </section>
+
+            <section>
+               <title>Clone Viewer</title>
+
+               <indexterm class="startofrange" id="index.section.viewer.clone">
+                  <primary>viewers</primary>
+
+                  <secondary>clone</secondary>
+               </indexterm>
+
+               <para>The Clone Viewer offers a way for cluster administrators
+               to manage the updating of cluster nodes through a cloning
+               process. This viewer requires that a node cloning/deployment
+               solution already be in place. <emphasis>Maestro does not
+               include cloning software itself or have any features for direct
+               assistance with software deployment on a cluster</emphasis>.
+               Since there are many different ways of managing a cluster
+               through cloning, this viewer is designed to be extensible
+               through the use of a plug-in that implements the actual details
+               of running the cloning software.</para>
+
+               <section>
+                  <title>SystemImager Cloning Plug-in</title>
+
+                  <indexterm>
+                     <primary>viewers</primary>
+
+                     <secondary>clone</secondary>
+
+                     <tertiary>SystemImager</tertiary>
+
+                     <see>cloning plug-ins</see>
+                  </indexterm>
+
+                  <indexterm class="startofrange"
+                             id="index.section.viewer.clone.systemimager">
+                     <primary>cloning plug-ins</primary>
+
+                     <secondary>SystemImager</secondary>
+                  </indexterm>
+
+                  <para>The use of <ulink
+                  url="http://www.systemimager.org/">SystemImager</ulink> for
+                  <emphasis>updating</emphasis> existing cloned nodes is
+                  supported by the SystemImager Cloning Plug-in. This plug-in
+                  handles communication with the golden client, the image
+                  server, and all the cloned client nodes. More generally,
+                  this plug-in has the following features:</para>
+
+                  <itemizedlist>
+                     <listitem>
+                        <para>Prepares the golden client to have its image
+                        uploaded to the image server.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Pulls the golden client image to the image
+                        server.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Shuts down the synchronization process on the
+                        golden client to reduce the risk of unauthorized users
+                        accessing the sytem image.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Pulls the image from the image server to each of
+                        the cloned clients in parallel.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>Runs any post-update commands on each of the
+                        cloned clients.</para>
+                     </listitem>
+                  </itemizedlist>
+
+                  <para>Ultimately, this plug-in just runs the SystemImager
+                  client- and server-side commands
+                  <command>si_prepareclient</command>,
+                  <command>si_getimage</command>, and
+                  <command>si_updateclient</command>. It has been tested with
+                  the simple use case of SystemImager that does not use <ulink
+                  url="http://sourceforge.net/projects/flamethrower/">flamethrower</ulink>,
+                  <ulink url="http://www.bittorrent.com/">BitTorrent</ulink>,
+                  or SSH for image deployment/installation. There is plenty of
+                  room for improving this plug-in.</para>
+
+                  <indexterm class="startofrange"
+                             id="index.section.viewer.clone.systemimager.reqs">
+                     <primary>cloning plug-ins</primary>
+
+                     <secondary>SystemImager</secondary>
+
+                     <tertiary>usage requirements</tertiary>
+                  </indexterm>
+
+                  <para>Users can customize the behavior of the SystemImager
+                  Cloning Plug-in to some extent, though there are a few
+                  assumptions currently made by this plug-in. These
+                  assumptions impact the functionality of this plug-in (and
+                  thus the Clone Viewer) in fundamental ways, so it is
+                  important to understand these details. At a high level, the
+                  assumptions made during the implementation of this plug-in
+                  are as follows:</para>
+
+                  <itemizedlist>
+                     <listitem>
+                        <para>SystemImager is already set up and ready to use
+                        for updating cloned client nodes.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>The user who will run the cloning process knows
+                        the root password for all the nodes in the
+                        cluster.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>The image server is not part of the ensemble and
+                        instead is accessed from the golden cllient via SSH
+                        without a password.</para>
+                     </listitem>
+
+                     <listitem>
+                        <para>The golden client is one of the nodes of the
+                        ensemble.</para>
+                     </listitem>
+                  </itemizedlist>
+
+                  <para>The first assumption comes from the fact that Maestro
+                  is not designed to support all the details of node cloning.
+                  It is relatively easy for Maestro to run the commands needed
+                  to update a cluster through cloning, but setting up cloning
+                  is a much more complex task that often involves careful
+                  planning and customzation steps. With the current version of
+                  SystemImager, the initial setup process is simply too
+                  complicated to be automated entirely by software written by
+                  a third party who has no direct knowledge of the cluster
+                  where SystemImager will be installed.</para>
+
+                  <para>The next assumption is based on the requirement of
+                  SystemImager that the commands be run as the
+                  <literal>root</literal> user. At a lower level, this plug-in
+                  is implemented without a corresponding service plug-in on
+                  the server side. Instead, it reuses the Launch
+                  Service<indexterm>
+                        <primary>services</primary>
+
+                        <secondary>launch</secondary>
+                     </indexterm>. Since the Launch Service only executes
+                  commands as the user who gets authenticated through the
+                  Maestro client GUI, the authenticated user must be
+                  <literal>root</literal> in order for this plug-in to do its
+                  job. While this may seem like a frustrating limitation, the
+                  alternative is to have a server-side service plug-in that
+                  runs the SystemImager commands as <literal>root</literal>
+                  regardless of who is authenticated through Maestro.</para>
+
+                  <para>The next assumption deals with the relationship of the
+                  image server to the cluster. In general, the image server
+                  will not be a node in the cluster due to various reasons
+                  (not the least of which is that having the image server be
+                  one of the cluster nodes complicates usage of SystemImager
+                  to some extent). Since this node is not part of the cluster,
+                  it will not appear in the ensemble as a node. In order to
+                  pull the image from the golden client, we have to be able to
+                  execute a command on the image server. This is done by
+                  running <command>ssh</command> from the golden client to log
+                  in to the image server and execute
+                  <command>si_getimage</command>. For this to happen in a
+                  convenient manner (and to work around the fact that Maestro
+                  does not currently have a way to get the root password for
+                  the image server to the <command>ssh</command> command), it
+                  must be possible for the <literal>root</literal> user on the
+                  golden client to log on to the image server as
+                  <literal>root</literal> without a password. This can be
+                  accomplished by setting up an RSA2 SSH key <emphasis>with no
+                  passphrase</emphasis> for <literal>root</literal> on the
+                  golden client and then by adding the created public key to
+                  <filename>~/.ssh/authorized_keys</filename> for
+                  <literal>root</literal> on the image server. To create this
+                  SSH key, simply run the following as <literal>root</literal>
+                  and do not enter a passphrase when prompted:</para>
+
+                  <screen>ssh-keygen -t rsa</screen>
+
+                  <caution>
+                     <para>Allowing root logins to the image server from the
+                     golden client without a password poses a security risk.
+                     However, an attacker would have already had to have
+                     gained root access on the cluster golden client in order
+                     to be able to take advantage of this setup.</para>
+                  </caution>
+
+                  <para>The last assumption requires that the golden client be
+                  one of the nodes in the ensemble. This assumption is perhaps
+                  the most difficult to justify because a site with more than
+                  one or two Linux-based clusters would probably have only one
+                  golden client for all the clusters. For now, however, the
+                  golden client must be one of the cluster nodes. A future
+                  version of Maestro (one with more flexible ensemble support)
+                  may remove this limitation. The golden client is identified
+                  in the ensemble by including the token
+                  <literal>golden</literal> in the class identifiers for that
+                  node. See <xref
+                  linkend="section.maestro.config.systemimager.plugin" /> and
+                  <xref linkend="section.files.ensemble" /> for more
+                  details.</para>
+
+                  <para><indexterm class="endofrange"
+                  startref="index.section.viewer.clone.systemimager.reqs"></indexterm><indexterm
+                        class="startofrange"
+                        id="index.section.viewer.clone.systemimager.use">
+                        <primary>cloning plug-ins</primary>
+
+                        <secondary>SystemImager</secondary>
+
+                        <tertiary>usage</tertiary>
+                     </indexterm></para>
+
+                  <para>With all of that in mind, using the SytemImager
+                  Cloning Plug-in is usually quite easy. Given a complete
+                  configuration for the plug-in (see <xref
+                  linkend="section.maestro.config.systemimager.plugin" />),
+                  users can simply click the <guibutton>Clone</guibutton>
+                  button and then sit back and wait for the process to
+                  complete. The cloning process can be interrupted at any time
+                  by clicking the <guibutton>Stop</guibutton> button. Output
+                  from the individual cluster nodes is shown in the log window
+                  just as it would for regular program execution via the
+                  Launch Viewer<indexterm>
+                        <primary>viewers</primary>
+
+                        <secondary>launch</secondary>
+                     </indexterm>. The overall progress of the cloning process
+                  is displayed in the lower half of the panel for the plug-in
+                  itself.</para>
+
+                  <para>The user interface for the SystemImager Cloning
+                  Plug-in allows the end user to make some adjustment to the
+                  behavior of the cloning process when necessary. Specfically,
+                  there are two details that can be changed through the GUI:
+                  the name of the image used for cloning and the directories
+                  excluded from the cloning process. The most common settings
+                  for the cluster can be specified in the Maestro GUI
+                  system-wide configuration file. Currently, changes made to
+                  these settings are not saved to the user's Maestro GUI
+                  settings file, so the changes will be lost when the GUI
+                  exits.</para>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.clone.systemimager.use"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.clone.systemimager"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.clone"></indexterm>
+               </section>
+            </section>
          </section>
 
          <section id="section.maestro.config">
@@ -3352,9 +3613,537 @@ setup (hd0)</screen>
                      novice)</para>
                   </listitem>
                </itemizedlist>
+            </section>
 
-               <indexterm class="endofrange"
-                          startref="index.section.maestro.config"></indexterm>
+            <section>
+               <title>Configuring the Clone Viewer</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.viewer.clone.config">
+                  <primary>viewers</primary>
+
+                  <secondary>clone</secondary>
+
+                  <tertiary>configuration</tertiary>
+               </indexterm>
+
+               <para>Configuring the Clone Viewer involves two pieces:
+               identifying the cloning plug-in to use and configuring the
+               cloning plug-in (if necessary). Identifying the cloning plug-in
+               means changing the CDATA value of the XML element
+               <sgmltag>&lt;clone_view&gt;</sgmltag><indexterm>
+                     <primary><filename>maestro.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;clone_view&gt;</sgmltag></tertiary>
+                  </indexterm><indexterm>
+                     <primary><filename>maestro.xml</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;clone_view&gt;</sgmltag></tertiary>
+                  </indexterm> under the root
+               <sgmltag>&lt;maestro&gt;</sgmltag> node so that it identifies
+               the Python class to be instantiated. This XML element can
+               appear in either the system-wide GUI configuration file or in
+               the user's personal GUI configuration file.</para>
+
+               <section id="section.maestro.config.systemimager.plugin">
+                  <title>Configuring the SystemImager Cloning Plug-in</title>
+
+                  <indexterm class="startofrange"
+                             id="index.section.viewer.clone.systemimager.config">
+                     <primary>cloning plug-ins</primary>
+
+                     <secondary>SystemImager</secondary>
+
+                     <tertiary>configuration</tertiary>
+                  </indexterm>
+
+                  <highlights>
+                     <para>Below is a quick overview of the configuration
+                     information associated with the SystemImager Cloning
+                     Plug-in:</para>
+
+                     <itemizedlist>
+                        <listitem>
+                           <para>Python class (for the
+                           <sgmltag>&lt;clone_view&gt;</sgmltag> element):
+                           <classname>views.clone.systemimager.SystemImager</classname></para>
+                        </listitem>
+
+                        <listitem>
+                           <para>Root XML element:
+                           <sgmltag>&lt;systemimager&gt;</sgmltag></para>
+                        </listitem>
+
+                        <listitem>
+                           <para>Required children of root XML element:</para>
+
+                           <itemizedlist>
+                              <listitem>
+                                 <para><sgmltag>&lt;image&gt;</sgmltag>: Identifies
+                                 the name of the image in its CDATA</para>
+                              </listitem>
+
+                              <listitem>
+                                 <para><sgmltag>&lt;image_server&gt;</sgmltag>:
+                                 Identifies the image server in the CDATA of its
+                                 <sgmltag>&lt;name&gt;</sgmltag> child; allows
+                                 addition of arguments to the
+                                 <command>si_getimage</command> command through its
+                                 <sgmltag>&lt;cmd_args&gt;</sgmltag> child</para>
+                              </listitem>
+                           </itemizedlist>
+                        </listitem>
+
+                        <listitem>
+                           <para>Other children of the root XML element:</para>
+
+                           <itemizedlist>
+                              <listitem>
+                                 <para><sgmltag>&lt;golden_client&gt;</sgmltag>:
+                                 Allows addition of arguments to the
+                                 <command>si_prepareclient</command> command through
+                                 its <sgmltag>&lt;prep_cmd_args&gt;</sgmltag> child;
+                                 allows for specification of commands to be executed
+                                 before and after cloning through its
+                                 <sgmltag>&lt;pre_clone_cmds&gt;</sgmltag> and
+                                 <sgmltag>&lt;post_clone_cmds&gt;</sgmltag>
+                                 children</para>
+                              </listitem>
+
+                              <listitem>
+                                 <para><sgmltag>&lt;cloned_client&gt;</sgmltag>:
+                                 Allows for specification of commands to be executed
+                                 before and after cloning through its
+                                 <sgmltag>&lt;pre_clone_cmds&gt;</sgmltag> and
+                                 <sgmltag>&lt;post_clone_cmds&gt;</sgmltag>
+                                 children</para>
+                              </listitem>
+
+                              <listitem>
+                                 <para><sgmltag>&lt;exclusions&gt;</sgmltag>: Lists
+                                 files and/or directories to be excluded from the
+                                 cloning process</para>
+                              </listitem>
+                           </itemizedlist>
+                        </listitem>
+
+                        <listitem>
+                           <para>The golden client is identified using the
+                           class token <literal>golden</literal> in the
+                           ensemble</para>
+                        </listitem>
+                     </itemizedlist>
+                  </highlights>
+
+                  <para>The SystemImager Cloning Plug-in has a large
+                  collection of configurable parameters. The intention is to
+                  make this plug-in adapt well to variations in the use of
+                  SystemImager. All parameters are children of the root XML
+                  element <sgmltag>&lt;systemimager&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;systemimager&gt;</sgmltag></tertiary>
+                     </indexterm>, and only the system-wide Maestro GUI
+                  configuration file is examined for these settings. This is
+                  because the plug-in requires root authentication on all
+                  nodes of the cluster and the image server. Allowing users to
+                  override these settings poses a major security risk<footnote>
+                        <para>Of course, the use of the SystemImager Cloning
+                        Plug-in requires root access to be used with any
+                        efficacy. If an untrusted user already knows the root
+                        password for the cluster nodes, then there are bigger
+                        problems afoot. Nevertheless, this plug-in would
+                        provide a nice springboard for a malicious user to
+                        wreak havoc on a cluster with a single button
+                        click.</para>
+                     </footnote>.</para>
+
+                  <para>The &lt;systemimager&gt;<indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;systemimager&gt;</sgmltag></tertiary>
+                     </indexterm> XML tag has two required children:
+                  <sgmltag>&lt;image&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;image&gt;</sgmltag></tertiary>
+                     </indexterm> and
+                  <sgmltag>&lt;image_server&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;image_server&gt;</sgmltag></tertiary>
+                     </indexterm>. The first identifies the name of the image
+                  to be used for the cloning process through its CDATA
+                  (leading and trailing whitespace is ignored). In general, a
+                  system administrator will probably have only one such image
+                  for a cluster, but the GUI user can change the image name
+                  temporarily.</para>
+
+                  <para>The <sgmltag>&lt;image_server&gt;</sgmltag> element
+                  has child elements of its own. The first,
+                  <sgmltag>&lt;name&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;name&gt;</sgmltag></tertiary>
+                     </indexterm>, is required as it identifies the name
+                  (either the host name or the IP address) of the image
+                  server. This value will be used repeatedly during the
+                  cloning process since every node in the cluster needs to
+                  know the name of the image server. Moreover, it is used for
+                  communicating with the image server to run the
+                  <command>si_getimage</command> command.</para>
+
+                  <para>The second child of the
+                  <sgmltag>&lt;image_server&gt;</sgmltag> element is optional.
+                  It is <sgmltag>&lt;cmd_args&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;cmd_args&gt;</sgmltag></tertiary>
+                     </indexterm>, and its
+                  <sgmltag>&lt;arg&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;arg&gt;</sgmltag></tertiary>
+                     </indexterm> children identify additional arguments to be
+                  passed to the <command>si_getimage</command> command when it
+                  is executed on the image server (via SSH). Without any
+                  additional arguments specified in
+                  <filename>maestro.xcfg</filename>,
+                  <command>si_getimage</command> is run with the arguments
+                  <option>--quiet</option>, <option>--golden-client</option>,
+                  and <option>--image</option> (with appropriate values for
+                  the name of the golden client and the image). Each argument
+                  must be specified as a separate
+                  <sgmltag>&lt;arg&gt;</sgmltag> child element. Arguments that
+                  are made up of a flag and a value (such as
+                  <option>--update-script NO</option>) will utilize the
+                  <literal>flag</literal> attribute and the CDATA of the
+                  <sgmltag>&lt;arg&gt;</sgmltag> XML element. An example of
+                  specifying additional arguments for
+                  <command>si_getimage</command> is shown in <xref
+                  linkend="example.maestro.xcfg.systemimager1" />.</para>
+
+                  <example id="example.maestro.xcfg.systemimager1">
+                     <title>System-Wide <filename>maestro.xcfg</filename> for
+                     SystemImager Image Server</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestro&gt;
+   &lt;clone_view&gt;
+      views.clone.systemimager.SystemImager
+   &lt;/clone_view&gt;
+   &lt;systemimager&gt;
+      &lt;image&gt;
+         my_cluster_image
+      &lt;/image&gt;
+      &lt;image_server&gt;
+         &lt;name&gt;
+            imgserver.example.com
+         &lt;/name&gt;
+         &lt;cmd_args&gt;
+            &lt;arg flag="--quiet"/&gt;
+            &lt;arg flag="--update-script"&gt;NO&lt;/arg&gt;
+            &lt;arg flag="--ip-assignment"&gt;static&lt;/arg&gt;
+            &lt;arg flag="--directory"&gt;
+               /host/server.example.com/si
+            &lt;/arg&gt;
+         &lt;/cmd_args&gt;
+      &lt;/image_server&gt;
+   &lt;/systemimager&gt;
+&lt;/maestro&gt;</programlisting>
+                  </example>
+
+                  <para>Once the required information about the image is set,
+                  we can customize the behavior of this cloning plug-in
+                  further by adding files and/or directories to be excluded
+                  from the cloning process. These settings end up being passed
+                  as <option>--exclude</option> options to
+                  <command>si_getimage</command>. Exclusions are collected
+                  under the <sgmltag>&lt;exclusions&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;exclusions&gt;</sgmltag></tertiary>
+                     </indexterm> child of the
+                  <sgmltag>&lt;systemimager&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;systemimager&gt;</sgmltag></tertiary>
+                     </indexterm> XML element. Each exclusion is identified
+                  using the CDATA of the
+                  <sgmltag>&lt;exclude&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;exclude&gt;</sgmltag></tertiary>
+                     </indexterm> element (with leading and trailing
+                  whitespace stripped), as shown in <xref
+                  linkend="example.maestro.xcfg.systemimager2" />. The syntax
+                  for these values is exactly the same as what is used for the
+                  <option>--exclude</option> option to
+                  <command>si_getimage</command>.</para>
+
+                  <example id="example.maestro.xcfg.systemimager2">
+                     <title>System-Wide <filename>maestro.xcfg</filename> for
+                     SystemImager Cloning Exclusions</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestro&gt;
+   &lt;clone_view&gt;
+      views.clone.systemimager.SystemImager
+   &lt;/clone_view&gt;
+   &lt;systemimager&gt;
+      &lt;!-- Image server settings omitted. --&gt;
+      &lt;exclusions&gt;
+         &lt;exclude&gt;/media&lt;/exclude&gt;
+         &lt;exclude&gt;/tmp&lt;/exclude&gt;
+         &lt;exclude&gt;/var/tmp&lt;/exclude&gt;
+         &lt;exclude&gt;/var/run/*&lt;/exclude&gt;
+         &lt;exclude&gt;/var/cache/yum&lt;/exclude&gt;
+      &lt;/exclusions&gt;
+   &lt;/systemimager&gt;
+&lt;/maestro&gt;</programlisting>
+                  </example>
+
+                  <para>Next, we can customize what is run on the golden
+                  client using the
+                  <sgmltag>&lt;golden_client&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;golden_client&gt;</sgmltag></tertiary>
+                     </indexterm> child of the
+                  <sgmltag>&lt;systemimager&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;systemimager&gt;</sgmltag></tertiary>
+                     </indexterm> element. The most useful will be adding
+                  options to be passed to the command
+                  <command>si_prepareclient</command> when it is run on the
+                  golden client. This is done using the
+                  <sgmltag>&lt;prep_cmd_args&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;prep_cmd_args&gt;</sgmltag></tertiary>
+                     </indexterm> child of
+                  <sgmltag>&lt;golden_client&gt;</sgmltag>. Its
+                  <sgmltag>&lt;arg&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;arg&gt;</sgmltag></tertiary>
+                     </indexterm> children identify additional arguments to be
+                  passed to the <command>si_prepareclient</command> command.
+                  Without any additional arguments specified in
+                  <filename>maestro.xcfg</filename>,
+                  <command>si_prepareclient</command> is run with the
+                  arguments <option>--yes</option> and
+                  <option>--server</option> (with the appropriate value for
+                  the name of the image server). Each argument must be
+                  specified as a separate <sgmltag>&lt;arg&gt;</sgmltag> child
+                  element. Arguments that are made up of a flag and a value
+                  (such as <option>--exclude /dev/sdX</option>) will utilize
+                  the <literal>flag</literal> attribute and the CDATA of the
+                  <sgmltag>&lt;arg&gt;</sgmltag> XML element. The structure of
+                  these <sgmltag>&lt;arg&gt;</sgmltag> elements is the same as
+                  what is used for the
+                  <sgmltag>&lt;cmd_args&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;cmd_args&gt;</sgmltag></tertiary>
+                     </indexterm> element for adding options to
+                  <command>si_getimage</command> (see <xref
+                  linkend="example.maestro.xcfg.systemimager1" />).</para>
+
+                  <para>Additional commands to execute on the golden client
+                  before and after cloning can be provided under the
+                  <sgmltag>&lt;golden_client&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;golden_client&gt;</sgmltag></tertiary>
+                     </indexterm> node's children
+                  <sgmltag>&lt;pre_clone_cmds&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;pre_clone_cmds&gt;</sgmltag></tertiary>
+                     </indexterm> and
+                  <sgmltag>&lt;post_clone_cmds&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;post_clone_cmds&gt;</sgmltag></tertiary>
+                     </indexterm> respectively. The pre-clone commands are
+                  executed before <command>si_prepareclient</command> is
+                  executed, and the post-clone commands are executed after
+                  <command>si_updateclient</command> completes successfully on
+                  all the cloned clients. The commands are described using the
+                  <sgmltag>&lt;command&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;command&gt;</sgmltag></tertiary>
+                     </indexterm> element which has three children:
+                  <sgmltag>&lt;cmd&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;cmd&gt;</sgmltag></tertiary>
+                     </indexterm>, <sgmltag>&lt;arg&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;arg&gt;</sgmltag></tertiary>
+                     </indexterm>, and
+                  <sgmltag>&lt;cwd&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;cwd&gt;</sgmltag></tertiary>
+                     </indexterm>. Only <sgmltag>&lt;cmd&gt;</sgmltag> is
+                  required as it specifies what the actual command to be run
+                  is. For the sake of safety and simplicity, it is best to use
+                  an absolute path to the command. After that, there can be
+                  zero or more &lt;arg&gt; elements which are used in exactly
+                  the same manner as other instances of this element type.
+                  Finally, <sgmltag>&lt;cwd&gt;</sgmltag> allows an explicit
+                  current working directory to be set for the command
+                  execution through its CDATA (leading and trailing whitespace
+                  are stripped). If the current working directory is not
+                  given, it defaults to the current working directory of
+                  <command>maestrod</command>.</para>
+
+                  <para>Finally, we can customize pre- and post-clone commands
+                  to be executed on the cloned clients (those in the ensemble
+                  that are not the golden client). This uses the same
+                  <sgmltag>&lt;pre_clone_cmds&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;pre_clone_cmds&gt;</sgmltag></tertiary>
+                     </indexterm> and
+                  <sgmltag>&lt;post_clone_cmds&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;post_clone_cmds&gt;</sgmltag></tertiary>
+                     </indexterm> XML elements, though in this case they are
+                  children of the
+                  <sgmltag>&lt;cloned_client&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;cloned_client&gt;</sgmltag></tertiary>
+                     </indexterm> element. The pre-clone commands are executed
+                  before <command>si_prepareclient</command> is run on the
+                  golden client, and the post-clone commands are run after
+                  <command>si_updateclient</command> completes successfully.
+                  These use the same
+                  <sgmltag>&lt;command&gt;</sgmltag><indexterm>
+                        <primary><filename>maestro.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;command&gt;</sgmltag></tertiary>
+                     </indexterm> element as in the case of the golden client
+                  with the same structure.</para>
+
+                  <note>
+                     <para>The list of pre- and post-clone commands is
+                     executed sequentially based on the order in
+                     <filename>maestro.xcfg</filename>, though they each
+                     command is started on all the cloned clients at the same
+                     time. If one of the commands is to pull a lot of data
+                     from a file server, then all the nodes of the ensemble
+                     except the golden client will be performing that
+                     operation at the same time.</para>
+                  </note>
+
+                  <example id="example.maestro.xcfg.systemimager3">
+                     <title>System-Wide <filename>maestro.xcfg</filename> for
+                     SystemImager Post-Cloning Commands</title>
+
+                     <programlisting>&lt;?xml version="1.0" ?&gt;
+&lt;maestro&gt;
+   &lt;clone_view&gt;
+      views.clone.systemimager.SystemImager
+   &lt;/clone_view&gt;
+   &lt;systemimager&gt;
+      &lt;!-- Other settings omitted. --&gt;
+      &lt;cloned_client&gt;
+         &lt;post_clone_cmds&gt;
+            &lt;command&gt;
+               &lt;cmd&gt;/sbin/chkconfig&lt;/cmd&gt;
+               &lt;arg flag="kudzu"&gt;off&lt;/arg&gt;
+            &lt;/command&gt;
+            &lt;command&gt;
+               &lt;cmd&gt;/sbin/chkconfig&lt;/cmd&gt;
+               &lt;arg flag="rhnsd"&gt;off&lt;/arg&gt;
+            &lt;/command&gt;
+         &lt;/post_clone_cmds&gt;
+      &lt;/cloned_client&gt;
+   &lt;/systemimager&gt;
+&lt;/maestro&gt;</programlisting>
+                  </example>
+
+                  <important>
+                     <para>Remember that <emphasis>all</emphasis> commands
+                     executed as part of the cloning process (including pre-
+                     and post-clone commands) are run as the
+                     <literal>root</literal> user. Be very careful about what
+                     is set up for custom execution!</para>
+                  </important>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.clone.systemimager.config"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.viewer.clone.config"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.maestro.config"></indexterm>
+               </section>
             </section>
          </section>
       </section>
