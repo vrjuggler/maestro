@@ -21,6 +21,7 @@
 import os, sys, traceback
 pj = os.path.join
 import reloader
+import logging
 
 if sys.version_info[0] == 2 and sys.version_info[1] < 4:
    import sets
@@ -46,6 +47,7 @@ class PluginManager(object):
    """
    def __init__(self):
       self.modules = {}   # Map module name --> [module, sys_path]      
+      self.mLogger = logging.getLogger('maestro.util.plugin.PluginManager')
 
    def scan(self, paths, progressCB=None):
       """ Scan the paths looking for plugins.
@@ -143,12 +145,12 @@ class PluginManager(object):
                __import__(mod_name)
                self.modules[mod_name] = [sys.modules[mod_name],mod_path]
          except Exception, ex:
-            print "Failed loading module: ", mod_name
+            self.mLogger.info("Failed loading module '%s'" % mod_name)
             if self.modules.has_key(mod_name):
                del self.modules[mod_name]
-            print "Error loading module: [%s] deleting it."%mod_name
-            print "   path:", sys.path
-            print "   exception:", ex
+               self.mLogger.error("Deleting module '%s'" % mod_name)
+            self.mLogger.error("   path: %s" % str(sys.path))
+            self.mLogger.error("   exception: %s" % str(ex))
             traceback.print_exc()
          sys.path = sys.path[1:]          # Remove path again
       
@@ -202,12 +204,12 @@ class PluginManager(object):
          try:                        
             reload(module)         
          except Exception, ex:
-            print "Failed rellaoding module: ", mod_name
+            self.mLogger.info("Failed rellaoding module '%s'" % mod_name)
             if self.modules.has_key(mod_name):
                del self.modules[mod_name]
-            print "Error loading module: [%s] deleting it."%mod_name
-            print "   path:", sys.path
-            print "   exception:", ex
+               self.mLogger.error("Deleting module '%s'" % mod_name)
+            self.mLogger.error("   path: %s" % str(sys.path))
+            self.mLogger.error("   exception: %s" % str(ex))
             traceback.print_exc()
          sys.path = sys.path[1:]          # Remove path again
 

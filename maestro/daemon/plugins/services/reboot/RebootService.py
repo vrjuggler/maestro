@@ -58,7 +58,7 @@ class RebootService(maestro.core.IServicePlugin):
    """
    def __init__(self):
       maestro.core.IServicePlugin.__init__(self)
-      self.mLogger = logging.getLogger('maestrod.MaestroServer')
+      self.mLogger = logging.getLogger('maestrod.RebootService')
       self.mBootPlugin = None
 
    def registerCallbacks(self):
@@ -146,7 +146,7 @@ class RebootService(maestro.core.IServicePlugin):
           @param avatar: System avatar that represents the remote user.
       """
 
-      print "Rebooting..."
+      self.mLogger.info("Rebooting...")
 
       if "win32" == sys.platform:
          Reboot(timeout = 0)
@@ -161,7 +161,7 @@ class RebootService(maestro.core.IServicePlugin):
           @param avatar: System avatar that represents the remote user.
       """
 
-      print "Powering down..."
+      self.mLogger.info("Powering down...")
 
       if "win32" == sys.platform:
          Reboot(message = 'Powering Down', timeout = 0, bReboot = False)

@@ -1,6 +1,7 @@
 # Copyright (C) Infiscape Corporation 2006
 
 import re
+import logging
 
 
 class GrubBootTarget:
@@ -39,6 +40,8 @@ class GrubBootTarget:
       self.mBody  = body
       self.mOS    = self.UNKNOWN
 
+      self.mLogger = logging.getLogger("maestrod.reboot.GrubBootTarget")
+
       self.mKernelPath         = ''
       self.mKernelPkgVersion   = ''
       self.mKernelVersion      = ''
@@ -56,10 +59,10 @@ class GrubBootTarget:
             self.mKernelPkgRevision  = match.group(4)
             self.mKernelPkgExtraText = match.group(5)
             self.mKernelOpts         = match.group(6)
-            #print "mKernelPkgVersion =", self.mKernelPkgVersion
-            #print "mKernelVersion =", self.mKernelVersion
-            #print "mKernelPkgRevision =", self.mKernelPkgRevision
-            #print "mKernelPkgExtraText =", self.mKernelPkgExtraText
+            #self.mLogger.debug("mKernelPkgVersion = %s" % self.mKernelPkgVersion)
+            #self.mLogger.debug("mKernelVersion = %s" % self.mKernelVersion)
+            #self.mLogger.debug("mKernelPkgRevision = %s" % self.mKernelPkgRevision)
+            #self.mLogger.debug("mKernelPkgExtraText = %s" % self.mKernelPkgExtraText)
             break
          elif self.sFreeBsdKernelBootRe.search(l) is not None:
             self.mOS = self.FREEBSD
@@ -70,9 +73,9 @@ class GrubBootTarget:
             break
 
       if self.mOS == self.UNKNOWN:
-         print "WARNING: Unknown operating system in"
+         self.mLogger.warning("Unknown operating system in:")
          for l in body:
-            print l.rstrip()
+            self.mLogger.warning(l.rstrip())
 
    def getIndex(self):
       return self.mIndex

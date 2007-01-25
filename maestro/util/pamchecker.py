@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, os, platform
+import logging
 
 from twisted.cred import checkers, credentials, error
 from twisted.internet import defer
@@ -36,19 +37,20 @@ def callIntoPAM(service, user, conv):
    uid = os.geteuid()
    os.setegid(0)
    os.seteuid(0)
+   logger = logging.getLogger("maestro.util.pamchecker")
    try:
       pam.authenticate() # these will raise
       pam.acct_mgmt()
-      print 'PAM Authentication Succeeded!'
+      logger.info('PAM Authentication Succeeded!')
       os.setegid(gid)
       os.seteuid(uid)
       return True
    except PAM.error, resp:
-      print 'PAM Authentication Failed!'
-      print 'Go away! (%s)' % resp
+      logger.error('PAM Authentication Failed!')
+      logger.error('Go away! (%s)' % str(resp))
    except Exception, ex:
-      print 'PAM Authentication Failed!'
-      print 'Internal error: (%s)' % ex
+      logger.error('PAM Authentication Failed!')
+      logger.error('Internal error: %s' % str(ex))
 
    os.setegid(gid)
    os.seteuid(uid)

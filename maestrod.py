@@ -150,8 +150,8 @@ class MaestroServer:
          except Exception, ex:
             if new_service:
                new_service = None
-            print "Error loading service:" + name + "\n  exception:" + str(ex)
-            traceback.print_exc()
+            self.mLogger.error("Error loading service '%s'" % name)
+            self.mLogger.error("  exception: " + str(ex))
 
       # Register callbacks to send info to clients
       #self.mEventManager.timers().createTimer(settings.update, 2.0)

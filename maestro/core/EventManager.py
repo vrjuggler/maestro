@@ -39,7 +39,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
    def closeAllConnections(self):
       for (ip, proxy) in self.mProxies.iteritems():
          remote_addr = proxy.broker.transport.getHost()
-         print "Closing connection to: ", remote_addr
+         self.mLogger.info("Closing connection to: %s" % str(remote_addr))
          proxy.broker.transport.loseConnection()
       self.mProxies = {}
 
@@ -121,9 +121,10 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
 
    def onErrorEmitting(self, reason):
       # Quietly ignore all emitting errors
-      # XXX: This is only temporary until we can figure out why there are errors on exit.
+      # XXX: This is only temporary until we can figure out why there are
+      # errors on exit.
       pass
-      #print "ERROR: ", reason
+      #self.mLogger.error(str(reason))
 
    def isConnected(self, nodeId):
       return self.mProxies.has_key(nodeId)

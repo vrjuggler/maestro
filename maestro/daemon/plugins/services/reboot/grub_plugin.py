@@ -22,6 +22,10 @@ import maestro.core
 const = maestro.core.const
 import grubconfig
 import re
+import logging
+
+
+gLogger = logging.getLogger("maestrod.reboot.grub_plugin")
 
 def grubIdToMaestroId(id):
    """ Map grubconf constants to Maestro constants.
@@ -83,7 +87,7 @@ def makeLinuxDefault(grubConf):
    if new_target is not None:
       grubConf.setDefault(new_target.getIndex())
    else:
-      print "WARNING: Could not find appropriate Linux target to be default"
+      gLogger.warning("Could not find appropriate Linux target to be default")
 
 class GrubPlugin(maestro.core.IBootPlugin):
    """ Reboot service that allows remote Maestro connections to change the
@@ -91,6 +95,8 @@ class GrubPlugin(maestro.core.IBootPlugin):
    """
    def __init__(self):
       maestro.core.IBootPlugin.__init__(self)
+      self.mLogger = logging.getLogger("maestrod.reboot.GrubPlugin")
+
       env = maestro.core.Environment()
       grub_path = env.settings.get('grub_conf', '/boot/grub/grub.conf').strip()
       # If this throws an exception (such as an IOException resulting from
@@ -137,17 +143,17 @@ class GrubPlugin(maestro.core.IBootPlugin):
 
       current_target = self.mGrubConfig.getTarget(self.mGrubConfig.getDefault())
       new_target = self.mGrubConfig.getTargets()[index]
-      
-      print "[%s][%s]" % (index, title)
+
+      self.mLogger.debug("[%s][%s]" % (index, title))
       title_on_disk = new_target.mTitle.lstrip("title").strip()
       if title == title_on_disk:
          # If we are going to Windows, save our current default so we know
          # which Linux target to boot back into.
          if not current_target.isWindows() and new_target.isWindows():
-            print "Saving default because we are going to Windows"
+            self.mLogger.debug("Saving default because we are going to Windows")
             self.mGrubConfig.saveDefault()
 
-         print "Setting default to: ", title
+         self.mLogger.info("Setting default to: %s" % title)
          self.mGrubConfig.setDefault(index)
          self.mGrubConfig.save()
          return True
@@ -175,16 +181,16 @@ class GrubPlugin(maestro.core.IBootPlugin):
       current_target = self.mGrubConfig.getTarget(self.mGrubConfig.getDefault())
 
       if const.LINUX == targetOs and current_target.isLinux():
-         print "Already booting into Linux."
+         self.mLogger.debug("Already booting into Linux.")
          return False
       elif const.WINXP == targetOs and current_target.isWindows():
-         print "Already booting into windows."
+         self.mLogger.debug("Already booting into windows.")
          return False
 
-      print "Target Linux: ", const.LINUX == targetOs
-      print "Target Windows: ", const.WINXP == targetOs
-      print "Current Linux: ", current_target.isLinux()
-      print "Current Windows: ", current_target.isWindows()
+      self.mLogger.debug("Target Linux: %s" % const.LINUX == targetOs)
+      self.mLogger.debug("Target Windows: %s" % const.WINXP == targetOs)
+      self.mLogger.debug("Current Linux: %s" % current_target.isLinux())
+      self.mLogger.debug("Current Windows: %s" % current_target.isWindows())
 
       # If we are in Windows, restore whatever the default Linux target was.
       if const.LINUX == targetOs:
@@ -205,10 +211,10 @@ class GrubPlugin(maestro.core.IBootPlugin):
          else:
             makeLinuxDefault(self.mGrubConfig)
 
-      # If we are in Linux (i.e., not in Windows), save the current Linux default
-      # target and make the first Widows target the default.
+      # If we are in Linux (i.e., not in Windows), save the current Linux
+      # default target and make the first Widows target the default.
       elif const.WINXP == targetOs:
-         print "Switching to Windows"
+         self.mLogger.debug("Switching to Windows")
          self.mGrubConfig.saveDefault()
          self.mGrubConfig.makeDefault(matchWindowsTarget)
       else:
@@ -217,7 +223,8 @@ class GrubPlugin(maestro.core.IBootPlugin):
             target_name = Constants.OsNameMap[targetOS][0]
          except:
             pass
-         print "Can not currently reboot into: [%s][%d]" % (target_name, targetOs)
+         self.mLogger.info("Can not currently reboot into: '%s' (%d)" % \
+                              (target_name, targetOs))
          return False
 
       # All done!
