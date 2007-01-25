@@ -26,7 +26,6 @@ import maestro.core
 const = maestro.core.const
 LOCAL = maestro.core.EventManager.EventManager.LOCAL
 import socket, types
-import LoginDialog
 
 
 class Ensemble(QtCore.QObject):
@@ -218,53 +217,6 @@ class Ensemble(QtCore.QObject):
    def onConnectError(self, failure, nodeId):
       reason = str(failure.value)
       self.mLogger.error("Failed to connect to %s: %s" % (nodeId, reason))
-
-      if 'twisted.cred.error.LoginFailed' in failure.parents:
-         # Temporarily disallow connection attempts to nodeId.
-         self.mDisallowedNodes.append(nodeId)
-
-         if 'twisted.cred.error.UnauthorizedLogin' in failure.parents:
-            result = \
-               QtGui.QMessageBox.critical(
-                  None, 'Unauthorized Login',
-                  'Login to %s failed!\n%s\nReauthenticate?' % (nodeId, reason),
-                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                  QtGui.QMessageBox.Yes
-               )
-
-            # If the user selected the "Yes" button, then open the login
-            # dialog box again so that s/he can reauthenticate.
-            if result == QtGui.QMessageBox.Yes:
-               self.mDisallowedNodes.remove(nodeId)
-
-               try:
-                  host = socket.gethostbyaddr(nodeId)[0]
-               except:
-                  host = nodeId
-
-               dlg = LoginDialog.LoginDialog(host)
-               dlg.exec_()
-               env = maestro.gui.Environment()
-               env.mEventManager.setCredentials(dlg.getLoginInfo())
-         # If login was deined, give the user the option of retrying. Denied
-         # login may not necessarily require reauthentication.
-         elif 'twisted.cred.error.LoginDenied' in failure.parents:
-            result = \
-               QtGui.QMessageBox.critical(
-                  None, 'Unauthorized Login',
-                  'Login to %s was denied!\n%s\nRetry?' % (nodeId, reason),
-                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                  QtGui.QMessageBox.Yes
-               )
-
-            # If the user selected the "Yes" button, remove nodeId from
-            # self.mDisallowedNodes so that another connection attempt can be
-            # made.
-            if result == QtGui.QMessageBox.Yes:
-               self.mDisallowedNodes.remove(nodeId)
-         # Otherwise, allow more connection attempts to nodeId to occur.
-         else:
-            self.mDisallowedNodes.remove(nodeId)
 
       # Connection to nodeId has completed (and failed).
       self.mConnectInProgress[nodeId] = False
