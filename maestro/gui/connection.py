@@ -108,6 +108,8 @@ class AuthorizationClient:
             # Then, we try again with the next server-specified authentication
             # method in the list.
             d.addErrback(lambda _, c = caps[1:]: self._handleGetCap(c))
+         else:
+            self._handleGetCap(caps[1:])
       else:
          self.mLoginDeferred.errback(twisted.cred.error.LoginFailed())
 
