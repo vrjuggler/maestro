@@ -92,7 +92,7 @@ def writeOut(text):
    if sys.platform.startswith("win"):
       real_text = text.strip('\r\n')
    else:
-      real_text = text.strip('\r')
+      real_text = text.strip('\n')
    if real_text != '':
       stdout_logger.debug(real_text)
 
@@ -100,7 +100,7 @@ def writeErr(text):
    if sys.platform.startswith("win"):
       real_text = text.strip('\r\n')
    else:
-      real_text = text.strip('\r')
+      real_text = text.strip('\n')
    if real_text != '':
       stderr_logger.debug(real_text)
 
