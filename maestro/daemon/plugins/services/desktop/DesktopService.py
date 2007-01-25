@@ -22,6 +22,7 @@ import os.path
 import sys
 
 import maestro.core
+import maestro.util
 import maestro.util.pbhelpers as pbhelpers
 
 
@@ -228,11 +229,73 @@ class DesktopService(maestro.core.IServicePlugin):
       file_name = self._getBackgroundFileName(avatar)
 
       if file_name != '':
-         try:
-            file_obj = open(file_name, 'r+b')
-            bytes = file_obj.read()
-            file_obj.close()
-         except:
-            pass
+         if sys.platform.startswith('win'):
+            import win32security
+
+            win32security.ImpersonateLoggedOnUser(avatar.mUserHandle)
+
+            try:
+               file_obj = open(file_name, 'r+b')
+               bytes = file_obj.read()
+               file_obj.close()
+            except Exception, ex:
+               self.mLogger.debug("Failed to read '%s': %s" % \
+                                     (file_name, str(ex)))
+
+            win32security.RevertToSelf()
+         # On non-Windows platforms, we have to jump through some extra
+         # hoops to increase the likelihood of being able to read the
+         # background image file. That is, we have to fork off a child
+         # process and then read the file contents as the authenticated
+         # user.
+         else:
+            import select
+
+            child_pipe_rd, child_pipe_wr = os.pipe()
+
+            pid = os.fork()
+            if pid == 0:
+               os.close(child_pipe_rd)
+
+               maestro.util.changeToUserName(avatar.mUserName)
+               exit_status = 0
+               try:
+                  file_obj = open(file_name, 'r+b')
+                  bytes = file_obj.read()
+                  file_obj.close()
+                  os.write(child_pipe_wr, bytes)
+               except Exception, ex:
+                  self.mLogger.debug("Failed to read '%s': %s" % \
+                                        (file_name, str(ex)))
+                  exit_status = -1
+
+               os._exit(exit_status)
+
+            os.close(child_pipe_wr)
+
+            read, write, ex = select.select([child_pipe_rd], [], [])
+            if child_pipe_rd in read:
+               done = False
+               while not done:
+                  try:
+                     cur_data = os.read(child_pipe_rd, 8192)
+                     read, write, ex = select.select([child_pipe_rd], [], [], 0.1)
+                     if cur_data == '':
+                        done = True
+                     else:
+                        bytes = bytes + cur_data
+                        if child_pipe_rd not in read:
+                           done = True
+                  except IOError, ex:
+                     if ex.errno == errno.EINTR:
+                        continue
+                     else:
+                        raise
+                  except OSError, ex:
+                     if ex.errno == errno.EINTR:
+                        continue
+                     else:
+                        raise
+            maestro.util.waitpidRetryOnEINTR(pid, 0)
 
       return bytes
