@@ -760,6 +760,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                   (ensemble_filename, ex.strerror)
             )
 
+   def onChangeAuthentication(self):
+      env = maestro.gui.Environment()
+      env.mEventManager.closeAllConnections()
+      env.mConnectionMgr.clearCredentials()
+
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
 
@@ -794,6 +799,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onSaveStanzas)
       self.connect(self.mLoadStanzaAction, QtCore.SIGNAL("triggered()"),
                    self.onLoadStanza)
+      self.connect(self.mChangeAuthAction, QtCore.SIGNAL("triggered()"),
+                   self.onChangeAuthentication)
       self.connect(self.mAboutAction, QtCore.SIGNAL("triggered()"),
                    self.onAbout)
       self.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),

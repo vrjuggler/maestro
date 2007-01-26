@@ -185,9 +185,20 @@
      <x>0</x>
      <y>0</y>
      <width>557</width>
-     <height>25</height>
+     <height>29</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuHelp" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="mAboutAction" />
+   </widget>
+   <widget class="QMenu" name="menuView" >
+    <property name="title" >
+     <string>&amp;View</string>
+    </property>
+   </widget>
    <widget class="QMenu" name="menuFile" >
     <property name="title" >
      <string>&amp;File</string>
@@ -218,13 +229,15 @@
     <addaction name="separator" />
     <addaction name="mExitAction" />
    </widget>
-   <widget class="QMenu" name="menuHelp" >
+   <widget class="QMenu" name="menuTools" >
     <property name="title" >
-     <string>&amp;Help</string>
+     <string>&amp;Tools</string>
     </property>
-    <addaction name="mAboutAction" />
+    <addaction name="mChangeAuthAction" />
    </widget>
    <addaction name="menuFile" />
+   <addaction name="menuTools" />
+   <addaction name="menuView" />
    <addaction name="menuHelp" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
@@ -353,6 +366,11 @@
    </property>
    <property name="shortcut" >
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="mChangeAuthAction" >
+   <property name="text" >
+    <string>Change &amp;Authentication</string>
    </property>
   </action>
  </widget>

@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -178,6 +178,12 @@ class ConnectionManager:
       d.addErrback(lambda err, n = nodeId: self._catchFailure(n, err))
 
       return d
+
+   def clearCredentials(self):
+      '''
+      Wipes out all cached authentication information. Use with caution!
+      '''
+      self.mLoginData = {}
 
    def _catchFailure(self, nodeId, failure):
       self.mConnectingNodes.remove(nodeId)
