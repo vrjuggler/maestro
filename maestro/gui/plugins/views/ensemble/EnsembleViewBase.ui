@@ -99,7 +99,7 @@
             <string>&amp;Add</string>
            </property>
            <property name="shortcut" >
-            <string>Ctrl+A</string>
+            <string>Ctrl+N</string>
            </property>
           </widget>
          </item>
