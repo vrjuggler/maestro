@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -133,7 +133,7 @@ class OutputTabWidget(QtGui.QTabWidget):
       for i in xrange(self.count()):
          self.removeTab(0)
       self.mTabMap = {}
-         
+
       for i in xrange(len(self.mEnsemble.mNodes)):
          node = self.mEnsemble.mNodes[i]
          self.addOutputTab(node, i)
@@ -162,11 +162,12 @@ class OutputTabWidget(QtGui.QTabWidget):
       """
       # Ensure that we do not already have a tab for this node.
       if self.mTabMap.has_key(node):
-         raise AttributeError("OutputTabWidget: [%s] already has a tab." % node.getName())
+         raise AttributeError("OutputTabWidget: [%s] already has a tab." % \
+                                 node.getName())
 
       tab = QtGui.QWidget()
       tab.setObjectName("tab")
-      
+
       hboxlayout = QtGui.QHBoxLayout(tab)
       hboxlayout.setMargin(9)
       hboxlayout.setSpacing(6)
@@ -176,9 +177,9 @@ class OutputTabWidget(QtGui.QTabWidget):
       log_widget = LogWidget.LogWidget()
       scroll_area.setWidget(log_widget)
       hboxlayout.addWidget(scroll_area)
-      
+
       self.insertTab(index, tab, node.getName())
-      
+
       self.mTabMap[node] = (tab, scroll_area, log_widget)
 
 class NodeLogger:
@@ -464,7 +465,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def init(self):
       env = maestro.gui.Environment()
       self.mCurViewPlugin = None
-      self.mViewPlugins = env.mPluginManager.getPlugins(plugInType=maestro.core.IViewPlugin, returnNameDict=True)
+      self.mViewPlugins = \
+         env.mPluginManager.getPlugins(plugInType = maestro.core.IViewPlugin,
+                                       returnNameDict = True)
 
       view_plugins = env.settings.findall('gui_layout/view_plugins/*')
       all_view_plugin_types = self.mViewPlugins.keys()
@@ -515,9 +518,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             all_view_names = [cls.getName() for cls in self.mViewPlugins.values()]
             QtGui.QMessageBox.information(
                self, "View Not Found ",
-               "Could not find view named %s. You can selected from one " \
-               "of the following:\n%s\nDefaulting to the first view (%s)."\
-               % (env.mCmdOpts.view, all_view_names, view_names[0]))
+               "Could not find view named %s. You can selected from one "    \
+               "of the following:\n%s\nDefaulting to the first view (%s)." % \
+                  (env.mCmdOpts.view, all_view_names, view_names[0])
+            )
 
       self.mViewList.setCurrentRow(start_view_index)
       self.mViewList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -529,7 +533,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.refreshTimer = QtCore.QTimer()
       self.refreshTimer.setInterval(2000)
       self.refreshTimer.start()
-      QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"), self.onRefreshEnsemble)
+      QtCore.QObject.connect(self.refreshTimer, QtCore.SIGNAL("timeout()"),
+                             self.onRefreshEnsemble)
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
@@ -642,11 +647,12 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             ensemble = ensemble.Ensemble(xmlTree=element_tree,
                                          fileName=ensemble_filename)
             self.setEnsemble(ensemble)
-            self.statusBar().showMessage("Opened ensemble %s"%ensemble_filename)
+            self.statusBar().showMessage("Opened ensemble %s" % \
+                                            ensemble_filename)
 
-            # Store the directory that contains ensemble_filename so that the next
-            # time the user tries to save an ensemble without a filename, it will
-            # start out in that same directory.
+            # Store the directory that contains ensemble_filename so that the
+            # next time the user tries to save an ensemble without a filename,
+            # it will start out in that same directory.
             self.mEnsembleStartDir = os.path.dirname(ensemble_filename)
          except IOError, ex:
             QtGui.QMessageBox.critical(
@@ -679,7 +685,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       #if not ensemble_filename.endswith('.ensem'):
       #   ensemble_filename = ensemble_filename + '.ensem'
 
-      # If ensemble_filename is None or empty, then the user must have canceled.
+      # If ensemble_filename is None or empty, then the user must have
+      # canceled.
       if ensemble_filename is None or ensemble_filename == '':
          return
 
@@ -714,18 +721,23 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       try:
          self.mEnsemble.save(ensemble_filename)
-         self.statusBar().showMessage("Ensemble saved %s"%ensemble_filename)
+         self.statusBar().showMessage("Ensemble saved %s" % ensemble_filename)
       except IOError, ex:
-         QtGui.QMessageBox.critical(self, "Error",
+         QtGui.QMessageBox.critical(
+            self, "Error",
             "Failed to save ensemble file %s: %s" % \
-            (ensemble_filename, ex.strerror))
+               (ensemble_filename, ex.strerror)
+         )
 
    def onCreateNewEnsemble(self):
       if self.mEnsemble is not None:
-         reply = QtGui.QMessageBox.question(self, self.tr("Create New Ensemble"),
-            self.tr("Do you want to save the current ensemble first?"),
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         reply = \
+            QtGui.QMessageBox.question(
+               self, self.tr("Create New Ensemble"),
+               self.tr("Do you want to save the current ensemble first?"),
+               QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+               QtGui.QMessageBox.No | QtGui.QMessageBox.Escape
+            )
          if reply == QtGui.QMessageBox.Yes:
             self.onSaveEnsemble()
 
@@ -738,7 +750,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       env = maestro.gui.Environment()
       env.mStanzaStore.saveAll()
       self.statusBar().showMessage("All stanzas saved")
-      
+
    def onLoadStanza(self):
       ensemble_filename = \
          QtGui.QFileDialog.getOpenFileName(self, "Choose a Stanza file",
@@ -912,9 +924,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       if not vtype:
          warning_text = "WARNING: Could not find View Plug-in named: %s" % \
-                           pluginTypeName      
+                           pluginTypeName
          QtGui.QMessageBox.critical(self, "Plug-in Lookup Failure",
-                                    warning_text, 
+                                    warning_text,
                                     QtGui.QMessageBox.Ignore |     \
                                        QtGui.QMessageBox.Default | \
                                        QtGui.QMessageBox.Escape,
@@ -923,7 +935,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          return
 
       view_name = vtype.getName()
-      
+
       # Try to load the view
       new_view = None
       try:
@@ -944,7 +956,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          if hidden:
             err_text = 'Failed to get view object for %s\n(type %s)' % \
                           (view_name, pluginTypeName)
-            QtGui.QMessageBox.warning(self, "Plug-in Failure", err_text, 
+            QtGui.QMessageBox.warning(self, "Plug-in Failure", err_text,
                                       QtGui.QMessageBox.Ignore     | \
                                          QtGui.QMessageBox.Default | \
                                          QtGui.QMessageBox.Escape,
@@ -979,10 +991,13 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          err_text = "Error loading view:" + view_name + "\n  exception:" + str(ex)
          print err_text
          traceback.print_exc()
-         
-         QtGui.QMessageBox.warning(self, "Plug-in Failure", err_text, 
-                                    QtGui.QMessageBox.Ignore|QtGui.QMessageBox.Default|QtGui.QMessageBox.Escape,
-                                    QtGui.QMessageBox.NoButton, QtGui.QMessageBox.NoButton)
+
+         QtGui.QMessageBox.warning(self, "Plug-in Failure", err_text,
+                                   QtGui.QMessageBox.Ignore     | \
+                                      QtGui.QMessageBox.Default | \
+                                      QtGui.QMessageBox.Escape,
+                                   QtGui.QMessageBox.NoButton,
+                                   QtGui.QMessageBox.NoButton)
 
    def viewChanged(self, index):
       if self.mCurViewPlugin is not None:
