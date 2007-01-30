@@ -29,14 +29,6 @@ class Ui_PathEditorBase(object):
       self.gridlayout.setSpacing(6)
       self.gridlayout.setObjectName("gridlayout")
 
-      self.mMatchesList = QtGui.QListWidget(PathEditorBase)
-      self.mMatchesList.setObjectName("mMatchesList")
-      self.gridlayout.addWidget(self.mMatchesList,1,0,1,2)
-
-      self.mPathLbl = QtGui.QLabel(PathEditorBase)
-      self.mPathLbl.setObjectName("mPathLbl")
-      self.gridlayout.addWidget(self.mPathLbl,0,0,1,1)
-
       self.mPathCB = QtGui.QComboBox(PathEditorBase)
 
       sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7),QtGui.QSizePolicy.Policy(0))
@@ -48,20 +40,34 @@ class Ui_PathEditorBase(object):
       self.mPathCB.setObjectName("mPathCB")
       self.gridlayout.addWidget(self.mPathCB,0,1,1,1)
 
+      self.mPathLbl = QtGui.QLabel(PathEditorBase)
+      self.mPathLbl.setObjectName("mPathLbl")
+      self.gridlayout.addWidget(self.mPathLbl,0,0,1,1)
+
+      self.label = QtGui.QLabel(PathEditorBase)
+      self.label.setObjectName("label")
+      self.gridlayout.addWidget(self.label,1,0,1,1)
+
+      self.mMatchesList = QtGui.QListWidget(PathEditorBase)
+      self.mMatchesList.setSortingEnabled(True)
+      self.mMatchesList.setObjectName("mMatchesList")
+      self.gridlayout.addWidget(self.mMatchesList,2,0,1,2)
+
       self.retranslateUi(PathEditorBase)
       QtCore.QMetaObject.connectSlotsByName(PathEditorBase)
 
    def retranslateUi(self, PathEditorBase):
       PathEditorBase.setWindowTitle(QtGui.QApplication.translate("PathEditorBase", "Path Editor", None, QtGui.QApplication.UnicodeUTF8))
-      self.mMatchesList.setToolTip(QtGui.QApplication.translate("PathEditorBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-      "p, li { white-space: pre-wrap; }\n"
-      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
-      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">List of options that match the path given above.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-      self.mPathLbl.setText(QtGui.QApplication.translate("PathEditorBase", "Path:", None, QtGui.QApplication.UnicodeUTF8))
       self.mPathCB.setToolTip(QtGui.QApplication.translate("PathEditorBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
       "p, li { white-space: pre-wrap; }\n"
       "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
       "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Select or type a path to see the matches below.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mPathLbl.setText(QtGui.QApplication.translate("PathEditorBase", "Path:", None, QtGui.QApplication.UnicodeUTF8))
+      self.label.setText(QtGui.QApplication.translate("PathEditorBase", "Matches:", None, QtGui.QApplication.UnicodeUTF8))
+      self.mMatchesList.setToolTip(QtGui.QApplication.translate("PathEditorBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+      "p, li { white-space: pre-wrap; }\n"
+      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">List of matches based on the path given above.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
 
 
 
