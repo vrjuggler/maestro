@@ -13,7 +13,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -160,6 +160,11 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
                    self.onPathSet)
       self.connect(line_edit, QtCore.SIGNAL("returnPressed()"),
                    self.onPathSet)
+      # XXX: For some reason, the itemDoubleClicked(QListWidgetItem) slot is
+      # not working.
+      self.connect(self.mMatchesList,
+                   QtCore.SIGNAL("doubleClicked(QModelIndex)"),
+                   self.onMatchDoubleClick)
 
    def setOption(self, option):
       """ Updates the current state of the application with the given option.
@@ -256,6 +261,34 @@ class StanzaPathEditor(QtGui.QWidget, PathEditorBase.Ui_PathEditorBase):
          if new_path != old_path:
             self.mOption.mElement.set('id', new_path)
             self.__fillMatchList()
+
+   # This expression matches the last element of a global option path. It can
+   # be used for replacing that component of the path with a different value.
+   sPathReplEx = re.compile(r'(.*/)([^/]+)$')
+
+   def onMatchDoubleClick(self, index):
+      try:
+         # XXX: This extra bit of work is because the signal
+         # itemDoubleClicked(QListWidgetItem) does not seem to be working.
+         # The simpler version would be the following:
+         # match = str(item.text())
+         match = str(self.mMatchesList.model().data(index).toString())
+
+         # Extract the current path and determine what we can replace in it.
+         line_edit = self.mPathCB.lineEdit()
+         cur_path = str(line_edit.text())
+         m = self.sPathReplEx.search(cur_path)
+
+         if m is not None:
+            new_path = m.group(1) + match
+            line_edit.setText(new_path)
+
+            # We do not have a slot for textChanged(QString), so we do this
+            # manually to ensure that the matches list gets updated.
+            self.onPathSet()
+      except:
+         # Ignore exceptions that may be thrown by the above operations.
+         pass
 
    def __fillMatchList(self):
       """ Helper method that fills the match list with all application
