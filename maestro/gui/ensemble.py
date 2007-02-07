@@ -299,12 +299,13 @@ class ClusterNode(QtCore.QObject):
        information is loaded from the configuration file. But things like
        the current OS are retrieved from the remote object.
    """
-   def __init__(self, xmlElt, parent=None):
+   def __init__(self, xmlElt, platform = const.ERROR, ipAddr = None,
+                parent = None):
       QtCore.QObject.__init__(self, parent)
       assert xmlElt.tag == "cluster_node"
       self.mElement = xmlElt
-      self.mPlatform = const.ERROR
-      self.mIpAddress = None
+      self.mPlatform = platform
+      self.mIpAddress = ipAddr
       self.lookupIpAddress()
 
    def getName(self):

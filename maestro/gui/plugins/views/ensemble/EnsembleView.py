@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
+import elementtree.ElementTree as ET
 import EnsembleViewBase
 import maestro.core
 const = maestro.core.const
@@ -163,6 +164,9 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
        They can add/remove nodes to the ensemble and view detailed settings
        for each node.
    """
+
+   sNodeMimeType = 'application/maestro-ensemble-node'
+
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -187,24 +191,56 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # Call if you want an icon view
       #self.mClusterListView.setViewMode(QtGui.QListView.IconMode)
-      self.mListModeAction = QtGui.QAction("List View", self)
-      self.mIconModeAction = QtGui.QAction("Icon View", self)
-      self.mViewModeCBs = [lambda mode=QtGui.QListView.ListMode: self.mClusterListView.setViewMode(mode),
-                           lambda mode=QtGui.QListView.IconMode: self.mClusterListView.setViewMode(mode)]
-         
-      self.connect(self.mListModeAction, QtCore.SIGNAL("triggered()"), self.mViewModeCBs[0])
-      self.connect(self.mIconModeAction, QtCore.SIGNAL("triggered()"), self.mViewModeCBs[1])
+      self.mCopyNodeAction  = QtGui.QAction("Copy Node", self)
+      self.mCutNodeAction   = QtGui.QAction("Cut Node", self)
+      self.mPasteNodeAction = QtGui.QAction("Paste Node", self)
+      self.mListModeAction  = QtGui.QAction("List View", self)
+      self.mIconModeAction  = QtGui.QAction("Icon View", self)
 
-      self.mSeperatorAction = QtGui.QAction(self)
-      self.mSeperatorAction.setSeparator(True)
+      self.mCopyNodeAction.setShortcut(QtGui.QKeySequence("Ctrl+C"))
+      self.mCutNodeAction.setShortcut(QtGui.QKeySequence("Ctrl+X"))
+      self.mPasteNodeAction.setShortcut(QtGui.QKeySequence("Ctrl+V"))
+
+      selected_nodes = self.mClusterListView.selectedIndexes()
+      can_copy = len(selected_nodes) == 1
+
+      self.mCopyNodeAction.setEnabled(can_copy)
+      self.mCutNodeAction.setEnabled(can_copy)
+      self.mPasteNodeAction.setEnabled(False)
+
+      self.connect(self.mCopyNodeAction, QtCore.SIGNAL("triggered()"),
+                   self.onCopyNode)
+      self.connect(self.mCutNodeAction, QtCore.SIGNAL("triggered()"),
+                   self.onCutNode)
+      self.connect(self.mPasteNodeAction, QtCore.SIGNAL("triggered()"),
+                   self.onPasteNode)
+
+      self.mViewModeCBs = [
+         lambda mode=QtGui.QListView.ListMode: self.mClusterListView.setViewMode(mode),
+         lambda mode=QtGui.QListView.IconMode: self.mClusterListView.setViewMode(mode)
+      ]
+
+      self.connect(self.mListModeAction, QtCore.SIGNAL("triggered()"),
+                   self.mViewModeCBs[0])
+      self.connect(self.mIconModeAction, QtCore.SIGNAL("triggered()"),
+                   self.mViewModeCBs[1])
+
+      self.mSeparatorAction1 = QtGui.QAction(self)
+      self.mSeparatorAction1.setSeparator(True)
+      self.mSeparatorAction2 = QtGui.QAction(self)
+      self.mSeparatorAction2.setSeparator(True)
 
       # Create a log action that will ask the selected node for its current log.
       self.mLogAction = QtGui.QAction("Get Log", self)
       self.connect(self.mLogAction, QtCore.SIGNAL("triggered()"), self.onGetLog)
 
+      self.mClusterListView.addAction(self.mCopyNodeAction)
+      self.mClusterListView.addAction(self.mCutNodeAction)
+      self.mClusterListView.addAction(self.mPasteNodeAction)
+      self.mClusterListView.addAction(self.mSeparatorAction1)
       self.mClusterListView.addAction(self.mListModeAction)
       self.mClusterListView.addAction(self.mIconModeAction)
-      self.mClusterListView.addAction(self.mSeperatorAction)
+      self.mClusterListView.addAction(self.mSeparatorAction2)
       self.mClusterListView.addAction(self.mLogAction)
 
       self.mClusterListView.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
@@ -348,6 +384,9 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """ Called when user presses the add button. """
       # Create a new node that is stored in the ensemble.
       new_node = self.mEnsemble.createNode()
+      self.__doNodeAdd()
+
+   def __doNodeAdd(self):
       num_nodes = self.mEnsemble.getNumNodes()
       new_index = self.mEnsembleModel.index(num_nodes-1)
 
@@ -449,6 +488,81 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.mSettingsTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
       self.mSettingsTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
+      selected = self.mClusterListView.selectedIndexes()
+      can_copy = len(selected) == 1
+      self.mCopyNodeAction.setEnabled(can_copy)
+      self.mCutNodeAction.setEnabled(can_copy)
+
+   def onCopyNode(self):
+      # Copy the selected node to the clipboard.
+      clipboard = QtGui.QApplication.clipboard()
+      clipboard.setMimeData(self._makeNodeMimeData(self.__getSelectedNode()))
+
+      # Enable the paste action.
+      self.mPasteNodeAction.setEnabled(True)
+
+   def onCutNode(self):
+      # Copy the selected node to the clipboard.
+      clipboard = QtGui.QApplication.clipboard()
+      node = self.__getSelectedNode()
+      clipboard.setMimeData(self._makeNodeMimeData(node))
+
+      # Perform the cut operation.
+      self.mEnsemble.removeNode(node)
+      self.mClusterListView.clearSelection()
+
+      # Enable the paste action.
+      self.mPasteNodeAction.setEnabled(True)
+
+   def _makeNodeMimeData(self, node):
+      assert node is not None
+
+      node_data = QtCore.QByteArray()
+      data_stream = QtCore.QDataStream(node_data, QtCore.QIODevice.WriteOnly)
+
+      # Store the node's XML element, platform identifier (an integer) and
+      # IP address as QtCore.QString objects.
+      xml_elt  = QtCore.QString(ET.tostring(node.mElement))
+      platform = QtCore.QString(str(node.mPlatform))
+
+      if node.mIpAddress is None:
+         ip_addr = QtCore.QString()
+      else:
+         ip_addr = QtCore.QString(node.mIpAddress)
+
+      data_stream << xml_elt << platform << ip_addr
+
+      mime_data = QtCore.QMimeData()
+      mime_data.setData(self.sNodeMimeType, node_data)
+
+      return mime_data
+
+   def onPasteNode(self):
+      clipboard = QtGui.QApplication.clipboard()
+      data = clipboard.mimeData()
+      if data.hasFormat(self.sNodeMimeType):
+         node_data = data.data(self.sNodeMimeType)
+         data_stream = QtCore.QDataStream(node_data,
+                                          QtCore.QIODevice.ReadOnly)
+
+         # The MIME data for an ensemble node contains its XML element, its
+         # platform identifier, and its IP address. All of these are stored as
+         # QtCore.QString instances.
+         xml_elt  = QtCore.QString()
+         platform = QtCore.QString()
+         ip_addr  = QtCore.QString()
+
+         data_stream >> xml_elt >> platform >> ip_addr
+
+         if len(str(ip_addr)) == 0:
+            ip_addr = None
+         else:
+            ip_addr = str(ip_addr)
+
+         node = ensemble.ClusterNode(ET.fromstring(str(xml_elt)),
+                                     platform.toInt()[0], ip_addr)
+         self.mEnsemble.addNode(node)
+         self.__doNodeAdd()
 
    def updateFields(self):
       """ Fills in the node information for the currently selected node. This
