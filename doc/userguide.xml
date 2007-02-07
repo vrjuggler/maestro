@@ -37,7 +37,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>January 31, 2007</pubdate>
+      <pubdate>February 9, 2007</pubdate>
    </bookinfo>
 
    <preface>
@@ -1228,15 +1228,6 @@ maestrod.py remove</screen>
                   in the partition containing the root Linux file
                   system.</para>
 
-                  <indexterm class="startofrange"
-                             id="index.section.boot.loader.config.grub.fat32">
-                     <primary>boot loader</primary>
-
-                     <secondary>GRUB</secondary>
-
-                     <tertiary>FAT32 installation</tertiary>
-                  </indexterm>
-
                   <para>The Maestro Reboot Service<indexterm>
                         <primary>services</primary>
 
@@ -1253,252 +1244,387 @@ maestrod.py remove</screen>
                   Windows</productname> does not include support for many file
                   system types, so it becomes the limiting factor. The lowest
                   common denominator among most modern operating systems and
-                  GRUB is the FAT32 file system. By (re-)installing GRUB into
-                  a FAT32 partition, the <filename>grub.conf</filename> file
+                  GRUB is the FAT file system<indexterm>
+                        <primary>file systems</primary>
+
+                        <secondary>FAT</secondary>
+                     </indexterm>. By (re-)installing GRUB into a FAT16 or
+                  FAT32 partition, the <filename>grub.conf</filename> file
                   will be readable and writable by all operating systems and
-                  by GRUB at boot time.</para>
+                  by GRUB at boot time. Alternatively, we can install software
+                  on <productname class="registered">Microsoft
+                  Windows</productname> to allow it to read and write the
+                  Linux ext2fs file system. We explain both of these
+                  approaches.</para>
 
-                  <caution>
-                     <para>The process for installing GRUB into a FAT32 file
-                     system manually is not difficult, but it requires care.
-                     If the boot blocks of a disk are not set up properly, the
-                     computer will be rendered unbootable, so having a
-                     recovery CD that can reinstall some boot loader (such as
-                     the default Master Boot Record [MBR] or GRUB's first
-                     stage loader) is highly recommended. Furthermore, a good
-                     understanding of how boot loaders and boot blocks work
-                     will come in very handy if anything should go
-                     wrong.</para>
-                  </caution>
+                  <section>
+                     <title>Installing GRUB in a FAT Partition</title>
 
-                  <para>The first step of installing GRUB onto a FAT32
-                  partition is to create the partition. It does not need to be
-                  large (a GRUB installation requires roughly 200 kB of
-                  storage), and since the partition may be used for other
-                  things that just giving GRUB a home, users should consider
-                  carefully just how large to make it. For the purposes of
-                  this discussion, let us say that the FAT32 partition is the
-                  third primary partition on the first hard disk. In <ulink
-                  url="http://www.gnu.org/software/grub/manual/html_node/Naming-convention.html#Naming-convention">GRUB
-                  terminology</ulink>, this makes it partition (hd0,2). The
-                  actual disk and partition used will vary from site to
-                  site.</para>
-
-                  <important>
-                     <para>It is highly recommended that the FAT32 partition
-                     be created as part of setting up the computer rather than
-                     as an afterthought. However, this is not always possible,
-                     and in that case, the FAT32 partition should go
-                     <emphasis>after</emphasis> the existing primary
-                     partitions on the hard disk where it is created. (It does
-                     not have to be on the first disk.) Doing it this way
-                     prevents the BIOS partitions from being renumbered which
-                     would cause problems with existing boot loader
-                     configurations. This is because boot loaders generally
-                     rely upon BIOS partition ordering to know which OS to
-                     load.</para>
-                  </important>
-
-                  <para>Once the partition is created, the existing GRUB
-                  installation needs to be copied into the directory. In most
-                  cases, GRUB will only be accessible from a non-<productname
-                  class="registered">Windows</productname> platform, so the
-                  FAT32 partition must be mounted under the operating system
-                  where the GRUB files are currently installed. Let us assume
-                  that the GRUB files are currently available under
-                  <filename>/boot/grub</filename> and that the new FAT32
-                  partition is mounted at <filename>/mnt</filename>. The
-                  following command (run as root or another user with write
-                  access to <filename>/mnt</filename>) copies the existing
-                  GRUB files to the FAT32 partition where they need to
-                  be:</para>
-
-                  <screen>cp -rp /boot/grub /mnt</screen>
-
-                  <para>When we are finished, the old
-                  <filename>/boot/grub</filename> will no longer be the
-                  official GRUB installation. For that reason, the FAT32
-                  partition must be mounted when the non-Windows operating
-                  system is booted (add an entry to
-                  <filename>/etc/fstab</filename> to do this), and the
-                  <filename>/boot/grub</filename> directory should be moved
-                  out of the way to be replaced with a symbolic link. For
-                  example, let us say that the FAT32 partition will be mounted
-                  under <filename>/fat32</filename> every time the computer
-                  boots. In that case, the following commands would set up the
-                  new <filename>/boot/grub</filename> as a symbolic link to
-                  the actual GRUB installation:</para>
-
-                  <screen>cd /boot
-mv grub grub-off
-ln -s /fat32/grub ./</screen>
-
-                  <para>At this point, it is a good idea to check
-                  <filename>grub.conf</filename> (i.e.,
-                  <filename>/mnt/grub/grub.conf</filename> in our example so
-                  far) for any partition and/or path references that may need
-                  to be updated. For example, if a splash screen is being used
-                  with GRUB, then it will be referenced relative to its GRUB
-                  partition identifier. For example, a Red Hat-based Linux
-                  distribution will usually have the splash image set to
-                  something similar to to
-                  <filename>(hd0,0)/grub/splash.xpm.gz</filename>. Since GRUB
-                  installation partition has now changed to (hd0,2) in our
-                  example, the partition identifer part of the path must be
-                  updated. (Taking this step at this stage saves some hassle
-                  later.)</para>
-
-                  <para>Next, a decision must be made about how to tell the
-                  GRUB first stage loader (the GRUB boot blocks) about the new
-                  location of the installation. If GRUB was already being used
-                  as the boot loader for the computer, then the process is
-                  very simple. First, make sure that the file
-                  <filename>fat_stage_1_5</filename> exists in
-                  <filename>/fat32/grub</filename>. Next, we have two ways to
-                  go about updating the existing GRUB boot blocks. We can do
-                  it from within the booted operating system, or we can reboot
-                  the computer. Either way, we end up at a
-                  <literal>grub&gt;</literal> prompt and execute the same
-                  commands. If we choose to update the GRUB boot blocks from
-                  within the booted OS (likely to be the more convenient
-                  approach), we need to run the <command>grub</command>
-                  command (usually found in <filename>/sbin</filename> or
-                  <filename>/usr/local/sbin</filename>). At the
-                  <literal>grub&gt;</literal> prompt, enter the following
-                  commands:</para>
-
-                  <screen>root (hd0,2)
-setup (hd0)</screen>
-
-                  <para>If instead we choose to reboot the computer, then the
-                  GRUB first stage loader will run as usual, but it will not
-                  be able to find the second stage loader because it has moved
-                  to a different partition. At this point, we will be sitting
-                  at a <literal>grub&gt;</literal> prompt, so we can issue the
-                  same commands as above and reboot again.</para>
-
-                  <para>Both approaches will update the GRUB first stage
-                  loader to look at the FAT32 partition (for this example) to
-                  find the second stage loader. At this point, booting should
-                  be back to normal, but GRUB will be loading its information
-                  from the FAT32 partition instead of from the Linux
-                  partition.</para>
-
-                  <para>If GRUB was not being used as the boot loader for the
-                  computer, then it will be necessary to set it up as the boot
-                  loader. This can be accomplished from within Linux (or
-                  whatever operating system is currently hosting the GRUB
-                  files). Run the <command>grub</command> command as root, and
-                  at the <literal>grub&gt;</literal> prompt, and enter the
-                  same commands as above.</para>
-
-                  <para>If none of the previous approaches are viable for
-                  getting GRUB ready to boot from the FAT32 partition, then a
-                  GRUB <ulink
-                  url="http://www.gnu.org/software/grub/manual/html_node/Creating-a-GRUB-boot-floppy.html">boot
-                  floppy</ulink> or <ulink
-                  url="http://www.gnu.org/software/grub/manual/html_node/Making-a-GRUB-bootable-CD-ROM.html">boot
-                  CD</ulink> will be needed. However, the steps described in
-                  the referenced pages will not produce a complete GRUB
-                  installation device. Instead, they are intended to give the
-                  user a way to <emphasis>load</emphasis> GRUB, not install
-                  it. To simplify things, we have made a <ulink
-                  url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Start/MaestroAndGrub/grub.iso">GRUB
-                  0.95 boot CD ISO image</ulink><indexterm>
+                     <indexterm class="startofrange"
+                                id="index.section.boot.loader.config.grub.fat32">
                         <primary>boot loader</primary>
 
                         <secondary>GRUB</secondary>
 
-                        <tertiary>bootable CD installation image</tertiary>
-                     </indexterm> that can be burned to a CD (using a CD-R or
-                  a CD-RW works). The resulting CD will be capable of
-                  installing GRUB onto any file system supported by
-                  GRUB.</para>
+                        <tertiary>FAT installation</tertiary>
+                     </indexterm>
 
-                  <para>The bootable GRUB CD can be used for the case when
-                  GRUB is currently not installed on any disk. For this case,
-                  first make a directory called <filename>grub</filename> (or
-                  <filename>&lt;drive&gt;:\grub</filename> if the FAT32
-                  partition is being created from within <productname
-                  class="registered">Microsoft Windows</productname>) in the
-                  empty FAT32 partition. Then, boot the computer using the
-                  GRUB CD. At the <literal>grub&gt;</literal> prompt, run the
-                  same commands for the previous cases. The GRUB files will be
-                  installed to <filename>grub</filename> on the FAT32
-                  partition, and the first stage loader will be set up just as
-                  it would be for the other cases.</para>
+                     <para>GRUB can read its second-stage boot loader from a
+                     variety of file systems including the Microsoft FAT (File
+                     Allocation Table) file system. While Linux installations
+                     will almost always put GRUB into an ext2fs<indexterm>
+                           <primary>file systems</primary>
 
-                  <indexterm class="endofrange"
-                             startref="index.section.boot.loader.config.grub.fat32"></indexterm>
+                           <secondary>ext2fs</secondary>
+                        </indexterm> file system (often one that is dedicated
+                     to the GRUB boot loader installation), that does not mean
+                     that we have to leave it there. In this section, we will
+                     explain how to move a GRUB installation from an ext2fs
+                     partition to a FAT16 or FAT32 partition so that it can be
+                     manipulated from multiple operating systems. Note that we
+                     will normally use the term <quote>FAT</quote> to refer to
+                     FAT16 or FAT32 file systems.</para>
 
-                  <para>Once we have GRUB installed in the FAT32 partition
-                  with a working <filename>grub.conf</filename>, we can boot
-                  the computer as normal. The key difference is that now the
-                  Maestro Reboot Service<indexterm>
-                        <primary>services</primary>
+                     <caution>
+                        <para>The process for installing GRUB into a FAT file
+                        system manually is not difficult, but it requires
+                        care. If the boot blocks of a disk are not set up
+                        properly, the computer will be rendered unbootable, so
+                        having a recovery CD that can reinstall some boot
+                        loader (such as the default Master Boot Record [MBR]
+                        or GRUB's first stage loader) is highly recommended.
+                        Furthermore, a good understanding of how boot loaders
+                        and boot blocks work will come in very handy if
+                        anything should go wrong.</para>
+                     </caution>
 
-                        <secondary>reboot</secondary>
-                     </indexterm> plug-in for GRUB can edit
-                  <filename>grub.conf</filename> on all operating systems.
-                  Remember that the directory contaning
-                  <filename>grub.conf</filename> will be accessed as
-                  <filename>&lt;drive&gt;:\grub</filename> in <productname
-                  class="registered">Microsoft Windows</productname>. On
-                  non-Windows operating systems, the FAT32 partition mount
-                  point determines how it will be accessed.</para>
+                     <para>The first step of installing GRUB onto a FAT16 or
+                     FAT32 partition is to create the partition. It does not
+                     need to be large (a GRUB installation requires roughly
+                     200 kB of storage), and since the partition may be used
+                     for other things that just giving GRUB a home, users
+                     should consider carefully just how large to make it. For
+                     the purposes of this discussion, let us say that the FAT
+                     partition is the third primary partition on the first
+                     hard disk. In <ulink
+                     url="http://www.gnu.org/software/grub/manual/html_node/Naming-convention.html#Naming-convention">GRUB
+                     terminology</ulink>, this makes it partition (hd0,2). The
+                     actual disk and partition used will vary from site to
+                     site.</para>
 
-                  <para>After all of that, <filename>maestrod.xcfg</filename>
-                  must be updated to point to the new location for
-                  <filename>grub.conf</filename>. For the non-<productname
-                  class="registered">Windows</productname> operating system,
-                  remember that we are mounting the FAT32 partition at
-                  <filename>/fat32</filename> every time the computer boots.
-                  In that case, <filename>maestrod.xcfg</filename> would be
-                  similar to what is shown in <xref
-                  linkend="example.maestrod.xcfg.reboot.grub.linux" />. On
-                  <productname class="registered">Microsoft
-                  Windows</productname>, let us assume that the FAT32
-                  partition is accessed as drive <filename>E:</filename>,
-                  which would mean that <filename>maestrod.xcfg</filename>
-                  would be similar to that shown in <xref
-                  linkend="example.maestrod.xcfg.reboot.grub.windows" />.</para>
+                     <important>
+                        <para>It is highly recommended that the FAT partition
+                        be created as part of setting up the computer rather
+                        than as an afterthought. However, this is not always
+                        possible, and in that case, the FAT partition should
+                        go <emphasis>after</emphasis> the existing primary
+                        partitions on the hard disk where it is created. (It
+                        does not have to be on the first disk.) Doing it this
+                        way prevents the BIOS partitions from being renumbered
+                        which would cause problems with existing boot loader
+                        configurations. This is because boot loaders generally
+                        rely upon BIOS partition ordering to know which OS to
+                        load.</para>
+                     </important>
 
-                  <indexterm>
-                     <primary><filename>maestrod.xcfg</filename></primary>
+                     <para>Once the partition is created, the existing GRUB
+                     installation needs to be copied into the directory. In
+                     most cases, GRUB will only be accessible from a
+                     non-<productname class="registered">Windows</productname>
+                     platform, so the FAT partition must be mounted under the
+                     operating system where the GRUB files are currently
+                     installed. Let us assume that the GRUB files are
+                     currently available under <filename>/boot/grub</filename>
+                     and that the new FAT partition is mounted at
+                     <filename>/mnt</filename>. The following command (run as
+                     root or another user with write access to
+                     <filename>/mnt</filename>) copies the existing GRUB files
+                     to the FAT partition where they need to be:</para>
 
-                     <secondary>elements</secondary>
+                     <screen>cp -rp /boot/grub /mnt</screen>
 
-                     <tertiary><sgmltag>&lt;grub_conf&gt;</sgmltag></tertiary>
-                  </indexterm>
+                     <para>When we are finished, the old
+                     <filename>/boot/grub</filename> will no longer be the
+                     official GRUB installation. For that reason, the FAT
+                     partition must be mounted when the non-Windows operating
+                     system is booted (add an entry to
+                     <filename>/etc/fstab</filename> to do this), and the
+                     <filename>/boot/grub</filename> directory should be moved
+                     out of the way to be replaced with a symbolic link. For
+                     example, let us say that the FAT partition will be
+                     mounted under <filename>/fat32</filename> every time the
+                     computer boots. In that case, the following commands
+                     would set up the new <filename>/boot/grub</filename> as a
+                     symbolic link to the actual GRUB installation:</para>
 
-                  <example id="example.maestrod.xcfg.reboot.grub.linux">
-                     <title><command>maestrod.xcfg</command>: Multi-Platform
-                     <filename>grub.conf</filename> Access (Linux)</title>
+                     <screen>cd /boot
+mv grub grub-off
+ln -s /fat32/grub ./</screen>
 
-                     <programlisting>&lt;?xml version="1.0"?&gt;
+                     <para>At this point, it is a good idea to check
+                     <filename>grub.conf</filename> (i.e.,
+                     <filename>/mnt/grub/grub.conf</filename> in our example
+                     so far) for any partition and/or path references that may
+                     need to be updated. For example, if a splash screen is
+                     being used with GRUB, then it will be referenced relative
+                     to its GRUB partition identifier. For example, a Red
+                     Hat-based Linux distribution will usually have the splash
+                     image set to something similar to to
+                     <filename>(hd0,0)/grub/splash.xpm.gz</filename>. Since
+                     GRUB installation partition has now changed to
+                     <literal>(hd0,2)</literal> in our example, the partition
+                     identifer part of the path must be updated. (Taking this
+                     step at this stage saves some hassle later.)</para>
+
+                     <para>Next, a decision must be made about how to tell the
+                     GRUB first stage loader (the GRUB boot blocks) about the
+                     new location of the installation. If GRUB was already
+                     being used as the boot loader for the computer, then the
+                     process is very simple. First, make sure that the file
+                     <filename>fat_stage_1_5</filename> exists in
+                     <filename>/fat32/grub</filename>. Next, we have two ways
+                     to go about updating the existing GRUB boot blocks. We
+                     can do it from within the booted operating system, or we
+                     can reboot the computer. Either way, we end up at a
+                     <literal>grub&gt;</literal> prompt and execute the same
+                     commands. If we choose to update the GRUB boot blocks
+                     from within the booted OS (likely to be the more
+                     convenient approach), we need to run the
+                     <command>grub</command> command (usually found in
+                     <filename>/sbin</filename> or
+                     <filename>/usr/local/sbin</filename>). At the
+                     <literal>grub&gt;</literal> prompt, enter the following
+                     commands:</para>
+
+                     <screen>root (hd0,2)
+setup (hd0)</screen>
+
+                     <para>If instead we choose to reboot the computer, then
+                     the GRUB first stage loader will run as usual, but it
+                     will not be able to find the second stage loader because
+                     it has moved to a different partition. At this point, we
+                     will be sitting at a <literal>grub&gt;</literal> prompt,
+                     so we can issue the same commands as above and reboot
+                     again.</para>
+
+                     <para>Both approaches will update the GRUB first stage
+                     loader to look at the FAT partition (for this example) to
+                     find the second stage loader. At this point, booting
+                     should be back to normal, but GRUB will be loading its
+                     information from the FAT partition instead of from the
+                     Linux partition.</para>
+
+                     <para>If GRUB was not being used as the boot loader for
+                     the computer, then it will be necessary to set it up as
+                     the boot loader. This can be accomplished from within
+                     Linux (or whatever operating system is currently hosting
+                     the GRUB files). Run the <command>grub</command> command
+                     as root, and at the <literal>grub&gt;</literal> prompt,
+                     and enter the same commands as above.</para>
+
+                     <para>If none of the previous approaches are viable for
+                     getting GRUB ready to boot from the FAT partition, then a
+                     GRUB <ulink
+                     url="http://www.gnu.org/software/grub/manual/html_node/Creating-a-GRUB-boot-floppy.html">boot
+                     floppy</ulink> or <ulink
+                     url="http://www.gnu.org/software/grub/manual/html_node/Making-a-GRUB-bootable-CD-ROM.html">boot
+                     CD</ulink> will be needed. However, the steps described
+                     in the referenced pages will not produce a complete GRUB
+                     installation device. Instead, they are intended to give
+                     the user a way to <emphasis>load</emphasis> GRUB, not
+                     install it. To simplify things, we have made a <ulink
+                     url="https://realityforge.vrsource.org/trac/maestro/attachment/wiki/Start/MaestroAndGrub/grub.iso">GRUB
+                     0.95 boot CD ISO image</ulink><indexterm>
+                           <primary>boot loader</primary>
+
+                           <secondary>GRUB</secondary>
+
+                           <tertiary>bootable CD installation image</tertiary>
+                        </indexterm> that can be burned to a CD (using a CD-R
+                     or a CD-RW works). The resulting CD will be capable of
+                     installing GRUB onto any file system supported by
+                     GRUB.</para>
+
+                     <para>The bootable GRUB CD can be used for the case when
+                     GRUB is currently not installed on any disk. For this
+                     case, first make a directory called
+                     <filename>grub</filename> (or
+                     <filename>&lt;drive&gt;:\grub</filename> if the FAT
+                     partition is being created from within <productname
+                     class="registered">Microsoft Windows</productname>) in
+                     the empty FAT partition. Then, boot the computer using
+                     the GRUB CD. At the <literal>grub&gt;</literal> prompt,
+                     run the same commands for the previous cases. The GRUB
+                     files will be installed to <filename>grub</filename> on
+                     the FAT partition, and the first stage loader will be set
+                     up just as it would be for the other cases.</para>
+
+                     <indexterm class="endofrange"
+                                startref="index.section.boot.loader.config.grub.fat32"></indexterm>
+
+                     <para>Once we have GRUB installed in the FAT partition
+                     with a working <filename>grub.conf</filename>, we can
+                     boot the computer as normal. The key difference is that
+                     now the Maestro Reboot Service<indexterm>
+                           <primary>services</primary>
+
+                           <secondary>reboot</secondary>
+                        </indexterm> plug-in for GRUB can edit
+                     <filename>grub.conf</filename> on all operating systems.
+                     Remember that the directory contaning
+                     <filename>grub.conf</filename> will be accessed as
+                     <filename>&lt;drive&gt;:\grub</filename> in <productname
+                     class="registered">Microsoft Windows</productname>. On
+                     non-Windows operating systems, the FAT partition mount
+                     point determines how it will be accessed.</para>
+
+                     <para>After all of that,
+                     <filename>maestrod.xcfg</filename> must be updated to
+                     point to the new location for
+                     <filename>grub.conf</filename>. For the non-<productname
+                     class="registered">Windows</productname> operating
+                     system, remember that we are mounting the FAT partition
+                     at <filename>/fat32</filename> every time the computer
+                     boots. In that case, <filename>maestrod.xcfg</filename>
+                     would be similar to what is shown in <xref
+                     linkend="example.maestrod.xcfg.reboot.grub.linux" />. On
+                     <productname class="registered">Microsoft
+                     Windows</productname>, let us assume that the FAT
+                     partition is accessed as drive <filename>E:</filename>,
+                     which would mean that <filename>maestrod.xcfg</filename>
+                     would be similar to that shown in <xref
+                     linkend="example.maestrod.xcfg.reboot.grub.windows" />.</para>
+
+                     <indexterm>
+                        <primary><filename>maestrod.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;grub_conf&gt;</sgmltag></tertiary>
+                     </indexterm>
+
+                     <example id="example.maestrod.xcfg.reboot.grub.linux">
+                        <title><command>maestrod.xcfg</command>:
+                        Multi-Platform <filename>grub.conf</filename> Access
+                        (Linux)</title>
+
+                        <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
 &lt;/maestrod&gt;</programlisting>
-                  </example>
+                     </example>
 
-                  <example id="example.maestrod.xcfg.reboot.grub.windows">
-                     <title><command>maestrod.xcfg</command>: Multi-Platform
-                     <filename>grub.conf</filename> Access (<productname
-                     class="registered">Microsoft
-                     Windows</productname>)</title>
+                     <example id="example.maestrod.xcfg.reboot.grub.windows">
+                        <title><command>maestrod.xcfg</command>:
+                        Multi-Platform <filename>grub.conf</filename> Access
+                        (<productname class="registered">Microsoft
+                        Windows</productname>)</title>
 
-                     <programlisting>&lt;?xml version="1.0"?&gt;
+                        <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
 &lt;/maestrod&gt;</programlisting>
-                  </example>
+                     </example>
 
-                  <indexterm class="endofrange"
-                             startref="index.section.boot.loader.config.grub"></indexterm>
+                     <indexterm class="endofrange"
+                                startref="index.section.boot.loader.config.grub"></indexterm>
+                  </section>
+
+                  <section>
+                     <title>Accessing a Non-FAT Partition for GRUB from
+                     <productname class="registered">Microsoft
+                     Windows</productname></title>
+
+                     <para>After that lengthy discussion of moving a GRUB
+                     installation to a FAT partition, it would seem that
+                     leaving it in place and accessing it from <productname
+                     class="registered">Microsoft Windows</productname> would
+                     be an easier solution. Using the <ulink
+                     url="http://www.fs-driver.org/">Ext2
+                     IFS</ulink><indexterm>
+                           <primary>file systems</primary>
+
+                           <secondary>ext2fs</secondary>
+
+                           <tertiary>from <productname
+                           class="registered">Windows</productname></tertiary>
+                        </indexterm><indexterm>
+                           <primary><productname
+                           class="registered">Windows</productname>
+                           extensions</primary>
+
+                           <secondary>Ext2 IFS</secondary>
+                        </indexterm> software, this is a real possibility.
+                     Ext2 IFS is a freely available extension for <productname
+                     class="registered">Windows</productname> that adds read
+                     <emphasis>and</emphasis> write support for ext2fs
+                     partitions. The partitions are mapped as normal drive
+                     letters and can be made available to all users. By
+                     exposing the partition containing the GRUB installation
+                     to <productname class="registered">Windows</productname>,
+                     we can skip the difficulties of relocating it to a FAT
+                     partition.</para>
+
+                     <para>While this may seem to be a <quote>silver
+                     bullet</quote> solution, there are down sides to it. The
+                     current version of Ext2 IFS (1.10c as of this writing)
+                     does not implement file permissions of any form for the
+                     mapped ext2fs partitions. For that reason, it should be
+                     used with great caution. Since GRUB is often installed
+                     into its own ext2fs partition, this isolates it from the
+                     rest of the Linux operating system installation. The
+                     worst damage that a user could do is delete
+                     <filename>grub/grub.conf</filename>,
+                     <filename>grub/e2fs_stage_1_5</filename>, or
+                     <filename>grub/stage2</filename>. Loss of the
+                     <filename>grub.conf</filename> file would make booting
+                     annoying until a new one could be created, but loss of
+                     the others would make booting impossible until GRUB is
+                     reinstalled.</para>
+
+                     <para>Another limitation of the current version of Ext2
+                     IFS is that it does not support 64-bit versions of
+                     <productname class="registered">Microsoft
+                     Windows</productname>. The real impact of this would vary
+                     from site to site depending on the adoption of 64-bit
+                     hardware and 64-bit operating systems. In the long run,
+                     64-bit support will be required, and it will likely be
+                     added.</para>
+
+                     <para>There are many other file systems besides ext2fs
+                     including UFS<indexterm>
+                           <primary>file systems</primary>
+
+                           <secondary>UFS</secondary>
+                        </indexterm>, UFS2<indexterm>
+                           <primary>file systems</primary>
+
+                           <secondary>UFS2</secondary>
+                        </indexterm>, HFS<indexterm>
+                           <primary>file systems</primary>
+
+                           <secondary>HFS</secondary>
+                        </indexterm>, HFS+<indexterm>
+                           <primary>file systems</primary>
+
+                           <secondary>HFS+</secondary>
+                        </indexterm>, and ZFS<indexterm>
+                           <primary>file systems</primary>
+
+                           <secondary>ZFS</secondary>
+                        </indexterm>. Accessing these from <productname
+                     class="registered">Microsoft Windows</productname> may or
+                     may not be possible depending on what software exists for
+                     extending file system support in the operating system.
+                     Ultimately, the way that the Reboot Service is configured
+                     for modifying <filename>grub.conf</filename> depends on
+                     what file system support exists in the operating systems
+                     involved.</para>
+                  </section>
                </section>
 
                <section>
@@ -1572,16 +1698,20 @@ setup (hd0)</screen>
                   <productname class="registered">Microsoft
                   Windows</productname> is not a problem. The complexity comes
                   in when using the NT file system (<ulink
-                  url="http://en.wikipedia.org/wiki/NTFS">NTFS</ulink>) and
-                  trying to modify <filename>boot.ini</filename> from another
-                  operating system such as Linux. There is a freely available
-                  <ulink url="http://www.linux-ntfs.org/">Linux kernel
-                  module</ulink> that adds support for accessing NTFS
-                  partitions. While reading from an NTFS partition in Linux
-                  works very well, writing is still considered to be
-                  dangerous. File system corruption resulting from writing to
-                  an NTFS partition from Linux is something that is well
-                  within the realm of possibility. Nevertheless, the <ulink
+                  url="http://en.wikipedia.org/wiki/NTFS">NTFS</ulink>)<indexterm>
+                        <primary>file systems</primary>
+
+                        <secondary>NTFS</secondary>
+                     </indexterm> and trying to modify
+                  <filename>boot.ini</filename> from another operating system
+                  such as Linux. There is a freely available <ulink
+                  url="http://www.linux-ntfs.org/">Linux kernel module</ulink>
+                  that adds support for accessing NTFS partitions. While
+                  reading from an NTFS partition in Linux works very well,
+                  writing is still considered to be dangerous. File system
+                  corruption resulting from writing to an NTFS partition from
+                  Linux is something that is well within the realm of
+                  possibility. Nevertheless, the <ulink
                   url="http://www.linux-ntfs.org/content/view/15/29/">information
                   about the current version</ulink> of said Linux kernel
                   module (2.1.20 at the time of this writing) states that it
