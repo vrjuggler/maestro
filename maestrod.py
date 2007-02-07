@@ -324,6 +324,12 @@ def RunServer(installSH=True):
       #reactor.listenTCP(8789, factory)
       pk_path = os.path.join(const.EXEC_DIR, 'server.pem')
       cert_path = os.path.join(const.EXEC_DIR, 'server.pem')
+
+      if not os.path.exists(pk_path):
+         logger.error("Server private key %s does not exist!" % pk_path)
+      if not os.path.exists(cert_path):
+         logger.error("Server certificate %s does not exist!" % cert_path)
+
       logger.info("Cert: " + cert_path)
       reactor.listenSSL(8789, factory,
                         ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
