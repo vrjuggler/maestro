@@ -1,6 +1,73 @@
 <?xml version="1.0" ?>
 <maestro>
    <default_ensemble>
-      cluster.ensem
+      default.ensem
    </default_ensemble>
+   <clone_view>
+      views.clone.systemimager.SystemImager
+   </clone_view>
+   <systemimager>
+      <image>
+         mtic_rhel4
+      </image>
+      <golden_client>
+         <prep_cmd_args>
+            <arg flag="--my-modules"/>
+            <arg flag="--exclude">
+               /dev/sdb
+            </arg>
+         </prep_cmd_args>
+      </golden_client>
+      <image_server>
+         <name>
+            telperion
+         </name>
+         <cmd_args>
+            <arg flag="--quiet"/>
+            <arg flag="--update-script">
+               NO
+            </arg>
+            <arg flag="--ip-assignment">
+               static
+            </arg>
+            <arg flag="--directory">
+               /var/tmp/si
+            </arg>
+         </cmd_args>
+      </image_server>
+      <cloned_client>
+         <post_clone_cmds>
+            <command>
+               <cmd>
+                  /sbin/chkconfig
+               </cmd>
+               <arg flag="kudzu">
+                  off
+               </arg>
+            </command>
+            <command>
+               <cmd>
+                  /sbin/chkconfig
+               </cmd>
+               <arg flag="rhnsd">
+                  off
+               </arg>
+            </command>
+         </post_clone_cmds>
+      </cloned_client>
+      <exclusions>
+         <exclude>
+            /media
+         </exclude>
+         <exclude>
+            /tmp
+         </exclude>
+         <exclude>
+            /var/tmp
+         </exclude>
+         <exclude>
+            /var/cache/yum
+         </exclude>
+      </exclusions>
+   </systemimager>
 </maestro>
