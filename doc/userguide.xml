@@ -946,82 +946,361 @@ maestrod.py remove</screen>
             included with Maestro by default.</para>
 
             <section>
-               <title><command>maestrod</command> Settings</title>
+               <title><command>maestrod</command> User Authentication and
+               Access Settings</title>
 
-               <para>When <command>maestrod</command> is running on a
-               operating system that uses the X Window System, the
-               authenticated user must be allowed to open windows on the local
-               X server. This is done by granting modifying the authenticated
-               user's <filename>~/.Xauthority</filename> file to include the
-               local X server's authorization key using the
-               <command>xauth</command>(1) command. To avoid tying
-               <command>maestrod</command> to any specific operating system
-               installation or site configuration, the path to
-               <command>xauth</command>(1) and the local X server's Xauthority
-               file are configurable. For example, we see in <xref
-               linkend="example.maestrod.xcfg.rhel4" /> how to configure
-               maestrod to run on Red Hat Enterprise Linux 4. For Fedora Core
-               5, the configuration is slightly different, as seen in <xref
-               linkend="example.maestrod.xcfg.fc5" />. In both cases, <ulink
-               url="http://www.gnome.org/projects/gdm/">GDM</ulink> (the GNOME
-               Display Manager) is being used as the X display manager. The
-               path to the Xauthority file would differ if using <ulink
-               url="http://docs.kde.org/en/HEAD/kdebase/kdm/">KDM</ulink> (the
-               KDE Display Manager) or XDM (the X Display Manager).</para>
+               <para>As a service that executes code and commands on behalf of
+               users, it is very important for <command>maestrod</command> to
+               handle authentication and access correctly. Authentication is
+               the first phase of the connection process between the Maestro
+               GUI and <command>maestrod</command>, and if it fails, then the
+               GUI user cannot perform <emphasis>any</emphasis> actions on the
+               server side—even those that do not strictly require
+               authentication. After successful authentication, then access
+               rights for users must be taken into account. This includes
+               access to data and to software. In this section, we explain
+               what options exist for configuring <command>maestrod</command>
+               for these purposes.</para>
 
-               <indexterm>
-                  <primary><filename>maestrod.xcfg</filename></primary>
+               <section>
+                  <title>Server-Side User Authentication</title>
 
-                  <secondary>elements</secondary>
+                  <para>Authenticating users is no easy business, and many
+                  operating systems offer a plethora of options when it comes
+                  to performing authentication. Maestro has a plug-in
+                  architecture in order to accommodate different approaches.
+                  Below, we list the current set of plug-ins for server-side
+                  authentication:</para>
 
-                  <tertiary><sgmltag>&lt;xauth_cmd&gt;</sgmltag></tertiary>
-               </indexterm>
+                  <variablelist>
+                     <varlistentry>
+                        <term>User Name and Password</term>
 
-               <indexterm>
-                  <primary><filename>maestrod.xcfg</filename></primary>
+                        <listitem>
+                           <indexterm>
+                              <primary>authentication</primary>
 
-                  <secondary>elements</secondary>
+                              <secondary>plug-ins</secondary>
 
-                  <tertiary><sgmltag>&lt;xauthority_file&gt;</sgmltag></tertiary>
-               </indexterm>
+                              <tertiary>user name, password, domain</tertiary>
+                           </indexterm>
 
-               <example id="example.maestrod.xcfg.rhel4">
-                  <title><command>maestrod.xcfg</command> for Red Hat
-                  Enterprise Linux 4</title>
+                           <para>The most basic authentication mechanism. This
+                           is supported by all platforms, and on <productname
+                           class="registered">Microsoft Windows</productname>,
+                           it includes support for domain logins. Behind the
+                           scenes, this may utilize lower level pieces such as
+                           PAM (on non-<productname
+                           class="registered">Windows</productname> platforms).
+                           The implementation of this plug-in for
+                           non-<productname
+                           class="registered">Windows</productname> plug-ins
+                           currently relies upon PAM. For <productname
+                           class="registered">Windows</productname>, the
+                           <function>win32security.LogonUser()</function>
+                           function is called with the given user name,
+                           password, and domain to get a user handle.</para>
+                        </listitem>
+                     </varlistentry>
 
-                  <programlisting>&lt;?xml version="1.0"?&gt;
+                     <varlistentry>
+                        <term>Active Directory</term>
+
+                        <listitem>
+                           <indexterm>
+                              <primary>authentication</primary>
+
+                              <secondary>plug-ins</secondary>
+
+                              <tertiary>Active Directory</tertiary>
+                           </indexterm>
+
+                           <indexterm>
+                              <primary>SSPI</primary>
+
+                              <secondary>Active Directory</secondary>
+                           </indexterm>
+
+                           <para>Domain-level authentication using Kerberos 5.
+                           Direct use of Active Directory for authentication
+                           via credentials forwarding is available only on
+                           <productname class="registered">Microsoft
+                           Windows</productname>. Non-<productname
+                           class="registered">Windows</productname> platforms
+                           may be configured to use Active Directory for
+                           authentication behind the scenes (through PAM, for
+                           example). For nodes that are trusted for
+                           delegation<footnote>
+                                 <para>Computers must be identified as being trusted
+                                 for delegation. This is a property that must be set
+                                 on the domain controller. Users of <productname
+                                 class="registered">Microsoft Windows</productname>
+                                 Server 2003 can indicate that these nodes are
+                                 trusted for delegation with only the Maestro
+                                 Service.</para>
+                              </footnote>, users can forward their existing
+                           credentials to the Maestro service and never have to
+                           enter their user name or password.</para>
+                        </listitem>
+                     </varlistentry>
+
+                     <varlistentry>
+                        <term>NTLM</term>
+
+                        <listitem>
+                           <indexterm>
+                              <primary>authentication</primary>
+
+                              <secondary>plug-ins</secondary>
+
+                              <tertiary>NTLM</tertiary>
+                           </indexterm>
+
+                           <indexterm>
+                              <primary>SSPI</primary>
+
+                              <secondary>NTLM</secondary>
+                           </indexterm>
+
+                           <para>Basic <productname
+                           class="registered">Windows</productname>
+                           challenge/response authentication. This is only
+                           supported for <productname
+                           class="registered">Windows</productname> clients and
+                           servers. The use of NTLM for This supports
+                           single-hop credentials forwarding, meaning that a
+                           user can authenticate with the Maestro service on a
+                           remote node but cannot access remote resources from
+                           that remote node.</para>
+                        </listitem>
+                     </varlistentry>
+
+                     <varlistentry>
+                        <term>SSPI Auto-Negotiate</term>
+
+                        <listitem>
+                           <indexterm>
+                              <primary>authentication</primary>
+
+                              <secondary>plug-ins</secondary>
+
+                              <tertiary>SSPI auto-negotiate</tertiary>
+                           </indexterm>
+
+                           <indexterm>
+                              <primary>SSPI</primary>
+                           </indexterm>
+
+                           <para>The above authentication mechanisms for
+                           <productname class="registered">Microsoft
+                           Windows</productname> (Active Directory and NTLM)
+                           use SSPI (Security Support Provider) to negotiate
+                           credentials forwarding from the client to the
+                           server. SSPI allows the best available protocol to
+                           be chosen automatically.</para>
+                        </listitem>
+                     </varlistentry>
+                  </variablelist>
+
+                  <sidebar>
+                     <para>Currently, the support for automated logon (i.e.,
+                     reusing existing credentials to skip re-entering a user
+                     name and password) is only for <productname
+                     class="registered">Microsoft Windows</productname>, and
+                     that support has limitations. For example, delegation of
+                     credentials via Active Directory authentication requires
+                     that each node of the cluster be trusted for delegation.
+                     This is something that must be set up by the domain
+                     administrator on the domain controller.</para>
+                  </sidebar>
+
+                  <para>Configuring the server-side authentication
+                  mechanism(s) is easy. An optional child of the root
+                  <sgmltag>&lt;maestrod&gt;</sgmltag> node in
+                  <filename>maestrod.xcfg</filename> is
+                  <sgmltag>&lt;authentication_plugins&gt;</sgmltag><indexterm>
+                        <primary><filename>maestrod.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;authentication_plugins&gt;</sgmltag></tertiary>
+                     </indexterm>. The CDATA of this XML element is a
+                  comma-separated list of the authentication plug-ins to use
+                  for attempting authentication of the remote user. The
+                  plug-ins are identified by their name, and the order of the
+                  list dictates the order of authentication attempts. If one
+                  authentication attempt fails, then the subsequent plug-in
+                  will be used. This continues until authentication succeeds
+                  or there are no more plug-ins. If the client does not have a
+                  matching plug-in for an identified server-side
+                  authentication plug-in, that authentication mechanism is
+                  skipped.</para>
+
+                  <para>The authentication plug-in names are as
+                  follows:</para>
+
+                  <indexterm>
+                     <primary>authentication</primary>
+
+                     <secondary>plug-ins</secondary>
+                  </indexterm>
+
+                  <itemizedlist>
+                     <listitem>
+                        <para><literal>sspi_negotiate</literal>: Use SSPI
+                        auto-negotiation to choose the best authentication
+                        protocol (<productname
+                        class="registered">Windows</productname> clients and
+                        servers only).</para>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>sspi_kerberos</literal>: Use Active
+                        Directory authentication (<productname
+                        class="registered">Windows</productname> clients and
+                        servers only).</para>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>sspi_ntlm</literal>: Use NTLM
+                        authentication (<productname
+                        class="registered">Windows</productname> clients and
+                        servers only).</para>
+                     </listitem>
+
+                     <listitem>
+                        <para><literal>username_password</literal>: Use manual
+                        user name, password, and domain entry (all
+                        platforms).</para>
+                     </listitem>
+                  </itemizedlist>
+
+                  <para>In general, <literal>username_password</literal>
+                  should always be the last item in the list of plug-ins since
+                  the others do not require user interaction. In <xref
+                  linkend="example.maestrod.xcfg.auth.linux" /> and <xref
+                  linkend="example.maestrod.xcfg.auth.windows" />, we see
+                  examples of <filename>maestrod.xcfg</filename> files for
+                  non-<productname class="registered">Windows</productname>
+                  and <productname class="registered">Windows</productname>
+                  operating systems. If the &lt;authentication_plugins&gt; XML
+                  element is not present, the default setting is
+                  <literal>sspi_negotiate,sspi_ntlm,username_password</literal>.</para>
+
+                  <example id="example.maestrod.xcfg.auth.linux">
+                     <title><command>maestrod.xcfg</command>: Non-<productname
+                     class="registered">Windows</productname> Server-Side
+                     Authentication</title>
+
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
+                  <example id="example.maestrod.xcfg.auth.windows">
+                     <title><command>maestrod.xcfg</command>: <productname
+                     class="registered">Microsoft Windows</productname>
+                     Server-Side Authentication</title>
+
+                     <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      sspi_negotiate,username_password
+   &lt;/authentication_plugins&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+               </section>
+
+               <section>
+                  <title>X Server Permissions</title>
+
+                  <para>When <command>maestrod</command> is running on a
+                  operating system that uses the X Window System, the
+                  authenticated user must be allowed to open windows on the
+                  local X server. This is done by granting modifying the
+                  authenticated user's <filename>~/.Xauthority</filename> file
+                  to include the local X server's authorization key using the
+                  <command>xauth</command>(1) command. To avoid tying
+                  <command>maestrod</command> to any specific operating system
+                  installation or site configuration, the path to
+                  <command>xauth</command>(1) and the local X server's
+                  Xauthority file are configurable. For example, we see in
+                  <xref linkend="example.maestrod.xcfg.rhel4" /> how to
+                  configure maestrod to run on Red Hat Enterprise Linux 4. For
+                  Fedora Core 5, the configuration is slightly different, as
+                  seen in <xref linkend="example.maestrod.xcfg.fc5" />. In
+                  both cases, <ulink
+                  url="http://www.gnome.org/projects/gdm/">GDM</ulink> (the
+                  GNOME Display Manager) is being used as the X display
+                  manager. The path to the Xauthority file would differ if
+                  using <ulink
+                  url="http://docs.kde.org/en/HEAD/kdebase/kdm/">KDM</ulink>
+                  (the KDE Display Manager) or XDM (the X Display
+                  Manager).</para>
+
+                  <indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;xauth_cmd&gt;</sgmltag></tertiary>
+                  </indexterm>
+
+                  <indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;xauthority_file&gt;</sgmltag></tertiary>
+                  </indexterm>
+
+                  <example id="example.maestrod.xcfg.rhel4">
+                     <title><command>maestrod.xcfg</command> for Red Hat
+                     Enterprise Linux 4</title>
+
+                     <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
 &lt;/maestrod&gt;</programlisting>
-               </example>
+                  </example>
 
-               <example id="example.maestrod.xcfg.fc5">
-                  <title><command>maestrod.xcfg</command> for Fedora Core
-                  5</title>
+                  <example id="example.maestrod.xcfg.fc5">
+                     <title><command>maestrod.xcfg</command> for Fedora Core
+                     5</title>
 
-                  <programlisting>&lt;?xml version="1.0"?&gt;
+                     <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
    &lt;xauth_cmd&gt;/usr/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
 &lt;/maestrod&gt;</programlisting>
-               </example>
+                  </example>
 
-               <note>
-                  <para>If <sgmltag>&lt;xauth_cmd&gt;</sgmltag> is not
-                  specified or has no value, the default setting is
-                  <literal>/usr/X11R6/bin/xauth</literal>. This may not be
-                  valid for all operating systems using the X Window System,
-                  so it is better to set this value than to rely on the
-                  default.</para>
+                  <note>
+                     <para>If <sgmltag>&lt;xauth_cmd&gt;</sgmltag> is not
+                     specified or has no value, the default setting is
+                     <literal>/usr/X11R6/bin/xauth</literal>. This may not be
+                     valid for all operating systems using the X Window
+                     System, so it is better to set this value than to rely on
+                     the default.</para>
 
-                  <para>If <sgmltag>&lt;xauthority_file&gt;</sgmltag> is not
-                  specified or has no value, the default setting is
-                  <literal>/var/gdm/:0.Xauth</literal>. This is only valid
-                  when using GDM on display :0, and this path may still vary
-                  between operating systems. As such, it is better to set this
-                  value than to rely on the default.</para>
-               </note>
+                     <para>If <sgmltag>&lt;xauthority_file&gt;</sgmltag> is
+                     not specified or has no value, the default setting is
+                     <literal>/var/gdm/:0.Xauth</literal>. This is only valid
+                     when using GDM on display :0, and this path may still
+                     vary between operating systems. As such, it is better to
+                     set this value than to rely on the default.</para>
+                  </note>
+               </section>
             </section>
 
             <section id="section.maestrod.settings.reboot">
@@ -1119,6 +1398,9 @@ maestrod.py remove</screen>
 
                   <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
@@ -1132,6 +1414,9 @@ maestrod.py remove</screen>
 
                   <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;ntldr&lt;/boot_loader&gt;
@@ -1369,11 +1654,11 @@ ln -s /fat32/grub ./</screen>
                      being used with GRUB, then it will be referenced relative
                      to its GRUB partition identifier. For example, a Red
                      Hat-based Linux distribution will usually have the splash
-                     image set to something similar to to
+                     image set to something similar to
                      <filename>(hd0,0)/grub/splash.xpm.gz</filename>. Since
                      GRUB installation partition has now changed to
                      <literal>(hd0,2)</literal> in our example, the partition
-                     identifer part of the path must be updated. (Taking this
+                     identifier part of the path must be updated. (Taking this
                      step at this stage saves some hassle later.)</para>
 
                      <para>Next, a decision must be made about how to tell the
@@ -1471,7 +1756,7 @@ setup (hd0)</screen>
                            <secondary>reboot</secondary>
                         </indexterm> plug-in for GRUB can edit
                      <filename>grub.conf</filename> on all operating systems.
-                     Remember that the directory contaning
+                     Remember that the directory containing
                      <filename>grub.conf</filename> will be accessed as
                      <filename>&lt;drive&gt;:\grub</filename> in <productname
                      class="registered">Microsoft Windows</productname>. On
@@ -1525,6 +1810,9 @@ setup (hd0)</screen>
 
                         <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      sspi_negotiate,username_password
+   &lt;/authentication_plugins&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
 &lt;/maestrod&gt;</programlisting>
@@ -1905,6 +2193,9 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
@@ -1935,6 +2226,9 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      username_password
+   &lt;/authentication_plugins&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
@@ -1955,6 +2249,9 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      sspi_negotiate,username_password
+   &lt;/authentication_plugins&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
    &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
@@ -1991,6 +2288,9 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;authentication_plugins&gt;
+      sspi_negotiate,username_password
+   &lt;/authentication_plugins&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
    &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
@@ -2140,11 +2440,11 @@ setup (hd0)</screen>
                continues asynchronously while the GUI is in use until login
                completes on all the nodes in the ensemble. If login access is
                denied on a node, the user will be presented with a dialog box
-               asking him or her if reauthentication should be performed. If a
-               node cannot be contacted for logging in, the process will be
+               asking him or her if re-authentication should be performed. If
+               a node cannot be contacted for logging in, the process will be
                reattempted in the background periodically until it succeeds.
                Furthermore, if a server node goes down and comes back up after
-               login takes place, the user will be reauthenticated with the
+               login takes place, the user will be re-authenticated with the
                server automatically without any further necessary action on
                the part of the user.</para>
             </sidebar>
