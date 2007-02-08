@@ -118,12 +118,16 @@ class KerberosAuthenticationServer(PI.IServerAuthenticationPlugin,
    def __init__(self, broker):
       SspiAuthenticationServer.__init__(self, broker, 'Kerberos')
 
-class SSLAuthenticationServer(PI.IServerAuthenticationPlugin,
-                                   SspiAuthenticationServer):
-   id = 'sspi_ssl'
-
-   def __init__(self, broker):
-      SspiAuthenticationServer.__init__(self, broker, 'Schannel')
+# XXX: This is disabled until we figure out what the SSPI package name for
+# Schannel is supposed to be. The values 'Schannel', 'schannel', and 'ssl'
+# have been tried. Perhaps the problem is that I just don't have SSPI/SChannel
+# available at all.
+#class SSLAuthenticationServer(PI.IServerAuthenticationPlugin,
+#                              SspiAuthenticationServer):
+#   id = 'sspi_ssl'
+#
+#   def __init__(self, broker):
+#      SspiAuthenticationServer.__init__(self, broker, 'Schannel')
 
 class NegotiatedAuthenticationServer(PI.IServerAuthenticationPlugin,
                                      SspiAuthenticationServer):
