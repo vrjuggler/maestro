@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import logging
 import sspi, sspicon
 import win32api, win32security, ntsecuritycon
 import pywintypes
@@ -38,6 +39,7 @@ class SspiAuthenticationServer:
               sspicon.ASC_REQ_CONFIDENTIALITY | \
               sspicon.ASC_REQ_DELEGATE
       self.mServer = sspi.ServerAuth(pkgName, scflags = flags)
+      self.mLogger = logging.getLogger('maestrod.auth.%s' % pkgName)
 
    def remote_authorize(self, data):
       err, sec_buffer = self.mServer.authorize(data)
@@ -70,14 +72,28 @@ class SspiAuthenticationServer:
 #         sec_attr = pywintypes.SECURITY_ATTRIBUTES()
 #         sec_attr.Initialize()
 #         sec_attr.bInheritHandle = True
-         primary_handle = \
-            win32security.DuplicateTokenEx(
-               ExistingToken = handle,
-               DesiredAccess = win32security.TOKEN_ALL_ACCESS,
-               ImpersonationLevel = win32security.SecurityDelegation,
-               TokenType = ntsecuritycon.TokenPrimary,
-               TokenAttributes = sec_attr
-            )
+
+         # Try different impersonation levels for DuplicateTokenEx(). These
+         # should be in order of decreasing utility (most useful to least).
+         # See the SECURITY_IMPERSONATION_LEVEL documentation for more
+         # details.
+         levels = [win32security.SecurityDelegation,
+                   win32security.SecurityImpersonation]
+
+         for l in levels:
+            try:
+               primary_handle = \
+                  win32security.DuplicateTokenEx(
+                     ExistingToken = handle,
+                     DesiredAccess = win32security.TOKEN_ALL_ACCESS,
+                     ImpersonationLevel = l,
+                     TokenType = ntsecuritycon.TokenPrimary,
+                     TokenAttributes = sec_attr
+                  )
+               break
+            except Exception, ex:
+               self.mLogger.error("Failed to create primary token with impersonation level %s:" % str(l))
+               self.mLogger.error(ex[2])
 
          # acct_info[0] has the SID for the user.
          acct_info = win32security.LookupAccountName(None, user_info)
