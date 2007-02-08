@@ -253,7 +253,7 @@ class Ui_MaestroBase(object):
       self.mSaveStanzasAction.setText(QtGui.QApplication.translate("MaestroBase", "Save All Stanzas", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveStanzasAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Logs", None, QtGui.QApplication.UnicodeUTF8))
-      self.mArchiveLogsAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
+      self.mArchiveLogsAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
       self.mExitAction.setText(QtGui.QApplication.translate("MaestroBase", "Exit", None, QtGui.QApplication.UnicodeUTF8))
       self.mExitAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveEnsembleAsAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Ensemble As...", None, QtGui.QApplication.UnicodeUTF8))

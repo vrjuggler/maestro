@@ -256,6 +256,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # Create a log action that will ask the selected node for its current log.
       self.mLogAction = QtGui.QAction("Get Log", self)
+      self.mLogAction.setShortcut(QtGui.QKeySequence("Ctrl+L"))
       self.mLogAction.setEnabled(one_selected)
       self.connect(self.mLogAction, QtCore.SIGNAL("triggered()"), self.onGetLog)
 
