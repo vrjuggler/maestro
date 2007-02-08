@@ -22,6 +22,8 @@ import win32api, win32security, ntsecuritycon
 import pywintypes
 from twisted.spread import pb
 from twisted.spread.interfaces import IJellyable
+import twisted.python.failure as failure
+import twisted.cred.error as error
 
 import maestro.daemon.avatar as avatar
 import maestro.core.plugin_interfaces as PI
@@ -80,6 +82,8 @@ class SspiAuthenticationServer:
          levels = [win32security.SecurityDelegation,
                    win32security.SecurityImpersonation]
 
+         primary_handle = None
+
          for l in levels:
             try:
                primary_handle = \
@@ -93,7 +97,15 @@ class SspiAuthenticationServer:
                break
             except Exception, ex:
                self.mLogger.error("Failed to create primary token with impersonation level %s:" % str(l))
-               self.mLogger.error(ex[2])
+               self.mLogger.error(str(ex))
+
+         # If the above failed to create a primary token, then we throw an
+         # exception. It is important that we do not return None from this
+         # method.
+         if primary_handle is None:
+            msg = 'Failed to create primary token for user!'
+            self.mLogger.error(msg)
+            raise failure.Failure(error.UnauthorizedLogin(msg))
 
          # acct_info[0] has the SID for the user.
          acct_info = win32security.LookupAccountName(None, user_info)
