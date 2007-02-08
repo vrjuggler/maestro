@@ -17,7 +17,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
-import elementtree.ElementTree as ET
 import EnsembleViewBase
 import maestro.core
 const = maestro.core.const
@@ -164,8 +163,6 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
        They can add/remove nodes to the ensemble and view detailed settings
        for each node.
    """
-
-   sNodeMimeType = 'application/maestro-ensemble-node'
 
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
@@ -496,7 +493,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
    def onCopyNode(self):
       # Copy the selected node to the clipboard.
       clipboard = QtGui.QApplication.clipboard()
-      clipboard.setMimeData(self._makeNodeMimeData(self.__getSelectedNode()))
+      clipboard.setMimeData(self.__getSelectedNode().toMimeData())
 
       # Enable the paste action.
       self.mPasteNodeAction.setEnabled(True)
@@ -505,7 +502,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Copy the selected node to the clipboard.
       clipboard = QtGui.QApplication.clipboard()
       node = self.__getSelectedNode()
-      clipboard.setMimeData(self._makeNodeMimeData(node))
+      clipboard.setMimeData(node.toMimeData())
 
       # Perform the cut operation.
       self.mEnsemble.removeNode(node)
@@ -514,54 +511,11 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       # Enable the paste action.
       self.mPasteNodeAction.setEnabled(True)
 
-   def _makeNodeMimeData(self, node):
-      assert node is not None
-
-      node_data = QtCore.QByteArray()
-      data_stream = QtCore.QDataStream(node_data, QtCore.QIODevice.WriteOnly)
-
-      # Store the node's XML element, platform identifier (an integer) and
-      # IP address as QtCore.QString objects.
-      xml_elt  = QtCore.QString(ET.tostring(node.mElement))
-      platform = QtCore.QString(str(node.mPlatform))
-
-      if node.mIpAddress is None:
-         ip_addr = QtCore.QString()
-      else:
-         ip_addr = QtCore.QString(node.mIpAddress)
-
-      data_stream << xml_elt << platform << ip_addr
-
-      mime_data = QtCore.QMimeData()
-      mime_data.setData(self.sNodeMimeType, node_data)
-
-      return mime_data
-
    def onPasteNode(self):
       clipboard = QtGui.QApplication.clipboard()
       data = clipboard.mimeData()
-      if data.hasFormat(self.sNodeMimeType):
-         node_data = data.data(self.sNodeMimeType)
-         data_stream = QtCore.QDataStream(node_data,
-                                          QtCore.QIODevice.ReadOnly)
-
-         # The MIME data for an ensemble node contains its XML element, its
-         # platform identifier, and its IP address. All of these are stored as
-         # QtCore.QString instances.
-         xml_elt  = QtCore.QString()
-         platform = QtCore.QString()
-         ip_addr  = QtCore.QString()
-
-         data_stream >> xml_elt >> platform >> ip_addr
-
-         if len(str(ip_addr)) == 0:
-            ip_addr = None
-         else:
-            ip_addr = str(ip_addr)
-
-         node = ensemble.ClusterNode(ET.fromstring(str(xml_elt)),
-                                     platform.toInt()[0], ip_addr)
-         self.mEnsemble.addNode(node)
+      if data.hasFormat(ensemble.ClusterNode.sMimeType):
+         self.mEnsemble.addNode(ensemble.ClusterNode.makeFromMimeData(data))
          self.__doNodeAdd()
 
    def updateFields(self):

@@ -299,6 +299,9 @@ class ClusterNode(QtCore.QObject):
        information is loaded from the configuration file. But things like
        the current OS are retrieved from the remote object.
    """
+
+   sMimeType = 'application/maestro-ensemble-node'
+
    def __init__(self, xmlElt, platform = const.ERROR, ipAddr = None,
                 parent = None):
       QtCore.QObject.__init__(self, parent)
@@ -307,6 +310,58 @@ class ClusterNode(QtCore.QObject):
       self.mPlatform = platform
       self.mIpAddress = ipAddr
       self.lookupIpAddress()
+
+   def toMimeData(self):
+      '''
+      Serializes this cluster node object into a QtCore.QMimeData object.
+      '''
+      node_data   = QtCore.QByteArray()
+      data_stream = QtCore.QDataStream(node_data, QtCore.QIODevice.WriteOnly)
+
+      # Store the node's XML element, platform identifier (an integer), and IP
+      # address as QtCore.QString objects.
+      xml_elt  = QtCore.QString(ET.tostring(self.mElement))
+      platform = QtCore.QString(str(self.mPlatform))
+
+      if self.mIpAddress is None:
+         ip_addr = QtCore.QString()
+      else:
+         ip_addr = QtCore.QString(self.mIpAddress)
+
+      data_stream << xml_elt << platform << ip_addr
+
+      mime_data = QtCore.QMimeData()
+      mime_data.setData(self.sMimeType, node_data)
+
+      return mime_data
+
+   def makeFromMimeData(mimeData):
+      '''
+      Creates a new ClusterNode object from the given QtCore.QMimeData object.
+      '''
+      assert mimeData.hasFormat(ClusterNode.sMimeType)
+
+      node_data   = mimeData.data(ClusterNode.sMimeType)
+      data_stream = QtCore.QDataStream(node_data, QtCore.QIODevice.ReadOnly)
+
+      # The MIME data for an ensemble node contains its XML element, its
+      # platform identifier, and its IP address. All of these are stored as
+      # QtCore.QString instances.
+      xml_elt  = QtCore.QString()
+      platform = QtCore.QString()
+      ip_addr  = QtCore.QString()
+
+      data_stream >> xml_elt >> platform >> ip_addr
+
+      if len(str(ip_addr)) == 0:
+         ip_addr = None
+      else:
+         ip_addr = str(ip_addr)
+
+      return ClusterNode(ET.fromstring(str(xml_elt)), platform.toInt()[0],
+                         ip_addr)
+
+   makeFromMimeData = staticmethod(makeFromMimeData)
 
    def getName(self):
       return self.mElement.get('name', 'Unknown')
