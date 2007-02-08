@@ -523,11 +523,43 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                   (env.mCmdOpts.view, all_view_names, view_names[0])
             )
 
+      actions = {}
+      for name, cls in self.mViewPlugins.iteritems():
+         plugin_name = cls.getName()
+
+         action = QtGui.QAction(plugin_name, self.mViewList)
+         action.setCheckable(True)
+         if self.mActiveViewPlugins.has_key(name):
+            action.setChecked(True)
+
+         callable = lambda t, n = name: self.onToggleViewPlugin(n, t)
+         action.connect(action, QtCore.SIGNAL("toggled(bool)"), callable)
+
+         # NOTE: I do not think that we need to hang onto the callable here
+         # so that we can make a disconnection after the context menu closes.
+         # When the menu object is destroyed, its action objects should also
+         # be destroyed. This would remove the only remaining reference to
+         # each of the callable objects, thereby allowing them to be
+         # destroyed--right?
+
+         actions[plugin_name] = action
+
+      # Sort the actions based on the name of the View Plug-in. Another
+      # sorting option is to use the current order of plug-ins in
+      # self.mViewList. The inactive View Plug-ins would probably have to be
+      # at the end of the list in that case.
+      action_names = actions.keys()
+      action_names.sort()
+      for n in action_names:
+         a = actions[n]
+         self.mViewList.addAction(a)
+         self.menuView.addAction(a)
+
+      # We are done with the dictionary actions.
+      del actions
+
       self.mViewList.setCurrentRow(start_view_index)
-      self.mViewList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-      self.connect(self.mViewList,
-                   QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                   self.onViewListContextMenu)
+      self.mViewList.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 
       # Timer to refresh pyro connections to nodes.
       self.refreshTimer = QtCore.QTimer()
@@ -580,44 +612,6 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             self.mStack.removeWidget(cur_widget)
 
          del self.mActiveViewPlugins[pluginTypeName]
-
-   def onViewListContextMenu(self, point):
-      menu = QtGui.QMenu("View Plug-ins", self.mViewList)
-
-      actions = {}
-      for name, cls in self.mViewPlugins.iteritems():
-         plugin_name = cls.getName()
-
-         action = QtGui.QAction(plugin_name, self.mViewList)
-         action.setCheckable(True)
-         if self.mActiveViewPlugins.has_key(name):
-            action.setChecked(True)
-
-         callable = lambda t, n = name: self.onToggleViewPlugin(n, t)
-         action.connect(action, QtCore.SIGNAL("toggled(bool)"), callable)
-
-         # NOTE: I do not think that we need to hang onto the callable here
-         # so that we can make a disconnection after the context menu closes.
-         # When the menu object is destroyed, its action objects should also
-         # be destroyed. This would remove the only remaining reference to
-         # each of the callable objects, thereby allowing them to be
-         # destroyed--right?
-
-         actions[plugin_name] = action
-
-      # Sort the actions based on the name of the View Plug-in. Another
-      # sorting option is to use the current order of plug-ins in
-      # self.mViewList. The inactive View Plug-ins would probably have to be
-      # at the end of the list in that case.
-      action_names = actions.keys()
-      action_names.sort()
-      for n in action_names:
-         menu.addAction(actions[n])
-
-      # We are done with the dictionary actions.
-      del actions
-
-      menu.exec_(self.mapToGlobal(point))
 
    def onRefreshEnsemble(self):
       """Try to connect to all nodes."""
