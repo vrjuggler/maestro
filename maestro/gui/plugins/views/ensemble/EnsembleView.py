@@ -27,6 +27,7 @@ env = maestro.gui.Environment
 class EnsembleViewPlugin(maestro.core.IViewPlugin):
    def __init__(self):
       maestro.core.IViewPlugin.__init__(self)
+      self.mMenu  = None
       self.widget = EnsembleView()
       
    def getName():
@@ -39,6 +40,25 @@ class EnsembleViewPlugin(maestro.core.IViewPlugin):
       
    def getViewWidget(self):
       return self.widget
+
+   def activate(self, mainWindow):
+      if self.mMenu is None and self.widget is not None:
+         self.mMenu = QtGui.QMenu("Ensemble")
+         self.mMenu.addAction(self.widget.mCopyNodeAction)
+         self.mMenu.addAction(self.widget.mCutNodeAction)
+         self.mMenu.addAction(self.widget.mPasteNodeAction)
+         self.mMenu.addSeparator()
+         self.mMenu.addAction(self.widget.mListModeAction)
+         self.mMenu.addAction(self.widget.mIconModeAction)
+         self.mMenu.addSeparator()
+         self.mMenu.addAction(self.widget.mLogAction)
+
+      if self.mMenu is not None:
+         mainWindow.menuBar().addAction(self.mMenu.menuAction())
+
+   def deactivate(self, mainWindow):
+      if self.mMenu is not None:
+         mainWindow.menuBar().removeAction(self.mMenu.menuAction())
 
 class NodeSettingsModel(QtCore.QAbstractTableModel):
    """ TableModel that represents node settings returned from EnsembleService.
@@ -194,15 +214,22 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.mListModeAction  = QtGui.QAction("List View", self)
       self.mIconModeAction  = QtGui.QAction("Icon View", self)
 
+      view_mode_group = QtGui.QActionGroup(self)
+      self.mListModeAction.setCheckable(True)
+      self.mListModeAction.setChecked(True)     # We start in list view mode
+      self.mListModeAction.setActionGroup(view_mode_group)
+      self.mIconModeAction.setCheckable(True)
+      self.mIconModeAction.setActionGroup(view_mode_group)
+
       self.mCopyNodeAction.setShortcut(QtGui.QKeySequence("Ctrl+C"))
       self.mCutNodeAction.setShortcut(QtGui.QKeySequence("Ctrl+X"))
       self.mPasteNodeAction.setShortcut(QtGui.QKeySequence("Ctrl+V"))
 
       selected_nodes = self.mClusterListView.selectedIndexes()
-      can_copy = len(selected_nodes) == 1
+      one_selected = len(selected_nodes) == 1
 
-      self.mCopyNodeAction.setEnabled(can_copy)
-      self.mCutNodeAction.setEnabled(can_copy)
+      self.mCopyNodeAction.setEnabled(one_selected)
+      self.mCutNodeAction.setEnabled(one_selected)
       self.mPasteNodeAction.setEnabled(False)
 
       self.connect(self.mCopyNodeAction, QtCore.SIGNAL("triggered()"),
@@ -229,6 +256,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       # Create a log action that will ask the selected node for its current log.
       self.mLogAction = QtGui.QAction("Get Log", self)
+      self.mLogAction.setEnabled(one_selected)
       self.connect(self.mLogAction, QtCore.SIGNAL("triggered()"), self.onGetLog)
 
       self.mClusterListView.addAction(self.mCopyNodeAction)
@@ -486,9 +514,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.mSettingsTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
       selected = self.mClusterListView.selectedIndexes()
-      can_copy = len(selected) == 1
-      self.mCopyNodeAction.setEnabled(can_copy)
-      self.mCutNodeAction.setEnabled(can_copy)
+      one_selected = len(selected) == 1
+      self.mCopyNodeAction.setEnabled(one_selected)
+      self.mCutNodeAction.setEnabled(one_selected)
+      self.mLogAction.setEnabled(one_selected)
 
    def onCopyNode(self):
       # Copy the selected node to the clipboard.
