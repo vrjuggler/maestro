@@ -634,6 +634,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def onConnectionMade(self, node):
       assert node not in self.mConnectedNodes
       self.mConnectedNodes.append(node)
+      self.mArchiveServerLogsAction.setEnabled(True)
 
       if len(self.mConnectedNodes) == self.mEnsemble.getNumNodes():
          self.__setConnectedStatus()
@@ -647,6 +648,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          self.__setDisconnectedStatus()
       else:
          self.__setConnectingStatus()
+
+      if len(self.mConnectedNodes) == 0:
+         self.mArchiveServerLogsAction.setEnabled(False)
 
    def onEnsembleChanged(self):
       num_nodes = self.mEnsemble.getNumNodes()
@@ -855,6 +859,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
       self.connect(self.mArchiveLogsAction, QtCore.SIGNAL("triggered()"),
                    self.onArchiveLogs)
+      self.connect(self.mArchiveServerLogsAction, QtCore.SIGNAL("triggered()"),
+                   self.onArchiveServerLogs)
       self.connect(self.mExitAction, QtCore.SIGNAL("triggered()"),
                    self.onExit)
       self.connect(self.mLoadEnsembleAction, QtCore.SIGNAL("triggered()"),
@@ -900,8 +906,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
    def onArchiveLogs(self):
       zip_file_name = \
          QtGui.QFileDialog.getSaveFileName(
-            self, "Choose a ZIP file for the log archive",
-            os.path.join(OutputFileLogger.getLogDir(), "maestro-logs.zip"),
+            self, "Choose a ZIP file for the execution log archive",
+            os.path.join(OutputFileLogger.getLogDir(),
+                         "maestro-exec-logs.zip"),
             "ZIP archive (*.zip)"
          )
 
@@ -924,6 +931,87 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                zip_file.write(l)
 
          zip_file.close()
+
+   def onArchiveServerLogs(self):
+      self.mPendingServers = []
+      self.mServerLog = {}
+
+      for n in self.mConnectedNodes:
+         self.mPendingServers.append(n.getId())
+
+      env = maestro.gui.Environment()
+      env.mEventManager.connect('*', 'ensemble.report_log',
+                                self.onReportServerLog)
+
+      for n in self.mConnectedNodes:
+         env.mEventManager.emit(n.getId(), "ensemble.get_log")
+
+   def onReportServerLog(self, nodeId, debugList):
+      if nodeId in self.mPendingServers:
+         self.mPendingServers.remove(nodeId)
+         self.mServerLog[nodeId] = debugList
+
+         if len(self.mPendingServers) == 0:
+            env = maestro.gui.Environment()
+            env.mEventManager.disconnect('*', 'ensemble.report_log',
+                                         self.onReportServerLog)
+
+            zip_file_name = \
+               QtGui.QFileDialog.getSaveFileName(
+                  self, "Choose a ZIP file for the server log archive",
+                  os.path.join(OutputFileLogger.getLogDir(),
+                               "maestrod-logs.zip"),
+                  "ZIP archive (*.zip)"
+               )
+
+            if zip_file_name is not None and zip_file_name != '':
+               # Change zip_file_name from a QString to a Python string.
+               zip_file_name = str(zip_file_name)
+
+               # Try to create a zipfile.ZipFile object that uses compression.
+               # If that fails, then fall back on using an uncompressed
+               # archive.
+               try:
+                  zip_file = zipfile.ZipFile(zip_file_name, 'w',
+                                             zipfile.ZIP_DEFLATED)
+               # RuntimeError is raised if the zlib module is not available.
+               except RuntimeError:
+                  zip_file = zipfile.ZipFile(zip_file_name, 'w',
+                                             zipfile.ZIP_STORED)
+
+               files = []
+
+               for id in self.mServerLog.keys():
+                  file = 'maestrod-%s.log' % id
+
+                  try:
+                     node = self.mEnsemble.getNodeById(id)
+
+                     f = open(file, 'w')
+
+                     f.write('Name: %s\n' % node.getName())
+                     f.write('Class: %s\n' % node.getClass())
+                     f.write('Hostname: %s\n' % node.getHostname())
+                     f.write('OS: %s\n' % node.getPlatformName())
+                     f.write('Log:\n')
+
+                     f.write(''.join(self.mServerLog[id]))
+                     f.close()
+
+                     files.append(file)
+                  except Exception, ex:
+                     print ex
+
+               files.sort()
+
+               for l in files:
+                  zip_file.write(l)
+                  os.unlink(l)
+
+               zip_file.close()
+
+            # Clean up state.
+            self.mServerLog = {}
 
    def onExit(self):
       env = maestro.gui.Environment()
