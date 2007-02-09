@@ -658,6 +658,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          self.__setDisconnectedStatus()
       elif num_nodes > len(self.mConnectedNodes):
          self.__setConnectingStatus()
+      elif num_nodes == len(self.mConnectedNodes):
+         self.__setConnectedStatus()
 
    def __setConnectedStatus(self):
       icon = QtGui.QIcon(":/Maestro/images/connected.png")
