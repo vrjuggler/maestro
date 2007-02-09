@@ -189,8 +189,6 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       self.setupUi(self)
       self.mEnsemble = None
       self.mEnsembleModel = None
-      env().mEventManager.connect("*", "ensemble.report_log",
-                                  self.onReportLog)
 
    def setupUi(self, widget):
       """
@@ -279,9 +277,20 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
    def onGetLog(self):
       selected_node = self.__getSelectedNode()
       if selected_node is not None:
-         env().mEventManager.emit(selected_node.getId(), "ensemble.get_log")
+         id = selected_node.getId()
+
+         # We only connect to the ensemble.report_log signal when we are
+         # expecting a response.
+         env().mEventManager.connect(id, 'ensemble.report_log',
+                                     self.onReportLog)
+         env().mEventManager.emit(id, 'ensemble.get_log')
 
    def onReportLog(self, nodeId, debugList):
+      # We received the response that we wanted, so we disconnect from this
+      # signal.
+      env().mEventManager.disconnect(nodeId, 'ensemble.report_log',
+                                     self.onReportLog)
+
       node = self.mEnsemble.getNodeById(nodeId)
       if node is not None:
          title = "Log Window [%s][%s]" % (node.getHostname(), nodeId)
