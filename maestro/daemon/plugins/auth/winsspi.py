@@ -115,10 +115,14 @@ class SspiAuthenticationServer:
          # it is a duplicate.
          handle.Close()
 
+         # NOTE: We are forcing the addition of user_sid to the window station
+         # and desktop ACLs. This seems to be the only way for the user
+         # authenticated through SSPI to be able to open interactive windows.
          return self.prepareAvatar(avatar.WindowsAvatar(primary_handle,
                                                         user_sid,
                                                         str(user_info[0]),
-                                                        str(user_info[1])))
+                                                        str(user_info[1]),
+                                                        True))
 
       return sec_buffer[0].Buffer
 

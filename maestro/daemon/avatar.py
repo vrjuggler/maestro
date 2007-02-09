@@ -58,15 +58,19 @@ class UserPerspective(pb.Avatar):
          env.mEventManager.unregisterProxy(self.mNodeId)
 
 class WindowsAvatar(UserPerspective):
-   def __init__(self, userHandle, userSID, userName, domain):
+   def __init__(self, userHandle, userSID, userName, domain,
+                forceSidAdd = False):
       """
       Constructs a Windows-specific user perspective used to access the
       event manager.
       @pre userHandle is a valid PyHANDLE object.
-      @param userHandle Handle to the user's authentication.
-      @param userSID    The SID for the user represented by this avatar.
-      @param userName   The name of the user represented by this avatar.
-      @param domain     The domain for the user.
+      @param userHandle  Handle to the user's authentication.
+      @param userSID     The SID for the user represented by this avatar.
+      @param userName    The name of the user represented by this avatar.
+      @param domain      The domain for the user.
+      @param forceSidAdd Causes the given ID to be added to the window
+                         station and desktop ACLs even if it is already
+                         present. Use with caution!
       """
       assert(userHandle is not None)
 
@@ -100,14 +104,14 @@ class WindowsAvatar(UserPerspective):
 
       # If user_sid is not already among the SIDs who have access to
       # new_winsta, then add it now. It will be removed in logout().
-      if not windesktop.handleHasSID(new_winsta, self.mUserSID):
+      if forceSidAdd or not windesktop.handleHasSID(new_winsta, self.mUserSID):
          windesktop.addUserToWindowStation(new_winsta, self.mUserSID)
          self.mAddedHandles.append(new_winsta)
          self.mLogger.debug("Added SID to new_winsta")
 
       # If user_sid is not already among the SIDs who have access to desktop,
       # then add it now. It will be removed in logout().
-      if not windesktop.handleHasSID(desktop, self.mUserSID):
+      if forceSidAdd or not windesktop.handleHasSID(desktop, self.mUserSID):
          windesktop.addUserToDesktop(desktop, self.mUserSID)
          self.mAddedHandles.append(desktop)
          self.mLogger.debug("Added SID to desktop")
