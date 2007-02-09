@@ -47,16 +47,14 @@ class SspiAuthenticationServer:
       err, sec_buffer = self.mServer.authorize(data)
 
       if err == 0:
-#         self.mServer.ctxt.ImpersonateSecurityContext()
-#         user_info = win32api.GetUserNameEx(win32api.NameSamCompatible)
-#         self.mServer.ctxt.RevertSecurityContext()
-
-         # Retrieve the handle suitable for passing to
-         # ImpersonateLoggedOnUser().
-         handle = \
-            self.mServer.ctxt.QueryContextAttributes(
-               sspicon.SECPKG_ATTR_ACCESS_TOKEN
-            )
+         # Get the handle for the authenticated user such that we can pass it
+         # to win32security.DuplicateTokenEx() and get back a handle that
+         # allows us to spawn interactive processes as the authenticated user.
+         self.mServer.ctxt.ImpersonateSecurityContext()
+         flags = win32security.TOKEN_DUPLICATE | win32security.TOKEN_QUERY
+         handle = win32security.OpenThreadToken(win32api.GetCurrentThread(),
+                                                flags, False)
+         self.mServer.ctxt.RevertSecurityContext()
 
          # Using handle, reate a primary handle suitable for passing to
          # CreateProcessAsUser().
@@ -107,6 +105,8 @@ class SspiAuthenticationServer:
          # NOTE: The returned strings may be Unicode strings.
          user_info = win32security.LookupAccountSid(None, user_sid)
 
+         # Close the handle returned by win32security.OpenThreadToken() since
+         # it is a duplicate.
          handle.Close()
 
          return self.prepareAvatar(avatar.WindowsAvatar(primary_handle,
