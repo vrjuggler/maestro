@@ -461,6 +461,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mLoggers = []
       self.mFileLogger = None
       self.mEnsembleStartDir = None
+      self.mConnectedNodes = []
 
    def init(self):
       env = maestro.gui.Environment()
@@ -561,7 +562,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.mViewList.setCurrentRow(start_view_index)
       self.mViewList.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 
-      # Timer to refresh pyro connections to nodes.
+      self.__setConnectingStatus()
+
+      # Timer to refresh Twisted connections to nodes.
       self.refreshTimer = QtCore.QTimer()
       self.refreshTimer.setInterval(2000)
       self.refreshTimer.start()
@@ -570,13 +573,28 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("connectionMade"),
+                         self.onConnectionMade)
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("connectionLost"),
+                         self.onConnectionLost)
+         self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"),
+                         self.onEnsembleChanged)
+
          env = maestro.gui.Environment()
          # Close all connections.
          # NOTE: This will cause events to be fired before we disconnect
          # from the event manager on the next line.
          env.mEventManager.closeAllConnections()
          self.mEnsemble.disconnectFromEventManager()
+
       self.mEnsemble = ensemble
+      self.connect(self.mEnsemble, QtCore.SIGNAL("connectionMade"),
+                   self.onConnectionMade)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("connectionLost"),
+                   self.onConnectionLost)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"),
+                   self.onEnsembleChanged)
+
       # Initialize all loaded modules.
       for (view, view_widget) in self.mActiveViewPlugins.values():
          view_widget.setEnsemble(self.mEnsemble)
@@ -612,6 +630,48 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
             self.mStack.removeWidget(cur_widget)
 
          del self.mActiveViewPlugins[pluginTypeName]
+
+   def onConnectionMade(self, node):
+      assert node not in self.mConnectedNodes
+      self.mConnectedNodes.append(node)
+
+      if len(self.mConnectedNodes) == self.mEnsemble.getNumNodes():
+         self.__setConnectedStatus()
+      else:
+         self.__setConnectingStatus()
+
+   def onConnectionLost(self, node):
+      self.mConnectedNodes.remove(node)
+
+      if self.mEnsemble.getNumNodes() == 0:
+         self.__setDisconnectedStatus()
+      else:
+         self.__setConnectingStatus()
+
+   def onEnsembleChanged(self):
+      num_nodes = self.mEnsemble.getNumNodes()
+      if num_nodes == 0:
+         self.__setDisconnectedStatus()
+      elif num_nodes > len(self.mConnectedNodes):
+         self.__setConnectingStatus()
+
+   def __setConnectedStatus(self):
+      icon = QtGui.QIcon(":/Maestro/images/connected.png")
+      pixmap = icon.pixmap(QtCore.QSize(18, 18))
+      self.mConnectedStatusLabel.setPixmap(pixmap)
+      self.mConnectedStatusLabel.setToolTip("Connected")
+
+   def __setConnectingStatus(self):
+      icon = QtGui.QIcon(":/Maestro/images/connecting.png")
+      pixmap = icon.pixmap(QtCore.QSize(18, 18))
+      self.mConnectedStatusLabel.setPixmap(pixmap)
+      self.mConnectedStatusLabel.setToolTip("Connecting...")
+
+   def __setDisconnectedStatus(self):
+      icon = QtGui.QIcon(":/Maestro/images/not_connected.png")
+      pixmap = icon.pixmap(QtCore.QSize(18, 18))
+      self.mConnectedStatusLabel.setPixmap(pixmap)
+      self.mConnectedStatusLabel.setToolTip("Disconnected")
 
    def onRefreshEnsemble(self):
       """Try to connect to all nodes."""
@@ -773,6 +833,10 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def setupUi(self, widget):
       MaestroBase.Ui_MaestroBase.setupUi(self, widget)
+
+      self.mConnectedStatusLabel = QtGui.QLabel(self)
+      status_bar = self.statusBar()
+      status_bar.addPermanentWidget(self.mConnectedStatusLabel, False)
 
       # Replace the sself.mViewList object created by the above method call
       # with our derived type. This is done to get drag-and-drop operations

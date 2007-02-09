@@ -3,6 +3,8 @@
         <file>images/MacOSX.png</file>
         <file>images/archive.png</file>
         <file>images/cloneView.png</file>
+        <file>images/connected.png</file>
+        <file>images/connecting.png</file>
         <file>images/construction.png</file>
         <file>images/copy.png</file>
         <file>images/cut.png</file>
@@ -22,6 +24,7 @@
         <file>images/maestro_icon.png</file>
         <file>images/management.png</file>
         <file>images/new.png</file>
+        <file>images/not_connected.png</file>
         <file>images/open.png</file>
         <file>images/paste.png</file>
         <file>images/processView.png</file>
