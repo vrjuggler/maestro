@@ -71,13 +71,19 @@ class SspiAuthenticationServer:
                    win32security.SecurityImpersonation]
 
          primary_handle = None
+         #access = win32security.TOKEN_ALL_ACCESS
+         #access = win32con.MAXIMUM_ALLOWED
+         access = win32security.TOKEN_IMPERSONATE    | \
+                  win32security.TOKEN_QUERY          | \
+                  win32security.TOKEN_ASSIGN_PRIMARY | \
+                  win32security.TOKEN_DUPLICATE
 
          for l in levels:
             try:
                primary_handle = \
                   win32security.DuplicateTokenEx(
                      ExistingToken = handle,
-                     DesiredAccess = win32security.TOKEN_ALL_ACCESS,
+                     DesiredAccess = access,
                      ImpersonationLevel = l,
                      TokenType = ntsecuritycon.TokenPrimary,
                      TokenAttributes = sec_attr
