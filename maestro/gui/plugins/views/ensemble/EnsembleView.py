@@ -293,9 +293,10 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
 
       node = self.mEnsemble.getNodeById(nodeId)
       if node is not None:
-         title = "Log Window [%s][%s]" % (node.getHostname(), nodeId)
+         title = "Log Window: %s (%s) - %s" % (node.getHostname(), nodeId,
+                                               node.getPlatformName())
       else:
-         title = "Log Window [%s]" % (nodeId)
+         title = "Log Window: %s" % nodeId
 
       dialog = QtGui.QDialog(self)
       dialog.setWindowTitle(title)
