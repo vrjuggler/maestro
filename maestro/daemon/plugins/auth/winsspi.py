@@ -58,16 +58,6 @@ class SspiAuthenticationServer:
                sspicon.SECPKG_ATTR_ACCESS_TOKEN
             )
 
-         win32security.ImpersonateLoggedOnUser(handle)
-         user_info = win32api.GetUserNameEx(win32api.NameSamCompatible)
-         win32security.RevertToSelf()
-
-         if user_info.find('\\'):
-            domain, user_name = user_info.split('\\')
-         else:
-            domain    = None
-            user_name = user_info
-
          # Using handle, reate a primary handle suitable for passing to
          # CreateProcessAsUser().
          sec_attr = None
@@ -108,11 +98,21 @@ class SspiAuthenticationServer:
             raise failure.Failure(error.UnauthorizedLogin(msg))
 
          # acct_info[0] has the SID for the user.
-         acct_info = win32security.LookupAccountName(None, user_info)
+         acct_info = win32security.GetTokenInformation(primary_handle,
+                                                       win32security.TokenUser)
+         user_sid  = acct_info[0]
+
+         # This returns a tuple containing the user name, the domain (if
+         # applicable), and the accouunt type.
+         # NOTE: The returned strings may be Unicode strings.
+         user_info = win32security.LookupAccountSid(None, user_sid)
+
+         handle.Close()
 
          return self.prepareAvatar(avatar.WindowsAvatar(primary_handle,
-                                                        acct_info[0],
-                                                        user_name, domain))
+                                                        user_sid,
+                                                        str(user_info[0]),
+                                                        str(user_info[1])))
 
       return sec_buffer[0].Buffer
 
