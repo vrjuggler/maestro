@@ -90,8 +90,8 @@ class Ui_RebootViewerBase(object):
 
    def retranslateUi(self, RebootViewerBase):
       RebootViewerBase.setWindowTitle(QtGui.QApplication.translate("RebootViewerBase", "Reboot Cluster", None, QtGui.QApplication.UnicodeUTF8))
-      RebootViewerBase.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "Process View: Provides a method to reboot all nodes to a target operating system.", None, QtGui.QApplication.UnicodeUTF8))
-      RebootViewerBase.setStatusTip(QtGui.QApplication.translate("RebootViewerBase", "Process View", None, QtGui.QApplication.UnicodeUTF8))
+      RebootViewerBase.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "Reboot View: Provides a method to reboot all nodes to a target operating system.", None, QtGui.QApplication.UnicodeUTF8))
+      RebootViewerBase.setStatusTip(QtGui.QApplication.translate("RebootViewerBase", "Reboot View", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootClusterLbl.setText(QtGui.QApplication.translate("RebootViewerBase", "Cluster OS On Reboot:", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectWinBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectLinuxBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
