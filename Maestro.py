@@ -278,7 +278,25 @@ def main():
       if opts.ensemble is None and gui_settings.has_key('default_ensemble'):
          ensemble_str = gui_settings['default_ensemble']
          if ensemble_str is not None:
-            opts.ensemble = expandEnv(ensemble_str.strip())
+            default_ensemble = expandEnv(ensemble_str.strip())
+
+            # If the default ensemble file is not an absolute path, search in
+            # the current working directory and the user-specific application
+            # data directory for Maestro for the ensemble file.
+            if not os.path.isabs(default_ensemble):
+               # NOTE: We could define an ensemble search path.
+               dirs = ['.', xplatform.getUserAppDir(const.APP_NAME)]
+
+               for d in dirs:
+                  test_name = os.path.join(d, default_ensemble)
+                  if os.path.exists(test_name):
+                     default_ensemble = test_name
+                     break
+
+            print "NOTE: Using default ensemble %s" % default_ensemble
+            os.ensemble = default_ensemble
+      else:
+         print "NOTE: No ensemble (default or otherwise) has been specified."
 
       def splashProgressCB(percent, message):
          splash.showMessage("%3.0f%% %s"%(percent*100,message),
