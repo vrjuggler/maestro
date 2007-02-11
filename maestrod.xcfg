@@ -1,13 +1,19 @@
 <?xml version="1.0" ?>
 <maestrod version="1">
+<!--
+   <ssl>
+      <cert_file>/etc/maestro/ssl/server.pem</cert_file>
+      <key_file>/etc/maestro/ssl/server.pem</key_file>
+   </ssl>
+-->
    <authentication_plugins>
       sspi_negotiate,sspi_ntlm,username_password
    </authentication_plugins>
-   <boot_loader>GRUB</boot_loader>
+   <boot_loader></boot_loader>
    <grub_conf>/boot/grub/grub.conf</grub_conf>
    <xauth_cmd>/usr/X11R6/bin/xauth</xauth_cmd>
-   <xauthority_file>/var/gdm/:0.Xauth</xauthority_file>
-   <saver_types>windows,powercfg</saver_types>
+   <xauthority_file>/Users/patrick/.Xauthority</xauthority_file>
+   <saver_types></saver_types>
    <xscreensaver_cmd>/usr/X11R6/bin/xscreensaver</xscreensaver_cmd>
    <xscreensaver_command_cmd>/usr/X11R6/bin/xscreensaver-command</xscreensaver_command_cmd>
 </maestrod>

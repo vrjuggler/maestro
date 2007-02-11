@@ -322,15 +322,44 @@ def RunServer(installSH=True):
       factory = pboverssl.PBServerFactory(_AuthServerWrapper())
 
       #reactor.listenTCP(8789, factory)
-      pk_path = os.path.join(const.EXEC_DIR, 'server.pem')
-      cert_path = os.path.join(const.EXEC_DIR, 'server.pem')
+      env = maestro.core.Environment()
+
+      # Fallback settings for the SSL private key and certificate if none are
+      # given in the maestrod configuration.
+      default_pk_path   = os.path.join(const.EXEC_DIR, 'server.pem')
+      default_cert_path = os.path.join(const.EXEC_DIR, 'server.pem')
+
+      # Set the private key file. First, we check the maestrod settings to
+      # see if a private key file is named.
+      pk_path = env.settings.get('ssl/key_file', default_pk_path)
+
+      # Ensure that we are using an absolute path to the private key. This is
+      # done largely for backwards compatibility with installations migrated
+      # from pre-0.4 releases that are likely to have server.pem in the
+      # maestrod installation directory.
+      if not os.path.isabs(pk_path) and \
+         os.path.dirname(pk_path) != const.EXEC_DIR:
+         pk_path = os.path.join(const.EXEC_DIR, pk_path)
+
+      # Set the certificate. First, we check the maestrod settings to see if a
+      # certificate.
+      cert_path = env.settings.get('ssl/cert_file', default_cert_path)
+
+      # Ensure that we are using an absolute path to the certificate. This is
+      # done largely for backwards compatibility with installations migrated
+      # from pre-0.4 releases that are likely to have server.pem in the
+      # maestrod installation directory.
+      if not os.path.isabs(cert_path) and \
+         os.path.dirname(cert_path) != const.EXEC_DIR:
+         cert_path = os.path.join(const.EXEC_DIR, cert_path)
 
       if not os.path.exists(pk_path):
          logger.error("Server private key %s does not exist!" % pk_path)
       if not os.path.exists(cert_path):
          logger.error("Server certificate %s does not exist!" % cert_path)
 
-      logger.info("Cert: " + cert_path)
+      logger.info("SSL private key: " + pk_path)
+      logger.info("SSL certificate: " + cert_path)
       reactor.listenSSL(8789, factory,
                         ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
 
