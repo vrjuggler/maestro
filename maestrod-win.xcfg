@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<maestrod version="1">
+   <ssl>
+      <cert_file>server.pem</cert_file>
+      <key_file>server.pem</key_file>
+   </ssl>
+   <authentication_plugins>
+      sspi_negotiate,sspi_ntlm,username_password
+   </authentication_plugins>
+   <boot_loader>GRUB</boot_loader>
+   <grub_conf>E:\grub\grub.conf</grub_conf>
+   <saver_types>windows,powercfg</saver_types>
+</maestrod>

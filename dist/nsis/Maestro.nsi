@@ -139,7 +139,8 @@ Section "Maestro Service" SecService
   SetOutPath "$INSTDIR\maestro\daemon"
   File /r /x .svn maestro\maestro\daemon\*
   SetOutPath "$INSTDIR"
-  File maestro\maestrod.py maestro\maestrod.xcfg maestro\server.pem
+  File maestro\maestrod.py maestro\server.pem
+  File maestro\maestrod-win.xcfg /ofile=maestrod.xcfg
 SectionEnd
 
 Section "Maestro Documentation" SecDoc

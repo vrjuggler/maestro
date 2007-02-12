@@ -7,7 +7,7 @@
    </ssl>
 -->
    <authentication_plugins>
-      sspi_negotiate,sspi_ntlm,username_password
+      username_password
    </authentication_plugins>
    <boot_loader>GRUB</boot_loader>
    <grub_conf>/boot/grub/grub.conf</grub_conf>
