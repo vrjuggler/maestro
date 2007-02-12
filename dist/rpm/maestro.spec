@@ -15,6 +15,7 @@ Summary: Maestro cluster management software
 Version: %{version}
 Release: %{release}
 Source: %{name}-%{version}.tar.bz2
+Patch0: maestro-patch0
 URL: http://realityforge.vrsource.org/trac/maestro/
 Group: Applications/System
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -76,6 +77,7 @@ Maestro documentation.
 %prep
 rm -rf %{buildroot}
 %setup -q
+%patch0 -p0
 
 %build
 %if %{build_doc}
@@ -271,6 +273,22 @@ if test -x /usr/bin/gtk-update-icon-cache ; then
 fi
 
 %post server
+pem_dir='/etc/maestro/ssl'
+pem_path="$pem_dir/server.pem"
+if [ ! -e $pem_path ] ; then
+   if [ ! -d $pem_dir ] ; then
+      mkdir -p $pem_dir
+   fi
+   echo "Generating $pem_path ..."
+   old_umask=`umask`
+   umask 0277
+   openssl genrsa 1024 > /tmp/host.key
+   openssl req -new -x509 -nodes -sha1 -days 730 -key /tmp/host.key -batch > /tmp/host.cert
+   rm -f /tmp/cert.config
+   cat /tmp/host.cert /tmp/host.key > $pem_path && rm -f /tmp/host.cert /tmp/host.key
+   umask $old_umask
+fi
+
 /sbin/chkconfig --add maestrod
 /sbin/chkconfig --level 34 maestrod off
 /sbin/chkconfig --level 5 maestrod on

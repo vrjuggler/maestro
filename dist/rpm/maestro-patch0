@@ -1,0 +1,16 @@
+Index: maestrod.xcfg
+===================================================================
+--- maestrod.xcfg	(revision 984)
++++ maestrod.xcfg	(working copy)
+@@ -1,11 +1,9 @@
+ <?xml version="1.0" ?>
+ <maestrod version="1">
+-<!--
+    <ssl>
+       <cert_file>/etc/maestro/ssl/server.pem</cert_file>
+       <key_file>/etc/maestro/ssl/server.pem</key_file>
+    </ssl>
+--->
+    <authentication_plugins>
+       sspi_negotiate,sspi_ntlm,username_password
+    </authentication_plugins>
