@@ -30,7 +30,7 @@ XSLT_TOOL=	Saxon
 
 # Fill these in!!  Together, they make up the installation prefix.
 webroot=	$(HOME)/public_html
-instdir=	userguide
+instdir=	
 
 override prefix=$(webroot)/$(instdir)
 #INSTALL_DIRS=	images
