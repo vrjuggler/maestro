@@ -21,8 +21,7 @@ default: html
 docs: html chunk-html pdf
 install-docs: install-html install-chunk-html install-pdf
 
-NAME=		userguide
-XML_FILES=	$(NAME).xml
+XML_FILES=	userguide.xml programmerguide.xml
 
 XSLT_TOOL=	Saxon
 
@@ -39,8 +38,8 @@ override prefix=$(webroot)/$(instdir)
 
 #NEED_DB_IMAGES=	1
 
-#$(NAME).html: $(IMAGES)
-#$(NAME).pdf: $(IMAGES)
+#userguide.html: $(IMAGES)
+#userguide.pdf: $(IMAGES)
 
 #CLOBBER_FILES=	$(IMAGES)
 
