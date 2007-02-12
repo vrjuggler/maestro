@@ -190,7 +190,9 @@ class Ensemble(QtCore.QObject):
                if deferred is not None:
                   deferred.addErrback(self.onConnectError, ip_address)
          except Exception, ex:
-            print "WARNING: Could not connect to [%s] [%s]" % (node.getHostname(), ex)
+            msg = "WARNING: Could not connect to %s:\n%s" % \
+                     (node.getHostname(), ex)
+            QtGui.QMessageBox.warning(None, "Connection Failure", msg)
 
    def _canAttemptConnection(self, nodeId):
       if not self.mConnectInProgress.has_key(nodeId):
