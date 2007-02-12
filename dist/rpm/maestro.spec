@@ -142,10 +142,21 @@ done
 %{_prefix}/lib/maestro-%{version}/maestro/gui/images/*
 
 %dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/auth/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/auth/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/auth/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/auth/*.pyo
+
 %dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/
 %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/*.py
 %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/*.pyc
 %ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/*.pyo
+
+%dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/clone/
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/clone/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/clone/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/clone/*.pyo
 
 %dir %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/desktop/
 %{_prefix}/lib/maestro-%{version}/maestro/gui/plugins/views/desktop/*.py
@@ -216,6 +227,11 @@ done
 
 %dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/
 
+%dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/auth/
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/auth/*.py
+%{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/auth/*.pyc
+%ghost %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/auth/*.pyo
+
 %dir %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/
 %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/*.py
 %{_prefix}/lib/maestro-%{version}/maestro/daemon/plugins/services/*.pyc
@@ -271,6 +287,7 @@ fi
 %changelog
 * Mon Feb 12 2007 Patrick Hartling
 - Updated minimum version requirements for Qt and SIP
+- Updated packaging for new files to fix rpmbuild errors
 
 * Thu Dec 28 2006 Patrick Hartling
 - Update to version 0.4.0
