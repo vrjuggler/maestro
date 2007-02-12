@@ -107,7 +107,7 @@ Section "Maestro GUI" SecGUI
   File /r /x .svn maestro\stanzas\* 
 
   SetOutPath "$INSTDIR"
-  File maestro\cluster.ensem maestro\Maestro.py maestro\maestro.xcfg
+  File maestro\default.ensem maestro\Maestro.py maestro\maestro.xcfg
   File infiscape_maestro.ico ensemble.ico stanza.ico
   File /r gui_deps\*
 
