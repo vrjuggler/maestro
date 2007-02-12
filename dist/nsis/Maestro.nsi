@@ -191,6 +191,8 @@ Section -AdditionalIcons
   ${If} $DOC_INST == '1'
     CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (PDF).lnk" "$INSTDIR\doc\userguide.pdf"
     CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\User Guide (HTML).lnk" "$INSTDIR\doc\userguide\index.html"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Programmer Guide (PDF).lnk" "$INSTDIR\doc\programmerguide.pdf"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Programmer Guide (HTML).lnk" "$INSTDIR\doc\programmerguide\index.html"
   ${EndIf}
 
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
