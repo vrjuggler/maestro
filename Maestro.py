@@ -294,7 +294,7 @@ def main():
                      break
 
             print "NOTE: Using default ensemble %s" % default_ensemble
-            os.ensemble = default_ensemble
+            opts.ensemble = default_ensemble
       else:
          print "NOTE: No ensemble (default or otherwise) has been specified."
 
