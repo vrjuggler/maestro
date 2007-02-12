@@ -37,7 +37,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>February 9, 2007</pubdate>
+      <pubdate>February 13, 2007</pubdate>
    </bookinfo>
 
    <preface>
@@ -154,6 +154,10 @@
 
          <listitem>
             <para><acronym>VR</acronym>: Virtual reality</para>
+         </listitem>
+
+         <listitem>
+            <para><acronym>SSL</acronym>: Secure sockets layer</para>
          </listitem>
 
          <listitem>
@@ -525,7 +529,7 @@
          <filename>.ui</filename> files.</para>
       </section>
 
-      <section>
+      <section id="section.getting.maestro">
          <title>Getting Maestro</title>
 
          <para>Maestro is open source software, and it can be obtained
@@ -627,10 +631,47 @@ Certificate information:
          <filename>/usr/lib/maestro-X.Y.Z</filename> (where
          <quote>X.Y.Z</quote> is the Maestro version number such as 1.0.1) and
          run the script <command>mkpem</command> as root. This will generate a
-         file named <filename>server.pem</filename> that is the machine
-         certificate for that instance of the Maestro daemon. The certificate
-         can be reused with future Maestro installations, though it will
-         expire two years after the date of creation.</para>
+         file named <filename>server.pem</filename><indexterm>
+               <primary><filename>server.pem</filename></primary>
+
+               <seealso>maestrod</seealso>
+            </indexterm> that is the machine certificate for that instance of
+         the Maestro daemon. The certificate can be reused with future Maestro
+         installations, though it will expire two years after the date of
+         creation. It is recommended that the generated
+         <filename>server.pem</filename> file be placed in a directory other
+         than the Maestro installation tree so that it can survive upgrades
+         more easily. Good locations include the following:</para>
+
+         <itemizedlist>
+            <listitem>
+               <para><filename>/etc/maestro/ssl</filename> or
+               <filename>/usr/local/etc/maestro/ssl</filename> to contain
+               <filename>server.pem</filename> or the separate files (such as
+               <filename>maestro.key</filename> and
+               <filename>maestro.cert</filename>)</para>
+            </listitem>
+
+            <listitem>
+               <para><filename>/etc/ssl/private/maestro.key</filename>
+               (private key) and
+               <filename>/etc/ssl/certs/maestro.cert</filename>
+               (certificate)</para>
+            </listitem>
+
+            <listitem>
+               <para><filename>/etc/pki/tls/private/maestro.key</filename>
+               (private key) and
+               <filename>/etc/pki/tls/certs/maestro.cert</filename>
+               (certificate)</para>
+            </listitem>
+         </itemizedlist>
+
+         <para>If the file is moved out of the Maestro installation tree, then
+         the <command>maestrod</command> configuration must be updated so that
+         it can be found at run time. Refer to <xref
+         linkend="section.maestrod.config" /> for more information on
+         configuring <command>maestrod</command>.</para>
 
          <para>If the <filename>maestro-server</filename> package is being
          upgraded, the existing <filename>server.pem</filename> file should be
@@ -672,248 +713,10 @@ Certificate information:
          <quote>maestro-dee</quote>). On <productname
          class="registered">Microsoft Windows</productname>, it runs as a
          service as the SYSTEM user; on other platforms, it runs as a daemon
-         as root. In this section, we explain how to use
+         as root. In this section, we explain how to configure and run
          <command>maestrod</command>.</para>
 
-         <section id="section.running.maestrod">
-            <title>Running <command>maestrod</command></title>
-
-            <para>In general, maestrod will be running as a background
-            service/daemon that users do not need to worry about starting and
-            stopping. Nevertheless, to get a complete understanding of how
-            Maestro works, it is useful to understand how the server side is
-            managed. Below, we explain how the Maestro service is installed
-            and started on <productname class="registered">Microsoft
-            Windows</productname> and then how the Maestro daemon is installed
-            on managed on Linux.</para>
-
-            <section>
-               <title>The <productname class="registered">Microsoft
-               Windows</productname> Maestro Service</title>
-
-               <indexterm class="startofrange" id="index.maestrod.service">
-                  <primary>maestrod</primary>
-
-                  <secondary><productname
-                  class="registered">Windows</productname> service</secondary>
-               </indexterm>
-
-               <para>On <productname class="registered">Microsoft
-               Windows</productname>, the automated installer sets up the
-               Maestro service and starts it running. Hence, by using that
-               installer, there is nothing further that has to be done in
-               order to run maestrod on that platform. However, if the
-               installer was not used, the process of installing and starting
-               the service is quite simple. As a user with administrative
-               privileges, simply run the following in the directory
-               containing the Maestro distribution:</para>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary><productname
-                  class="registered">Windows</productname> service</secondary>
-
-                  <tertiary>installation</tertiary>
-               </indexterm>
-
-               <screen>maestrod.py --interactive --startup auto install
-maestrod.py start</screen>
-
-               <para>Should it become necessary to remove the service, run
-               these commands as a user with administrative privileges in the
-               directory containing the Maestro distribution:</para>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary><productname
-                  class="registered">Windows</productname> service</secondary>
-
-                  <tertiary>start</tertiary>
-               </indexterm>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary><productname
-                  class="registered">Windows</productname> service</secondary>
-
-                  <tertiary>stop</tertiary>
-               </indexterm>
-
-               <screen>maestrod.py stop
-maestrod.py remove</screen>
-
-               <para>Running <command>maestrod</command> as a service causes
-               it to be run as the SYSTEM user. In general this is how most
-               people would run <command>maestrod</command> since that user
-               has all the necessary privileges in order for the Maestro
-               software to work. Sometimes it is useful to run
-               <command>maestrod</command> in debug mode, but doing this
-               requires that the logged on user have the necessary privileges
-               to spawn processes as other users and to impersonate other
-               users. To get these privileges, follow these steps:</para>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary><productname
-                  class="registered">Windows</productname> service</secondary>
-
-                  <tertiary>user security policies</tertiary>
-               </indexterm>
-
-               <orderedlist>
-                  <listitem>
-                     <para>Open the Start Menu, click
-                     <guimenuitem>Run...</guimenuitem>, and enter
-                     <command>secpol.msc</command>.</para>
-                  </listitem>
-
-                  <listitem>
-                     <para>Find the policy item labeled <quote>Impersonate a
-                     client after authentication</quote> and double-click
-                     it.</para>
-                  </listitem>
-
-                  <listitem>
-                     <para>In the dialog box, enter the user name (with domain
-                     if necessary) for the user who will be running
-                     <command>maestrod</command> and click OK.</para>
-                  </listitem>
-
-                  <listitem>
-                     <para>Do the same for the policy item labeled
-                     <quote>Replace a process level token.</quote></para>
-                  </listitem>
-
-                  <listitem>
-                     <para>Log out and log in as the user who can now
-                     impersonate other users.</para>
-                  </listitem>
-               </orderedlist>
-
-               <para>Now, open a command shell and change to the directory
-               containing the Maestro distribution. If the Maestro service is
-               still running, enter the following:</para>
-
-               <screen>maestrod.py stop</screen>
-
-               <para>At the prompt, run the following:</para>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary><productname
-                  class="registered">Windows</productname> service</secondary>
-
-                  <tertiary>debug mode</tertiary>
-               </indexterm>
-
-               <screen>maestrod.py -debug</screen>
-
-               <indexterm class="endofrange" startref="index.maestrod.service"></indexterm>
-            </section>
-
-            <section>
-               <title>The UNIX/Linux Maestro Daemon</title>
-
-               <indexterm class="startofrange" id="index.maestrod.daemon">
-                  <primary>maestrod</primary>
-
-                  <secondary>daemon</secondary>
-               </indexterm>
-
-               <para>For non-Windows platforms, <command>maestrod</command>
-               runs as a background daemon as the root user. Currently, Linux
-               is the only non-Windows platform supported, so this part of the
-               documentation will focus on how it is installed and used on
-               Linux. In the future, this text will be expanded to cover other
-               operating systems.</para>
-
-               <para>Maestro is packaged up for deployment on Linux using RPM
-               files. For the server side, there are two packages to install:
-               maestro-base and maestro-server. The maestro-base package
-               contains the core Python code that is used by both
-               <command>maestrod</command> and the Maestro client GUI;
-               maestro-server contains all the server-side code, scripts, and
-               data files. When the maestro-server package is installed on
-               Linux, there is a shell script added to
-               <filename>/etc/init.d</filename> called
-               <filename>maestrod</filename><indexterm>
-                     <primary><filename>/etc/init.d/maestrod</filename></primary>
-
-                     <see>maestrod</see>
-                  </indexterm><indexterm>
-                     <primary>maestrod</primary>
-
-                     <secondary>daemon</secondary>
-
-                     <tertiary><filename>/etc/init.d/maestrod</filename></tertiary>
-                  </indexterm>. This script can be used by the root user to
-               start and stop the Maestro daemon as shown below:</para>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary>daemon</secondary>
-
-                  <tertiary>Linux start</tertiary>
-               </indexterm>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary>daemon</secondary>
-
-                  <tertiary>Linux stop</tertiary>
-               </indexterm>
-
-               <screen>/etc/init.d/maestrod start
-/etc/init.d/maestrod stop</screen>
-
-               <para>The actual command that is run by this shell script is
-               another shell script named <filename>maestrod</filename>
-               installed in <filename>/usr/sbin</filename><indexterm>
-                     <primary><filename>/usr/sbin/maestrod</filename></primary>
-
-                     <see>maestrod</see>
-                  </indexterm><indexterm>
-                     <primary>maestrod</primary>
-
-                     <secondary>daemon</secondary>
-
-                     <tertiary><filename>/usr/sbin/maestrod</filename></tertiary>
-                  </indexterm>. This command can be run directly in debug mode
-               as follows:</para>
-
-               <indexterm>
-                  <primary>maestrod</primary>
-
-                  <secondary>daemon</secondary>
-
-                  <tertiary>debug mode</tertiary>
-               </indexterm>
-
-               <screen>/usr/sbin/maestrod -debug</screen>
-
-               <para>Running <command>/usr/sbin/maestrod</command> without the
-               <option>-debug</option> option causes it to start up as a
-               background daemon. Running <command>maestrod</command> requires
-               root privileges in order to perform the PAM authentication of
-               remote users<indexterm>
-                     <primary>authentication</primary>
-
-                     <secondary>PAM</secondary>
-                  </indexterm>, so all of the above must be run as
-               root.</para>
-
-               <indexterm class="endofrange" startref="index.maestrod.daemon"></indexterm>
-            </section>
-         </section>
-
-         <section>
+         <section id="section.maestrod.config">
             <title>Configuring <command>maestrod</command></title>
 
             <indexterm class="startofrange" id="index.section.maestrod.config">
@@ -944,6 +747,186 @@ maestrod.py remove</screen>
             server-side components. In this section, we explain how to
             configure <command>maestrod</command> and the services that are
             included with Maestro by default.</para>
+
+            <important>
+               <para>Putting the <filename>maestrod.xcfg</filename> file in
+               the <command>maestrod</command> installation directory will
+               usually complicate upgrading. Because Maestro gets installed
+               into a versioned directory tree, the server configuration file
+               would have to be saved and moved to the new installation
+               directory when a newer Maestro version is installed. In
+               general, it is better to keep
+               <filename>maestrod.xcfg</filename> separate from the Maestro
+               installation.</para>
+            </important>
+
+            <section>
+               <title>SSL Private Key and Certificate Files</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.maestrod.config.ssl">
+                  <primary>maestrod</primary>
+
+                  <secondary>configuration</secondary>
+
+                  <tertiary>ssl</tertiary>
+               </indexterm>
+
+               <indexterm>
+                  <primary>ssl private key</primary>
+
+                  <see>maestrod</see>
+               </indexterm>
+
+               <indexterm>
+                  <primary>ssl certificate</primary>
+
+                  <see>maestrod</see>
+               </indexterm>
+
+               <para>To ensure that sensitive communication between the
+               Maestro GUI client and <command>maestrod</command> is not
+               compromised, SSL encryption is always used between the two. In
+               order for this to work, the server side must have a private key
+               and a certificate. As noted in <xref
+               linkend="section.getting.maestro" />, these can be created
+               using <command>mkpem</command>. The private key and certificate
+               can be in the same file using the PEM format (as will be the
+               case if <command>mkpem</command> is used) or in separate files.
+               In <filename>maestrod.xcfg</filename>, they will be listed
+               individually even if they are in the same file.</para>
+
+               <para>The <sgmltag>&lt;maestrod&gt;</sgmltag><indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;maestrod&gt;</sgmltag></tertiary>
+                  </indexterm> root XML element of maestrod.xcfg can have an
+               optional child element called
+               <sgmltag>&lt;ssl&gt;</sgmltag><indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;ssl&gt;</sgmltag></tertiary>
+                  </indexterm> whose children provide the paths to the private
+               key and the certificate file(s). The first child is
+               <sgmltag>&lt;cert_file&gt;</sgmltag><indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;cert_file&gt;</sgmltag></tertiary>
+                  </indexterm>, and it names the certificate file. This can be
+               an absolute path or a path relative to the
+               <command>maestrod</command> installation directory. In the same
+               way, <filename>&lt;key_file&gt;</filename><indexterm>
+                     <primary><filename>maestrod.xcfg</filename></primary>
+
+                     <secondary>elements</secondary>
+
+                     <tertiary><sgmltag>&lt;key_file&gt;</sgmltag></tertiary>
+                  </indexterm> names the private key file. If either or both
+               of these files are not named, then the default is to use
+               <filename>server.pem</filename><indexterm>
+                     <primary>server.pem</primary>
+                  </indexterm> from the <command>maestrod</command>
+               installation directory. Examples configurations are shown in
+               <xref linkend="example.maestrod.xcfg.ssl.linux" /> and <xref
+               linkend="example.maestrod.xcfg.ssl.windows" />.</para>
+
+               <important>
+                  <para>Putting the private key and certificate files in the
+                  <command>maestrod</command> installation directory will
+                  usually complicate upgrading. Because Maestro gets installed
+                  into a versioned directory tree, the SSL file(s) would have
+                  to be moved to the new installation directory when a newer
+                  version is installed. In general, it is better to keep the
+                  SSL file(s) separate from the Maestro installation.</para>
+               </important>
+
+               <example id="example.maestrod.xcfg.ssl.linux">
+                  <title><command>maestrod.xcfg</command>: Non-<productname
+                  class="registered">Windows</productname> Server-Side SSL
+                  Setup</title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
+&lt;/maestrod&gt;</programlisting>
+               </example>
+
+               <example id="example.maestrod.xcfg.ssl.windows">
+                  <title><command>maestrod.xcfg</command>: <productname
+                  class="registered">Windows</productname> Server-Side SSL
+                  Setup</title>
+
+                  <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;server.pem&lt;/cert_file&gt;
+      &lt;key_file&gt;server.pem&lt;/key_file&gt;
+   &lt;/ssl&gt;
+&lt;/maestrod&gt;</programlisting>
+               </example>
+
+               <para>Note that for the <productname
+               class="registered">Microsoft Windows</productname> case (<xref
+               linkend="example.maestrod.xcfg.ssl.windows" />), we are using
+               <filename>server.pem</filename> in the
+               <command>maestrod</command> installation directory<footnote>
+                     <para>Remember that a non-absolute path will be looked up
+                     relative to the <command>maestrod</command> installation
+                     directory.</para>
+                  </footnote> for both files. While this is default behavior,
+               it illustrates how a single PEM file can be used for both. It
+               also points out that there is no good system-wide location for
+               these files to live on <productname
+               class="registered">Windows</productname>. One possible location
+               is <filename>C:\OpenSSL\bin\PEM</filename>, but this is not a
+               very obvious or logical choice. Another is
+               <filename>%SystemRoot%\System32\drivers\etc</filename>, but
+               this may not be appropriate in general even though it would
+               allow for a directory structure similar to that used on
+               non-<productname class="registered">Windows</productname>
+               platforms.</para>
+
+               <sidebar>
+                  <para>Currently, the client is not required to accept the
+                  server-supplied certificate as being valid; the client
+                  implementation just assumes that the certificate is valid.
+                  While this makes things simpler for the end user, it
+                  introduces a security vulnerability since any node can
+                  masquerade as a member of the ensemble. A future version of
+                  Maestro may change this behavior and require that the user
+                  authorize previously unseen SSL certificates from the server
+                  nodes.</para>
+               </sidebar>
+
+               <note>
+                  <para>In a future release of Maestro, the server-side
+                  private key and certificate may be created dynamically if
+                  they do not already exist. Whether this feature is added
+                  depends on several factors. For one, if clients end up being
+                  required to accept server-side certificates as being valid
+                  (as happens with SSL certificates signed by unknown
+                  authorities in web browsers), then it would be critical to
+                  the end user experience that this process not be repeated
+                  every time the server gets restarted. This would mean being
+                  able to put the private key and certificate in a safe place
+                  on the server computer, and that would mean that the
+                  administrator would still have to make a change to
+                  <filename>maestrod.xcfg</filename> similar to what is
+                  described above.</para>
+               </note>
+
+               <indexterm class="endofrange"
+                          startref="index.section.maestrod.config.ssl"></indexterm>
+            </section>
 
             <section>
                <title><command>maestrod</command> User Authentication and
@@ -1194,6 +1177,10 @@ maestrod.py remove</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -1207,6 +1194,10 @@ maestrod.py remove</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;server.pem&lt;/cert_file&gt;
+      &lt;key_file&gt;server.pem&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       sspi_negotiate,username_password
    &lt;/authentication_plugins&gt;
@@ -1263,6 +1254,10 @@ maestrod.py remove</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -1277,6 +1272,10 @@ maestrod.py remove</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -1398,6 +1397,10 @@ maestrod.py remove</screen>
 
                   <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -1414,6 +1417,10 @@ maestrod.py remove</screen>
 
                   <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -1795,6 +1802,10 @@ setup (hd0)</screen>
 
                         <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
@@ -1810,6 +1821,10 @@ setup (hd0)</screen>
 
                         <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;server.pem&lt;/cert_file&gt;
+      &lt;key_file&gt;server.pem&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       sspi_negotiate,username_password
    &lt;/authentication_plugins&gt;
@@ -2193,6 +2208,10 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -2226,6 +2245,10 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       username_password
    &lt;/authentication_plugins&gt;
@@ -2249,6 +2272,10 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;server.pem&lt;/cert_file&gt;
+      &lt;key_file&gt;server.pem&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       sspi_negotiate,username_password
    &lt;/authentication_plugins&gt;
@@ -2288,6 +2315,10 @@ setup (hd0)</screen>
 
                      <programlisting>&lt;?xml version="1.0"?&gt;
 &lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;server.pem&lt;/cert_file&gt;
+      &lt;key_file&gt;server.pem&lt;/key_file&gt;
+   &lt;/ssl&gt;
    &lt;authentication_plugins&gt;
       sspi_negotiate,username_password
    &lt;/authentication_plugins&gt;
@@ -2372,6 +2403,244 @@ setup (hd0)</screen>
                   <indexterm class="endofrange"
                              startref="index.section.maestrod.config"></indexterm>
                </section>
+            </section>
+         </section>
+
+         <section id="section.running.maestrod">
+            <title>Running <command>maestrod</command></title>
+
+            <para>In general, maestrod will be running as a background
+            service/daemon that users do not need to worry about starting and
+            stopping. Nevertheless, to get a complete understanding of how
+            Maestro works, it is useful to understand how the server side is
+            managed. Below, we explain how the Maestro service is installed
+            and started on <productname class="registered">Microsoft
+            Windows</productname> and then how the Maestro daemon is installed
+            on managed on Linux.</para>
+
+            <section>
+               <title>The <productname class="registered">Microsoft
+               Windows</productname> Maestro Service</title>
+
+               <indexterm class="startofrange" id="index.maestrod.service">
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+               </indexterm>
+
+               <para>On <productname class="registered">Microsoft
+               Windows</productname>, the automated installer sets up the
+               Maestro service and starts it running. Hence, by using that
+               installer, there is nothing further that has to be done in
+               order to run maestrod on that platform. However, if the
+               installer was not used, the process of installing and starting
+               the service is quite simple. As a user with administrative
+               privileges, simply run the following in the directory
+               containing the Maestro distribution:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>installation</tertiary>
+               </indexterm>
+
+               <screen>maestrod.py --interactive --startup auto install
+maestrod.py start</screen>
+
+               <para>Should it become necessary to remove the service, run
+               these commands as a user with administrative privileges in the
+               directory containing the Maestro distribution:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>start</tertiary>
+               </indexterm>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>stop</tertiary>
+               </indexterm>
+
+               <screen>maestrod.py stop
+maestrod.py remove</screen>
+
+               <para>Running <command>maestrod</command> as a service causes
+               it to be run as the SYSTEM user. In general this is how most
+               people would run <command>maestrod</command> since that user
+               has all the necessary privileges in order for the Maestro
+               software to work. Sometimes it is useful to run
+               <command>maestrod</command> in debug mode, but doing this
+               requires that the logged on user have the necessary privileges
+               to spawn processes as other users and to impersonate other
+               users. To get these privileges, follow these steps:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>user security policies</tertiary>
+               </indexterm>
+
+               <orderedlist>
+                  <listitem>
+                     <para>Open the Start Menu, click
+                     <guimenuitem>Run...</guimenuitem>, and enter
+                     <command>secpol.msc</command>.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Find the policy item labeled <quote>Impersonate a
+                     client after authentication</quote> and double-click
+                     it.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>In the dialog box, enter the user name (with domain
+                     if necessary) for the user who will be running
+                     <command>maestrod</command> and click OK.</para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Do the same for the policy item labeled
+                     <quote>Replace a process level token.</quote></para>
+                  </listitem>
+
+                  <listitem>
+                     <para>Log out and log in as the user who can now
+                     impersonate other users.</para>
+                  </listitem>
+               </orderedlist>
+
+               <para>Now, open a command shell and change to the directory
+               containing the Maestro distribution. If the Maestro service is
+               still running, enter the following:</para>
+
+               <screen>maestrod.py stop</screen>
+
+               <para>At the prompt, run the following:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary><productname
+                  class="registered">Windows</productname> service</secondary>
+
+                  <tertiary>debug mode</tertiary>
+               </indexterm>
+
+               <screen>maestrod.py -debug</screen>
+
+               <indexterm class="endofrange" startref="index.maestrod.service"></indexterm>
+            </section>
+
+            <section>
+               <title>The UNIX/Linux Maestro Daemon</title>
+
+               <indexterm class="startofrange" id="index.maestrod.daemon">
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+               </indexterm>
+
+               <para>For non-Windows platforms, <command>maestrod</command>
+               runs as a background daemon as the root user. Currently, Linux
+               is the only non-Windows platform supported, so this part of the
+               documentation will focus on how it is installed and used on
+               Linux. In the future, this text will be expanded to cover other
+               operating systems.</para>
+
+               <para>Maestro is packaged up for deployment on Linux using RPM
+               files. For the server side, there are two packages to install:
+               maestro-base and maestro-server. The maestro-base package
+               contains the core Python code that is used by both
+               <command>maestrod</command> and the Maestro client GUI;
+               maestro-server contains all the server-side code, scripts, and
+               data files. When the maestro-server package is installed on
+               Linux, there is a shell script added to
+               <filename>/etc/init.d</filename> called
+               <filename>maestrod</filename><indexterm>
+                     <primary><filename>/etc/init.d/maestrod</filename></primary>
+
+                     <see>maestrod</see>
+                  </indexterm><indexterm>
+                     <primary>maestrod</primary>
+
+                     <secondary>daemon</secondary>
+
+                     <tertiary><filename>/etc/init.d/maestrod</filename></tertiary>
+                  </indexterm>. This script can be used by the root user to
+               start and stop the Maestro daemon as shown below:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+
+                  <tertiary>Linux start</tertiary>
+               </indexterm>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+
+                  <tertiary>Linux stop</tertiary>
+               </indexterm>
+
+               <screen>/etc/init.d/maestrod start
+/etc/init.d/maestrod stop</screen>
+
+               <para>The actual command that is run by this shell script is
+               another shell script named <filename>maestrod</filename>
+               installed in <filename>/usr/sbin</filename><indexterm>
+                     <primary><filename>/usr/sbin/maestrod</filename></primary>
+
+                     <see>maestrod</see>
+                  </indexterm><indexterm>
+                     <primary>maestrod</primary>
+
+                     <secondary>daemon</secondary>
+
+                     <tertiary><filename>/usr/sbin/maestrod</filename></tertiary>
+                  </indexterm>. This command can be run directly in debug mode
+               as follows:</para>
+
+               <indexterm>
+                  <primary>maestrod</primary>
+
+                  <secondary>daemon</secondary>
+
+                  <tertiary>debug mode</tertiary>
+               </indexterm>
+
+               <screen>/usr/sbin/maestrod -debug</screen>
+
+               <para>Running <command>/usr/sbin/maestrod</command> without the
+               <option>-debug</option> option causes it to start up as a
+               background daemon. Running <command>maestrod</command> requires
+               root privileges in order to perform the PAM authentication of
+               remote users<indexterm>
+                     <primary>authentication</primary>
+
+                     <secondary>PAM</secondary>
+                  </indexterm>, so all of the above must be run as
+               root.</para>
+
+               <indexterm class="endofrange" startref="index.maestrod.daemon"></indexterm>
             </section>
          </section>
       </section>
