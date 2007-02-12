@@ -769,17 +769,21 @@ Certificate information:
 
                   <secondary>configuration</secondary>
 
-                  <tertiary>ssl</tertiary>
+                  <tertiary>SSL</tertiary>
                </indexterm>
 
                <indexterm>
-                  <primary>ssl private key</primary>
+                  <primary>SSL</primary>
+
+                  <secondary>server private key location</secondary>
 
                   <see>maestrod</see>
                </indexterm>
 
                <indexterm>
-                  <primary>ssl certificate</primary>
+                  <primary>SSL</primary>
+
+                  <secondary>server certificate location</secondary>
 
                   <see>maestrod</see>
                </indexterm>
@@ -931,6 +935,17 @@ Certificate information:
             <section>
                <title><command>maestrod</command> User Authentication and
                Access Settings</title>
+
+               <indexterm class="startofrange"
+                          id="index.section.maestrod.config.auth">
+                  <primary>maestrod</primary>
+
+                  <secondary>configuration</secondary>
+
+                  <tertiary>user authentication</tertiary>
+
+                  <seealso>authentication</seealso>
+               </indexterm>
 
                <para>As a service that executes code and commands on behalf of
                users, it is very important for <command>maestrod</command> to
@@ -1208,6 +1223,15 @@ Certificate information:
                <section>
                   <title>X Server Permissions</title>
 
+                  <indexterm class="startofrange"
+                             id="index.section.maestrod.config.xserver">
+                     <primary>maestrod</primary>
+
+                     <secondary>configuration</secondary>
+
+                     <tertiary>X11 server access</tertiary>
+                  </indexterm>
+
                   <para>When <command>maestrod</command> is running on a
                   operating system that uses the X Window System, the
                   authenticated user must be allowed to open windows on the
@@ -1299,6 +1323,12 @@ Certificate information:
                      vary between operating systems. As such, it is better to
                      set this value than to rely on the default.</para>
                   </note>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.maestrod.config.xserver"></indexterm>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.maestrod.config.auth"></indexterm>
                </section>
             </section>
 
@@ -1314,14 +1344,15 @@ Certificate information:
                   <tertiary>settings</tertiary>
                </indexterm>
 
-               <indexterm class="startofrange">
+               <indexterm class="startofrange"
+                          id="index.section.maestrod.config.reboot">
                   <primary>maestrod</primary>
 
                   <secondary>configuration</secondary>
 
                   <tertiary>Reboot Service</tertiary>
 
-                  <see>services</see>
+                  <seealso>services</seealso>
                </indexterm>
 
                <indexterm>
@@ -2043,6 +2074,9 @@ setup (hd0)</screen>
                              startref="index.section.boot.loader.config.nt"></indexterm>
 
                   <indexterm class="endofrange"
+                             startref="index.section.maestrod.config.reboot"></indexterm>
+
+                  <indexterm class="endofrange"
                              startref="index.sectcion.service.reboot.settings"></indexterm>
                </section>
             </section>
@@ -2059,14 +2093,15 @@ setup (hd0)</screen>
                   <tertiary>settings</tertiary>
                </indexterm>
 
-               <indexterm class="startofrange">
+               <indexterm class="startofrange"
+                          id="index.section.maestrod.config.desktop">
                   <primary>maestrod</primary>
 
                   <secondary>configuration</secondary>
 
                   <tertiary>Desktop Service</tertiary>
 
-                  <see>services</see>
+                  <seealso>services</seealso>
                </indexterm>
 
                <para>The Desktop Service<indexterm>
@@ -2396,6 +2431,9 @@ setup (hd0)</screen>
                   <productname class="registered">Microsoft
                   Windows</productname> and the plug-in
                   <literal>gnome</literal> on other platforms.</para>
+
+                  <indexterm class="endofrange"
+                             startref="index.section.maestrod.config.desktop"></indexterm>
 
                   <indexterm class="endofrange"
                              startref="index.sectcion.service.desktop.settings"></indexterm>
