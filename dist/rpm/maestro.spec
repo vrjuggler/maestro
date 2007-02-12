@@ -306,6 +306,8 @@ fi
 * Mon Feb 12 2007 Patrick Hartling
 - Updated minimum version requirements for Qt and SIP
 - Updated packaging for new files to fix rpmbuild errors
+- Generate /etc/maestro/ssl/server.pem if it does not already exist in the
+  post-installation step for maestro-server
 
 * Thu Dec 28 2006 Patrick Hartling
 - Update to version 0.4.0
