@@ -55,6 +55,8 @@ import maestro.util
 from maestro.util import pboverssl
 from zope.interface import implements
 from twisted.internet import ssl
+from twisted.internet import reactor
+from twisted.internet import task
 
 from elementtree.ElementTree import parse
 
@@ -315,13 +317,7 @@ def RunServer(installSH=True):
 
       cluster_server = MaestroServer()
       cluster_server.loadServices()
-      from twisted.internet import reactor
-      from twisted.internet import task
 
-      #reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
-      factory = pboverssl.PBServerFactory(_AuthServerWrapper())
-
-      #reactor.listenTCP(8789, factory)
       env = maestro.core.Environment()
 
       # Fallback settings for the SSL private key and certificate if none are
@@ -360,6 +356,10 @@ def RunServer(installSH=True):
 
       logger.info("SSL private key: " + pk_path)
       logger.info("SSL certificate: " + cert_path)
+
+      #reactor.listenTCP(8789, pb.PBServerFactory(cluster_server.mEventManager))
+      factory = pboverssl.PBServerFactory(_AuthServerWrapper())
+      #reactor.listenTCP(8789, factory)
       reactor.listenSSL(8789, factory,
                         ssl.DefaultOpenSSLContextFactory(pk_path, cert_path))
 
