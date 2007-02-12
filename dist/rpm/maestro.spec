@@ -45,8 +45,8 @@ Summary: Maestro GUI client
 Group: Applications/System
 BuildArch: noarch
 Requires: maestro-base = %{version}
-Requires: qt4 >= 4.2.0
-Requires: sip >= 4.5.1
+Requires: qt4 >= 4.2.2
+Requires: sip >= 4.5.2
 Requires: PyQt4 >= 4.1.1
 
 %description gui
@@ -269,6 +269,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 12 2007 Patrick Hartling
+- Updated minimum version requirements for Qt and SIP
+
 * Thu Dec 28 2006 Patrick Hartling
 - Update to version 0.4.0
 
