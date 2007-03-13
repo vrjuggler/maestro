@@ -16,6 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+# -*- coding: utf-8 -*-
+
+# Resource object code
+#
+# Created: Tue Mar 13 14:31:04 2007
+#      by: The Resource Compiler for PyQt (Qt v4.2.2)
+#
+# WARNING! All changes made in this file will be lost!
+
 from PyQt4 import QtCore
 
 qt_resource_data = "\
