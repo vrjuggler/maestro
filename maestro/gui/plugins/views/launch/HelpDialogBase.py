@@ -16,6 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'maestro/gui/plugins/views/launch/HelpDialogBase.ui'
+#
+# Created: Tue Mar 13 14:31:05 2007
+#      by: PyQt4 UI code generator 4.1.1
+#
+# WARNING! All changes made in this file will be lost!
+
 import sys
 from PyQt4 import QtCore, QtGui
 

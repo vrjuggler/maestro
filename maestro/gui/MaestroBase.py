@@ -16,6 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'maestro/gui/MaestroBase.ui'
+#
+# Created: Tue Mar 13 14:31:04 2007
+#      by: PyQt4 UI code generator 4.1.1
+#
+# WARNING! All changes made in this file will be lost!
+
 import sys
 from PyQt4 import QtCore, QtGui
 
@@ -268,6 +277,7 @@ class Ui_MaestroBase(object):
       self.mChangeAuthAction.setText(QtGui.QApplication.translate("MaestroBase", "Change &Authentication", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveServerLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Server Logs...", None, QtGui.QApplication.UnicodeUTF8))
 
+import MaestroResource_rc
 
 
 if __name__ == "__main__":
