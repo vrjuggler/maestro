@@ -20,9 +20,6 @@
 
 # Form implementation generated from reading ui file 'playpen/cluster_options/ClusterEditorBase.ui'
 #
-# Created: Wed Apr 18 09:53:42 2007
-#      by: PyQt4 UI code generator 4.2
-#
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui

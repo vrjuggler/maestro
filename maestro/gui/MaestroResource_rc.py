@@ -20,9 +20,6 @@
 
 # Resource object code
 #
-# Created: Wed Apr 18 09:53:39 2007
-#      by: The Resource Compiler for PyQt (Qt v4.2.3)
-#
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore
