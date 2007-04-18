@@ -143,7 +143,6 @@ class Ui_LoginDialogBase(object):
       self.mLoginBtn.setText(QtGui.QApplication.translate("LoginDialogBase", "&Login", None, QtGui.QApplication.UnicodeUTF8))
       self.mCancelBtn.setText(QtGui.QApplication.translate("LoginDialogBase", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
 
-import MaestroResource_rc
 
 
 if __name__ == "__main__":

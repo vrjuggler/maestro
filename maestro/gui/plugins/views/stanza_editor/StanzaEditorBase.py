@@ -248,8 +248,6 @@ class Ui_StanzaEditorBase(object):
       self.mNewApplicationAction.setText(QtGui.QApplication.translate("StanzaEditorBase", "New Application", None, QtGui.QApplication.UnicodeUTF8))
       self.mNewGlobalOptionAction.setText(QtGui.QApplication.translate("StanzaEditorBase", "New Global Option", None, QtGui.QApplication.UnicodeUTF8))
 
-import StanzaEditorResource_rc
-import MaestroResource_rc
 
 
 if __name__ == "__main__":

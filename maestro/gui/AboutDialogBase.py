@@ -105,7 +105,6 @@ class Ui_AboutDialogBase(object):
       "Maestro was developed by Infiscape Corporation http://www.infiscape.com", None, QtGui.QApplication.UnicodeUTF8))
       self.pushButton.setText(QtGui.QApplication.translate("AboutDialogBase", "OK", None, QtGui.QApplication.UnicodeUTF8))
 
-import MaestroResource_rc
 
 
 if __name__ == "__main__":

@@ -273,7 +273,6 @@ class Ui_MaestroBase(object):
       self.mChangeAuthAction.setText(QtGui.QApplication.translate("MaestroBase", "Change &Authentication", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveServerLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Server Logs...", None, QtGui.QApplication.UnicodeUTF8))
 
-import MaestroResource_rc
 
 
 if __name__ == "__main__":
