@@ -61,6 +61,30 @@ def stripCreationInfo(source):
 
       f.close()
 
+def stripResourceImport(source):
+   if os.path.exists(source):
+      res_import_re = re.compile(r'^import (.*_rc)$')
+
+      f = open(source, 'r')
+      lines = f.readlines()
+      f.close()
+
+      f = open(source, 'w+')
+
+      line_count = len(lines)
+      i = 0
+      while i < line_count:
+         l = lines[i]
+
+         # Skip the import line.
+         match = res_import_re.search(l)
+         if match is None:
+            f.write(l)
+
+         i = i + 1
+
+      f.close()
+
 def addLicense(source):
    if os.path.exists(source):
       f = open(source, 'r')
@@ -83,6 +107,7 @@ def runPyuic(target = None, source = None, env = None):
 
    if status == 0:
       stripCreationInfo(py_file)
+      stripResourceImport(py_file)
       addLicense(py_file)
 
    return status
