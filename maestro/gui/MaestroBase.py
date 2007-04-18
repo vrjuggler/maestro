@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'maestro/gui/MaestroBase.ui'
 #
-# Created: Tue Mar 13 14:31:04 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:39 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_MaestroBase(object):
@@ -52,7 +51,7 @@ class Ui_MaestroBase(object):
       sizePolicy.setHeightForWidth(self.mViewTitleLbl.sizePolicy().hasHeightForWidth())
       self.mViewTitleLbl.setSizePolicy(sizePolicy)
 
-      font = QtGui.QFont(self.mViewTitleLbl.font())
+      font = QtGui.QFont()
       font.setFamily("Sans Serif")
       font.setPointSize(12)
       font.setWeight(50)
@@ -281,6 +280,7 @@ import MaestroResource_rc
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    MaestroBase = QtGui.QMainWindow()
    ui = Ui_MaestroBase()

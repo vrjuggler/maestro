@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'maestro/gui/plugins/views/clone/SIViewBase.ui'
 #
-# Created: Tue Mar 13 14:31:04 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:40 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_SIViewBase(object):
@@ -176,6 +175,7 @@ class Ui_SIViewBase(object):
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    SIViewBase = QtGui.QWidget()
    ui = Ui_SIViewBase()

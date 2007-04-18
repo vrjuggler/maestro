@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'maestro/gui/plugins/views/stanza_editor/StanzaEditorBase.ui'
 #
-# Created: Tue Mar 13 14:31:05 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:41 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_StanzaEditorBase(object):
@@ -200,7 +199,7 @@ class Ui_StanzaEditorBase(object):
 
       self.mClassFilterComma = QtGui.QLabel(self.mToolGroupBox)
 
-      font = QtGui.QFont(self.mClassFilterComma.font())
+      font = QtGui.QFont()
       font.setPointSize(20)
       self.mClassFilterComma.setFont(font)
       self.mClassFilterComma.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
@@ -253,9 +252,11 @@ class Ui_StanzaEditorBase(object):
       self.mNewGlobalOptionAction.setText(QtGui.QApplication.translate("StanzaEditorBase", "New Global Option", None, QtGui.QApplication.UnicodeUTF8))
 
 import StanzaEditorResource_rc
+import MaestroResource_rc
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    StanzaEditorBase = QtGui.QWidget()
    ui = Ui_StanzaEditorBase()

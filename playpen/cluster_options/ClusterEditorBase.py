@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'playpen/cluster_options/ClusterEditorBase.ui'
 #
-# Created: Tue Mar 13 14:31:06 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:42 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_ClusterEditor(object):
@@ -100,6 +99,7 @@ class Ui_ClusterEditor(object):
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    ClusterEditor = QtGui.QWidget()
    ui = Ui_ClusterEditor()

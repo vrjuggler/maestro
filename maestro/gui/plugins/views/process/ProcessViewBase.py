@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'maestro/gui/plugins/views/process/ProcessViewBase.ui'
 #
-# Created: Tue Mar 13 14:31:05 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:40 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_ProcessViewBase(object):
@@ -72,6 +71,7 @@ class Ui_ProcessViewBase(object):
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    ProcessViewBase = QtGui.QWidget()
    ui = Ui_ProcessViewBase()

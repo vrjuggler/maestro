@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'maestro/gui/LoginDialogBase.ui'
 #
-# Created: Tue Mar 13 14:31:04 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:39 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_LoginDialogBase(object):
@@ -58,7 +57,7 @@ class Ui_LoginDialogBase(object):
       sizePolicy.setHeightForWidth(self.mLoginLbl.sizePolicy().hasHeightForWidth())
       self.mLoginLbl.setSizePolicy(sizePolicy)
 
-      font = QtGui.QFont(self.mLoginLbl.font())
+      font = QtGui.QFont()
       font.setFamily("Sans Serif")
       font.setPointSize(22)
       font.setWeight(75)
@@ -151,6 +150,7 @@ import MaestroResource_rc
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    LoginDialogBase = QtGui.QDialog()
    ui = Ui_LoginDialogBase()

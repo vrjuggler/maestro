@@ -20,12 +20,11 @@
 
 # Form implementation generated from reading ui file 'maestro/gui/AboutDialogBase.ui'
 #
-# Created: Tue Mar 13 14:31:04 2007
-#      by: PyQt4 UI code generator 4.1.1
+# Created: Wed Apr 18 09:53:39 2007
+#      by: PyQt4 UI code generator 4.2
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
 from PyQt4 import QtCore, QtGui
 
 class Ui_AboutDialogBase(object):
@@ -57,7 +56,7 @@ class Ui_AboutDialogBase(object):
       sizePolicy.setHeightForWidth(self.mTitleLbl.sizePolicy().hasHeightForWidth())
       self.mTitleLbl.setSizePolicy(sizePolicy)
 
-      font = QtGui.QFont(self.mTitleLbl.font())
+      font = QtGui.QFont()
       font.setPointSize(12)
       self.mTitleLbl.setFont(font)
       self.mTitleLbl.setAlignment(QtCore.Qt.AlignCenter)
@@ -113,6 +112,7 @@ import MaestroResource_rc
 
 
 if __name__ == "__main__":
+   import sys
    app = QtGui.QApplication(sys.argv)
    AboutDialogBase = QtGui.QDialog()
    ui = Ui_AboutDialogBase()
