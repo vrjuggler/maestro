@@ -27,6 +27,40 @@ license = \
 
 """
 
+# This helper function removes the "Created:/by:" comments from the generated
+# Python source. These comments are included by the PyQt code generation
+# tools, and they pose a problem for SCons. The first time that someone checks
+# out the source and runs SCons, the PyQt code generation tools will be run
+# because SCons does know that doing so is unnecessary. The result is that the
+# generated code will be the same *except* for the "Created:/by:" comments.
+# By stripping out those comments, we can be sure that regenerating the code
+# unnecessarily will not cause unwanted modifications to occur to checked in
+# source.
+def stripCreationInfo(source):
+   if os.path.exists(source):
+      creation_re = re.compile(r'^# Created: (.+)$')
+
+      f = open(source, 'r')
+      lines = f.readlines()
+      f.close()
+
+      f = open(source, 'w+')
+
+      line_count = len(lines)
+      i = 0
+      while i < line_count:
+         l = lines[i]
+         match = creation_re.search(l)
+         if match is not None:
+            # Skip the "Created:" line, the "by:" line, and the blank line
+            # after.
+            i = i + 3
+         else:
+            f.write(l)
+            i = i + 1
+
+      f.close()
+
 def addLicense(source):
    if os.path.exists(source):
       f = open(source, 'r')
@@ -48,6 +82,7 @@ def runPyuic(target = None, source = None, env = None):
    status = Execute(pyuic_build_str)
 
    if status == 0:
+      stripCreationInfo(py_file)
       addLicense(py_file)
 
    return status
@@ -64,6 +99,7 @@ def runPyrcc(target = None, source = None, env = None):
    status = Execute(pyrcc_build_str)
 
    if status == 0:
+      stripCreationInfo(py_file)
       addLicense(py_file)
 
    return status
