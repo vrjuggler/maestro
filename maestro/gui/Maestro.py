@@ -27,7 +27,7 @@ from maestro.util import plugin
 from maestro.util import xplatform
 
 import MaestroBase
-import MaestroResource
+import MaestroResource_rc
 import AboutDialogBase
 
 import maestro

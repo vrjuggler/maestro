@@ -33,7 +33,7 @@ import math
 import maestro.core
 import maestro.gui.stanza
 from maestro.util import xplatform
-import maestro.gui.MaestroResource
+import maestro.gui.MaestroResource_rc
 
 import stanzaitems
 from stanzaitems import *
