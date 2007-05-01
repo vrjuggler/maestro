@@ -186,7 +186,7 @@ if os.name == 'nt':
          const.LOGFILE = os.path.join(os.environ['SystemRoot'], 'system32',
                                       'maestrod.log')
          self.mFileLog = logging.handlers.RotatingFileHandler(const.LOGFILE,
-                                                              'a', 50000, 10)
+                                                              'a', 5000000, 10)
 
       def SvcStop(self):
          sys.stdout = self.savedOut
