@@ -45,7 +45,7 @@ class LoginHandler(QtCore.QObject):
                              self._loginAccepted)
       self.mLoginDlg.connect(self.mLoginDlg, QtCore.SIGNAL("rejected()"),
                              self._loginRejected)
-      self.mLoginDlg.show()
+      self.mLoginDlg.exec_()
 
    def _loginAccepted(self):
       self.mSuccessCallback(self.mLoginDlg.getLoginInfo())
