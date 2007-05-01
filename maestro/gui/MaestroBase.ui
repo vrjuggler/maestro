@@ -209,18 +209,18 @@
     <property name="title" >
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuNew" >
+     <property name="title" >
+      <string>New</string>
+     </property>
+     <addaction name="mCreateNewEnsembleAction" />
+    </widget>
     <widget class="QMenu" name="menuOpen" >
      <property name="title" >
       <string>Open</string>
      </property>
      <addaction name="mLoadEnsembleAction" />
      <addaction name="mLoadStanzaAction" />
-    </widget>
-    <widget class="QMenu" name="menuNew" >
-     <property name="title" >
-      <string>New</string>
-     </property>
-     <addaction name="mCreateNewEnsembleAction" />
     </widget>
     <addaction name="separator" />
     <addaction name="menuNew" />
@@ -285,7 +285,7 @@
     <iconset resource="MaestroResource.qrc" >:/Maestro/images/maestro_icon.png</iconset>
    </property>
    <property name="text" >
-    <string>Ensemble</string>
+    <string>Open Ensemble...</string>
    </property>
   </action>
   <action name="mAboutAction" >
@@ -304,7 +304,7 @@
     <iconset resource="MaestroResource.qrc" >:/Maestro/images/stanza.png</iconset>
    </property>
    <property name="text" >
-    <string>Stanza</string>
+    <string>Open Stanza...</string>
    </property>
   </action>
   <action name="mSaveEnsembleAction" >
