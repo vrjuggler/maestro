@@ -320,10 +320,10 @@ class LaunchService(maestro.core.IServicePlugin):
          self.mLogger.debug("replaced: " + str(replaced))
          replaced = 0
          for k, v in envMap.iteritems():
-            self.mLogger.debug("Trying to match: " + v)
+            self.mLogger.debug("Checking for environment variables in '%s'" % str(v))
             match = self.sEnvVarRegexBraces.search(v)
             if match is not None:
-               self.mLogger.debug("Trying to replace env vars in " + str(v))
+               self.mLogger.debug("Replacing environment variables in '%s'" % str(v))
                (v, r) = self.expandEnv(v, envMap, usrEnvMap, k)
                envMap[k] = v
                replaced = replaced + r

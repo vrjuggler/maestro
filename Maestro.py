@@ -316,11 +316,12 @@ def main():
       element_tree = None
       if opts.ensemble is not None:
          try:
-            print "Trying to load file: ", opts.ensemble
+            print "Loading ensemble '%s' ..." % opts.ensemble
             # Parse XML file.
             element_tree = ET.ElementTree(file=opts.ensemble)
             m.setEnsemble(ensemble.Ensemble(element_tree,
                                             fileName = opts.ensemble))
+            print "Ensemble loaded."
          except IOError, ex:
             element_tree = None
             QtGui.QMessageBox.critical(None, "Error",
