@@ -2,4 +2,9 @@
 <ensemble>
    <cluster_node class="" hostname="node0" name="Node 0"/>
    <cluster_node class="" hostname="node1" name="Node 1"/>
+   <cluster_node class="" hostname="node2" name="Node 2"/>
+   <cluster_node class="" hostname="node3" name="Node 3"/>
+   <cluster_node class="" hostname="node4" name="Node 4"/>
+   <cluster_node class="" hostname="node5" name="Node 5"/>
+   <cluster_node class="" hostname="node6" name="Node 6"/>
 </ensemble>
