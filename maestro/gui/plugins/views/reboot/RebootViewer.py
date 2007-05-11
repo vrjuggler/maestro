@@ -100,11 +100,16 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       self.mNodeTableView.setEditTriggers(triggers)
       self.mNodeTableView.setTabKeyNavigation(True)
 
-
       # Setup a custom context menu callback.
       self.mNodeTableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-      self.connect(self.mNodeTableView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-         self.onNodeContextMenu)
+      self.connect(self.mNodeTableView,
+                   QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                   self.onNodeContextMenu)
+
+      self.connect(self.mSelectAllBtn, QtCore.SIGNAL("clicked()"),
+                   self.onSelectAll)
+      self.connect(self.mSelectNoneBtn, QtCore.SIGNAL("clicked()"),
+                   self.onClearSelection)
 
       # Create action to change the selected node's boot target to Windows.
       self.mSetTargetToWindowsAction = QtGui.QAction(const.mOsIcons[const.WINXP], self.tr("Windows"), self)
@@ -125,31 +130,31 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       shutdown_icon = QtGui.QIcon(":/Maestro/images/exit.png")
 
       # Create action to reboot the selected node.
-      self.mRebootNodeAction = QtGui.QAction(reboot_icon,
-                                             self.tr("Reboot Node"), self)
+      self.mRebootNodeAction = QtGui.QAction(reboot_icon, self.tr("Reboot"),
+                                             self)
       self.connect(self.mRebootNodeAction, QtCore.SIGNAL("triggered()"),
                    self.onRebootNode)
 
       # Create action to reboot the entire cluster.
-      self.mRebootClusterAction = QtGui.QAction(reboot_icon,
-                                                self.tr("Reboot Entire Cluster"),
-                                                self)
-      self.connect(self.mRebootClusterAction, QtCore.SIGNAL("triggered()"),
-                   self.onRebootCluster)
+      self.mRebootSelectedAction = \
+         QtGui.QAction(reboot_icon, self.tr("Reboot Selected Nodes"), self)
+      self.mRebootSelectedAction.setEnabled(False)
+      self.connect(self.mRebootSelectedAction, QtCore.SIGNAL("triggered()"),
+                   self.onRebootSelected)
 
       # Create action to shut down the selected node.
       self.mShutdownNodeAction = QtGui.QAction(shutdown_icon,
-                                               self.tr("Power Off Node"),
-                                               self)
+                                               self.tr("Power Off"), self)
       self.connect(self.mShutdownNodeAction, QtCore.SIGNAL("triggered()"),
                    self.onShutdownNode)
 
       # Create action to shut down the entire cluster.
-      self.mShutdownClusterAction = QtGui.QAction(shutdown_icon,
-                                                  self.tr("Power Off Entire Cluster"),
-                                                  self)
-      self.connect(self.mShutdownClusterAction, QtCore.SIGNAL("triggered()"),
-                   self.onShutdownCluster)
+      self.mShutdownSelectedAction = \
+         QtGui.QAction(shutdown_icon, self.tr("Power Off Selected Nodes"),
+                       self)
+      self.mShutdownSelectedAction.setEnabled(False)
+      self.connect(self.mShutdownSelectedAction, QtCore.SIGNAL("triggered()"),
+                   self.onShutdownSelected)
 
       # Create action to refresh targets for all nodes.
       self.mRefreshAction = QtGui.QAction(self.tr("Refresh"), self)
@@ -159,8 +164,8 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       # Set the default action for the target selection buttons.
       self.mSelectWinBtn.setDefaultAction(self.mSetAllTargetsToWindowsAction)
       self.mSelectLinuxBtn.setDefaultAction(self.mSetAllTargetsToLinuxAction)
-      self.mRebootBtn.setDefaultAction(self.mRebootClusterAction)
-      self.mShutdownBtn.setDefaultAction(self.mShutdownClusterAction)
+      self.mRebootBtn.setDefaultAction(self.mRebootSelectedAction)
+      self.mShutdownBtn.setDefaultAction(self.mShutdownSelectedAction)
       self.mRefreshBtn.setDefaultAction(self.mRefreshAction)
 
       # Create ItemDelegate to allow editing boot target with a combo box.
@@ -188,26 +193,38 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
          self.connect(self.mRebootModel, QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
             self.onRebootModelChanged)
 
-
-      # Set the model.
-      self.mNodeTableView.setModel(self.mRebootModel)
+      self.__setNodeTableModel(self.mRebootModel)
 
       # Tell the last column in the table to take up remaining space.
       #self.mNodeTableView.horizontalHeader().setStretchLastSection(True)
-      
-      # Tell the both columns to split the availible space.
-      self.mNodeTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
-      self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
    def onReportTargets(self, nodeId, targets, defaultTargetIndex, timeout):
       """ Slot that is called when a node reports its possible boot targets. """
 
       ri = RebootInfo(targets, defaultTargetIndex, timeout)
       self.mRebootInfoMap[nodeId] = ri
-      self.mNodeTableView.setModel(self.mRebootModel)
+      self.__setNodeTableModel(self.mRebootModel)
+
+   def __setNodeTableModel(self, model):
+      selection_signal = QtCore.SIGNAL("selectionChanged(QItemSelection,QItemSelection)")
+
+      old_model = self.mNodeTableView.selectionModel()
+      if old_model is not None:
+         self.disconnect(old_model, selection_signal, self.onSelectionChanged)
+
+      # Set the model.
+      self.mNodeTableView.setModel(model)
+
+      self.connect(self.mNodeTableView.selectionModel(), selection_signal,
+                   self.onSelectionChanged)
+
       # Tell the both columns to split the availible space.
-      self.mNodeTableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
-      self.mNodeTableView.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+      self.mNodeTableView.horizontalHeader().setResizeMode(
+         0, QtGui.QHeaderView.Stretch
+      )
+      self.mNodeTableView.horizontalHeader().setResizeMode(
+         1, QtGui.QHeaderView.Stretch
+      )
 
    def onNodeContextMenu(self, point):
       """ Create a pop-up menu listing all valid operations for selection. """
@@ -247,20 +264,47 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       # Only allow rebooting a node if one is selected. 
       if node is not None:
          menu.addAction(self.mRebootNodeAction)
-      menu.addAction(self.mRebootClusterAction)
-      menu.addAction(self.mShutdownNodeAction)
-      menu.addAction(self.mShutdownClusterAction)
+         menu.addAction(self.mShutdownNodeAction)
 
       # Show the context menu.
       menu.exec_(self.mNodeTableView.mapToGlobal(point))
 
+   def onSelectionChanged(self, selected, deselected):
+      selected_rows = self.mNodeTableView.selectionModel().selectedRows()
+
+      if len(selected_rows) > 0:
+         self.mSelectNoneBtn.setEnabled(True)
+         self.mRebootSelectedAction.setEnabled(True)
+         self.mShutdownSelectedAction.setEnabled(True)
+      else:
+         self.mSelectNoneBtn.setEnabled(False)
+         self.mRebootSelectedAction.setEnabled(False)
+         self.mShutdownSelectedAction.setEnabled(False)
+
+   def onSelectAll(self):
+      self.mNodeTableView.selectAll()
+
+   def onClearSelection(self):
+      self.mNodeTableView.clearSelection()
+
    def __getSelectedNode(self):
-      """ Helper method to get the currently selected node. """
+      """ Helper method to get the currently selected ClusterNode object. """
       index = self.mNodeTableView.currentIndex()
       if not index.isValid():
          return None
       node = index.model().data(index, QtCore.Qt.UserRole)
       return node
+
+   def __getSelectedNodes(self):
+      """ Helper method to get the currently selected ClusterNode objects. """
+      nodes = []
+
+      selected_rows = self.mNodeTableView.selectionModel().selectedRows()
+      for r in selected_rows:
+         if r.isValid():
+            nodes.append(r.model().data(r, QtCore.Qt.UserRole))
+
+      return nodes
 
    def onRefresh(self):
       """ Slot that reboots the entire cluster. """
@@ -271,49 +315,79 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       """ Slot that reboots the selected node. """
       node = self.__getSelectedNode()
       if node is not None:
-         reply = \
-            QtGui.QMessageBox.question(self, self.tr("Reboot Node"),
-                                       self.tr("Reboot %s?" % node.getName()),
-                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                                       QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
-         if reply == QtGui.QMessageBox.Yes:
-            env = maestro.gui.Environment()
-            env.mEventManager.emit(node.getId(), "reboot.reboot")
+         # Do not try to reboot a node that has no ID.
+         if node.getId() is not None:
+            reply = \
+               QtGui.QMessageBox.question(
+                  self, self.tr("Reboot Node"),
+                  self.tr("Reboot %s?" % node.getName()),
+                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                  QtGui.QMessageBox.No | QtGui.QMessageBox.Escape
+               )
 
-   def onRebootCluster(self):
+            if reply == QtGui.QMessageBox.Yes:
+               env = maestro.gui.Environment()
+               env.mEventManager.emit(node.getId(), "reboot.reboot")
+         else:
+            QtGui.QMessageBox.warning(
+               self, self.tr("Reboot Failed"),
+               self.tr("Node %s is not available to reboot!\nCheck the host name setting for this node." % node.getName())
+            )
+
+   def onRebootSelected(self):
       """ Slot that reboots the entire cluster. """
       reply = \
-         QtGui.QMessageBox.question(self, self.tr("Reboot Cluster"),
-                                    self.tr("Reboot the entire cluster?"),
-                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                                    QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         QtGui.QMessageBox.question(
+            self, self.tr("Reboot Nodes"),
+            self.tr("Reboot the selected node(s)?"),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape
+         )
+
       if reply == QtGui.QMessageBox.Yes:
          env = maestro.gui.Environment()
-         env.mEventManager.emit("*", "reboot.reboot")
+         for n in self.__getSelectedNodes():
+            if n.getId() is not None:
+               env.mEventManager.emit(n.getId(), "reboot.reboot")
 
    def onShutdownNode(self):
       """ Slot that shuts down the selected node. """
       node = self.__getSelectedNode()
       if node is not None:
-         reply = \
-            QtGui.QMessageBox.question(self, self.tr("Reboot Node"),
-                                       self.tr("Power off %s?" % node.getName()),
-                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                                       QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
-         if reply == QtGui.QMessageBox.Yes:
-            env = maestro.gui.Environment()
-            env.mEventManager.emit(node.getId(), "reboot.shutdown")
+         # Do not try to shut down a node that has no ID.
+         if node.getId() is not None:
+            reply = \
+               QtGui.QMessageBox.question(
+                  self, self.tr("Power Off Node"),
+                  self.tr("Power off %s?" % node.getName()),
+                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+                  QtGui.QMessageBox.No | QtGui.QMessageBox.Escape
+               )
 
-   def onShutdownCluster(self):
-      """ Slot that shuts down the entire cluster. """
+            if reply == QtGui.QMessageBox.Yes:
+               env = maestro.gui.Environment()
+               env.mEventManager.emit(node.getId(), "reboot.shutdown")
+         else:
+            QtGui.QMessageBox.warning(
+               self, self.tr("Power Off Failed"),
+               self.tr("Node %s is not available to shut down!\nCheck the host name setting for this node." % node.getName())
+            )
+
+   def onShutdownSelected(self):
+      """ Slot that shuts down the selected nodes of the cluster. """
       reply = \
-         QtGui.QMessageBox.question(self, self.tr("Power Off Cluster"),
-                                    self.tr("Power off the entire cluster?"),
-                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                                    QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+         QtGui.QMessageBox.question(
+            self, self.tr("Power Off Nodes"),
+            self.tr("Power off the selected node(s)?"),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
+            QtGui.QMessageBox.No | QtGui.QMessageBox.Escape
+         )
+
       if reply == QtGui.QMessageBox.Yes:
          env = maestro.gui.Environment()
-         env.mEventManager.emit("*", "reboot.shutdown")
+         for n in self.__getSelectedNodes():
+            if n.getId() is not None:
+               env.mEventManager.emit(n.getId(), "reboot.shutdown")
 
    def onSetTargetToLinux(self):
       """ Slot that makes the selected node reboot to Linux. """
@@ -429,7 +503,15 @@ class RebootDelegate(QtGui.QItemDelegate):
             (title, os, target_index) = new_target
             # Tell the selected node to change its default target.
             env = maestro.gui.Environment()
-            env.mEventManager.emit(node.getId(), "reboot.set_default_target", target_index, title)
+            if node.getId() is not None:
+               env.mEventManager.emit(node.getId(),
+                                      "reboot.set_default_target",
+                                      target_index, title)
+            else:
+               QtGui.QMessageBox.warning(
+                  self.parent(), self.tr("Timeout Change Failed"),
+                  self.tr("Changing the reboot target for %s failed!\nCheck the host name setting for this node." % node.getName())
+               )
       elif 2 == index.column():
          # Get the node that we are editing.
          node = index.model().data(index, QtCore.Qt.UserRole)
@@ -439,10 +521,16 @@ class RebootDelegate(QtGui.QItemDelegate):
          if not timeout == reboot_info.mTimeout:
             # Tell the selected node to change its default target.
             env = maestro.gui.Environment()
-            env.mEventManager.emit(node.getId(), "reboot.set_timeout", timeout)
+            if node.getId() is not None:
+               env.mEventManager.emit(node.getId(), "reboot.set_timeout",
+                                      timeout)
+            else:
+               QtGui.QMessageBox.warning(
+                  self.parent(), self.tr("Timeout Change Failed"),
+                  self.tr("Changing the reboot timeout for %s failed!\nCheck the host name setting for this node." % node.getName())
+               )
       else:
          QtGui.QItemDelegate.setModelData(self, widget, model, index)
-
 
    def updateEditorGeometry(self, editor, option, index):
       editor.setGeometry(option.rect)

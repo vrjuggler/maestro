@@ -74,16 +74,33 @@ class Ui_RebootViewerBase(object):
       self.mRefreshBtn.setObjectName("mRefreshBtn")
       self.hboxlayout1.addWidget(self.mRefreshBtn)
 
-      spacerItem1 = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
+      spacerItem1 = QtGui.QSpacerItem(191,33,QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Minimum)
       self.hboxlayout1.addItem(spacerItem1)
 
+      self.mSelectAllBtn = QtGui.QPushButton(RebootViewerBase)
+      self.mSelectAllBtn.setObjectName("mSelectAllBtn")
+      self.hboxlayout1.addWidget(self.mSelectAllBtn)
+
+      self.mSelectNoneBtn = QtGui.QPushButton(RebootViewerBase)
+      self.mSelectNoneBtn.setEnabled(False)
+      self.mSelectNoneBtn.setObjectName("mSelectNoneBtn")
+      self.hboxlayout1.addWidget(self.mSelectNoneBtn)
+
+      self.line = QtGui.QFrame(RebootViewerBase)
+      self.line.setFrameShape(QtGui.QFrame.VLine)
+      self.line.setFrameShadow(QtGui.QFrame.Sunken)
+      self.line.setObjectName("line")
+      self.hboxlayout1.addWidget(self.line)
+
       self.mRebootBtn = QtGui.QToolButton(RebootViewerBase)
+      self.mRebootBtn.setEnabled(False)
       self.mRebootBtn.setIcon(QtGui.QIcon(":/Maestro/images/reboot.png"))
       self.mRebootBtn.setIconSize(QtCore.QSize(24,24))
       self.mRebootBtn.setObjectName("mRebootBtn")
       self.hboxlayout1.addWidget(self.mRebootBtn)
 
       self.mShutdownBtn = QtGui.QToolButton(RebootViewerBase)
+      self.mShutdownBtn.setEnabled(False)
       self.mShutdownBtn.setIcon(QtGui.QIcon(":/Maestro/images/exit.png"))
       self.mShutdownBtn.setIconSize(QtCore.QSize(24,24))
       self.mShutdownBtn.setObjectName("mShutdownBtn")
@@ -101,9 +118,25 @@ class Ui_RebootViewerBase(object):
       self.mSelectWinBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mSelectLinuxBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
       self.mRefreshBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
-      self.mRebootBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Reboot Entire Cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSelectAllBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+      "p, li { white-space: pre-wrap; }\n"
+      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Select all the nodes in the cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSelectAllBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "Select All", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSelectNoneBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+      "p, li { white-space: pre-wrap; }\n"
+      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">De-select all the nodes in the cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSelectNoneBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "Select None", None, QtGui.QApplication.UnicodeUTF8))
+      self.mRebootBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+      "p, li { white-space: pre-wrap; }\n"
+      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Reboot selected nodes</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mRebootBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
-      self.mShutdownBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /></head><body style=\" white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\"><p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Power Off Entire Cluster</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mShutdownBtn.setToolTip(QtGui.QApplication.translate("RebootViewerBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+      "p, li { white-space: pre-wrap; }\n"
+      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Power off selected nodes</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
       self.mShutdownBtn.setText(QtGui.QApplication.translate("RebootViewerBase", "...", None, QtGui.QApplication.UnicodeUTF8))
 
 
