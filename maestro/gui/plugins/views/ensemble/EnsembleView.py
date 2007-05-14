@@ -74,10 +74,21 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
       self.mEnsemble = ensemble
 
       # Connect the new ensemble.
-      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"), self.onNodeChanged)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("connectionLost"),
+                   self.onConnectionLost)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("nodeChanged"),
+                   self.onNodeChanged)
 
       # Register to receive a signal when a node reports its settings.
-      env().mEventManager.connect("*", "ensemble.report_settings", self.onReportSettings)
+      env().mEventManager.connect("*", "ensemble.report_settings",
+                                  self.onReportSettings)
+
+   def onConnectionLost(self, node):
+      id = node.getIpAddress()
+      if id is not None and self.mNodeSettings.has_key(id):
+         del self.mNodeSettings[id]
+         if self.mSelectedNode is node:
+            self.reset()
 
    def onNodeChanged(self, node):
       if self.mSelectedNode == node:
