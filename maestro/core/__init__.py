@@ -33,28 +33,58 @@ class _const:
 
 const = _const()
 
-const.ERROR = 0
-const.UNKNOWN = 0
-const.LINUX = 1
-const.WIN = 2
-const.WINXP = 3
-const.MACOS = 4
-const.MACOSX = 5
-const.HPUX = 6
-const.AIX = 7
-const.SOLARIS = 8
-const.FREEBSD = 9
+const.ERROR           = 0
+const.NOT_CONNECTED   = 1
+const.ADDRESS_UNKNOWN = 2
+const.CONNECTING      = 3
+const.CONNECT_FAILED  = 4
+const.AUTH_FAILED     = 5
+const.UNKNOWN_OS      = 6
+const.LINUX           = 7
+const.WIN             = 8
+const.WINXP           = 9
+const.MACOS           = 10
+const.MACOSX          = 11
+const.HPUX            = 12
+const.AIX             = 13
+const.SOLARIS         = 14
+const.FREEBSD         = 15
+const.OPENBSD         = 16
+const.NETBSD          = 17
+const.DRAGONFLYBSD    = 18
+
+const.ERROR_STATES = [const.ERROR, const.NOT_CONNECTED, const.ADDRESS_UNKNOWN,
+                      const.CONNECTING, const.CONNECT_FAILED,
+                      const.AUTH_FAILED]
+
+const.PLATFORMS = [const.UNKNOWN_OS, const.LINUX, const.WIN, const.WINXP,
+                   const.MACOS, const.MACOSX, const.HPUX, const.AIX,
+                   const.SOLARIS, const.FREEBSD, const.OPENBSD, const.NETBSD,
+                   const.DRAGONFLYBSD]
 
 const.OsNameMap = {
-   const.ERROR   : ['Error'],
-   const.LINUX   : ['Linux', 'UNIX'],
-   const.WIN     : ['Windows'],
-   const.WINXP   : ['Windows XP'],
-   const.MACOS   : ['MacOS', 'UNIX'],
-   const.MACOSX  : ['Mac OS X', 'UNIX'],
-   const.HPUX    : ['HP-UX', 'UNIX'],
-   const.AIX     : ['AIX', 'UNIX'],
-   const.SOLARIS : ['Solaris', 'UNIX']
+   # Error states
+   const.ERROR           : ['Error'],
+   const.NOT_CONNECTED   : ['Not connected'],
+   const.ADDRESS_UNKNOWN : ['Address lookup failed'],
+   const.CONNECTING      : ['Connection in progress'],
+   const.CONNECT_FAILED  : ['Cannot connect to server'],
+   const.AUTH_FAILED     : ['Failed to authenticate'],
+
+   # Operating systems
+   const.UNKNOWN_OS      : ['Unknown', 'Unknown'],
+   const.LINUX           : ['Linux', 'UNIX'],
+   const.WIN             : ['Windows'],
+   const.WINXP           : ['Windows XP'],
+   const.MACOS           : ['MacOS', 'Mac'],
+   const.MACOSX          : ['Mac OS X', 'UNIX'],
+   const.HPUX            : ['HP-UX', 'UNIX'],
+   const.AIX             : ['AIX', 'UNIX'],
+   const.SOLARIS         : ['Solaris', 'UNIX'],
+   const.FREEBSD         : ['FreeBSD', 'UNIX'],
+   const.OPENBSD         : ['OpenBSD', 'UNIX'],
+   const.NETBSD          : ['NetBSD', 'UNIX'],
+   const.DRAGONFLYBSD    : ['DragonflyBSD', 'UNIX'],
 }
 
 # GUI user levels.

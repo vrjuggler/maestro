@@ -45,6 +45,18 @@ import logging, socket, time
 # Only load the OS icons once.
 const.mOsIcons = {}
 const.mOsIcons[const.ERROR] = QtGui.QIcon(":/Maestro/images/error2.png")
+const.mOsIcons[const.NOT_CONNECTED] = \
+   QtGui.QIcon(":/Maestro/images/not_connected.png")
+const.mOsIcons[const.ADDRESS_UNKNOWN] = \
+   QtGui.QIcon(":/Maestro/images/address_unknown.png")
+const.mOsIcons[const.CONNECTING] = \
+   QtGui.QIcon(":/Maestro/images/connecting.png")
+const.mOsIcons[const.CONNECT_FAILED] = \
+   QtGui.QIcon(":/Maestro/images/connect_failed.png")
+const.mOsIcons[const.AUTH_FAILED] = \
+   QtGui.QIcon(":/Maestro/images/access_denied.png")
+const.mOsIcons[const.UNKNOWN_OS] = \
+   QtGui.QIcon(":/Maestro/images/question.png")
 const.mOsIcons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
 const.mOsIcons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
 const.mOsIcons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")

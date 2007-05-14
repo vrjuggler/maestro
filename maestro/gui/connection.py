@@ -134,39 +134,43 @@ class ConnectionManager:
       # instance.
       self.mLoginData = {}
 
-      # List of nodes for which a connection is currently in progress.
+      # List of ensemble.ClusterNode objects for which a connection is
+      # currently in progress.
       self.mConnectingNodes = []
 
-   def connectToNode(self, nodeId):
-      """ Connect to the given nodes event manager.
-          nodeId - IP/hostname of the node to connect to
+   def connectToNode(self, node):
+      """ Connect to the given node using the Event Manager.
+          node - The node to connect to
       """
-      if nodeId in self.mConnectingNodes:
-         self.mLogger.info("Skipping reconnect attempt for %s while connection in progress" % nodeId)
-         return None
-      self.mConnectingNodes.append(nodeId)
+      node_id = node.getIpAddress()
 
-      # nodeId must be a string.
-      if not isinstance(nodeId, types.StringType):
-         raise TypeError("connectToNode(): nodeId of non-string type passed")
+      if node in self.mConnectingNodes:
+         self.mLogger.info("Skipping reconnect attempt for %s while connection in progress" % node_id)
+         return None
+
+      self.mConnectingNodes.append(node)
+
+      # node_id must be a string.
+      if not isinstance(node_id, types.StringType):
+         raise TypeError("connectToNode(): node_id of non-string type passed")
       
       # Make sure we are not already connected to node.
-      if self.mEventMgr.hasProxy(nodeId):
+      if self.mEventMgr.hasProxy(node_id):
          raise AttributeError("connectToNode(): already connected to %s" % \
-                                 nodeId)
+                                 node_id)
 
       from twisted.internet import reactor, ssl
       #factory = pb.PBClientFactory()
-      #reactor.connectTCP(nodeId, 8789, factory)
+      #reactor.connectTCP(node_id, 8789, factory)
       factory = pboverssl.PBClientFactory()
-      reactor.connectSSL(nodeId, 8789, factory, ssl.ClientContextFactory())
+      reactor.connectSSL(node_id, 8789, factory, ssl.ClientContextFactory())
       d = factory.getRootObject()
       d = \
          d.addCallback(
-            lambda obj, n = nodeId, f = factory: self.handleGetAuthServer(n, f,
-                                                                          obj)
+            lambda obj, n = node, f = factory: self.handleGetAuthServer(n, f,
+                                                                        obj)
          )
-      d.addErrback(lambda err, n = nodeId: self._catchFailure(n, err))
+      d.addErrback(lambda err, n = node: self._catchFailure(n, err))
 
       return d
 
@@ -176,60 +180,70 @@ class ConnectionManager:
       '''
       self.mLoginData = {}
 
-   def _catchFailure(self, nodeId, failure):
-      self.mConnectingNodes.remove(nodeId)
+   def _catchFailure(self, node, failure):
+      self.mConnectingNodes.remove(node)
       self.mLogger.error(str(failure.value))
 #      self.mLogger.error(failure.getErrorMessage())
+      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+                               "connectionFailed", node)
       return failure
 
-   def handleGetAuthServer(self, nodeId, factory, serverAuth):
+   def handleGetAuthServer(self, node, factory, serverAuth):
       client = AuthorizationClient(serverAuth, self.mLoginData)
       d = client.login()
       d.addCallback(
-         lambda avatar, n = nodeId, f = factory: self.completeConnect(n, f,
-                                                                      avatar)
+         lambda avatar, n = node, f = factory: self.completeConnect(n, f,
+                                                                    avatar)
       )
+      d.addErrback(lambda err, n = node: self.authFailed(n, err))
 
-   def connectionLost(self, nodeId):
-      self.mLogger.debug("connectionLost(%s)" % (nodeId))
-      self.mEventMgr.unregisterProxy(nodeId)
+   def connectionLost(self, node):
+      node_id = node.getIpAddress()
+      self.mLogger.debug("connectionLost(%s)" % str(node))
+      self.mEventMgr.unregisterProxy(node_id)
       self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
-                               "connectionLost", nodeId)
+                               "connectionLost", node)
 
-   def completeConnect(self, nodeId, factory, avatar):
-      if not self.mEventMgr.hasProxy(nodeId):
+   def completeConnect(self, node, factory, avatar):
+      node_id = node.getIpAddress()
+      if not self.mEventMgr.hasProxy(node_id):
          self.mLogger.debug("completeConnect(%s, %s, %s)" % \
-                               (str(nodeId), str(factory), str(avatar)))
+                               (str(node), str(factory), str(avatar)))
 
          avatar.callRemote("registerCallback", self.mIpAddress,
                            self.mEventMgr)
          avatar.callRemote("setNodeId", self.mIpAddress)
 
          factory._broker.notifyOnDisconnect(
-            lambda n = nodeId: self.connectionLost(n)
+            lambda n = node: self.connectionLost(n)
          )
-         self.mEventMgr.registerProxy(nodeId, avatar)
+         self.mEventMgr.registerProxy(node_id, avatar)
          self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
-                                  "connectionMade", nodeId)
+                                  "connectionMade", node)
          self.mLogger.debug("Proxy registered")
 
          # As soon as we connect to a new node, we want to know what OS it is
          # running.
-         self.mEventMgr.emit(nodeId, "ensemble.get_os")
-         self.mEventMgr.emit(nodeId, "ensemble.get_settings")
-         self.mEventMgr.emit(nodeId, "reboot.get_info")
+         self.mEventMgr.emit(node_id, "ensemble.get_os")
+         self.mEventMgr.emit(node_id, "ensemble.get_settings")
+         self.mEventMgr.emit(node_id, "reboot.get_info")
 
-      self.mConnectingNodes.remove(nodeId)
+      self.mConnectingNodes.remove(node)
 
       return avatar
 
-   def disconnectFromNode(self, nodeId):
+   def authFailed(self, node, err):
+      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+                               "authenticationFailed", node, err)
+
+   def disconnectFromNode(self, node):
       """ Disconnect a given nodes remote object.
       """
-      if not isinstance(nodeId, types.StringType):
-         raise TypeError("ConnectionManager.disconnectFromNode(): nodeId of non-string type passed")
+      node_id = node.getIpAddress()
+      if not isinstance(node, types.StringType):
+         raise TypeError("ConnectionManager.disconnectFromNode(): node ID of non-string type passed")
 
-      if self.mEventMgr.hasProxy(nodeId):
-         self.mLogger.debug("disconnectFromNode(%s)" % (nodeId))
-         self.mEventMgr.getProxy(nodeId).broker.transport.loseConnection()
-         self.mEventMgr.unregisterProxy(nodeId)
+      if self.mEventMgr.hasProxy(node_id):
+         self.mLogger.debug("disconnectFromNode(%s)" % node_id)
+         self.mEventMgr.getProxy(node_id).broker.transport.loseConnection()
+         self.mEventMgr.unregisterProxy(node_id)

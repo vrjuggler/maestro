@@ -1,12 +1,16 @@
 <RCC>
     <qresource prefix="/Maestro" >
         <file>images/MacOSX.png</file>
+        <file>images/access_denied.png</file>
+        <file>images/address_unknown.png</file>
         <file>images/archive.png</file>
         <file>images/cloneView.png</file>
+        <file>images/connect_failed.png</file>
         <file>images/connected.png</file>
         <file>images/connecting.png</file>
         <file>images/construction.png</file>
         <file>images/copy.png</file>
+        <file>images/critical.png</file>
         <file>images/cut.png</file>
         <file>images/desktop.png</file>
         <file>images/down32.png</file>
@@ -28,6 +32,7 @@
         <file>images/open.png</file>
         <file>images/paste.png</file>
         <file>images/processView.png</file>
+        <file>images/question.png</file>
         <file>images/reboot.png</file>
         <file>images/rebootView.png</file>
         <file>images/reload.png</file>
@@ -38,6 +43,7 @@
         <file>images/stanza_global_new.png</file>
         <file>images/stanza_new.png</file>
         <file>images/up32.png</file>
+        <file>images/warning.png</file>
         <file>images/win_xp.png</file>
     </qresource>
 </RCC>

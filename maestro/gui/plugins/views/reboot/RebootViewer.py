@@ -648,8 +648,8 @@ class RebootModel(QtCore.QAbstractTableModel):
 
       if role == QtCore.Qt.DecorationRole:
          if index.column() == 0:
-            if const.mOsIcons.has_key(node.mPlatform):
-               return QtCore.QVariant(const.mOsIcons[node.mPlatform])
+            if const.mOsIcons.has_key(node.getState()):
+               return QtCore.QVariant(const.mOsIcons[node.getState()])
             else:
                return QtCore.QVariant()
          if index.column() == 1:

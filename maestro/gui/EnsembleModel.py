@@ -78,8 +78,8 @@ class EnsembleModel(QtCore.QAbstractListModel):
       if cluster_node is not None:
          # Return an icon representing the operating system.
          if role == QtCore.Qt.DecorationRole:
-            if const.mOsIcons.has_key(cluster_node.mPlatform):
-               return QtCore.QVariant(const.mOsIcons[cluster_node.mPlatform])
+            if const.mOsIcons.has_key(cluster_node.getState()):
+               return QtCore.QVariant(const.mOsIcons[cluster_node.getState()])
             else:
                return QtCore.QVariant()
          # Return the name of the node.
