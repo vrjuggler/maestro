@@ -30,7 +30,7 @@ start() {
 	
 	[ -n "${pid:-}" ] && success $"prog startup" && echo && return 0
 
-    daemon $prog
+    daemon $prog -log
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
