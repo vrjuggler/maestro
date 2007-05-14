@@ -100,9 +100,13 @@ def addLicense(source):
       f.close()
 
 def runPyuic(target = None, source = None, env = None):
+   pyuic = WhereIs('pyuic4')
+   if pyuic is None:
+      raise Exception("pyuic4 not found in PATH!")
+
    ui_file = str(source[0])
    py_file = str(target[0])
-   pyuic_build_str = 'pyuic4 -x -i3 %s -o %s' % (ui_file, py_file)
+   pyuic_build_str = "%s -x -i3 %s -o %s" % (pyuic, ui_file, py_file)
    status = Execute(pyuic_build_str)
 
    if status == 0:
@@ -118,9 +122,13 @@ def registerPyuicBuilder(env):
    env.Append(BUILDERS = {'Pyuic' : pyuic_builder})
 
 def runPyrcc(target = None, source = None, env = None):
+   pyrcc = WhereIs('pyrcc4')
+   if pyrcc is None:
+      raise Exception('pyrcc4 not found in PATH!')
+
    qrc_file = str(source[0])
    py_file  = str(target[0])
-   pyrcc_build_str = 'pyrcc4 -compress 5 %s -o %s' % (qrc_file, py_file)
+   pyrcc_build_str = "%s -compress 5 %s -o %s" % (pyrcc, qrc_file, py_file)
    status = Execute(pyrcc_build_str)
 
    if status == 0:
