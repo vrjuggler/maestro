@@ -5,7 +5,7 @@
    <bookinfo>
       <title>Maestro User's Guide</title>
 
-      <releaseinfo>Version 0.4</releaseinfo>
+      <releaseinfo>Version 0.5</releaseinfo>
 
       <authorgroup>
          <corpauthor><ulink url="http://www.infiscape.com/">Infiscape
@@ -18,7 +18,7 @@
          <holder>Infiscape Corporation</holder>
       </copyright>
 
-      <address><street>2901 South Loop Drive, Suite 3400</street><city>Ames</city><state>Iowa</state><postcode>50010-8646</postcode><phone>+1.515.296.3787</phone><email>contact@infiscape.com</email><otheraddr>Website: <ulink
+      <address><street>2625 North Loop Drive, Suite 2100</street><city>Ames</city><state>Iowa</state><postcode>50010-8649</postcode><phone>+1.515.296.3787</phone><email>contact@infiscape.com</email><otheraddr>Website: <ulink
                url="http://www.infiscape.com/">http://www.infiscape.com/</ulink></otheraddr></address>
 
       <legalnotice>
@@ -37,7 +37,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>February 12, 2007</pubdate>
+      <pubdate>May 14, 2007</pubdate>
    </bookinfo>
 
    <preface>
