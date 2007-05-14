@@ -8,7 +8,7 @@
    </clone_view>
    <systemimager>
       <image>
-         mtic_rhel4
+         example_rhel4
       </image>
       <golden_client>
          <prep_cmd_args>
@@ -20,7 +20,7 @@
       </golden_client>
       <image_server>
          <name>
-            telperion
+            imageserver.example.com
          </name>
          <cmd_args>
             <arg flag="--quiet"/>
