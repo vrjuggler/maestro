@@ -41,7 +41,7 @@ import layout
 import elementtree.ElementTree as ET
 import xml.dom.minidom
 
-import StanzaEditorResource
+import StanzaEditorResource_rc
 import ChooseStanzaDialog
 
 class StanzaEditorPlugin(maestro.core.IViewPlugin):

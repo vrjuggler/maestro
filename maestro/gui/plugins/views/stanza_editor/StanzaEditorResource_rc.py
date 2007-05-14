@@ -16,6 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+# -*- coding: utf-8 -*-
+
+# Resource object code
+#
+# WARNING! All changes made in this file will be lost!
+
 from PyQt4 import QtCore
 
 qt_resource_data = "\
