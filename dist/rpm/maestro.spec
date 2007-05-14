@@ -4,7 +4,7 @@
 
 # Spec file for Maestro.
 %define name    maestro
-%define version 0.4.0
+%define version 0.5.0
 %define release 1
 
 # Change to 0 to disable building documentation.
@@ -303,6 +303,9 @@ fi
 %endif
 
 %changelog
+* Mon May 14 2007 Patrick Hartling
+- Update to version 0.5.0
+
 * Mon Feb 12 2007 Patrick Hartling
 - Updated minimum version requirements for Qt and SIP
 - Updated packaging for new files to fix rpmbuild errors

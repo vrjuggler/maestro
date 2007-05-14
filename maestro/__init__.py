@@ -19,7 +19,7 @@
 # package file
 
 __build__   = 1
-__version__ = '0.4.0.%d' % __build__
+__version__ = '0.5.0.%d' % __build__
 __date__    = ' '.join('$Date$'.split()[1:3])
 __author__  = 'Infiscape Corporation'
 __doc__     = '''This is Maestro.  For information regarding Maestro see:
