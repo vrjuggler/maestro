@@ -67,10 +67,12 @@ class Ensemble(QtCore.QObject):
       # Register to receive signals from all nodes about their current os.
       env = maestro.gui.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
-      env.mEventManager.connect(LOCAL, "connectionMade", self.onConnection)
+      env.mEventManager.connect(LOCAL, "connectionMade", self.onConnectionMade)
       env.mEventManager.connect(LOCAL, "connectionFailed",
                                 self.onConnectionFailure)
       env.mEventManager.connect(LOCAL, "connectionLost", self.onLostConnection)
+      env.mEventManager.connect(LOCAL, "authenticationSucceeded",
+                                self.onAuthSuccess)
       env.mEventManager.connect(LOCAL, "authenticationFailed",
                                 self.onAuthFailure)
 
@@ -113,9 +115,15 @@ class Ensemble(QtCore.QObject):
       env = maestro.gui.Environment()
       env.mEventManager.disconnect("*", "ensemble.report_os", self.onReportOs)
       env.mEventManager.disconnect(LOCAL, "connectionMade",
-                                   self.onConnection)
+                                   self.onConnectionMade)
+      env.mEventManager.disconnect(LOCAL, "connectionFailed",
+                                   self.onConnectionFailure)
       env.mEventManager.disconnect(LOCAL, "connectionLost",
                                    self.onLostConnection)
+      env.mEventManager.disconnect(LOCAL, "authenticationSucceeded",
+                                   self.onAuthSuccess)
+      env.mEventManager.disconnect(LOCAL, "authenticationFailed",
+                                   self.onAuthFailure)
 
    def __refreshIpMap(self):
       self.mIpToNodeMap.clear()
@@ -192,9 +200,7 @@ class Ensemble(QtCore.QObject):
                # this becomes false.
                self.mConnectInProgress[ip_address] = True
                node.setState(const.CONNECTING)
-               deferred = env.mConnectionMgr.connectToNode(node)
-               if deferred is not None:
-                  deferred.addErrback(self.onConnectError, node)
+               env.mConnectionMgr.connectToNode(node)
          except Exception, ex:
             msg = "WARNING: Could not connect to %s:\n%s" % \
                      (node.getHostname(), ex)
@@ -209,41 +215,50 @@ class Ensemble(QtCore.QObject):
              not env.mEventManager.isConnected(nodeId) and \
              not nodeId in self.mDisallowedNodes
 
-   def onConnection(self, result, node):
+   def onConnectionMade(self, result, node):
       self.__refreshIpMap()
 
-      # Tell the new node to report its OS.
-      node.mState = const.UNKNOWN_OS
       node_id = node.getIpAddress()
       self.mLogger.info("We are now connected to %s" % node_id)
       self.emit(QtCore.SIGNAL("connectionMade"), node)
-      self.emit(QtCore.SIGNAL("nodeChanged"), node)
+
+      return result
+
+   def onAuthSuccess(self, result, node):
+      self.__refreshIpMap()
+
+      node_id = node.getIpAddress()
+      assert self.mConnectInProgress[node_id]
 
       # Connection to node_id has completed (and succeeded).
       self.mConnectInProgress[node_id] = False
+
+      self.mLogger.info("Authentication with %s succeeded" % node_id)
+
+      # Tell the new node to report its OS.
+      # XXX: This state change for node should be somewhere else.
+      node.setState(const.UNKNOWN_OS)
+      self.emit(QtCore.SIGNAL("authenticationSucceeded"), node)
+
       return result
 
-   def onConnectError(self, failure, node):
-      # XXX: As of version 0.5.0 where onConnectionFailure() was added, this
-      # method is bsaically redundant. The two could probably be merged into
-      # one.
-      reason = str(failure.value)
-      node_id = node.getIpAddress()
-      self.mLogger.error("Failed to connect to %s: %s" % (node_id, reason))
-
-      # Connection to nodeId has completed (and failed).
-      self.mConnectInProgress[node_id] = False
-
-      node.setState(const.CONNECT_FAILED)
-
-   def onConnectionFailure(self, msgFrom, node):
+   def onConnectionFailure(self, msgFrom, node, failure):
       """ Slot that is called when a connection attempt to a node fails.
 
           @param msgFrom Source of signal, in this case always '*'.
           @param node    The node to which connection failed.
+          @param failure The failure object.
       """
       self.__refreshIpMap()
+
       if node is not None:
+         node_id = node.getIpAddress()
+         self.mLogger.error("Failed to connect to %s: %s" % \
+                               (node_id, str(failure.value)))
+
+         # Connection to nodeId has completed (and failed).
+         self.mConnectInProgress[node_id] = False
+
          node.mState = const.CONNECT_FAILED
          self.emit(QtCore.SIGNAL("connectionFailed"), node)
          self.emit(QtCore.SIGNAL("nodeChanged"), node)
@@ -262,6 +277,14 @@ class Ensemble(QtCore.QObject):
 
    def onAuthFailure(self, msgFrom, node, err):
       if node is not None:
+         node_id = node.getIpAddress()
+         assert self.mConnectInProgress[node_id]
+
+         # Connection to node_id has completed (and failed).
+         self.mConnectInProgress[node_id] = False
+
+         self.mLogger.info("Authentication with %s failed" % node_id)
+
          node.mState = const.AUTH_FAILED
          self.emit(QtCore.SIGNAL("authenticationFailed"), node)
          self.emit(QtCore.SIGNAL("nodeChanged"), node)

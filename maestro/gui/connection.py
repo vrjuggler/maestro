@@ -185,10 +185,14 @@ class ConnectionManager:
       self.mLogger.error(str(failure.value))
 #      self.mLogger.error(failure.getErrorMessage())
       self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
-                               "connectionFailed", node)
+                               "connectionFailed", node, failure)
       return failure
 
    def handleGetAuthServer(self, node, factory, serverAuth):
+      self.mLogger.debug("Beginning authentication with %s" % \
+                            node.getIpAddress())
+      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+                               "connectionMade", node)
       client = AuthorizationClient(serverAuth, self.mLoginData)
       d = client.login()
       d.addCallback(
@@ -205,6 +209,10 @@ class ConnectionManager:
                                "connectionLost", node)
 
    def completeConnect(self, node, factory, avatar):
+      '''
+      Completes the connection process to the given node. This is invoked
+      when authentication with the server succeeds.
+      '''
       node_id = node.getIpAddress()
       if not self.mEventMgr.hasProxy(node_id):
          self.mLogger.debug("completeConnect(%s, %s, %s)" % \
@@ -219,7 +227,7 @@ class ConnectionManager:
          )
          self.mEventMgr.registerProxy(node_id, avatar)
          self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
-                                  "connectionMade", node)
+                                  "authenticationSucceeded", node)
          self.mLogger.debug("Proxy registered")
 
          # As soon as we connect to a new node, we want to know what OS it is
@@ -233,6 +241,7 @@ class ConnectionManager:
       return avatar
 
    def authFailed(self, node, err):
+      self.mConnectingNodes.remove(node)
       self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
                                "authenticationFailed", node, err)
 

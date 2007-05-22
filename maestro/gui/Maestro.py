@@ -585,8 +585,9 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def setEnsemble(self, ensemble):
       if self.mEnsemble is not None:
-         self.disconnect(self.mEnsemble, QtCore.SIGNAL("connectionMade"),
-                         self.onConnectionMade)
+         self.disconnect(self.mEnsemble,
+                         QtCore.SIGNAL("authenticationSucceeded"),
+                         self.onAuthSuccess)
          self.disconnect(self.mEnsemble, QtCore.SIGNAL("connectionLost"),
                          self.onConnectionLost)
          self.disconnect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"),
@@ -600,8 +601,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
          self.mEnsemble.disconnectFromEventManager()
 
       self.mEnsemble = ensemble
-      self.connect(self.mEnsemble, QtCore.SIGNAL("connectionMade"),
-                   self.onConnectionMade)
+      self.connect(self.mEnsemble, QtCore.SIGNAL("authenticationSucceeded"),
+                   self.onAuthSuccess)
       self.connect(self.mEnsemble, QtCore.SIGNAL("connectionLost"),
                    self.onConnectionLost)
       self.connect(self.mEnsemble, QtCore.SIGNAL("ensembleChanged"),
@@ -643,7 +644,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
          del self.mActiveViewPlugins[pluginTypeName]
 
-   def onConnectionMade(self, node):
+   def onAuthSuccess(self, node):
       assert node not in self.mConnectedNodes
       self.mConnectedNodes.append(node)
       self.mArchiveServerLogsAction.setEnabled(True)
