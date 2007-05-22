@@ -249,7 +249,7 @@ class ConnectionManager:
       """ Disconnect a given nodes remote object.
       """
       node_id = node.getIpAddress()
-      if not isinstance(node, types.StringType):
+      if not isinstance(node_id, types.StringType):
          raise TypeError("ConnectionManager.disconnectFromNode(): node ID of non-string type passed")
 
       if self.mEventMgr.hasProxy(node_id):
