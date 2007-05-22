@@ -847,6 +847,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def onChangeAuthentication(self):
       env = maestro.gui.Environment()
+      self.mEnsemble.clearConnectionState()
       env.mEventManager.closeAllConnections()
       env.mConnectionMgr.clearCredentials()
 

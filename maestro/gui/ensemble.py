@@ -76,6 +76,10 @@ class Ensemble(QtCore.QObject):
       env.mEventManager.connect(LOCAL, "authenticationFailed",
                                 self.onAuthFailure)
 
+   def clearConnectionState(self):
+      self.mDisallowedNodes   = []
+      self.mConnectInProgress = {}
+
    def save(self, filename=None):
       if filename is None:
          filename = self.mFilename
@@ -282,6 +286,7 @@ class Ensemble(QtCore.QObject):
 
          # Connection to node_id has completed (and failed).
          self.mConnectInProgress[node_id] = False
+         self.mDisallowedNodes.append(node_id)
 
          self.mLogger.info("Authentication with %s failed" % node_id)
 
