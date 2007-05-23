@@ -67,6 +67,8 @@ class Ensemble(QtCore.QObject):
       # Register to receive signals from all nodes about their current os.
       env = maestro.gui.Environment()
       env.mEventManager.connect("*", "ensemble.report_os", self.onReportOs)
+      env.mEventManager.connect(LOCAL, "connectionStarted",
+                                self.onConnectionStarted)
       env.mEventManager.connect(LOCAL, "connectionMade", self.onConnectionMade)
       env.mEventManager.connect(LOCAL, "connectionFailed",
                                 self.onConnectionFailure)
@@ -118,6 +120,8 @@ class Ensemble(QtCore.QObject):
       # Unregister to receive signals from all nodes about their current os.
       env = maestro.gui.Environment()
       env.mEventManager.disconnect("*", "ensemble.report_os", self.onReportOs)
+      env.mEventManager.disconnect(LOCAL, "connectionStarted",
+                                   self.onConnectionStarted)
       env.mEventManager.disconnect(LOCAL, "connectionMade",
                                    self.onConnectionMade)
       env.mEventManager.disconnect(LOCAL, "connectionFailed",
@@ -199,26 +203,36 @@ class Ensemble(QtCore.QObject):
 
             # If node is available for a connection attempt, go ahead and try
             # to connect.
-            if ip_address is not None and self._canAttemptConnection(ip_address):
+            if ip_address is not None and self._canAttemptConnection(node):
                # Connection is now in progress. Do not reattempt again until
                # this becomes false.
                self.mLogger.info("Connecting to %s" % ip_address)
-               self.mConnectInProgress[ip_address] = True
-               node.setState(const.CONNECTING)
                env.mConnectionMgr.connectToNode(node)
          except Exception, ex:
             msg = "WARNING: Could not connect to %s:\n%s" % \
                      (node.getHostname(), ex)
             QtGui.QMessageBox.warning(None, "Connection Failure", msg)
 
-   def _canAttemptConnection(self, nodeId):
-      if not self.mConnectInProgress.has_key(nodeId):
-         self.mConnectInProgress[nodeId] = False
+   def _canAttemptConnection(self, node):
+      node_id = node.getIpAddress()
+      assert node_id is not None
+
+      if not self.mConnectInProgress.has_key(node_id):
+         self.mConnectInProgress[node_id] = False
 
       env = maestro.gui.Environment()
-      return not self.mConnectInProgress[nodeId] and \
-             not env.mEventManager.isConnected(nodeId) and \
-             not nodeId in self.mDisallowedNodes
+      return not self.mConnectInProgress[node_id] and \
+             not env.mEventManager.isConnected(node_id) and \
+             not node_id in self.mDisallowedNodes
+
+   def onConnectionStarted(self, result, node):
+      self.__refreshIpMap()
+
+      self.mConnectInProgress[node.getIpAddress()] = True
+      node.setState(const.CONNECTING)
+      self.emit(QtCore.SIGNAL("connectionStarted"), node)
+
+      return result
 
    def onConnectionMade(self, result, node):
       self.__refreshIpMap()
@@ -481,6 +495,7 @@ class ClusterNode(QtCore.QObject):
       self.lookupIpAddress()
 
       if self.mIpAddress is not None:
+         self.setState(const.CONNECTING)
          env.mConnectionMgr.connectToNode(self)
 
       # Allow signal emission again now that we are done updating the state

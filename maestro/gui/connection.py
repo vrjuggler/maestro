@@ -164,6 +164,12 @@ class ConnectionManager:
       #reactor.connectTCP(node_id, 8789, factory)
       factory = pboverssl.PBClientFactory()
       reactor.connectSSL(node_id, 8789, factory, ssl.ClientContextFactory())
+
+      # Let everyone who is interested know that we have started the
+      # connection process to the given node.
+      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+                               "connectionStarted", node)
+
       d = factory.getRootObject()
       d = \
          d.addCallback(
