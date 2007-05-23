@@ -202,6 +202,7 @@ class Ensemble(QtCore.QObject):
             if ip_address is not None and self._canAttemptConnection(ip_address):
                # Connection is now in progress. Do not reattempt again until
                # this becomes false.
+               self.mLogger.info("Connecting to %s" % ip_address)
                self.mConnectInProgress[ip_address] = True
                node.setState(const.CONNECTING)
                env.mConnectionMgr.connectToNode(node)
@@ -224,6 +225,7 @@ class Ensemble(QtCore.QObject):
 
       node_id = node.getIpAddress()
       self.mLogger.info("We are now connected to %s" % node_id)
+      node.setState(const.AUTHENTICATING)
       self.emit(QtCore.SIGNAL("connectionMade"), node)
 
       return result
@@ -500,8 +502,11 @@ class ClusterNode(QtCore.QObject):
    def getState(self):
       return self.mState
 
-   def getPlatformName(self):
+   def getStateDesc(self):
       return const.OsNameMap[self.mState][0]
+
+   def getPlatformName(self):
+      return self.getStateDesc()
 
    def getPlatformNames(self):
       return const.OsNameMap[self.mState]

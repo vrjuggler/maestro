@@ -53,6 +53,8 @@ const.mOsIcons[const.CONNECTING] = \
    QtGui.QIcon(":/Maestro/images/connecting.png")
 const.mOsIcons[const.CONNECT_FAILED] = \
    QtGui.QIcon(":/Maestro/images/connect_failed.png")
+const.mOsIcons[const.AUTHENTICATING] = \
+   QtGui.QIcon(":/Maestro/images/authenticating.png")
 const.mOsIcons[const.AUTH_FAILED] = \
    QtGui.QIcon(":/Maestro/images/access_denied.png")
 const.mOsIcons[const.UNKNOWN_OS] = \
