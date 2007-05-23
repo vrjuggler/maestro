@@ -34,7 +34,7 @@ import maestro
 import maestro.core
 const = maestro.core.const
 import ensemble
-LOCAL = maestro.core.EventManager.EventManager.LOCAL
+LOCAL = maestro.core.event.EventManager.LOCAL
 
 import elementtree.ElementTree as ET
 

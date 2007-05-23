@@ -16,8 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import types
 import os, sys, os.path, traceback, types, weakref, time
+import socket
 import logging
+
+from twisted.spread import pb, banana
+from twisted.cred import credentials
+import maestro
+from maestro.util import pboverssl
 
 class EventManagerBase(object):
    """ Class to capture and handle event processing in the system.
@@ -31,7 +38,7 @@ class EventManagerBase(object):
       # the callable is held using a weak reference
       self.mConnections = {}
       self.mTimerHandler = TimerHandler()
-      self.mLogger = logging.getLogger('core.EventManagerBase')
+      self.mLogger = logging.getLogger('core.event.EventManagerBase')
 
    def update(self):
       """ Update method.  Called once per frame. """
@@ -259,5 +266,112 @@ class TimerHandler(object):
       # Clean up null keys
       for k in null_keys:
          del self.mTimerMap[k]
+
+class EventManager(pb.Root, EventManagerBase):
+   """ Handles sending messages to remote objects.
+   """
+   LOCAL = "<LOCAL>"
+   def __init__(self):
+      """ Initialize the event dispatcher. """
+      EventManagerBase.__init__(self)
+      self.mProxies = {}
+      self.mLogger = logging.getLogger('core.event.EventManager')
+
+   def closeAllConnections(self):
+      for (ip, proxy) in self.mProxies.iteritems():
+         remote_addr = proxy.broker.transport.getHost()
+         self.mLogger.info("Closing connection to: %s" % str(remote_addr))
+         proxy.broker.transport.loseConnection()
+      self.mProxies = {}
+
+   def remote_registerCallback(self, nodeId, obj):
+      """ Forward request to register for callback signals. """
+      self.mLogger.debug("Register remote object: " + str(obj))
+      self.registerProxy(nodeId, obj)
+
+   def remote_emit(self, nodeId, sigName, args, **kwArgs):
+      """ Forward incoming signals to event manager. """
+      self.localEmit(nodeId, sigName, *args, **kwArgs)
+
+   def hasProxy(self, nodeId):
+      return self.mProxies.has_key(nodeId)
+
+   def getProxy(self, nodeId):
+      return self.mProxies[nodeId]
+
+   def registerProxy(self, nodeId, obj):
+      """ Register object to recieve callback events for the given node.
+      """
+      if self.mProxies.has_key(nodeId):
+         raise AttributeError("EventManager.registerProxy: already connected to [%s]" % (nodeId))
+
+      self.mProxies[nodeId] = obj
+
+   def unregisterProxy(self, nodeId):
+      """ Register object to recieve callback events for the given node.
+      """
+      if self.mProxies.has_key(nodeId):
+         del self.mProxies[nodeId]
+
+   def emit(self, nodeId, sigName, *args, **kwArgs):
+      """
+      Emit the named signal on the given node.
+      If there are no registered slots, just do nothing.
       
-   
+      Keyword parameters:
+         debug: Enable or disable debug output. If not specified, the default
+                value is True.
+      """
+      print_debug = kwArgs.get('debug', True) == True
+
+      if not isinstance(nodeId, types.StringType):
+         raise TypeError("EventManager.emit: nodeId of non-string type passed")
+      if not isinstance(sigName, types.StringType):
+         raise TypeError("EventManager.emit: sigName of non-string type passed")
+
+      if print_debug:
+         self.mLogger.debug("EventManager.emit([%s][%s][%s])" % \
+                               (nodeId, sigName, args))
+
+      # Build up a list of all connections to emit signal on.
+      nodes = []
+      if nodeId == "*":
+         nodes = self.mProxies.items()
+      elif self.mProxies.has_key(nodeId):
+         nodes = [(nodeId, self.mProxies[nodeId])]
+
+      if print_debug:
+         self.mLogger.debug("   Proxies: %s" % (self.mProxies.items()))
+         self.mLogger.debug("   Nodes: %s" % (nodes))
+
+      # Emit signal to selected nodes, removing any that have dropped their connection.
+      for k, v in nodes:
+         try:
+            # Get local IP address to use for nodeId mask on remote nodes.
+            # We do it this way to avoid a DNS lookup that would be required
+            # by using socket.gethostbyname(). This also ensures that the IP
+            # address being used is the one to which the remote node connected
+            # (an important detail for multi-homed hosts).
+            ip_address = v.broker.transport.getHost().host
+            v.callRemote("emit", ip_address, sigName, args, **kwArgs).addErrback(self.onErrorEmitting)
+         except banana.BananaError, ex:
+            self.mLogger.error('Emitting failed: %s' % str(ex))
+         except Exception, ex:
+            del self.mProxies[k]
+            self.mLogger.info('Removed dead connection ' + str(k))
+
+   def onErrorEmitting(self, reason):
+      # Quietly ignore all emitting errors
+      # XXX: This is only temporary until we can figure out why there are
+      # errors on exit.
+      pass
+      #self.mLogger.error(str(reason))
+
+   def isConnected(self, nodeId):
+      return self.mProxies.has_key(nodeId)
+
+   def getNumProxies(self):
+      return len(self.mProxies)
+
+   def _getProxies(self):
+      return self.mProxies

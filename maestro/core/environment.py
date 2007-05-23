@@ -21,7 +21,7 @@ pj = os.path.join
 import maestro.util.plugin
 import maestro.util.mixins
 import maestro.core
-import EventManager
+import event
 
 class Environment(maestro.util.mixins.Singleton):
    """ The main environment/namespace for the Maestro.
@@ -46,7 +46,7 @@ class Environment(maestro.util.mixins.Singleton):
       # Create an event dispatcher that will:
       #   - Connect to remote event manager objects.
       #   - Emit events to remote event manager objects.
-      self.mEventManager = EventManager.EventManager()
+      self.mEventManager = event.EventManager()
 
       # -- Plugin manager -- #
       self.mPluginManager = maestro.util.plugin.PluginManager()

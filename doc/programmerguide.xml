@@ -211,18 +211,18 @@ evt_mgr = maestro.core.Environment().mEventManager</programlisting>
       </example>
 
       <para>Signals are emitted by invoking the method
-      <methodname>maestro.core.EventManager.EventManager.emit()</methodname>
-      with a node identifier string (usually an IP address or the special
-      string <literal>'*'</literal> identifying all nodes in the ensemble), a
-      signal name, and any arguments to be passed with the signal. The signal
-      will be received by all code on the remote side that has registered a
-      handler for the identified signal. A signal can be emitted back to the
-      local code by using the method
-      <methodname>maestro.core.EventManager.EventManager.localEmit()</methodname>
+      <methodname>maestro.core.event.EventManager.emit()</methodname> with a
+      node identifier string (usually an IP address or the special string
+      <literal>'*'</literal> identifying all nodes in the ensemble), a signal
+      name, and any arguments to be passed with the signal. The signal will be
+      received by all code on the remote side that has registered a handler
+      for the identified signal. A signal can be emitted back to the local
+      code by using the method
+      <methodname>maestro.core.event.EventManager.localEmit()</methodname>
       with the constant value
-      <constant>maestro.core.EventManager.EventManager.LOCAL</constant> as the
-      node identifier. One case where this can be useful is in sending signals
-      to the Maestro client GUI. The signal handler in the GUI can respond as
+      <constant>maestro.core.event.EventManager.LOCAL</constant> as the node
+      identifier. One case where this can be useful is in sending signals to
+      the Maestro client GUI. The signal handler in the GUI can respond as
       though the signal were coming from a remote node.</para>
 
       <section>

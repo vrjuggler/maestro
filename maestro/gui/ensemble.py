@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtGui
 import maestro
 import maestro.core
 const = maestro.core.const
-LOCAL = maestro.core.EventManager.EventManager.LOCAL
+LOCAL = maestro.core.event.EventManager.LOCAL
 import socket, types
 
 

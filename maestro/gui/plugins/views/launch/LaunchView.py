@@ -23,7 +23,7 @@ import HelpDialogBase
 import maestro.core
 const = maestro.core.const
 from maestro.gui import stanza
-LOCAL = maestro.core.EventManager.EventManager.LOCAL
+LOCAL = maestro.core.event.EventManager.LOCAL
 from maestro.gui import helpers
 
 import os.path

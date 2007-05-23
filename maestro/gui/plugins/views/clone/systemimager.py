@@ -21,11 +21,11 @@ from PyQt4 import QtGui, QtCore
 import copy
 import maestro.gui
 import maestro.gui.LogWidget as LogWidget
-import maestro.core.EventManager
+import maestro.core.event
 import interfaces
 import SIViewBase
 
-LOCAL = maestro.core.EventManager.EventManager.LOCAL
+LOCAL = maestro.core.event.EventManager.LOCAL
 
 
 class SystemImager(interfaces.ICloneViewPlugin):

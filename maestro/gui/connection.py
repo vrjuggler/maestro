@@ -167,7 +167,7 @@ class ConnectionManager:
 
       # Let everyone who is interested know that we have started the
       # connection process to the given node.
-      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+      self.mEventMgr.localEmit(maestro.core.event.EventManager.LOCAL,
                                "connectionStarted", node)
 
       d = factory.getRootObject()
@@ -190,14 +190,14 @@ class ConnectionManager:
       self.mConnectingNodes.remove(node)
       self.mLogger.error(str(failure.value))
 #      self.mLogger.error(failure.getErrorMessage())
-      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+      self.mEventMgr.localEmit(maestro.core.event.EventManager.LOCAL,
                                "connectionFailed", node, failure)
       return failure
 
    def handleGetAuthServer(self, node, factory, serverAuth):
       self.mLogger.debug("Beginning authentication with %s" % \
                             node.getIpAddress())
-      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+      self.mEventMgr.localEmit(maestro.core.event.EventManager.LOCAL,
                                "connectionMade", node)
       client = AuthorizationClient(serverAuth, self.mLoginData)
       d = client.login()
@@ -211,7 +211,7 @@ class ConnectionManager:
       node_id = node.getIpAddress()
       self.mLogger.debug("connectionLost(%s)" % str(node))
       self.mEventMgr.unregisterProxy(node_id)
-      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+      self.mEventMgr.localEmit(maestro.core.event.EventManager.LOCAL,
                                "connectionLost", node)
 
    def completeConnect(self, node, factory, avatar):
@@ -232,7 +232,7 @@ class ConnectionManager:
             lambda n = node: self.connectionLost(n)
          )
          self.mEventMgr.registerProxy(node_id, avatar)
-         self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+         self.mEventMgr.localEmit(maestro.core.event.EventManager.LOCAL,
                                   "authenticationSucceeded", node)
          self.mLogger.debug("Proxy registered")
 
@@ -248,7 +248,7 @@ class ConnectionManager:
 
    def authFailed(self, node, err):
       self.mConnectingNodes.remove(node)
-      self.mEventMgr.localEmit(maestro.core.EventManager.EventManager.LOCAL,
+      self.mEventMgr.localEmit(maestro.core.event.EventManager.LOCAL,
                                "authenticationFailed", node, err)
 
    def disconnectFromNode(self, node):
