@@ -20,7 +20,6 @@ import sys, os, platform
 
 import maestro.core
 Env = maestro.core.Environment
-import maestro.core.EventManager
 import re
 import logging
 

@@ -61,8 +61,6 @@ import maestro.gui.ensemble as ensemble
 import maestro.gui.Maestro
 import maestro.gui.guiprefs
 
-import maestro.core.EventManager
-
 import logging, socket, time
 
 def process_command_line():
