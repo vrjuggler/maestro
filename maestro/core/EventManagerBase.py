@@ -31,8 +31,8 @@ class EventManagerBase(object):
       # the callable is held using a weak reference
       self.mConnections = {}
       self.mTimerHandler = TimerHandler()
-      self.mLogger = logging.getLogger('maestrod.EventManagerBase')
-      
+      self.mLogger = logging.getLogger('core.EventManagerBase')
+
    def update(self):
       """ Update method.  Called once per frame. """
       # Update timers
@@ -213,7 +213,7 @@ class TimerHandler(object):
       # map callable --> next_trigger_time
       #  - If trigger time == 0, then tigger always
       self.mTimerMap = {}
-      self.mLogger = logging.getLogger('maestrod.TimerHandler')
+      self.mLogger = logging.getLogger('core.TimerHandler')
       
    def createTimer(self, slot, duration=0):
       """ Create a new timer.

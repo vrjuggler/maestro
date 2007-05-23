@@ -34,7 +34,7 @@ class EventManager(pb.Root, EventManagerBase.EventManagerBase):
       """ Initialize the event dispatcher. """
       EventManagerBase.EventManagerBase.__init__(self)
       self.mProxies = {}
-      self.mLogger = logging.getLogger('maestrod.EventManager')
+      self.mLogger = logging.getLogger('core.EventManager')
 
    def closeAllConnections(self):
       for (ip, proxy) in self.mProxies.iteritems():
