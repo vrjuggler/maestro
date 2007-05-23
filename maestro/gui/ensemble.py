@@ -466,9 +466,11 @@ class ClusterNode(QtCore.QObject):
       '''
       @post The nodeChanged signal is emitted.
       '''
-      # XXX: The nodeChanged signal is emitted more than once as a result of
-      # side effects of the operations performed in this method. It would
-      # probably be better if the signal were only emitted at the end.
+      # Block signal emission until we are done here. Many state changes
+      # occur within the small body of this method, but we do not need to
+      # emit the "nodeChanged" signal for each and every change.
+      self.blockSignals(True)
+
       env = maestro.gui.Environment()
       if self.mIpAddress is not None and env.mEventManager.isConnected(self.mIpAddress):
          env.mConnectionMgr.disconnectFromNode(self)
@@ -481,6 +483,9 @@ class ClusterNode(QtCore.QObject):
       if self.mIpAddress is not None:
          env.mConnectionMgr.connectToNode(self)
 
+      # Allow signal emission again now that we are done updating the state
+      # of this node.
+      self.blockSignals(False)
       self.emit(QtCore.SIGNAL("nodeChanged"), self)
 
    def getId(self):
