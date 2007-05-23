@@ -63,6 +63,7 @@ const.mOsIcons[const.WIN] = QtGui.QIcon(":/Maestro/images/win_xp.png")
 const.mOsIcons[const.WINXP] = QtGui.QIcon(":/Maestro/images/win_xp.png")
 const.mOsIcons[const.LINUX] = QtGui.QIcon(":/Maestro/images/linux2.png")
 const.mOsIcons[const.MACOSX] = QtGui.QIcon(":/Maestro/images/MacOSX.png")
+const.mOsIcons[const.OPENBSD] = QtGui.QIcon(":/Maestro/images/openbsd.png")
 
 class OutputTabWidget(QtGui.QTabWidget):
    def __init__(self, parent):
