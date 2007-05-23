@@ -38,24 +38,25 @@ const.NOT_CONNECTED   = 1
 const.ADDRESS_UNKNOWN = 2
 const.CONNECTING      = 3
 const.CONNECT_FAILED  = 4
-const.AUTH_FAILED     = 5
-const.UNKNOWN_OS      = 6
-const.LINUX           = 7
-const.WIN             = 8
-const.WINXP           = 9
-const.MACOS           = 10
-const.MACOSX          = 11
-const.HPUX            = 12
-const.AIX             = 13
-const.SOLARIS         = 14
-const.FREEBSD         = 15
-const.OPENBSD         = 16
-const.NETBSD          = 17
-const.DRAGONFLYBSD    = 18
+const.AUTHENTICATING  = 5
+const.AUTH_FAILED     = 6
+const.UNKNOWN_OS      = 101
+const.LINUX           = 102
+const.WIN             = 103
+const.WINXP           = 104
+const.MACOS           = 105
+const.MACOSX          = 106
+const.HPUX            = 107
+const.AIX             = 108
+const.SOLARIS         = 109
+const.FREEBSD         = 110
+const.OPENBSD         = 111
+const.NETBSD          = 112
+const.DRAGONFLYBSD    = 113
 
 const.ERROR_STATES = [const.ERROR, const.NOT_CONNECTED, const.ADDRESS_UNKNOWN,
                       const.CONNECTING, const.CONNECT_FAILED,
-                      const.AUTH_FAILED]
+                      const.AUTHENTICATING, const.AUTH_FAILED]
 
 const.PLATFORMS = [const.UNKNOWN_OS, const.LINUX, const.WIN, const.WINXP,
                    const.MACOS, const.MACOSX, const.HPUX, const.AIX,
@@ -69,6 +70,7 @@ const.OsNameMap = {
    const.ADDRESS_UNKNOWN : ['Address lookup failed'],
    const.CONNECTING      : ['Connection in progress'],
    const.CONNECT_FAILED  : ['Cannot connect to server'],
+   const.AUTHENTICATING  : ['Authentication in progress'],
    const.AUTH_FAILED     : ['Failed to authenticate'],
 
    # Operating systems
@@ -88,5 +90,5 @@ const.OsNameMap = {
 }
 
 # GUI user levels.
-const.NOVICE   = 100
-const.ADVANCED = 101
+const.NOVICE   = 1000
+const.ADVANCED = 1001
