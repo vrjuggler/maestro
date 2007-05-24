@@ -59,7 +59,7 @@ Var DOC_INST
 
 Name "Maestro ${PRODUCT_VERSION}"
 OutFile "Maestro ${PRODUCT_VERSION} Setup.exe"
-InstallDir "$PROGRAMFILES\Infiscape\Maestro ${PRODUCT_VERSION}"
+InstallDir "$PROGRAMFILES\Infiscape\Maestro"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails hide
 ShowUnInstDetails hide
