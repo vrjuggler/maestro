@@ -27,7 +27,7 @@ def updateACL(handle, acl):
    new_security_desc = win32security.SECURITY_DESCRIPTOR()
    new_security_desc.SetSecurityDescriptorDacl(True, acl, False)
 
-   # Set the new security descriptor for winsta.
+   # Set the new security descriptor for handle.
    win32security.SetUserObjectSecurity(handle,
                                        win32con.DACL_SECURITY_INFORMATION,
                                        new_security_desc)
