@@ -16,8 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import logging
 import win32con
 import win32security
+
+gLogger = logging.getLogger('daemon.windesktop')
 
 def updateACL(handle, acl):
    # Create a new security descriptor for handle and set its DACL.
@@ -185,7 +188,13 @@ def removeACEs(handle, aceIndices):
    ace_list.sort()
    ace_list.reverse()
 
+   gLogger.debug("Old ACE count = %d" % old_count)
+   gLogger.debug("Will remove %d ACEs" % len(ace_list))
+
    for i in ace_list:
+      gLogger.debug("\tRemoving ACE %d from ACL for handle %s" % (i, handle))
       acl.DeleteAce(i)
+
+   gLogger.debug("New ACE count = %d" % acl.GetAceCount())
 
    updateACL(handle, acl)
