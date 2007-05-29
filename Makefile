@@ -48,7 +48,9 @@ install:
 	@mkdir -p $(gmimetypedir)
 	tar --exclude .svn -cvf - maestro | tar -C $(appdir) -xpf -
 	install -m 0644 LICENSE.txt $(appdir)
+	install -m 0644 LICENSE.html $(appdir)
 	install -m 0644 LICENSE.txt $(docdir)
+	install -m 0644 LICENSE.html $(docdir)
 	install -m 0755 maestrod.py $(appdir)
 	install -m 0755 Maestro.py $(appdir)
 	@files=`find $(appdir) -name \*.py | xargs echo | awk '{ for ( i = 1; i <= NF - 1; i++ ) { print "\"" $$i "\", "; } print "\"" $$NF "\"" }'` ; \

@@ -108,12 +108,6 @@ class Ui_MaestroBase(object):
       self.menubar.setGeometry(QtCore.QRect(0,0,557,29))
       self.menubar.setObjectName("menubar")
 
-      self.menuHelp = QtGui.QMenu(self.menubar)
-      self.menuHelp.setObjectName("menuHelp")
-
-      self.menuView = QtGui.QMenu(self.menubar)
-      self.menuView.setObjectName("menuView")
-
       self.menuTools = QtGui.QMenu(self.menubar)
       self.menuTools.setObjectName("menuTools")
 
@@ -125,6 +119,12 @@ class Ui_MaestroBase(object):
 
       self.menuOpen = QtGui.QMenu(self.menuFile)
       self.menuOpen.setObjectName("menuOpen")
+
+      self.menuView = QtGui.QMenu(self.menubar)
+      self.menuView.setObjectName("menuView")
+
+      self.menuHelp = QtGui.QMenu(self.menubar)
+      self.menuHelp.setObjectName("menuHelp")
       MaestroBase.setMenuBar(self.menubar)
 
       self.statusbar = QtGui.QStatusBar(MaestroBase)
@@ -196,7 +196,9 @@ class Ui_MaestroBase(object):
       self.mArchiveServerLogsAction = QtGui.QAction(MaestroBase)
       self.mArchiveServerLogsAction.setEnabled(False)
       self.mArchiveServerLogsAction.setObjectName("mArchiveServerLogsAction")
-      self.menuHelp.addAction(self.mAboutAction)
+
+      self.mLicenseAction = QtGui.QAction(MaestroBase)
+      self.mLicenseAction.setObjectName("mLicenseAction")
       self.menuTools.addAction(self.mChangeAuthAction)
       self.menuNew.addAction(self.mCreateNewEnsembleAction)
       self.menuOpen.addAction(self.mLoadEnsembleAction)
@@ -214,6 +216,9 @@ class Ui_MaestroBase(object):
       self.menuFile.addAction(self.mArchiveServerLogsAction)
       self.menuFile.addSeparator()
       self.menuFile.addAction(self.mExitAction)
+      self.menuHelp.addAction(self.mLicenseAction)
+      self.menuHelp.addSeparator()
+      self.menuHelp.addAction(self.mAboutAction)
       self.menubar.addAction(self.menuFile.menuAction())
       self.menubar.addAction(self.menuTools.menuAction())
       self.menubar.addAction(self.menuView.menuAction())
@@ -248,12 +253,12 @@ class Ui_MaestroBase(object):
       item4 = QtGui.QListWidgetItem(self.mViewList)
       item4.setText(QtGui.QApplication.translate("MaestroBase", "New Item", None, QtGui.QApplication.UnicodeUTF8))
       item4.setIcon(QtGui.QIcon(":/Maestro/images/desktop.png"))
-      self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
-      self.menuView.setTitle(QtGui.QApplication.translate("MaestroBase", "&View", None, QtGui.QApplication.UnicodeUTF8))
       self.menuTools.setTitle(QtGui.QApplication.translate("MaestroBase", "&Tools", None, QtGui.QApplication.UnicodeUTF8))
       self.menuFile.setTitle(QtGui.QApplication.translate("MaestroBase", "&File", None, QtGui.QApplication.UnicodeUTF8))
       self.menuNew.setTitle(QtGui.QApplication.translate("MaestroBase", "New", None, QtGui.QApplication.UnicodeUTF8))
       self.menuOpen.setTitle(QtGui.QApplication.translate("MaestroBase", "Open", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuView.setTitle(QtGui.QApplication.translate("MaestroBase", "&View", None, QtGui.QApplication.UnicodeUTF8))
+      self.menuHelp.setTitle(QtGui.QApplication.translate("MaestroBase", "&Help", None, QtGui.QApplication.UnicodeUTF8))
       self.mToolbar.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Maestro Toolbar", None, QtGui.QApplication.UnicodeUTF8))
       self.mLogWindow.setWindowTitle(QtGui.QApplication.translate("MaestroBase", "Log Window", None, QtGui.QApplication.UnicodeUTF8))
       self.mLoadEnsembleAction.setText(QtGui.QApplication.translate("MaestroBase", "Open Ensemble...", None, QtGui.QApplication.UnicodeUTF8))
@@ -272,6 +277,7 @@ class Ui_MaestroBase(object):
       self.mSaveStanzaAsAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Shift+S", None, QtGui.QApplication.UnicodeUTF8))
       self.mChangeAuthAction.setText(QtGui.QApplication.translate("MaestroBase", "Change &Authentication", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveServerLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Server Logs...", None, QtGui.QApplication.UnicodeUTF8))
+      self.mLicenseAction.setText(QtGui.QApplication.translate("MaestroBase", "License Terms", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

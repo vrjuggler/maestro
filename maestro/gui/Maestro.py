@@ -29,6 +29,7 @@ from maestro.util import xplatform
 import MaestroBase
 import MaestroResource_rc
 import AboutDialogBase
+import licenseui
 
 import maestro
 import maestro.core
@@ -896,6 +897,8 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onLoadStanza)
       self.connect(self.mChangeAuthAction, QtCore.SIGNAL("triggered()"),
                    self.onChangeAuthentication)
+      self.connect(self.mLicenseAction, QtCore.SIGNAL("triggered()"),
+                   self.onLicense)
       self.connect(self.mAboutAction, QtCore.SIGNAL("triggered()"),
                    self.onAbout)
       self.connect(self.mStack, QtCore.SIGNAL("currentChanged(int)"),
@@ -915,6 +918,30 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       plugin_type_name = self.mViewList.getPluginTypeName(view_item)
       view_widget = self.mActiveViewPlugins[plugin_type_name][1]
       self.mStack.setCurrentWidget(view_widget)
+
+   def onLicense(self):
+      try:
+         f = open(os.path.join(const.EXEC_DIR, 'LICENSE.html'), 'r')
+         input = f.readlines()
+         lic_html = '\n'.join(input)
+         f.close()
+
+         dialog = QtGui.QDialog(self)
+         lic_ui = licenseui.Ui_Dialog()
+         lic_ui.setupUi(dialog)
+         lic_ui.mTextBrowser.setHtml(lic_html)
+         dialog.exec_()
+      except IOError:
+         error_msg = \
+            "You should have received a copy of the GNU General Public " \
+            "License with this software, but it could not be found. This is " \
+            "in violation of the terms of the redistribution of this " \
+            "software!"
+         QtGui.QMessageBox.critical(self, "License Not Found", error_msg,
+                                    QtGui.QMessageBox.Default | \
+                                       QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton,
+                                    QtGui.QMessageBox.NoButton)
 
    def onAbout(self):
       dialog = QtGui.QDialog(self)

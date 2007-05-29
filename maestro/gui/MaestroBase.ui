@@ -188,17 +188,6 @@
      <height>29</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuHelp" >
-    <property name="title" >
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="mAboutAction" />
-   </widget>
-   <widget class="QMenu" name="menuView" >
-    <property name="title" >
-     <string>&amp;View</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuTools" >
     <property name="title" >
      <string>&amp;Tools</string>
@@ -235,6 +224,19 @@
     <addaction name="mArchiveServerLogsAction" />
     <addaction name="separator" />
     <addaction name="mExitAction" />
+   </widget>
+   <widget class="QMenu" name="menuView" >
+    <property name="title" >
+     <string>&amp;View</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="mLicenseAction" />
+    <addaction name="separator" />
+    <addaction name="mAboutAction" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuTools" />
@@ -380,6 +382,11 @@
    </property>
    <property name="text" >
     <string>Archive Server Logs...</string>
+   </property>
+  </action>
+  <action name="mLicenseAction" >
+   <property name="text" >
+    <string>License Terms</string>
    </property>
   </action>
  </widget>
