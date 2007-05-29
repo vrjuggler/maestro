@@ -109,6 +109,7 @@ done
 %files base
 %defattr(-, root, root)
 %dir %{_prefix}/lib/maestro-%{version}/
+%{_prefix}/lib/maestro-%{version}/LICENSE.*
 
 %dir %{_prefix}/lib/maestro-%{version}/maestro/
 %{_prefix}/lib/maestro-%{version}/maestro/*.py
@@ -125,6 +126,9 @@ done
 %{_prefix}/lib/maestro-%{version}/maestro/util/*.pyc
 %{_prefix}/lib/maestro-%{version}/maestro/util/*.txt
 %ghost %{_prefix}/lib/maestro-%{version}/maestro/util/*.pyo
+
+%dir %{_docdir}/maestro-%{version}/
+%doc %{_docdir}/maestro-%{version}/LICENSE.*
 
 %files gui
 %defattr(-, root, root)
