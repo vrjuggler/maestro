@@ -92,10 +92,7 @@ class Ui_AboutDialogBase(object):
 
    def retranslateUi(self, AboutDialogBase):
       AboutDialogBase.setWindowTitle(QtGui.QApplication.translate("AboutDialogBase", "About Maestro", None, QtGui.QApplication.UnicodeUTF8))
-      self.mTitleLbl.setText(QtGui.QApplication.translate("AboutDialogBase", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-      "p, li { white-space: pre-wrap; }\n"
-      "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:12pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
-      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">About Maestro by Infiscape       </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+      self.mTitleLbl.setText(QtGui.QApplication.translate("AboutDialogBase", "About Maestro 0.5.0 by Infiscape", None, QtGui.QApplication.UnicodeUTF8))
       self.mDescriptionLbl.setText(QtGui.QApplication.translate("AboutDialogBase", "Maestro is a software package using a simple client/server model for utilizing the resources of a cluster of computers. Its current intended audience is owners of graphics clusters (also known as image generator clusters) used for displaying high-quality, real-time graphics on multiple projection surfaces.\n"
       "\n"
       "The Maestro software is released under the terms of the GNU General Public License http://www.gnu.org/copyleft/gpl.html\n"
