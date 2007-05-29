@@ -46,6 +46,7 @@ install:
 	@mkdir -p $(siteappdir)
 	@mkdir -p $(icondir)
 	@mkdir -p $(gmimetypedir)
+	@mkdir -p $(docdir)
 	tar --exclude .svn -cvf - maestro | tar -C $(appdir) -xpf -
 	install -m 0644 LICENSE.txt $(appdir)
 	install -m 0644 LICENSE.html $(appdir)
