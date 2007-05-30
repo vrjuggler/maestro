@@ -132,7 +132,7 @@ done
 
 %files gui
 %defattr(-, root, root)
-/etc/maestro.xcfg
+%config /etc/maestro.xcfg
 %{_bindir}/maestro
 
 %{_prefix}/lib/maestro-%{version}/Maestro.py
@@ -218,7 +218,7 @@ done
 %files server
 %defattr(-, root, root)
 /etc/init.d/maestrod
-/etc/maestrod.xcfg
+%config /etc/maestrod.xcfg
 %ghost /var/log/maestrod.log*
 %{_sbindir}/maestrod
 %{_prefix}/lib/maestro-%{version}/maestrod.py
