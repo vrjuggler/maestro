@@ -17,11 +17,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys, os, platform
+import time
 
 import maestro.core
 Env = maestro.core.Environment
 import re
 import logging
+
 
 if "win32" == sys.platform:
    import win32api
@@ -60,6 +62,13 @@ class RebootService(maestro.core.IServicePlugin):
       self.mLogger = logging.getLogger('maestrod.RebootService')
       self.mBootPlugin = None
 
+      # Time to wait before rebooting or powering down. These exist mainly as
+      # a way to deal with the case where the client needs time to send out
+      # the reboot/shutdown signal to all nodes in the ensemble before its own
+      # node gets rebooted/shutdown.
+      self.mRebootWait   = 5
+      self.mShutdownWait = 5
+
    def registerCallbacks(self):
       env = Env()
       # Find out which boot loader we are using. If none is set, assume that
@@ -79,6 +88,28 @@ class RebootService(maestro.core.IServicePlugin):
 
       if self.mBootPlugin is not None:
          self.mLogger.debug("Using boot plugin: %s", self.mBootPlugin.getName())
+
+      reboot_wait   = env.settings.get('reboot_wait', '5').strip()
+      shutdown_wait = env.settings.get('shutdown_wait', '5').strip()
+
+      try:
+         self.mRebootWait = int(reboot_wait)
+      except ValueError:
+         self.mLogger.warning(
+            "Failed to convert reboot wait value '%s' to an integer" % reboot_wait
+         )
+         self.mRebootWait = 5
+
+      try:
+         self.mShutdownWait = int(shutdown_wait)
+      except ValueError:
+         self.mLogger.warning(
+            "Failed to convert shutdown wait value '%s' to an integer" % shutdown_wait
+         )
+         self.mShutdownWait = 5
+
+      self.mLogger.info("Reboot wait: %d seconds" % self.mRebootWait)
+      self.mLogger.info("Shutdown wait: %d seconds" % self.mShutdownWait)
 
       env.mEventManager.connect("*", "reboot.get_info", self.onGetInfo)
       env.mEventManager.connect("*", "reboot.set_default_target", self.onSetDefaultTarget)
@@ -145,6 +176,11 @@ class RebootService(maestro.core.IServicePlugin):
           @param avatar: System avatar that represents the remote user.
       """
 
+      if self.mRebootWait > 0:
+         self.mLogger.info("Waiting %d seconds before rebooting..." % \
+                              self.mRebootWait)
+         time.sleep(self.mRebootWait)
+
       self.mLogger.info("Rebooting...")
 
       if "win32" == sys.platform:
@@ -159,6 +195,11 @@ class RebootService(maestro.core.IServicePlugin):
           @param nodeId: IP address of maestro client that sent event.
           @param avatar: System avatar that represents the remote user.
       """
+
+      if self.mShutdownWait > 0:
+         self.mLogger.info("Waiting %d seconds before powering down..." % \
+                              self.mShutdownWait)
+         time.sleep(self.mShutdownWait)
 
       self.mLogger.info("Powering down...")
 
