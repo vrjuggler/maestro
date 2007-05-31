@@ -262,29 +262,36 @@ FunctionEnd
 Section Uninstall
   Call un.SetStartMenuToUse
 
-  ${If} $SERVICE_INST == '1'
-    # XXX: This path to pythonw.exe should not be hard coded!
-    ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" stop' $0
-    DetailPrint "Stopping the Maestro service returned $0"
-    # XXX: This path to pythonw.exe should not be hard coded!
-    ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" remove' $0
-    DetailPrint "Removing the Maestro service returned $0"
-  ${EndIf}
+  # NOTE: We stop and remove the Maestro service whether it was installed or
+  # not. If it wasn't installed, then these commands fail silently. If there
+  # were a way for the installer to communicate the value of $SERVICE_INST to
+  # the uninstaller, that would be great.
+
+  # XXX: This path to pythonw.exe should not be hard coded!
+  ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" stop' $0
+  DetailPrint "Stopping the Maestro service returned $0"
+  # XXX: This path to pythonw.exe should not be hard coded!
+  ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" remove' $0
+  DetailPrint "Removing the Maestro service returned $0"
 
   RMDir /R "$SMPROGRAMS\${PRODUCT_NAME}"
   RMDir /R /REBOOTOK "$INSTDIR\"
 
-  ${If} $GUI_INST == '1'
-    Push ".ensem"
-    Push "MaestroEnsemble"
-    Call un.RemoveFileAssociation
+  # NOTE: We remove the Maestro GUI file associations whether they are in the
+  # registry or not. If the associations are not in the registry, then these
+  # actions fail silently. If there were a way for the installer to
+  # communicate the value of $GUI_INST to the uninstaller, that would be
+  # great.
 
-    Push ".stanza"
-    Push "MaestroStanza"
-    Call un.RemoveFileAssociation
+  Push ".ensem"
+  Push "MaestroEnsemble"
+  Call un.RemoveFileAssociation
 
-    Call un.RefreshShellIcons
-  ${EndIf}
+  Push ".stanza"
+  Push "MaestroStanza"
+  Call un.RemoveFileAssociation
+
+  Call un.RefreshShellIcons
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
