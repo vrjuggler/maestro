@@ -37,7 +37,7 @@
          initial caps.</para>
       </legalnotice>
 
-      <pubdate>May 14, 2007</pubdate>
+      <pubdate>June 1, 2007</pubdate>
    </bookinfo>
 
    <preface>
@@ -1863,9 +1863,6 @@ setup (hd0)</screen>
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
 &lt;/maestrod&gt;</programlisting>
                      </example>
-
-                     <indexterm class="endofrange"
-                                startref="index.section.boot.loader.config.grub"></indexterm>
                   </section>
 
                   <section>
@@ -1958,6 +1955,9 @@ setup (hd0)</screen>
                      for modifying <filename>grub.conf</filename> depends on
                      what file system support exists in the operating systems
                      involved.</para>
+
+                     <indexterm class="endofrange"
+                                startref="index.section.boot.loader.config.grub"></indexterm>
                   </section>
                </section>
 
@@ -2072,6 +2072,80 @@ setup (hd0)</screen>
 
                   <indexterm class="endofrange"
                              startref="index.section.boot.loader.config.nt"></indexterm>
+               </section>
+
+               <section>
+                  <title>Adjusting Reboot and Power Down Delays</title>
+
+                  <para>In some instances, it can be helpful for the server
+                  node(s) to wait before beginning their reboot (or power
+                  down) sequence after the Maestro GUI user initiates it. This
+                  can be achieved by setting a wait period or delay that must
+                  expire before the reboot (or power down) sequence starts.
+                  This is done using
+                  <sgmltag>&lt;reboot_wait&gt;</sgmltag><indexterm>
+                        <primary><filename>maestrod.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;reboot_wait&gt;</sgmltag></tertiary>
+                     </indexterm> (or
+                  <sgmltag>&lt;shutdown_wait&gt;</sgmltag><indexterm>
+                        <primary><filename>maestrod.xcfg</filename></primary>
+
+                        <secondary>elements</secondary>
+
+                        <tertiary><sgmltag>&lt;shutdown_wait&gt;</sgmltag></tertiary>
+                     </indexterm>) in <filename>maestrod.xcfg</filename>. The
+                  value is measured in seconds and must be a <emphasis>whole
+                  number</emphasis>. Invalid values are ignored, and the
+                  default wait period of five (5) seconds is used in that
+                  case. An example of setting the reboot and power down wait
+                  periods to ten (10) seconds is shown in <xref
+                  linkend="example.maestrod.xcfg.reboot.wait.linux" />. The
+                  example below is for Linux; for <productname
+                  class="registered">Microsoft Windows</productname>, the use
+                  of <sgmltag>&lt;reboot_wait&gt;</sgmltag> and
+                  <sgmltag>&lt;shutdown_wait&gt;</sgmltag> is
+                  identical.</para>
+
+                  <example id="example.maestrod.xcfg.reboot.wait.linux">
+                     <title><command>maestrod.xcfg</command>: Reboot and Power
+                     Down Wait Settings (Linux)</title>
+
+                     <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;maestrod&gt;
+   &lt;ssl&gt;
+      &lt;cert_file&gt;/etc/ssl/certs/maestro.cert&lt;/cert_file&gt;
+      &lt;key_file&gt;/etc/ssl/private/maestro.key&lt;/key_file&gt;
+   &lt;/ssl&gt;
+   &lt;xauth_cmd&gt;/usr/X11R6/bin/xauth&lt;/xauth_cmd&gt;
+   &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
+   &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
+   &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
+   &lt;reboot_wait&gt;10&lt;/reboot_wait&gt;
+   &lt;shutdown_wait&gt;10&lt;/shutdown_wait&gt;
+&lt;/maestrod&gt;</programlisting>
+                  </example>
+
+                  <tip>
+                     <para>The reboot and power down delay settings are useful
+                     for a variety of cases, but they were added to work
+                     around a specific limitation of the Maestro GUI. If the
+                     Maestro GUI is running on one of the nodes being rebooted
+                     or powered down, it is important that the GUI have time
+                     to tell all the selected nodes to reboot or power down
+                     before the node where the GUI is running begins its
+                     reboot or power down sequence. Using a suitable delay
+                     (five or ten seconds should be sufficient depending on
+                     the number of nodes in the ensemble) ensures that the
+                     node where the Maestro GUI is running does not reboot or
+                     power off while the GUI is still telling nodes in the
+                     ensemble to do the same. If the Maestro GUI is never run
+                     from one of the ensemble nodes, then the delay period for
+                     rebooting and/or powering down can be set to zero
+                     (0).</para>
+                  </tip>
 
                   <indexterm class="endofrange"
                              startref="index.section.maestrod.config.reboot"></indexterm>
@@ -2254,6 +2328,8 @@ setup (hd0)</screen>
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
+   &lt;reboot_wait&gt;10&lt;/reboot_wait&gt;
+   &lt;shutdown_wait&gt;10&lt;/shutdown_wait&gt;
    &lt;saver_types&gt;xset&lt;/saver_types&gt;
 &lt;/maestrod&gt;</programlisting>
                   </example>
@@ -2291,6 +2367,8 @@ setup (hd0)</screen>
    &lt;xauthority_file&gt;/var/gdm/:0.Xauth&lt;/xauthority_file&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;/fat32/grub/grub.conf&lt;/grub_conf&gt;
+   &lt;reboot_wait&gt;10&lt;/reboot_wait&gt;
+   &lt;shutdown_wait&gt;10&lt;/shutdown_wait&gt;
    &lt;saver_types&gt;xset,xscreensaver&lt;/saver_types&gt;
    &lt;xscreensaver_cmd&gt;/usr/X11R6/bin/xscreensaver&lt;/xscreensaver_cmd&gt;
    &lt;xscreensaver_command_cmd&gt;
@@ -2316,6 +2394,8 @@ setup (hd0)</screen>
    &lt;/authentication_plugins&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
+   &lt;reboot_wait&gt;10&lt;/reboot_wait&gt;
+   &lt;shutdown_wait&gt;10&lt;/shutdown_wait&gt;
    &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
 &lt;/maestrod&gt;</programlisting>
                   </example>
@@ -2359,6 +2439,8 @@ setup (hd0)</screen>
    &lt;/authentication_plugins&gt;
    &lt;boot_loader&gt;GRUB&lt;/boot_loader&gt;
    &lt;grub_conf&gt;E:\grub\grub.conf&lt;/grub_conf&gt;
+   &lt;reboot_wait&gt;10&lt;/reboot_wait&gt;
+   &lt;shutdown_wait&gt;10&lt;/shutdown_wait&gt;
    &lt;saver_types&gt;windows,powercfg&lt;/saver_types&gt;
    &lt;powercfg&gt;
       &lt;ac_off_time&gt;120&lt;/ac_off_time&gt;
