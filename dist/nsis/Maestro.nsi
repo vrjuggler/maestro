@@ -117,8 +117,8 @@ Section "Maestro GUI" SecGUI
   Push "Ensemble File"
   Push "$INSTDIR\ensemble.ico"
   Push "Load Ensemble into Maestro"
-  # XXX: This path to python.exe should not be hard coded!
-  Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" "%1"'
+  # XXX: This path to pythonw.exe should not be hard coded!
+  Push 'C:\Python24\pythonw.exe "$OUTDIR\Maestro.py" "%1"'
   Call FileAssociation
 
   # Associate .stanza files with the Maestro GUI.
@@ -127,8 +127,8 @@ Section "Maestro GUI" SecGUI
   Push "Stanza File"
   Push "$INSTDIR\stanza.ico"
   Push "Load Stanza into Maestro"
-  # XXX: This path to python.exe should not be hard coded!
-  Push 'C:\Python24\python.exe "$OUTDIR\Maestro.py" -s "%1" -v "Launch View"'
+  # XXX: This path to pythonw.exe should not be hard coded!
+  Push 'C:\Python24\pythonw.exe "$OUTDIR\Maestro.py" -s "%1" -v "Launch View"'
   Call FileAssociation
 
   Call RefreshShellIcons
@@ -218,11 +218,11 @@ Section -Post
   ${EndIf}
 
   ${If} $SERVICE_INST == '1'
-    # XXX: This path to python.exe should not be hard coded!
-    ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" --interactive --startup auto install' $0
+    # XXX: This path to pythonw.exe should not be hard coded!
+    ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" --interactive --startup auto install' $0
     DetailPrint "Installing the Maestro service returned $0"
-    # XXX: This path to python.exe should not be hard coded!
-    Exec 'C:\Python24\python.exe "$INSTDIR\maestrod.py" start'
+    # XXX: This path to pythonw.exe should not be hard coded!
+    Exec 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" start'
   ${EndIf}
 SectionEnd
 
@@ -263,11 +263,11 @@ Section Uninstall
   Call un.SetStartMenuToUse
 
   ${If} $SERVICE_INST == '1'
-    # XXX: This path to python.exe should not be hard coded!
-    ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" stop' $0
+    # XXX: This path to pythonw.exe should not be hard coded!
+    ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" stop' $0
     DetailPrint "Stopping the Maestro service returned $0"
-    # XXX: This path to python.exe should not be hard coded!
-    ExecWait 'C:\Python24\python.exe "$INSTDIR\maestrod.py" remove' $0
+    # XXX: This path to pythonw.exe should not be hard coded!
+    ExecWait 'C:\Python24\pythonw.exe "$INSTDIR\maestrod.py" remove' $0
     DetailPrint "Removing the Maestro service returned $0"
   ${EndIf}
 
