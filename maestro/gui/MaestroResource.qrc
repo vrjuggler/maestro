@@ -46,6 +46,7 @@
         <file>images/stanza_new.png</file>
         <file>images/up32.png</file>
         <file>images/warning.png</file>
+        <file>images/win_vista.png</file>
         <file>images/win_xp.png</file>
     </qresource>
 </RCC>
