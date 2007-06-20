@@ -194,11 +194,11 @@ def main():
    sys.stdout = maestro.util.PseudoFileOut(writeOut)
    sys.stderr = maestro.util.PseudoFileOut(writeErr)
 
-   if os.name == 'nt':
-      nt_elog_handler = logging.handlers.NTEventLogHandler('Maestro')
-      nt_elog_handler.setLevel(logging.ERROR)
-      nt_elog_handler.setFormatter(formatter)
-      logger.addHandler(nt_elog_handler)
+#   if os.name == 'nt':
+#      nt_elog_handler = logging.handlers.NTEventLogHandler('Maestro')
+#      nt_elog_handler.setLevel(logging.ERROR)
+#      nt_elog_handler.setFormatter(formatter)
+#      logger.addHandler(nt_elog_handler)
 
    try:
       logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'images', 'splash.png')
