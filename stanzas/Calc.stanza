@@ -4,13 +4,13 @@
       <command class="Linux" name="linux_cmd">
          /usr/X11R6/bin/xcalc
       </command>
-      <command class="Windows XP" name="windows_cmd">
+      <command class="Windows" name="windows_cmd">
          C:\WINDOWS\system32\calc.exe
       </command>
       <cwd class="Linux" name="linux_cwd">
          /
       </cwd>
-      <cwd class="Windows XP" name="win_cwd">
+      <cwd class="Windows" name="win_cwd">
          C:\
       </cwd>
    </application>

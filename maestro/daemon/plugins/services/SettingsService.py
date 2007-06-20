@@ -67,7 +67,23 @@ class SettingsService(maestro.core.IServicePlugin):
       elif sys_name == 'Darwin':
          platform_id = const.MACOSX
       elif os.name == 'nt':
-         platform_id = const.WINXP
+         win_ver = sys.getwindowsversion()
+
+         # Windows NT 6.0: Vista
+         if win_ver[0] == 6:
+            platform_id = const.WIN_VISTA
+         # Windows NT 5.x
+         elif win_ver[0] == 5:
+            # Windows NT 5.0: Windows 2000
+            if win_ver[1] == 0:
+               platform_id = const.WIN2K
+            # Windows NT 5.1: Windows XP
+            elif win_ver[1] == 1:
+               platform_id = const.WINXP
+         # NOTE: This is for backwards compatibility with pre-0.5 verseions of
+         # Maestro where all versions of Windows were identified as WINXP.
+         else:
+            platform_id = const.WINXP
 
       return platform_id
 

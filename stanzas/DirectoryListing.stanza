@@ -4,13 +4,13 @@
       <command class="UNIX" name="unix_cmd">
          ls
       </command>
-      <command class="Windows XP" name="windows_cmd">
+      <command class="Windows" name="windows_cmd">
          C:\WINDOWS\system32\cmd.exe
       </command>
       <arg class="UNIX" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
          ${HOME}
       </arg>
-      <arg class="Windows XP" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
+      <arg class="Windows" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
          /C dir ${HOMEDRIVE}${HOMEPATH}
       </arg>
    </application>

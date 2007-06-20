@@ -53,6 +53,8 @@ const.FREEBSD         = 110
 const.OPENBSD         = 111
 const.NETBSD          = 112
 const.DRAGONFLYBSD    = 113
+const.WIN2K           = 114
+const.WIN_VISTA       = 115
 
 const.ERROR_STATES = [const.ERROR, const.NOT_CONNECTED, const.ADDRESS_UNKNOWN,
                       const.CONNECTING, const.CONNECT_FAILED,
@@ -61,7 +63,7 @@ const.ERROR_STATES = [const.ERROR, const.NOT_CONNECTED, const.ADDRESS_UNKNOWN,
 const.PLATFORMS = [const.UNKNOWN_OS, const.LINUX, const.WIN, const.WINXP,
                    const.MACOS, const.MACOSX, const.HPUX, const.AIX,
                    const.SOLARIS, const.FREEBSD, const.OPENBSD, const.NETBSD,
-                   const.DRAGONFLYBSD]
+                   const.DRAGONFLYBSD, const.WIN2K, const.WIN_VISTA]
 
 const.OsNameMap = {
    # Error states
@@ -76,8 +78,8 @@ const.OsNameMap = {
    # Operating systems
    const.UNKNOWN_OS      : ['Unknown', 'Unknown'],
    const.LINUX           : ['Linux', 'UNIX'],
-   const.WIN             : ['Windows'],
-   const.WINXP           : ['Windows XP'],
+   const.WIN             : ['Windows', 'Windows'],
+   const.WINXP           : ['Windows XP', 'Windows'],
    const.MACOS           : ['MacOS', 'Mac'],
    const.MACOSX          : ['Mac OS X', 'UNIX'],
    const.HPUX            : ['HP-UX', 'UNIX'],
@@ -87,6 +89,8 @@ const.OsNameMap = {
    const.OPENBSD         : ['OpenBSD', 'UNIX'],
    const.NETBSD          : ['NetBSD', 'UNIX'],
    const.DRAGONFLYBSD    : ['DragonflyBSD', 'UNIX'],
+   const.WIN2K           : ['Windows 2000', 'Windows'],
+   const.WIN_VISTA       : ['Windows Vista', 'Windows'],
 }
 
 # GUI user levels.

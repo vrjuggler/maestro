@@ -4,19 +4,19 @@
       <command class="Linux" name="linux_cmd">
          /usr/bin/python
       </command>
-      <command class="Windows XP" name="win_cmd">
+      <command class="Windows" name="win_cmd">
          C:\Python24\python.exe
       </command>
       <cwd class="Linux" name="linux_cwd">
          /
       </cwd>
-      <cwd class="Windows XP" name="win_cwd">
+      <cwd class="Windows" name="win_cwd">
          C:\
       </cwd>
       <arg class="Linux" editable="false" flag="-c" label="Code" name="linux_arg">
          import os, pwd; print pwd.getpwuid(os.getuid())[0]
       </arg>
-      <arg class="Windows XP" editable="false" flag="-c" label="Code" name="win_arg">
+      <arg class="Windows" editable="false" flag="-c" label="Code" name="win_arg">
          import os, win32api, win32profile; print 'Username: %s User Env: %s' % (win32api.GetUserName(), os.environ.get('USERNAME', ''))
       </arg>
    </application>
