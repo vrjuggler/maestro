@@ -175,7 +175,7 @@ class MaestroServer:
          env.mEventManager.update()
 
 if os.name == 'nt':
-   class vrjclusterserver(win32serviceutil.ServiceFramework):
+   class MaestroService(win32serviceutil.ServiceFramework):
       _svc_name_ = "MaestroService"
       _svc_display_name_ = "Maestro Server"
 
@@ -466,7 +466,7 @@ if __name__ == '__main__':
       RunServer()
    elif os.name == 'nt':
       # Install as a Windows Service on NT
-      win32serviceutil.HandleCommandLine(vrjclusterserver)
+      win32serviceutil.HandleCommandLine(MaestroService)
    elif platform.system() == 'Linux':
       if '-log' in sys.argv:
          log = '/var/log/maestrod.log'
