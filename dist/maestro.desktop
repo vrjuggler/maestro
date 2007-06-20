@@ -2,7 +2,7 @@
 Name=Maestro Cluster Management GUI
 Comment=Use, maintain, and control a cluster of computers from a single GUI
 Exec=maestro %F
-Terminal=true
+Terminal=false
 MimeType=application/x-maestro-ensemble+xml;application/x-maestro-stanza+xml
 Icon=maestro
 Type=Application
