@@ -209,15 +209,8 @@ if os.name == 'nt':
       def SvcDoRun(self):
          import servicemanager
 
-         def null_output(text):
-            pass
-
          self.savedOut = sys.stdout
          self.savedErr = sys.stderr
-
-         # Create file like objects to get all stdout and stderr.
-         sys.stdout = maestro.util.PseudoFileOut(null_output)
-         sys.stderr = maestro.util.PseudoFileErr(null_output)
 
          formatter = \
             logging.Formatter(
@@ -232,6 +225,10 @@ if os.name == 'nt':
          logger.addHandler(self.mNtEvent)
          logger.addHandler(self.mFileLog)
          logger.setLevel(logging.DEBUG)
+
+         # Create file like objects to get all stdout and stderr.
+         sys.stdout = maestro.util.PseudoFileOut(writeOut)
+         sys.stderr = maestro.util.PseudoFileErr(writeErr)
 
          logger.info('Started')
 
@@ -474,7 +471,7 @@ if __name__ == '__main__':
 
          const.LOGFILE = '/var/log/maestrod.log'
          file_log = logging.handlers.RotatingFileHandler(const.LOGFILE, 'a',
-                                                         50000, 10)
+                                                         5000000, 10)
          formatter = \
             logging.Formatter(
                '%(asctime)s %(name)-12s: %(levelname)-8s %(message)s'
