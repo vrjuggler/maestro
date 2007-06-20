@@ -62,6 +62,8 @@ import maestro.gui.Maestro
 import maestro.gui.guiprefs
 
 import logging, socket, time
+import logging.handlers
+
 
 def process_command_line():
    """ Parse and process the command line options.
@@ -147,23 +149,56 @@ def expandEnv(value):
 
    return value
 
+# Redirect stdout and stderr into the logging system. This will ensure that we
+# can see all error output.
+stdout_logger = logging.getLogger('stdout')
+stdout_logger.setLevel(logging.DEBUG)
+stderr_logger = logging.getLogger('stderr')
+stderr_logger.setLevel(logging.DEBUG)
+
+def writeOut(text):
+   if sys.platform.startswith("win"):
+      real_text = text.strip('\r\n')
+   else:
+      real_text = text.strip('\n')
+   if real_text != '':
+      stdout_logger.debug(real_text)
+
+def writeErr(text):
+   if sys.platform.startswith("win"):
+      real_text = text.strip('\r\n')
+   else:
+      real_text = text.strip('\n')
+   if real_text != '':
+      stderr_logger.debug(real_text)
+
 def main():
    # --- Process command line options ---- #
    opts = process_command_line()
 
-   # Set up logging to sys.stderr.
-   # Set up logging to sys.stderr.
-   fmt_str  = '%(name)-12s %(levelname)-8s %(message)s'
-   date_fmt = '%m-%d %H:%M'
-   if sys.version_info[0] == 2 and sys.version_info[1] < 4:
-      handler = logging.StreamHandler()
-      handler.setFormatter(logging.Formatter(fmt_str, date_fmt))
-      logger = logging.getLogger('')
-      logger.setLevel(logging.DEBUG)
-      logger.addHandler(handler)
-   else:
-      logging.basicConfig(level = logging.DEBUG, format = fmt_str,
-                          datefmt = date_fmt)
+   formatter = \
+      logging.Formatter(
+         '%(asctime)s %(name)-12s: %(levelname)-8s %(message)s'
+      )
+
+   user_data_dir = xplatform.getUserAppDir(const.APP_NAME)
+   log_file = os.path.join(user_data_dir, 'maestro.log')
+   flog_handler = logging.handlers.RotatingFileHandler(log_file, 'a', 50000, 5)
+   flog_handler.setLevel(logging.DEBUG)
+   flog_handler.setFormatter(formatter)
+
+   logger = logging.getLogger('')
+   logger.addHandler(flog_handler)
+   logger.setLevel(logging.DEBUG)
+
+   sys.stdout = maestro.util.PseudoFileOut(writeOut)
+   sys.stderr = maestro.util.PseudoFileOut(writeErr)
+
+   if os.name == 'nt':
+      nt_elog_handler = logging.handlers.NTEventLogHandler('Maestro')
+      nt_elog_handler.setLevel(logging.ERROR)
+      nt_elog_handler.setFormatter(formatter)
+      logger.addHandler(nt_elog_handler)
 
    try:
       logo_path = os.path.join(os.path.dirname(__file__), 'maestro', 'gui', 'images', 'splash.png')
