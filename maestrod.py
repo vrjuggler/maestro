@@ -191,16 +191,20 @@ if os.name == 'nt':
       def SvcStop(self):
          sys.stdout = self.savedOut
          sys.stderr = self.savedErr
-         import servicemanager
-         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
 
-         logger = logging.getLogger('')
-         logger.info('Stopped')
-         logging.shutdown()
+         try:
+            import servicemanager
+            self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
 
-         # Shutdown Server
-         #self.sfcServer.server_close()
-         self.ReportServiceStatus(win32service.SERVICE_STOPPED)
+            logger = logging.getLogger('')
+            logger.info('Stopped')
+            logging.shutdown()
+
+            # Shutdown Server
+            #self.sfcServer.server_close()
+            self.ReportServiceStatus(win32service.SERVICE_STOPPED)
+         except:
+            traceback.print_exc()
 
       def SvcDoRun(self):
          import servicemanager
