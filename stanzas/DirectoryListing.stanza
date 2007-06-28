@@ -10,8 +10,8 @@
       <arg class="UNIX" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
          ${HOME}
       </arg>
-      <arg class="Windows" editable="true" flag="" hidden="false" label="Directory" name="Directory" value_type="string">
-         /C dir ${HOMEDRIVE}${HOMEPATH}
+      <arg class="Windows" editable="true" flag="/C" hidden="false" label="Directory" name="Directory" value_type="string">
+         dir ${HOMEDRIVE}${HOMEPATH}
       </arg>
    </application>
 </stanza>
