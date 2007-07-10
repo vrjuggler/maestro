@@ -47,7 +47,7 @@ class PluginManager(object):
    """
    def __init__(self):
       self.modules = {}   # Map module name --> [module, sys_path]      
-      self.mLogger = logging.getLogger('maestro.util.plugin.PluginManager')
+      self.mLogger = logging.getLogger('util.plugin.PluginManager')
 
    def scan(self, paths, progressCB=None):
       """ Scan the paths looking for plugins.
