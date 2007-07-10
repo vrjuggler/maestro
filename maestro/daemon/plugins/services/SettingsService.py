@@ -78,7 +78,8 @@ class SettingsService(maestro.core.IServicePlugin):
             if win_ver[1] == 0:
                platform_id = const.WIN2K
             # Windows NT 5.1: Windows XP
-            elif win_ver[1] == 1:
+            # Windows NT 5.2: Windows XP x64 Edition
+            elif win_ver[1] == 1 or win_ver[1] == 2:
                platform_id = const.WINXP
          # NOTE: This is for backwards compatibility with pre-0.5 verseions of
          # Maestro where all versions of Windows were identified as WINXP.
