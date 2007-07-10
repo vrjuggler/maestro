@@ -464,7 +464,7 @@ if __name__ == '__main__':
    elif os.name == 'nt':
       # Install as a Windows Service on NT
       win32serviceutil.HandleCommandLine(MaestroService)
-   elif platform.system() == 'Linux':
+   else:
       if '-log' in sys.argv:
          log = '/var/log/maestrod.log'
          print "Using log file: ", log
