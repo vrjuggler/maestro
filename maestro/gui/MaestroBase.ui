@@ -217,7 +217,8 @@
     <addaction name="mSaveEnsembleAction" />
     <addaction name="mSaveEnsembleAsAction" />
     <addaction name="separator" />
-    <addaction name="mSaveStanzasAction" />
+    <addaction name="mSaveStanzaAction" />
+    <addaction name="mSaveAllStanzasAction" />
     <addaction name="mSaveStanzaAsAction" />
     <addaction name="separator" />
     <addaction name="mArchiveLogsAction" />
@@ -317,7 +318,7 @@
     <string>Save Ensemble</string>
    </property>
   </action>
-  <action name="mSaveStanzasAction" >
+  <action name="mSaveAllStanzasAction" >
    <property name="icon" >
     <iconset resource="MaestroResource.qrc" >:/Maestro/images/save.png</iconset>
    </property>
@@ -325,7 +326,7 @@
     <string>Save All Stanzas</string>
    </property>
    <property name="shortcut" >
-    <string>Ctrl+S</string>
+    <string>Ctrl+Shift+A</string>
    </property>
   </action>
   <action name="mArchiveLogsAction" >
@@ -387,6 +388,14 @@
   <action name="mLicenseAction" >
    <property name="text" >
     <string>License Terms</string>
+   </property>
+  </action>
+  <action name="mSaveStanzaAction" >
+   <property name="text" >
+    <string>Save Stanza</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

@@ -825,30 +825,67 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       self.setEnsemble(ensemble.Ensemble(element_tree))
       self.statusBar().showMessage("Created new ensemble")
 
-   def onSaveStanzas(self):
+   def onSaveStanza(self):
+      env = maestro.gui.Environment()
+      stanza_store = env.mStanzaStore
+
+      if stanza_store.hasActive():
+         stanza_store.saveActive()
+         self.statusBar().showMessage("Current stanza saved")
+      else:
+         QtGui.QMessageBox.warning(self, "No Active Stanza",
+                                   "There is no active stanza to save!",
+                                   QtGui.QMessageBox.Ignore |     \
+                                       QtGui.QMessageBox.Default | \
+                                       QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton,
+                                    QtGui.QMessageBox.NoButton)
+
+   def onSaveStanzaAs(self):
+      env = maestro.gui.Environment()
+      stanza_store = env.mStanzaStore
+
+      if stanza_store.hasActive():
+         filename = \
+            QtGui.QFileDialog.getSaveFileName(self, "Choose a Stanza file",
+                                              "", "Stanza (*.stanza)")
+
+         if filename is not None and filename != '':
+            stanza_store.saveActive(str(filename))
+            self.statusBar().showMessage("Current stanza saved")
+      else:
+         QtGui.QMessageBox.warning(self, "No Active Stanza",
+                                   "There is no active stanza to save!",
+                                   QtGui.QMessageBox.Ignore |     \
+                                       QtGui.QMessageBox.Default | \
+                                       QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton,
+                                    QtGui.QMessageBox.NoButton)
+
+   def onSaveAllStanzas(self):
       env = maestro.gui.Environment()
       env.mStanzaStore.saveAll()
       self.statusBar().showMessage("All stanzas saved")
 
    def onLoadStanza(self):
-      ensemble_filename = \
+      stanza_filename = \
          QtGui.QFileDialog.getOpenFileName(self, "Choose a Stanza file",
                                            "", "Stanza (*.stanza)")
 
-      ensemble_filename = str(ensemble_filename)
+      stanza_filename = str(stanza_filename)
 
       def printCB(p, t):
          print "%s [%s]" % (t,p)
 
-      if os.path.exists(ensemble_filename):
+      if os.path.exists(stanza_filename):
          try:
             env = maestro.gui.Environment()
-            env.mStanzaStore.loadStanzas(ensemble_filename, printCB)
+            env.mStanzaStore.loadStanzas(stanza_filename, printCB)
          except IOError, ex:
             QtGui.QMessageBox.critical(
                self, "Error",
                "Failed to read ensemble file %s: %s" % \
-                  (ensemble_filename, ex.strerror)
+                  (stanza_filename, ex.strerror)
             )
 
    def onChangeAuthentication(self):
@@ -893,8 +930,12 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.onSaveEnsembleAs)
       self.connect(self.mCreateNewEnsembleAction, QtCore.SIGNAL("triggered()"),
                    self.onCreateNewEnsemble)
-      self.connect(self.mSaveStanzasAction, QtCore.SIGNAL("triggered()"),
-                   self.onSaveStanzas)
+      self.connect(self.mSaveStanzaAction, QtCore.SIGNAL("triggered()"),
+                   self.onSaveStanza)
+      self.connect(self.mSaveStanzaAsAction, QtCore.SIGNAL("triggered()"),
+                   self.onSaveStanzaAs)
+      self.connect(self.mSaveAllStanzasAction, QtCore.SIGNAL("triggered()"),
+                   self.onSaveAllStanzas)
       self.connect(self.mLoadStanzaAction, QtCore.SIGNAL("triggered()"),
                    self.onLoadStanza)
       self.connect(self.mChangeAuthAction, QtCore.SIGNAL("triggered()"),
@@ -907,6 +948,11 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
                    self.viewChanged)
       self.connect(self.mViewList, QtCore.SIGNAL("currentRowChanged(int)"),
                    self.onViewSelection)
+
+      # XXX: Disable this action for now. The Stanza Editor does not handle
+      # this case well. It doesn't keep track of the name change for the
+      # stanza or load the newly created file.
+      self.mSaveStanzaAsAction.setEnabled(False)
 
       self.mOutputTab = OutputTabWidget(self.mDockWidgetContents)
       self.vboxlayout.addWidget(self.mOutputTab)

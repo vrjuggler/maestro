@@ -37,14 +37,16 @@ def null_progress_cb(p,s):
 
 class StanzaStore:
    def __init__(self):
-      self.mStanzas = {}
       self.mStanzaDigests = {}
+      self.clearStanzas()
 
    def clearStanzas(self):
       '''
       Wipes out the current collection of loaded stanzas.
       '''
       self.mStanzas = {}
+      self.mActiveStanzaFile = None
+      self.mActiveStanza     = None
 
    def scan(self, progressCB=None):
       '''
@@ -79,6 +81,10 @@ class StanzaStore:
             # Load all files that we found.
             self.loadStanzas(stanza_files, progressCB=progressCB)
 
+      values = self.mStanzas.values()
+      if len(values) > 0:
+         self.setActive(values[0])
+
    def loadStanzas(self, stanzaFiles, progressCB=None):
       # If files is really a single file, turn it into a list.
       if types.StringType == type(stanzaFiles):
@@ -101,6 +107,39 @@ class StanzaStore:
             self.mStanzaDigests[file_name] = stanza_digest
 
       self._expandCmdLine()
+
+   def hasActive(self):
+      return self.mActiveStanza is not None
+
+   def setActive(self, newActiveStanza):
+      self.mActiveStanzaFile = None
+      self.mActiveStanza     = None
+
+      print "newActiveStanza:", newActiveStanza
+      for file_name, stanza in self.mStanzas.iteritems():
+         print "stanza:", stanza
+         if stanza is newActiveStanza:
+            self.mActiveStanzaFile = file_name
+            self.mActiveStanza     = stanza
+            print "Changed active stanza"
+            return
+
+      raise Exception("Could not change active stanza: given stanza not found")
+
+   def saveActive(self, fileName = None):
+      if self.mActiveStanza is not None:
+         if fileName is None:
+            fileName = self.mActiveStanzaFile
+
+         self.saveStanza(self.mActiveStanza, fileName)
+      else:
+         QtGui.QMessageBox.critical(None, "No Active Stanza",
+                                    "There is no active stanza to save!",
+                                    QtGui.QMessageBox.Ignore |     \
+                                       QtGui.QMessageBox.Default | \
+                                       QtGui.QMessageBox.Escape,
+                                    QtGui.QMessageBox.NoButton,
+                                    QtGui.QMessageBox.NoButton)
 
    def saveAll(self):
       for file_name, stanza in self.mStanzas.iteritems():

@@ -168,9 +168,9 @@ class Ui_MaestroBase(object):
       self.mSaveEnsembleAction.setIcon(QtGui.QIcon(":/Maestro/images/save.png"))
       self.mSaveEnsembleAction.setObjectName("mSaveEnsembleAction")
 
-      self.mSaveStanzasAction = QtGui.QAction(MaestroBase)
-      self.mSaveStanzasAction.setIcon(QtGui.QIcon(":/Maestro/images/save.png"))
-      self.mSaveStanzasAction.setObjectName("mSaveStanzasAction")
+      self.mSaveAllStanzasAction = QtGui.QAction(MaestroBase)
+      self.mSaveAllStanzasAction.setIcon(QtGui.QIcon(":/Maestro/images/save.png"))
+      self.mSaveAllStanzasAction.setObjectName("mSaveAllStanzasAction")
 
       self.mArchiveLogsAction = QtGui.QAction(MaestroBase)
       self.mArchiveLogsAction.setIcon(QtGui.QIcon(":/Maestro/images/archive.png"))
@@ -199,6 +199,9 @@ class Ui_MaestroBase(object):
 
       self.mLicenseAction = QtGui.QAction(MaestroBase)
       self.mLicenseAction.setObjectName("mLicenseAction")
+
+      self.mSaveStanzaAction = QtGui.QAction(MaestroBase)
+      self.mSaveStanzaAction.setObjectName("mSaveStanzaAction")
       self.menuTools.addAction(self.mChangeAuthAction)
       self.menuNew.addAction(self.mCreateNewEnsembleAction)
       self.menuOpen.addAction(self.mLoadEnsembleAction)
@@ -209,7 +212,8 @@ class Ui_MaestroBase(object):
       self.menuFile.addAction(self.mSaveEnsembleAction)
       self.menuFile.addAction(self.mSaveEnsembleAsAction)
       self.menuFile.addSeparator()
-      self.menuFile.addAction(self.mSaveStanzasAction)
+      self.menuFile.addAction(self.mSaveStanzaAction)
+      self.menuFile.addAction(self.mSaveAllStanzasAction)
       self.menuFile.addAction(self.mSaveStanzaAsAction)
       self.menuFile.addSeparator()
       self.menuFile.addAction(self.mArchiveLogsAction)
@@ -265,8 +269,8 @@ class Ui_MaestroBase(object):
       self.mAboutAction.setText(QtGui.QApplication.translate("MaestroBase", "About", None, QtGui.QApplication.UnicodeUTF8))
       self.mLoadStanzaAction.setText(QtGui.QApplication.translate("MaestroBase", "Open Stanza...", None, QtGui.QApplication.UnicodeUTF8))
       self.mSaveEnsembleAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Ensemble", None, QtGui.QApplication.UnicodeUTF8))
-      self.mSaveStanzasAction.setText(QtGui.QApplication.translate("MaestroBase", "Save All Stanzas", None, QtGui.QApplication.UnicodeUTF8))
-      self.mSaveStanzasAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveAllStanzasAction.setText(QtGui.QApplication.translate("MaestroBase", "Save All Stanzas", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveAllStanzasAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Shift+A", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Execution Logs...", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveLogsAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
       self.mExitAction.setText(QtGui.QApplication.translate("MaestroBase", "Exit", None, QtGui.QApplication.UnicodeUTF8))
@@ -278,6 +282,8 @@ class Ui_MaestroBase(object):
       self.mChangeAuthAction.setText(QtGui.QApplication.translate("MaestroBase", "Change &Authentication", None, QtGui.QApplication.UnicodeUTF8))
       self.mArchiveServerLogsAction.setText(QtGui.QApplication.translate("MaestroBase", "Archive Server Logs...", None, QtGui.QApplication.UnicodeUTF8))
       self.mLicenseAction.setText(QtGui.QApplication.translate("MaestroBase", "License Terms", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveStanzaAction.setText(QtGui.QApplication.translate("MaestroBase", "Save Stanza", None, QtGui.QApplication.UnicodeUTF8))
+      self.mSaveStanzaAction.setShortcut(QtGui.QApplication.translate("MaestroBase", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
 
 
 

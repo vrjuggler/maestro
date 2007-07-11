@@ -506,6 +506,14 @@ class GraphWidget(QtGui.QGraphicsView):
 class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
+      # self.mStanzas will be a list of tuples containing the root stanza
+      # Element object and the child of the root that is the application or
+      # global option to be edited. Doing it this way is necessary because we
+      # need to tell the Stanza Store what the active stanza is during
+      # editing.
+      # XXX: This would probably be easier if we weren't operating on the
+      # ElementTree Element objects directly and instead built up our own
+      # data structures from what we get back from ElementTree.
       self.mStanzas = []
       self.mScene = None
       self.setupUi(self)
@@ -626,7 +634,15 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          for item in stanza:
             if ('application' == item.tag or
                 'global_option' == item.tag):
-               stanza_elms.append(item)
+               # Store the root stanza element and the current application or
+               # global_option child of the root together. This is needed so
+               # that we can keep the Stanza Store up to date regarding which
+               # stanza is currently being edited.
+               # XXX: This would probably be easier if we weren't operating on
+               # the ElementTree Element objects directly and instead built up
+               # our own data structures from what we get back from
+               # ElementTree.
+               stanza_elms.append((stanza, item))
 
       # If the list of stanzas has not changed since the last time
       # self.mStanzaCB was updated, then we do not need to do any more work.
@@ -652,10 +668,11 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
       new_index = 0
       i = 0
 
-      for app in self.mStanzas:
-         label = app.get('label', None)
+      for s in self.mStanzas:
+         stanza_item = s[1]
+         label = stanza_item.get('label', None)
          if label is None:
-            label = app.get('name', None)
+            label = stanza_item.get('name', None)
          assert(label is not None)
          self.mStanzaCB.addItem(label)
 
@@ -674,7 +691,20 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
          self.onStanzaSelected(new_index)
 
    def onStanzaSelected(self, index):
-      stanza = self.mStanzas[index]
+      # stanza_root is the root XML element, and stanza is the child that is
+      # the application or global_option element currently being edited.
+      # XXX: This would probably be easier if we weren't operating on the
+      # ElementTree Element objects directly and instead built up our own
+      # data structures from what we get back from ElementTree.
+      stanza_root, stanza = self.mStanzas[index]
+
+      # Tell the Stanza Store which stanza is currently being edited.
+      # XXX: This is a hack to allow the "active" stanza to be saved. Really,
+      # what should happen is that this object (the StanzaEditor instance)
+      # should be in charge of saving rather than the top-level GUI.
+      if stanza_root is not None:
+         env = maestro.gui.Environment()
+         env.mStanzaStore.setActive(stanza_root)
 
       if self.mScene is not None:
          self.disconnect(self.mScene,QtCore.SIGNAL("itemSelected(QGraphicsItem*)"),self.onItemSelected)
