@@ -17,8 +17,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
-import LaunchViewBase
-import HelpDialogBase
+import launchviewui
+import helpdialogui
 
 import maestro.core
 const = maestro.core.const
@@ -51,12 +51,12 @@ class LaunchViewPlugin(maestro.core.IViewPlugin):
    def deactivate(self, mainWindow):
       pass
 
-class HelpDialog(QtGui.QDialog, HelpDialogBase.Ui_HelpDialogBase):
+class HelpDialog(QtGui.QDialog, helpdialogui.Ui_HelpDialogBase):
    def __init__(self, parent = None):
       QtGui.QDialog.__init__(self, parent)
       self.setupUi(self)
 
-class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
+class LaunchView(QtGui.QWidget, launchviewui.Ui_LaunchViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -72,7 +72,7 @@ class LaunchView(QtGui.QWidget, LaunchViewBase.Ui_LaunchViewBase):
       self.mEnsemble = ensemble
 
    def setupUi(self, widget):
-      LaunchViewBase.Ui_LaunchViewBase.setupUi(self, widget)
+      launchviewui.Ui_LaunchViewBase.setupUi(self, widget)
       
       self.connect(self.mLaunchBtn,QtCore.SIGNAL("clicked()"),self.onLaunchApp)
       self.connect(self.mTerminateBtn,QtCore.SIGNAL("clicked()"),self.onTerminateApp)

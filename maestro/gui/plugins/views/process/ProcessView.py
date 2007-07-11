@@ -18,7 +18,7 @@
 
 from PyQt4 import QtGui, QtCore
 
-import ProcessViewBase
+import processviewui
 import socket
 import maestro.core
 
@@ -103,7 +103,7 @@ class Proc:
       return "<Proc node:%s name:%s pid:%s user:%s>" \
          % (self.mNodeId, self.mName, self.mPID, self.mUser)
 
-class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
+class ProcessView(QtGui.QWidget, processviewui.Ui_ProcessViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -114,7 +114,7 @@ class ProcessView(QtGui.QWidget, ProcessViewBase.Ui_ProcessViewBase):
       """
       Setup all initial gui settings that don't need to know about the ensemble.
       """
-      ProcessViewBase.Ui_ProcessViewBase.setupUi(self, widget)
+      processviewui.Ui_ProcessViewBase.setupUi(self, widget)
       
       self.mTerminateBtn.setEnabled(False)
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)

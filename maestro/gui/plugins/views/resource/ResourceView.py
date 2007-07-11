@@ -17,11 +17,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
-import ResourceViewBase
+import resourceviewui
 import maestro
 import maestro.core
 
-from SimpleGraph import Scale, Curve
+from simplegraph import Scale, Curve
 
 def xfrange(start, stop=None, step=None):
    """Like range(), but returns list of floats instead
@@ -58,7 +58,7 @@ class ResourceViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
 
-class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
+class ResourceView(QtGui.QWidget, resourceviewui.Ui_ResourceViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
@@ -68,7 +68,7 @@ class ResourceView(QtGui.QWidget, ResourceViewBase.Ui_ResourceViewBase):
       """
       Setup all initial gui settings that don't need to know about the cluster configuration.
       """
-      ResourceViewBase.Ui_ResourceViewBase.setupUi(self, widget)
+      resourceviewui.Ui_ResourceViewBase.setupUi(self, widget)
       
       delegate = GraphDelegate(self.mResourceTable)
       self.mResourceTable.setItemDelegate(delegate)

@@ -18,7 +18,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'maestro/gui/plugins/views/desktop/DesktopViewerBase.ui'
+# Form implementation generated from reading ui file 'maestro/gui/plugins/views/desktop/desktopviewerui.ui'
 #
 # WARNING! All changes made in this file will be lost!
 

@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 from PyQt4 import QtGui, QtCore
-import EnsembleViewBase
+import ensembleviewui
 import maestro.core
 const = maestro.core.const
 from maestro.gui import ensemble
@@ -189,7 +189,7 @@ class NodeSettingsModel(QtCore.QAbstractTableModel):
 
       return QtCore.QVariant()
 
-class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
+class EnsembleView(QtGui.QWidget, ensembleviewui.Ui_EnsembleViewBase):
    """ Presents the user with a high level view of the entire ensemble.
        They can add/remove nodes to the ensemble and view detailed settings
        for each node.
@@ -205,7 +205,7 @@ class EnsembleView(QtGui.QWidget, EnsembleViewBase.Ui_EnsembleViewBase):
       """
       Setup all initial gui settings that don't need to know about the cluster configuration.
       """
-      EnsembleViewBase.Ui_EnsembleViewBase.setupUi(self, widget)
+      ensembleviewui.Ui_EnsembleViewBase.setupUi(self, widget)
 
       # Connect all of the button signals.
       QtCore.QObject.connect(self.mRefreshBtn,QtCore.SIGNAL("clicked()"), self.onRefresh)

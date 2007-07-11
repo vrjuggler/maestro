@@ -18,7 +18,7 @@
 
 from PyQt4 import QtGui, QtCore
 
-import RebootViewerBase
+import rebootviewerui
 import maestro.core
 const = maestro.core.const
 
@@ -67,7 +67,7 @@ class RebootViewPlugin(maestro.core.IViewPlugin):
    def getViewWidget(self):
       return self.widget
       
-class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
+class RebootViewer(QtGui.QWidget, rebootviewerui.Ui_RebootViewerBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
 
@@ -87,7 +87,7 @@ class RebootViewer(QtGui.QWidget, RebootViewerBase.Ui_RebootViewerBase):
       Setup all initial gui settings that don't need to know about the ensemble configuration.
       """
       # Call out base class constructor.
-      RebootViewerBase.Ui_RebootViewerBase.setupUi(self, widget)
+      rebootviewerui.Ui_RebootViewerBase.setupUi(self, widget)
 
       # We only want to be able to select rows, not cells.
       self.mNodeTableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)

@@ -21,7 +21,7 @@ import socket
 import twisted.internet.defer
 import maestro.core.plugin_interfaces as PI
 import maestro.core.error
-import maestro.gui.LoginDialog
+import maestro.gui.logindialog
 
 
 class LoginHandler(QtCore.QObject):
@@ -40,7 +40,7 @@ class LoginHandler(QtCore.QObject):
          host = hostAddr
 
       # Create a log in dialog.
-      self.mLoginDlg = maestro.gui.LoginDialog.LoginDialog(host)
+      self.mLoginDlg = maestro.gui.logindialog.LoginDialog(host)
       self.mLoginDlg.connect(self.mLoginDlg, QtCore.SIGNAL("accepted()"),
                              self._loginAccepted)
       self.mLoginDlg.connect(self.mLoginDlg, QtCore.SIGNAL("rejected()"),
@@ -120,7 +120,7 @@ class UsernamePasswordAuthenticationClient(PI.IClientAuthenticationPlugin):
                          validate that instantiation of this plug-in will
                          work.
       @param parent      The parent Qt widget. This will be passed on to
-                         instances of maestro.gui.LoginDialog.LoginDiaog as
+                         instances of maestro.gui.logindialog.LoginDiaog as
                          appropriate.
       '''
       PI.IClientAuthenticationPlugin.__init__(self)

@@ -18,7 +18,7 @@
 
 import sys
 from PyQt4 import QtGui, QtCore
-import ChooseStanzaDialogBase
+import choosestanzadialogui
 
 import os
 import os.path
@@ -28,7 +28,8 @@ import maestro
 import maestro.core
 const = maestro.core.const
 
-class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDialogBase):
+class ChooseStanzaDialog(QtGui.QDialog,
+                         choosestanzadialogui.Ui_ChooseStanzaDialogBase):
    def __init__(self, parent = None, startDir = None, defaultFileName = None):
       QtGui.QWidget.__init__(self, parent)
       self.mStartDir        = startDir
@@ -56,7 +57,7 @@ class ChooseStanzaDialog(QtGui.QDialog, ChooseStanzaDialogBase.Ui_ChooseStanzaDi
       self.setupUi(self)
 
    def setupUi(self, widget):
-      ChooseStanzaDialogBase.Ui_ChooseStanzaDialogBase.setupUi(self, widget)
+      choosestanzadialogui.Ui_ChooseStanzaDialogBase.setupUi(self, widget)
 
       # Connect the browse button.
       self.connect(self.mBrowseBtn, QtCore.SIGNAL("clicked()"), self.onBrowse)

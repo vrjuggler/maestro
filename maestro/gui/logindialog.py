@@ -18,7 +18,7 @@
 
 import sys
 from PyQt4 import QtGui, QtCore
-import LoginDialogBase
+import logindialogui
 
 import MaestroResource_rc
 
@@ -27,14 +27,14 @@ pj = os.path.join
 
 import maestro
 
-class LoginDialog(QtGui.QDialog, LoginDialogBase.Ui_LoginDialogBase):
+class LoginDialog(QtGui.QDialog, logindialogui.Ui_LoginDialogBase):
    def __init__(self, hostName, parent = None):
       QtGui.QWidget.__init__(self, parent)
       self.setupUi(self)
       self.setHostName(hostName)
 
    def setupUi(self, widget):
-      LoginDialogBase.Ui_LoginDialogBase.setupUi(self, widget)
+      logindialogui.Ui_LoginDialogBase.setupUi(self, widget)
 
       try:
          if sys.platform.startswith("win"):

@@ -20,10 +20,10 @@ from PyQt4 import QtGui, QtCore
 
 import copy
 import maestro.gui
-import maestro.gui.LogWidget as LogWidget
+import maestro.gui.logwidget as logwidget
 import maestro.core.event
 import interfaces
-import SIViewBase
+import siviewui
 
 LOCAL = maestro.core.event.EventManager.LOCAL
 
@@ -46,7 +46,7 @@ class SystemImager(interfaces.ICloneViewPlugin):
    def deactivate(self, mainWindow):
       self.widget.deactivate(mainWindow)
 
-class SIView(QtGui.QWidget, SIViewBase.Ui_SIViewBase):
+class SIView(QtGui.QWidget, siviewui.Ui_SIViewBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
 
@@ -84,12 +84,12 @@ class SIView(QtGui.QWidget, SIViewBase.Ui_SIViewBase):
       self.__validateCloneButton()
 
    def setupUi(self, widget):
-      SIViewBase.Ui_SIViewBase.setupUi(self, widget)
+      siviewui.Ui_SIViewBase.setupUi(self, widget)
 
       scroll_area = QtGui.QScrollArea(widget)
       scroll_area.setFrameShape(QtGui.QFrame.StyledPanel)
       scroll_area.setFrameShadow(QtGui.QFrame.Sunken)
-      self.mMainLogWidget = LogWidget.LogWidget(scroll_area)
+      self.mMainLogWidget = logwidget.LogWidget(scroll_area)
       scroll_area.setWidget(self.mMainLogWidget)
       self.vboxlayout.addWidget(scroll_area)
 

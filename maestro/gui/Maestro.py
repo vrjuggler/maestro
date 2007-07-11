@@ -26,9 +26,9 @@ import maestro
 from maestro.util import plugin
 from maestro.util import xplatform
 
-import MaestroBase
+import maestroui
 import MaestroResource_rc
-import AboutDialogBase
+import aboutdialogui
 import licenseui
 
 import maestro
@@ -39,7 +39,7 @@ LOCAL = maestro.core.event.EventManager.LOCAL
 
 import elementtree.ElementTree as ET
 
-import LogWidget
+import logwidget
 
 import logging, socket, time
 
@@ -192,7 +192,7 @@ class OutputTabWidget(QtGui.QTabWidget):
       hboxlayout.setObjectName("TabLayout")
 
       scroll_area = QtGui.QScrollArea(tab)
-      log_widget = LogWidget.LogWidget()
+      log_widget = logwidget.LogWidget()
       scroll_area.setWidget(log_widget)
       hboxlayout.addWidget(scroll_area)
 
@@ -470,7 +470,7 @@ class PluginList(QtGui.QListWidget):
       '''
       return str(listItem.data(QtCore.Qt.UserRole).toString())
 
-class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
+class Maestro(QtGui.QMainWindow, maestroui.Ui_MaestroBase):
    def __init__(self, parent = None):
       QtGui.QMainWindow.__init__(self, parent)
       self.setupUi(self)
@@ -895,7 +895,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
       env.mConnectionMgr.clearCredentials()
 
    def setupUi(self, widget):
-      MaestroBase.Ui_MaestroBase.setupUi(self, widget)
+      maestroui.Ui_MaestroBase.setupUi(self, widget)
 
       self.mConnectedStatusLabel = QtGui.QLabel(self)
       status_bar = self.statusBar()
@@ -993,7 +993,7 @@ class Maestro(QtGui.QMainWindow, MaestroBase.Ui_MaestroBase):
 
    def onAbout(self):
       dialog = QtGui.QDialog(self)
-      about_ui = AboutDialogBase.Ui_AboutDialogBase()
+      about_ui = aboutdialogui.Ui_AboutDialogBase()
       about_ui.setupUi(dialog)
       dialog.exec_()
 

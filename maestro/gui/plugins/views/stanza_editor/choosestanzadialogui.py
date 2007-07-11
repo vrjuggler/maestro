@@ -18,7 +18,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'maestro/gui/plugins/views/stanza_editor/ChooseStanzaDialogBase.ui'
+# Form implementation generated from reading ui file 'maestro/gui/plugins/views/stanza_editor/choosestanzadialogui.ui'
 #
 # WARNING! All changes made in this file will be lost!
 

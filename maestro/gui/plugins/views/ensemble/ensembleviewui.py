@@ -18,7 +18,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'maestro/gui/plugins/views/ensemble/EnsembleViewBase.ui'
+# Form implementation generated from reading ui file 'maestro/gui/plugins/views/ensemble/ensembleviewui.ui'
 #
 # WARNING! All changes made in this file will be lost!
 

@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
 from PyQt4 import QtCore, QtGui
 
-import StanzaEditorBase
+import stanzaeditorui
 import math
 
 import maestro.core
@@ -42,7 +42,7 @@ import elementtree.ElementTree as ET
 import xml.dom.minidom
 
 import StanzaEditorResource_rc
-import ChooseStanzaDialog
+import choosestanzadialog
 
 class StanzaEditorPlugin(maestro.core.IViewPlugin):
    def __init__(self):
@@ -503,7 +503,7 @@ class GraphWidget(QtGui.QGraphicsView):
       self.scale(scaleFactor, scaleFactor)
 
 
-class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
+class StanzaEditor(QtGui.QWidget, stanzaeditorui.Ui_StanzaEditorBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
       # self.mStanzas will be a list of tuples containing the root stanza
@@ -776,7 +776,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
                                      'label' : name})
 
       dialog = \
-         ChooseStanzaDialog.ChooseStanzaDialog(self, self.mStanzaStartDir,
+         choosestanzadialog.ChooseStanzaDialog(self, self.mStanzaStartDir,
                                                name_no_spaces + '.stanza')
 
       if QtGui.QDialog.Accepted == dialog.exec_():
@@ -818,7 +818,7 @@ class StanzaEditor(QtGui.QWidget, StanzaEditorBase.Ui_StanzaEditorBase):
             #self.onStanzaSelected(0)
 
    def setupUi(self, widget):
-      StanzaEditorBase.Ui_StanzaEditorBase.setupUi(self, widget)
+      stanzaeditorui.Ui_StanzaEditorBase.setupUi(self, widget)
 
       self.mNoEditorLbl = QtGui.QLabel("There is not editor for this Item.")
 

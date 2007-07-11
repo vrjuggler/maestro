@@ -21,7 +21,7 @@ import md5
 
 from PyQt4 import QtGui, QtCore
 
-import DesktopViewerBase
+import desktopviewerui
 import maestro.core
 import maestro.util.pbhelpers as pbhelpers
 
@@ -45,7 +45,7 @@ class DesktopViewPlugin(maestro.core.IViewPlugin):
    def activate(self, mainWindow):
       self.widget.refresh()
 
-class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
+class DesktopViewer(QtGui.QWidget, desktopviewerui.Ui_DesktopViewerBase):
    def __init__(self, parent = None):
       QtGui.QWidget.__init__(self, parent)
 
@@ -64,7 +64,7 @@ class DesktopViewer(QtGui.QWidget, DesktopViewerBase.Ui_DesktopViewerBase):
       ensemble configuration.
       '''
       # Call the base class constructor.
-      DesktopViewerBase.Ui_DesktopViewerBase.setupUi(self, widget)
+      desktopviewerui.Ui_DesktopViewerBase.setupUi(self, widget)
 
       self.connect(self.mSaverEnabledBox, QtCore.SIGNAL("toggled(bool)"),
                    self.onToggleScreenSaver)
