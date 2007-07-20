@@ -239,16 +239,22 @@ class UsernamePasswordAuthenticationClient(PI.IClientAuthenticationPlugin):
       '''
       if len(creds) > 0:
          (username, password, domain) = creds.pop(0)
-         d = self.mAuthObj.callRemote('authenticate', username, password,
-                                      domain)
-         d.addCallback(lambda avatar: self._handleAuthSuccess(avatar,
-                                                              username,
-                                                              password,
-                                                              domain))
 
-         # If authentication fails using the current credentials, then we will
-         # try again using what remains in creds.
-         d.addErrback(lambda _, c = creds: self._tryLogin(c))
+         # This try ... except block is here to catch exceptions such as
+         # twisted.spread.pb.DeadReferenceError.
+         try:
+            d = self.mAuthObj.callRemote('authenticate', username, password,
+                                         domain)
+            d.addCallback(lambda avatar: self._handleAuthSuccess(avatar,
+                                                                 username,
+                                                                 password,
+                                                                 domain))
+
+            # If authentication fails using the current credentials, then we
+            # will try again using what remains in creds.
+            d.addErrback(lambda _, c = creds: self._tryLogin(c))
+         except Exception, ex:
+            self.mAuthenticationDeferred.errback(ex)
       else:
          self.mLoginHandler.openDialog(self.mServerID, self._loginAccepted,
                                        self._loginRejected)
