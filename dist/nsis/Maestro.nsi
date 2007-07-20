@@ -185,7 +185,7 @@ Section -AdditionalIcons
   Call SetStartMenuToUse
 
   ${If} $GUI_INST == '1'
-    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Maestro.lnk" "$INSTDIR\Maestro.py" '' "$INSTDIR\infiscape_maestro.ico"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Maestro.lnk" "C:\Python24\pythonw.exe" '"$INSTDIR\Maestro.py"' "$INSTDIR\infiscape_maestro.ico"
   ${EndIf}
 
   ${If} $DOC_INST == '1'
