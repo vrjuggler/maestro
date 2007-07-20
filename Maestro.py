@@ -182,6 +182,8 @@ def main():
       )
 
    user_data_dir = xplatform.getUserAppDir(const.APP_NAME)
+   if not os.path.exists(user_data_dir):
+      os.mkdir(user_data_dir)
    log_file = os.path.join(user_data_dir, 'maestro.log')
    flog_handler = logging.handlers.RotatingFileHandler(log_file, 'a', 50000, 5)
    flog_handler.setLevel(logging.DEBUG)
