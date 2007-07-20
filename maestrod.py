@@ -60,6 +60,11 @@ from twisted.internet import task
 
 from elementtree.ElementTree import parse
 
+# Set the maximum size for each of the rotating log files.
+gLogFileSize = 5000000
+# Set the maximum number of rotating log files to retain.
+gLogFileCount = 10
+
 if os.name == 'nt':
    import win32api, win32serviceutil, win32service, win32security
    import ntsecuritycon, win32con
@@ -186,7 +191,9 @@ if os.name == 'nt':
          const.LOGFILE = os.path.join(os.environ['SystemRoot'], 'system32',
                                       'maestrod.log')
          self.mFileLog = logging.handlers.RotatingFileHandler(const.LOGFILE,
-                                                              'a', 5000000, 10)
+                                                              'a',
+                                                              gLogFileSize,
+                                                              gLogFileCount)
 
       def SvcStop(self):
          sys.stdout = self.savedOut
@@ -471,7 +478,8 @@ if __name__ == '__main__':
 
          const.LOGFILE = '/var/log/maestrod.log'
          file_log = logging.handlers.RotatingFileHandler(const.LOGFILE, 'a',
-                                                         5000000, 10)
+                                                         gLogFileSize,
+                                                         gLogFileCount)
          formatter = \
             logging.Formatter(
                '%(asctime)s %(name)-12s: %(levelname)-8s %(message)s'
