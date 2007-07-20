@@ -61,7 +61,7 @@ from twisted.internet import task
 from elementtree.ElementTree import parse
 
 # Set the maximum size for each of the rotating log files.
-gLogFileSize = 5000000
+gLogFileSize = 15000000
 # Set the maximum number of rotating log files to retain.
 gLogFileCount = 10
 
