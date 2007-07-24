@@ -276,6 +276,12 @@ if test -x /usr/bin/gtk-update-icon-cache ; then
    /usr/bin/gtk-update-icon-cache /usr/share/icons/gnome
 fi
 
+%pre server
+# Upgrade.
+if [ "$1" = "2" ] ; then
+   /sbin/service maestrod stop
+fi
+
 %post server
 pem_dir='/etc/maestro/ssl'
 pem_path="$pem_dir/server.pem"
@@ -293,13 +299,21 @@ if [ ! -e $pem_path ] ; then
    umask $old_umask
 fi
 
-/sbin/chkconfig --add maestrod
-/sbin/chkconfig --level 34 maestrod off
-/sbin/chkconfig --level 5 maestrod on
+# First install.
+if [ "$1" = "1" ] ; then
+   /sbin/chkconfig --add maestrod
+   /sbin/chkconfig --level 34 maestrod off
+   /sbin/chkconfig --level 5 maestrod on
+fi
+
+/sbin/service maestrod start
 
 %preun server
-/sbin/service maestrod stop
-/sbin/chkconfig --del maestrod
+# Last uninstall.
+if [ "$1" = "0" ] ; then
+   /sbin/service maestrod stop
+   /sbin/chkconfig --del maestrod
+fi
 
 %if %{build_doc}
 %files doc
