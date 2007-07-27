@@ -183,6 +183,18 @@ class LaunchView(QtGui.QWidget, launchviewui.Ui_LaunchViewBase):
 
                   i = i + 1
 
+      apps = {}
+      for a in self.mApplications:
+         apps[a.getName()] = a
+
+      names = apps.keys()
+      names.sort()
+
+      # Recreate self.mApplications in alphabetial order.
+      self.mApplications = []
+      for n in names:
+         self.mApplications.append(apps[n])
+
       # If cur_text is not found among the namesl for applications in
       # self.mApplications, then Item 0 will be the one selected in
       # self.mAppComboBox.
