@@ -21,6 +21,7 @@ import os.path
 import popen2
 import pwd
 import re
+import traceback
 
 import maestro.util
 
@@ -77,32 +78,51 @@ def addAuthority(user, xauthCmd, xauthFile):
       # Run the xauth(1) command as the authenticated user.
       maestro.util.changeToUserName(user)
 
-      (child_stdout, child_stdin) = \
-         popen2.popen2('%s -f %s list' % (xauthCmd, getUserXauthFile(user)))
-
-      # Read the contents of the user's X authority file. This is not done
-      # using readlines() because that could fail due to an interrupted system
-      # call. Instead, we read lines one at a time and handle EINTR if an when
-      # it occurs.
-      lines = maestro.util.readlinesRetryOnEINTR(child_stdout)
-      child_stdout.close()
-      child_stdin.close()
-
       has_key = 0
+      uesr_xauth_file = getUserXauthFile(user)
 
-      # Determine if the user's Xauthority file already has the key.
-      for l in lines:
-         key_match = display_key_re.match(l)
-         user_key = (key_match.group(1), key_match.group(2),
-                     key_match.group(3))
-         if user_key == key:
-            has_key = 1
-            break
+      try:
+         (child_stdout, child_stdin) = \
+            popen2.popen2('%s -f %s list' % (xauthCmd, user_xauth_file))
 
-      # If the user's Xauthority file does not have the key, then we add it.
-      if not has_key:
-         os.spawnl(os.P_WAIT, xauthCmd, xauthCmd, '-f',
-                   getUserXauthFile(user), 'add', key[0], key[1], key[2])
+         # Read the contents of the user's X authority file. This is not done
+         # using readlines() because that could fail due to an interrupted
+         # system call. Instead, we read lines one at a time and handle EINTR
+         # if an when it occurs.
+         lines = maestro.util.readlinesRetryOnEINTR(child_stdout)
+         child_stdout.close()
+         child_stdin.close()
+
+         # Determine if the user's Xauthority file already has the key.
+         for l in lines:
+            key_match = display_key_re.match(l)
+            if key_match is not None:
+               user_key = (key_match.group(1), key_match.group(2),
+                           key_match.group(3))
+               if user_key == key:
+                  has_key = 1
+                  break
+      # If we fail to determine if the user's .Xauthority file already has the
+      # X11 server key, we will go ahead and attempt to add it.
+      except Exception, ex:
+         print "WARNING: Could not check '%s' for X11 key value: %s" % \
+                  (user_xauth_file, str(ex))
+
+      try:
+         # If the user's Xauthority file does not have the key, then we add
+         # it.
+         if not has_key:
+            result = -1
+            count  = 0
+            while result != 0 and count < 10:
+               result = os.spawnl(os.P_WAIT, xauthCmd, xauthCmd, '-f',
+                                  user_xauth_file, 'add', key[0], key[1],
+                                  key[2])
+               count += 1
+      except Exception, ex:
+         print "ERROR: Failed to extend '%s' with X11 server key: %s" % \
+                  (user_xauth_file, str(ex))
+         traceback.print_exc()
 
       # And that's it for us! It is critical that os._exit() be used here
       # rather than sys.exit() in order to prevent a SystemExit exception from
