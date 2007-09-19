@@ -17,7 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import logging, md5
-import elementtree.ElementTree as ET
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
 from PyQt4 import QtCore, QtGui
 

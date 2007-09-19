@@ -58,7 +58,10 @@ from twisted.internet import ssl
 from twisted.internet import reactor
 from twisted.internet import task
 
-from elementtree.ElementTree import parse
+try:
+   from elementtree.ElementTree import parse
+except:
+   from xml.elementtree.ElementTree import parse
 
 # Set the maximum size for each of the rotating log files.
 gLogFileSize = 15000000

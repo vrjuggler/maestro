@@ -23,7 +23,11 @@ from PyQt4 import QtCore, QtGui
 
 import maestro.core
 import EnvListEditorBase
-import elementtree.ElementTree as ET
+
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 class EnvListEditorPlugin(maestro.core.IOptionEditorPlugin):
    def __init__(self):

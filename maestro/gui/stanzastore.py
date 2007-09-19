@@ -24,7 +24,10 @@ import md5
 from PyQt4 import QtCore, QtGui
 
 import maestro.core
-import elementtree.ElementTree as ET
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 import stanza
 import xml.dom.minidom
 

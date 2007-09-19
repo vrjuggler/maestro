@@ -38,7 +38,10 @@ import maestro.gui.MaestroResource_rc
 import stanzaitems
 from stanzaitems import *
 import layout
-import elementtree.ElementTree as ET
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 import xml.dom.minidom
 
 import StanzaEditorResource_rc

@@ -17,7 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-import elementtree.ElementTree as ET
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 def str2bool(s, default=True):
    if (str(s) == "true" or str(s) == "True" or str(s) == "1"):

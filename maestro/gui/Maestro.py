@@ -37,7 +37,10 @@ const = maestro.core.const
 import ensemble
 LOCAL = maestro.core.event.EventManager.LOCAL
 
-import elementtree.ElementTree as ET
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 import logwidget
 

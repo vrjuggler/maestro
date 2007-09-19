@@ -18,7 +18,11 @@
 
 import re
 import xml.dom.minidom
-import elementtree.ElementTree as ET
+
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 
 class Preferences:

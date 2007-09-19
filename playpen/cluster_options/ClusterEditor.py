@@ -7,7 +7,11 @@ import sys
 from PyQt4 import QtGui, QtCore
 import ClusterEditorBase
 import ClusterModel
-import elementtree.ElementTree as ET
+
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 import GlobalOptions
 

@@ -7,7 +7,11 @@ import maestro.core
 const = maestro.core.const
 const.STANZA_PATH = [pj(os.path.dirname(__file__), "data")]
 #const.STANZA_PATH = [pj(os.path.dirname(__file__), "testdata")]
-import elementtree.ElementTree as ET
+
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 class StanzaStoreTest(unittest.TestCase):
    def setUp(self):

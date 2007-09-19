@@ -1,4 +1,7 @@
-import elementtree.ElementTree as ET
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 from xml.dom.minidom import parseString
 #import time, types, re, sys
 

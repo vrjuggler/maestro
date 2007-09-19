@@ -46,7 +46,11 @@ from maestro.util import plugin
 from maestro.util import xplatform
 qt4reactor.install(app)
 from twisted.internet import reactor
-import elementtree.ElementTree as ET
+
+try:
+   import elementtree.ElementTree as ET
+except:
+   import xml.elementtree.ElementTree as ET
 
 import maestro.core
 const = maestro.core.const
