@@ -1,4 +1,4 @@
-# Maestro is Copyright (C) 2006-2007 by Infiscape
+# Maestro is Copyright (C) 2006-2008 by Infiscape Corporation
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License

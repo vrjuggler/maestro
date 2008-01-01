@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Maestro is Copyright (C) 2006-2007 by Infiscape
+# Maestro is Copyright (C) 2006-2008 by Infiscape Corporation
 #
 # Original Author: Aron Bierbaum
 #
