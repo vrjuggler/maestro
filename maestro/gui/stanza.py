@@ -20,7 +20,7 @@
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 
 def str2bool(s, default=True):
    if (str(s) == "true" or str(s) == "True" or str(s) == "1"):

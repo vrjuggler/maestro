@@ -11,7 +11,7 @@ const.STANZA_PATH = [pj(os.path.dirname(__file__), "data")]
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 
 class StanzaStoreTest(unittest.TestCase):
    def setUp(self):

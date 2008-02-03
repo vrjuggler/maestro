@@ -26,7 +26,7 @@ sys.path.append( pj(os.path.dirname(__file__), ".."))
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 
 def buildItem(tagOrElm):
    item = None

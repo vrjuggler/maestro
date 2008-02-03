@@ -41,7 +41,7 @@ import layout
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
 import StanzaEditorResource_rc

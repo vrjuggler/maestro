@@ -50,7 +50,7 @@ from twisted.internet import reactor
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 
 import maestro.core
 const = maestro.core.const

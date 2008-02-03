@@ -61,7 +61,7 @@ from twisted.internet import task
 try:
    from elementtree.ElementTree import parse
 except:
-   from xml.elementtree.ElementTree import parse
+   from xml.etree.ElementTree import parse
 
 # Set the maximum size for each of the rotating log files.
 gLogFileSize = 15000000

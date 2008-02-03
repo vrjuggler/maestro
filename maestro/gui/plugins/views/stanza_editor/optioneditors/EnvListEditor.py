@@ -27,7 +27,7 @@ import EnvListEditorBase
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 
 class EnvListEditorPlugin(maestro.core.IOptionEditorPlugin):
    def __init__(self):

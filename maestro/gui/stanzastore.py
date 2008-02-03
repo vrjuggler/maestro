@@ -27,7 +27,7 @@ import maestro.core
 try:
    import elementtree.ElementTree as ET
 except:
-   import xml.elementtree.ElementTree as ET
+   import xml.etree.ElementTree as ET
 import stanza
 import xml.dom.minidom
 
