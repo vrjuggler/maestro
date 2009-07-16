@@ -38,10 +38,10 @@
 .SUFFIXES: .html .xml .pdf .tex .fo .txt
 
 # Software and stylesheet versions.
-DOCBOOK_XSL_VERSION?=	1.71.1
+DOCBOOK_XSL_VERSION?=	1.75.1
 XALAN_VERSION?=		2_7_0
 SAXON_VERSION?=		6.5.5
-FOP_VERSION?=		0.93
+FOP_VERSION?=		0.95
 #FOP_VERSION?=		0.20.5
 BATIK_VERSION?=		1.5.1
 
