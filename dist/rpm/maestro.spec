@@ -5,7 +5,7 @@
 # Spec file for Maestro.
 %define name    maestro
 %define version 0.5.0
-%define release 1
+%define release 2
 
 # Change to 0 to disable building documentation.
 %define build_doc 1
@@ -321,6 +321,9 @@ fi
 %endif
 
 %changelog
+* Thu Jul 16 2009 Patrick Hartling
+- Update RPM revision to 0.5.0-2
+
 * Mon May 14 2007 Patrick Hartling
 - Update to version 0.5.0
 
