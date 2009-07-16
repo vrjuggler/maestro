@@ -79,7 +79,7 @@ def addAuthority(user, xauthCmd, xauthFile):
       maestro.util.changeToUserName(user)
 
       has_key = 0
-      uesr_xauth_file = getUserXauthFile(user)
+      user_xauth_file = getUserXauthFile(user)
 
       try:
          (child_stdout, child_stdin) = \
